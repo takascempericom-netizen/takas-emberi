@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Takas Çemberi • Sıfır Atık, Doğrudan Takas</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <!-- Basit inline logo -->
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" opacity=".3" stroke-width="2"/>
+        <path d="M7 12h10M12 7v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Takas Çemberi</span>
+    </div>
+    <nav class="menu">
+      <a href="#kategoriler">Kategoriler</a>
+      <a href="#neden">Neden Takas?</a>
+      <a href="#iletisim">İletişim</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap center">
+      <h1>İhtiyacın olanı <span class="emph">takas</span> ile bul.</h1>
+      <p class="lead">Eşyalar çöpe değil, yeni sahibine gitsin. Sıfır atık ve milli sermaye için birlikte.</p>
+      <div class="cta">
+        <a class="btn primary" href="#kategoriler">İlanları Keşfet</a>
+        <a class="btn ghost" href="#iletisim">İletişime Geç</a>
+      </div>
+      <div class="stats">
+        <div><b>0</b><span>Aktif İlan</span></div>
+        <div><b>0</b><span>Takas</span></div>
+        <div><b>0</b><span>Üye</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kategoriler" class="section">
+    <div class="wrap">
+      <h2>Kategoriler</h2>
+      <div class="grid">
+        <article class="card"><h3>Elektronik</h3><p>Laptop, telefon, aksesuar…</p></article>
+        <article class="card"><h3>Ev & Yaşam</h3><p>Mobilya, dekor, mutfak…</p></article>
+        <article class="card"><h3>Giyim</h3><p>Kadın / Erkek / Çocuk</p></article>
+        <article class="card"><h3>Hobi</h3><p>Oyun, enstrüman, spor…</p></article>
+        <article class="card"><h3>Araç & Parça</h3><p>Bisiklet, oto ekipman…</p></article>
+        <article class="card"><h3>Diğer</h3><p>Kitap, koleksiyon…</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="neden" class="section alt">
+    <div class="wrap">
+      <h2>Neden Takas Çemberi?</h2>
+      <div class="features">
+        <div class="feature"><h3>Sıfır Atık</h3><p>Eşyalar ömrünü tamamlamadan yeni kullanıcıya geçer.</p></div>
+        <div class="feature"><h3>Doğrudan Takas</h3><p>Aracı yok, komisyon yok — güven & şeffaf süreç.</p></div>
+        <div class="feature"><h3>Yerel Topluluk</h3><p>Mahallendeki insanlarla eşleş, kargo derdi azalır.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="iletisim" class="section">
+    <div class="wrap">
+      <h2>İletişim</h2>
+      <p>Önerin var mı? İş birliği veya sponsorluk için bize yaz: <a href="mailto:info@takascemberi.com">info@takascemberi.com</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap small">
+    <div>© <span id="y"></span> Takas Çemberi • takascemberi.com</div>
+    <div class="links">
+      <a href="/privacy.html">Gizlilik</a>
+      <a href="/terms.html">Kullanım Şartları</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
