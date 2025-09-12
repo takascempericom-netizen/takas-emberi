@@ -56,7 +56,7 @@ input:focus{border-color:#60a5fa}
 <body>
 <div class="card">
   <button class="close" id="btnClose">✕</button>
-  <div class="hd"><img src="seffaf.png" alt="logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!</div>
+  <div class="hd"><img src="assets/img/şeffaf.png" alt="logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!</div>
 
   <div class="tabs">
     <button class="tab active" id="tabLogin">Giriş Yap</button>
@@ -227,7 +227,7 @@ input:focus{border-color:#60a5fa}
              email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
     if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsg(suStatus,'Tüm alanlar zorunlu.','err');return null;}
     if(d.p1!==d.p2){setMsg(suStatus,'Şifreler aynı değil.','err');return null;}
-    if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter.','err');return null;}
+    if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');return null;}
     return d;
   }
   async function performSignup(d){
