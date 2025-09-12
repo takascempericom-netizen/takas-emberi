@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Giriş • Takas Çemberi</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><span class="logo">⟳</span> Takas Çemberi</a>
+  </header>
+
+  <main class="card">
+    <h1>YÜKLE, TAKASLA, KAZAN!</h1>
+    <p class="sub">Hızlı giriş yap veya yeni hesap oluştur.</p>
+
+    <form id="authForm" class="form" autocomplete="on">
+      <label>E-posta
+        <input type="email" id="email" placeholder="ornek@eposta.com" required>
+      </label>
+      <label>Şifre
+        <input type="password" id="password" placeholder="••••••••" required minlength="6">
+      </label>
+
+      <div class="actions">
+        <button type="button" id="btnSignIn" class="btn primary">Giriş yap</button>
+        <button type="button" id="btnSignUp" class="btn ghost">Hesap oluştur</button>
+      </div>
+
+      <div class="row">
+        <button type="button" id="btnGoogle" class="btn google">Google ile devam et</button>
+        <button type="button" id="btnForgot" class="link">Şifremi unuttum</button>
+      </div>
+    </form>
+
+    <div id="verifyBox" class="verify hidden">
+      <p><b>E-posta doğrulaması gerekli.</b> Mail kutunu kontrol et. Gelmediyse:</p>
+      <button id="btnResend" class="btn small">Doğrulama e-postası gönder</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </main>
+
+  <footer class="foot">
+    © <span id="y"></span> Takas Çemberi • <a href="/pages/privacy.html">Gizlilik</a> • <a href="/pages/terms.html">Kullanım</a>
+  </footer>
+</div>
+
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>
