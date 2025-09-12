@@ -160,7 +160,8 @@ input:focus{border-color:#60a5fa}
   import {
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     sendEmailVerification, sendPasswordResetEmail,
-    GoogleAuthProvider, signInWithPopup, signOut
+    GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+    setPersistence, browserLocalPersistence
   } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
   import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
@@ -199,14 +200,40 @@ input:focus{border-color:#60a5fa}
   // X kapatma → ana sayfa
   document.getElementById('btnClose').addEventListener('click',()=>{location.href='index.html';});
 
-  // Giriş
+  // yönlendirme yardımcıları
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
+  const go = () => {
+    const target = (next && /^\/?[\w\-]+\.html$/.test(next)) ? next : 'home.html';
+    location.href = target;
+  };
+
+  // Kalıcı oturum
+  (async () => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch(e) {
+      // bazı tarayıcılarda 3rd-party cookie engeli olabilir
+      console.warn('Persistence set error:', e);
+    }
+  })();
+
+  // Eğer zaten girişliyse bu sayfada bekletme
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.emailVerified) {
+      go();
+    }
+  });
+
+  // Giriş (email/şifre)
   $('#btnSignIn').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim(), pass=$('#li_pass').value;
     if(!email||!pass) return setMsg(liStatus,'E-posta ve şifre gerekli.','err');
     try{
       const {user}=await signInWithEmailAndPassword(auth,email,pass);
       if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol et.','err');}
-      setMsg(liStatus,'Giriş başarılı. Ana sayfaya gidiliyor…','ok'); location.href='index.html';
+      setMsg(liStatus,'Giriş başarılı. Ana sayfaya gidiliyor…','ok'); 
+      go();
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
@@ -218,10 +245,18 @@ input:focus{border-color:#60a5fa}
     catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Google
+  // Google ile giriş
   $('#btnGoogle').addEventListener('click',async()=>{
-    try{const prov=new GoogleAuthProvider();await signInWithPopup(auth,prov);location.href='index.html';}
-    catch(e){setMsg(liStatus,errText(e),'err');}
+    try{
+      const prov=new GoogleAuthProvider();
+      const res=await signInWithPopup(auth,prov);
+      if(res?.user && res.user.emailVerified !== false){
+        go();
+      } else {
+        // Google hesapları e-posta doğrulanmış gelir; yine de guard:
+        go();
+      }
+    }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
   // Kayıt akışı
@@ -237,7 +272,10 @@ input:focus{border-color:#60a5fa}
   async function performSignup(d){
     try{
       const {user}=await createUserWithEmailAndPassword(auth,d.email,d.p1);
-      await setDoc(doc(db,'users',user.uid),{name:d.name,username:d.uname,city:d.city,phone:d.phone,email:d.email,createdAt:serverTimestamp(),role:'customer',isActive:true});
+      await setDoc(doc(db,'users',user.uid),{
+        name:d.name,username:d.uname,city:d.city,phone:d.phone,email:d.email,
+        createdAt:serverTimestamp(),role:'customer',isActive:true
+      });
       await sendEmailVerification(user);
       setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
       activate('login');
