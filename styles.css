@@ -1,0 +1,48 @@
+:root{
+  --bg:#0b1020; --bg2:#0e1430; --card:#111936; --stroke:#1e2a52;
+  --txt:#f4f6ff; --muted:#b8c1e3; --brand:#38bdf8; --brand2:#34d399;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--txt)}
+
+.wrap{width:min(1100px,92%);margin-inline:auto}
+.wrap.center{text-align:center}
+.wrap.small{width:min(1100px,92%);margin-inline:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+
+.nav{position:sticky;top:0;z-index:10;background:rgba(10,14,30,.7);backdrop-filter:blur(8px);border-bottom:1px solid #ffffff18}
+.nav .wrap{display:flex;justify-content:space-between;align-items:center;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--txt)}
+.menu a{color:var(--muted);text-decoration:none;margin-left:18px}
+.menu a:hover{color:var(--txt)}
+
+.hero{padding:80px 0 40px}
+h1{font-size:clamp(32px,6vw,56px);line-height:1.05;margin:0}
+.lead{margin:16px auto 0;max-width:720px;color:var(--muted);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;margin:28px 0}
+.btn{display:inline-block;padding:12px 18px;border-radius:14px;text-decoration:none;font-weight:700;border:1px solid #ffffff22}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#00111a;border-color:transparent}
+.btn.ghost{color:var(--txt)}
+.btn:hover{transform:translateY(-1px)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.stats b{font-size:28px;display:block}
+.stats span{color:var(--muted);font-size:14px}
+
+.section{padding:56px 0}
+.section.alt{background:linear-gradient(160deg,#0c1330,#0b1020)}
+.grid{display:grid;grid-template-columns:repeat( auto-fit, minmax(220px,1fr) );gap:16px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:18px}
+.card h3{margin:0 0 8px 0}
+
+.features{display:grid;grid-template-columns:repeat( auto-fit, minmax(240px,1fr) );gap:16px}
+.feature{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:18px}
+.feature h3{margin:0 0 6px 0}
+
+.footer{border-top:1px solid #ffffff18;padding:18px 0;margin-top:30px;color:var(--muted)}
+.footer .links a{color:var(--muted);text-decoration:none;margin-left:16px}
+.footer .links a:hover{color:var(--txt)}
+
+@media (max-width:640px){
+  .wrap.small{flex-direction:column;gap:10px}
+  .menu{display:none}
+}
