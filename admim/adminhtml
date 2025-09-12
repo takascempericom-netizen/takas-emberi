@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Takas Çemberi • Admin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1324; --card:#0f1a33; --ring:#1f2a44; --muted:#9aa4bf; --text:#e8ecf8;
+  --pri:#3b82f6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --acc:#8b5cf6;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.aside{background:linear-gradient(180deg,#0e1831,#0b1324);border-right:1px solid var(--ring);padding:14px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand img{height:34px}
+.nav{display:grid;gap:6px;margin-top:14px}
+.nav button{display:flex;gap:10px;align-items:center;border:1px solid transparent;background:transparent;color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
+.nav button:hover{background:#111a33}
+.nav button.active{background:#132044;border-color:#1f2a44}
+.top{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--ring);background:#0f1a33;position:sticky;top:0;z-index:10}
+.top .right{display:flex;align-items:center;gap:10px}
+.tag{padding:3px 8px;border:1px solid var(--ring);border-radius:999px;color:var(--muted);font-size:12px}
+.main{padding:16px}
+.card{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:14px}
+.grid{display:grid;gap:14px}
+.grid.cols-2{grid-template-columns:1fr 1fr}
+.grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid var(--ring);padding:10px;text-align:left}
+.table th{color:#c8d2ea;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:#111b36;color:#e8ecf8;cursor:pointer}
+.btn.pri{background:linear-gradient(90deg,#2563eb,#3b82f6);border:0}
+.btn.ok{background:linear-gradient(90deg,#059669,#10b981);border:0}
+.btn.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24);border:0;color:#0d0d0d}
+.btn.err{background:linear-gradient(90deg,#ef4444,#f87171);border:0}
+.btn.ghost{background:transparent}
+.input, select, textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:#0b152f;color:#e8ecf8}
+.kpi{display:grid;gap:6px;background:#0b152f;border:1px dashed #243252;border-radius:12px;padding:10px}
+.kpi b{font-size:22px}
+.status{font-size:13px;color:var(--muted);min-height:18px}
+.hide{display:none}
+
+/* Ticker (uyarı paneli) */
+.ticker-wrap{position:sticky;top:56px;z-index:9;background:#091025;border-bottom:1px solid var(--ring)}
+.ticker{display:flex;gap:24px;white-space:nowrap;overflow:hidden;padding:10px 0}
+.ticker .item{display:flex;gap:10px;align-items:center}
+.ticker .run{display:inline-block;will-change:transform;animation:marq 25s linear infinite}
+@keyframes marq{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* Chat */
+.chat{display:grid;grid-template-columns:300px 1fr;gap:12px}
+.threadlist{background:#0b152f;border:1px solid var(--ring);border-radius:12px;overflow:auto;height:60vh}
+.threadlist .row{padding:10px 12px;border-bottom:1px solid #132044;cursor:pointer}
+.threadlist .row.active{background:#132044}
+.msgview{display:grid;grid-template-rows:1fr auto;gap:10px;height:60vh}
+.messages{overflow:auto;border:1px solid var(--ring);border-radius:12px;padding:10px 12px;background:#0b152f}
+.bubble{max-width:70%;margin:6px 0;padding:8px 10px;border-radius:10px;background:#0e1a34;border:1px solid #223055}
+.bubble.me{background:#1c2b52}
+.msgft{display:flex;gap:8px}
+
+/* Login gate */
+.login{max-width:420px;margin:16vh auto;padding:16px}
+.center{text-align:center}
+
+@media (max-width:960px){
+  .app{grid-template-columns:1fr}
+  .aside{position:relative;height:auto}
+}
+</style>
+</head>
+<body>
+<div id="gate" class="login card hide">
+  <h2 class="center">Admin Girişi</h2>
+  <p class="center" style="color:var(--muted)">Yalnızca yetkili hesaplar erişebilir.</p>
+  <label>E-posta<input id="lg_email" class="input" type="email" placeholder="takascembericom@gmail.com" value="takascembericom@gmail.com"></label>
+  <label>Şifre<input id="lg_pass" class="input" type="password" placeholder="••••••••"></label>
+  <div class="grid" style="grid-template-columns:1fr auto;align-items:center;margin-top:10px">
+    <div class="status" id="lg_status"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="btnForgot" class="btn ghost">Şifreyi Sıfırla</button>
+      <button id="btnLogin" class="btn pri">Giriş</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app hide">
+  <aside class="aside">
+    <div class="brand"><img src="assets/img/seffaf.png" alt="logo"><span>Takas Çemberi • Admin</span></div>
+    <div class="nav" id="nav">
+      <button data-pane="ilanlar" class="active">📦 İlanlar</button>
+      <button data-pane="bildirimler">📣 Bildirim Panosu</button>
+      <button data-pane="kullanicilar">👥 Kullanıcılar</button>
+      <button data-pane="uyari">⚠️ Uyarı Paneli</button>
+      <button data-pane="sikayet">🚩 Şikayetler</button>
+      <button data-pane="chat">💬 Mesajlaşma</button>
+    </div>
+  </aside>
+
+  <section>
+    <div class="top">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="tag" id="who"></span>
+        <span class="tag" id="env">Firebase</span>
+      </div>
+      <div class="right">
+        <button id="btnSignOut" class="btn">Çıkış</button>
+      </div>
+    </div>
+
+    <!-- Ticker (admin uyarısı) -->
+    <div id="tickerWrap" class="ticker-wrap hide">
+      <div class="ticker"><div class="run" id="tickerRun"></div></div>
+    </div>
+
+    <main class="main">
+      <!-- İLANLAR -->
+      <div id="pane-ilanlar" class="grid">
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Onay Bekleyen İlanlar</h3>
+            <table class="table" id="tblPending"><thead><tr>
+              <th>İlan</th><th>Kullanıcı</th><th>Tarih</th><th style="width:210px">İşlem</th>
+            </tr></thead><tbody></tbody></table>
+          </div>
+          <div class="card">
+            <h3>Aktif İlanlar</h3>
+            <table class="table" id="tblActive"><thead><tr>
+              <th>İlan</th><th>Kullanıcı</th><th>Yayın</th><th style="width:140px">İşlem</th>
+            </tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BİLDİRİMLER -->
+      <div id="pane-bildirimler" class="grid hide">
+        <div class="card">
+          <h3>Toplu Bildirim Gönder</h3>
+          <div class="grid cols-3">
+            <label>Başlık<input id="nt_title" class="input" placeholder="Duyuru başlığı"></label>
+            <label>Emoji/İkon<input id="nt_icon" class="input" placeholder="🔔"></label>
+            <label>Kapsam<select id="nt_scope" class="input"><option value="all">Tüm kullanıcılar</option><option value="active">Sadece aktif ilan sahipleri</option></select></label>
+          </div>
+          <label style="margin-top:8px">Mesaj<textarea id="nt_body" class="input" rows="3" placeholder="Mesajınızı yazın..."></textarea></label>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button id="btnSendNotif" class="btn pri">Gönder</button>
+          </div>
+          <div id="nt_status" class="status"></div>
+        </div>
+        <div class="card">
+          <h3>Son Bildirimler</h3>
+          <table class="table" id="tblNotifs"><thead><tr><th>Zaman</th><th>Başlık</th><th>İçerik</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <!-- KULLANICILAR -->
+      <div id="pane-kullanicilar" class="grid hide">
+        <div class="card">
+          <h3>Kullanıcı Ara</h3>
+          <div class="grid cols-3">
+            <label>Kullanıcı Adı<input id="srch_uname" class="input" placeholder="kullanici_adi"></label>
+            <div style="align-self:end"><button id="btnSearchUser" class="btn">Ara</button></div>
+          </div>
+          <table class="table" id="tblUsers"><thead><tr><th>Ad</th><th>Kullanıcı Adı</th><th>E-posta</th><th>Durum</th><th style="width:160px">İşlem</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card hide" id="userPreview">
+          <h3>Profil Önizleme</h3>
+          <div id="userCard"></div>
+        </div>
+      </div>
+
+      <!-- UYARI PANELİ (TICKER) -->
+      <div id="pane-uyari" class="grid hide">
+        <div class="card">
+          <h3>Ekran Uyarısı (Ticker)</h3>
+          <div class="grid cols-3">
+            <label>İkon<input id="tk_icon" class="input" placeholder="⚠️"></label>
+            <label>Renk<input id="tk_color" class="input" type="color" value="#f59e0b"></label>
+            <label>Hız (sn/tur)<input id="tk_speed" class="input" type="number" min="8" max="60" value="25"></label>
+          </div>
+          <label style="margin-top:8px">Mesaj<textarea id="tk_text" class="input" rows="2" placeholder="Uyarı metni..."></textarea></label>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button id="btnTickerOn" class="btn ok">Yayınla</button>
+            <button id="btnTickerOff" class="btn err">Kaldır</button>
+          </div>
+          <div id="tk_status" class="status"></div>
+        </div>
+      </div>
+
+      <!-- ŞİKAYETLER -->
+      <div id="pane-sikayet" class="grid hide">
+        <div class="card">
+          <h3>Şikayet Kutusu</h3>
+          <table class="table" id="tblReports"><thead><tr><th>Zaman</th><th>Şikayet Eden</th><th>Hedef</th><th>Sebep</th><th>Detay</th><th>Görsel</th><th style="width:110px">İşlem</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <!-- MESAJLAŞMA -->
+      <div id="pane-chat" class="grid hide">
+        <div class="chat">
+          <div class="threadlist" id="threadList"></div>
+          <div class="msgview">
+            <div class="messages" id="msgs"></div>
+            <div class="msgft">
+              <input id="msgInput" class="input" placeholder="Yanıt yaz..."/>
+              <button id="btnSendMsg" class="btn pri">Gönder</button>
+            </div>
+          </div>
+        </div>
+        <div class="status" id="chat_status"></div>
+      </div>
+
+    </main>
+  </section>
+</div>
+
+<!-- Sesler -->
+<audio id="sndNotif"><source src="assets/sounds/notify.mp3" type="audio/mpeg"></audio>
+<audio id="sndMsg"><source src="assets/sounds/message.mp3" type="audio/mpeg"></audio>
+
+<script type="module">
+  import { app, auth, db } from './js/firebase-config.js';
+  import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+  import { collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+
+  // ===== Helpers =====
+  const $ = (s,p=document)=>p.querySelector(s); const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
+  const fmtTime = (ts)=> ts?.toDate ? ts.toDate().toLocaleString('tr-TR') : new Date(ts||Date.now()).toLocaleString('tr-TR');
+  const setTxt = (el,txt)=>{ if(!el) return; el.textContent = txt||''; };
+  const play = id=>{ try{$('#'+id)?.play?.()}catch(_){} };
+  const row = (html)=>{ const tr=document.createElement('tr'); tr.innerHTML=html; return tr; };
+
+  // ===== Auth Gate =====
+  const gate = $('#gate'); const appRoot = $('#app'); const who = $('#who');
+  const lgEmail=$('#lg_email'), lgPass=$('#lg_pass'), lgStatus=$('#lg_status');
+  const ALLOWED = new Set(['takascembericom@gmail.com']); // admin whitelist
+
+  function showGate(){ gate.classList.remove('hide'); appRoot.classList.add('hide'); }
+  function showApp(){ gate.classList.add('hide'); appRoot.classList.remove('hide'); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showGate(); return; }
+    if(!ALLOWED.has(user.email||'')) { await signOut(auth); showGate(); setTxt(lgStatus,'Bu panel için yetkiniz yok.'); return; }
+    setTxt(who, user.email);
+    showApp();
+    boot(); // start listeners
+  });
+
+  $('#btnLogin')?.addEventListener('click', async()=>{
+    const e=lgEmail.value.trim(), p=lgPass.value;
+    if(!e||!p){ setTxt(lgStatus,'E-posta ve şifre gerekli.'); return; }
+    try{ await signInWithEmailAndPassword(auth,e,p); setTxt(lgStatus,''); }
+    catch(err){ setTxt(lgStatus, 'Hata: '+(err?.code||err?.message)); }
+  });
+  $('#btnForgot')?.addEventListener('click', async()=>{
+    const e=lgEmail.value.trim(); if(!e) { setTxt(lgStatus,'E-posta giriniz.'); return; }
+    try{ await sendPasswordResetEmail(auth,e); setTxt(lgStatus,'Sıfırlama bağlantısı gönderildi.'); }
+    catch(err){ setTxt(lgStatus,'Hata: '+(err?.code||err?.message)); }
+  });
+  $('#btnSignOut')?.addEventListener('click', async()=>{ try{ await signOut(auth);}catch(_){ } location.reload(); });
+
+  // ===== Nav =====
+  $$('#nav button').forEach(b=>b.addEventListener('click',()=>{
+    $$('#nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    const pane = 'pane-'+b.dataset.pane; $$('#app main > div').forEach(x=>x.classList.add('hide')); $('#'+pane).classList.remove('hide');
+  }));
+
+  // ===== Boot: attach listeners =====
+  let unsubPending, unsubActive, unsubNotifs, unsubTicker, unsubReports, unsubThreads, unsubMsgs;
+  async function boot(){
+    // Ticker live
+    const tkRef = doc(db,'settings','adminAlert');
+    unsubTicker = onSnapshot(tkRef,(s)=>{
+      const d=s.data(); const wrap=$('#tickerWrap'), run=$('#tickerRun');
+      if(!d || d.enabled!==true){ wrap.classList.add('hide'); return; }
+      wrap.classList.remove('hide');
+      const icon = d.icon||'⚠️';
+      const text = d.text||''; const color=d.color||'#f59e0b'; const speed = Math.max(8, Math.min(60, d.speed||25));
+      run.style.animationDuration = speed+'s';
+      run.innerHTML = `<span class="item" style="color:${color}">${icon} ${text}</span> • <span class="item" style="color:${color}">${icon} ${text}</span>`;
+    });
+
+    // Listings: pending
+    const qPending = query(collection(db,'listings'), where('status','==','pending'), orderBy('createdAt','desc'), limit(50));
+    unsubPending = onSnapshot(qPending,(snap)=>{
+      const tb=$('#tblPending tbody'); tb.innerHTML='';
+      snap.forEach(docu=>{
+        const d=docu.data();
+        tb.appendChild(row(`<td>${d.title||'(adsız)'}<div class="status">${(d.desc||'').slice(0,80)}</div></td>
+          <td>${d.username||d.owner||''}</td>
+          <td>${fmtTime(d.createdAt)}</td>
+          <td>
+            <button class="btn ok" data-approve="${docu.id}">Onayla</button>
+            <button class="btn err" data-reject="${docu.id}">Reddet</button>
+          </td>`));
+      });
+    });
+
+    // Listings: active
+    const qActive = query(collection(db,'listings'), where('status','==','active'), orderBy('publishedAt','desc'), limit(50));
+    unsubActive = onSnapshot(qActive,(snap)=>{
+      const tb=$('#tblActive tbody'); tb.innerHTML='';
+      snap.forEach(docu=>{
+        const d=docu.data();
+        tb.appendChild(row(`<td>${d.title||'(adsız)'}</td>
+          <td>${d.username||d.owner||''}</td>
+          <td>${fmtTime(d.publishedAt)}</td>
+          <td><button class="btn warn" data-unpub="${docu.id}">Askıya Al</button></td>`));
+      });
+    });
+
+    // Approve/Reject/Unpublish handlers
+    $('#pane-ilanlar').addEventListener('click', async(e)=>{
+      const id=e.target?.dataset?.approve||e.target?.dataset?.reject||e.target?.dataset?.unpub; if(!id) return;
+      const ref=doc(db,'listings',id);
+      try{
+        if(e.target?.dataset?.approve){ await updateDoc(ref,{status:'active', publishedAt:serverTimestamp(), reviewedAt:serverTimestamp()}); }
+        else if(e.target?.dataset?.reject){ await updateDoc(ref,{status:'rejected', reviewedAt:serverTimestamp()}); }
+        else if(e.target?.dataset?.unpub){ await updateDoc(ref,{status:'suspended', reviewedAt:serverTimestamp()}); }
+      }catch(err){ alert('Hata: '+(err?.code||err?.message)); }
+    });
+
+    // Notifications
+    const qNotifs = query(collection(db,'broadcasts'), orderBy('createdAt','desc'), limit(50));
+    unsubNotifs = onSnapshot(qNotifs,(snap)=>{
+      const tb=$('#tblNotifs tbody'); tb.innerHTML='';
+      snap.forEach(d=>{
+        const v=d.data(); tb.appendChild(row(`<td>${fmtTime(v.createdAt)}</td><td>${v.icon||'🔔'} ${v.title||''}</td><td>${(v.body||'').slice(0,140)}</td>`));
+      });
+    });
+
+    $('#btnSendNotif').addEventListener('click', async()=>{
+      const title=$('#nt_title').value.trim(), body=$('#nt_body').value.trim(), icon=$('#nt_icon').value.trim()||'🔔';
+      const scope=$('#nt_scope').value;
+      if(!title||!body){ return $('#nt_status').textContent='Başlık ve mesaj gerekli.' }
+      try{
+        await addDoc(collection(db,'broadcasts'), {title, body, icon, scope, createdAt:serverTimestamp()});
+        $('#nt_status').textContent='Gönderildi.'; play('sndNotif');
+        $('#nt_title').value=''; $('#nt_body').value='';
+      }catch(err){ $('#nt_status').textContent='Hata: '+(err?.code||err?.message) }
+    });
+
+    // Users
+    $('#btnSearchUser').addEventListener('click', async()=>{
+      const uname=$('#srch_uname').value.trim(); const tb=$('#tblUsers tbody'); tb.innerHTML='';
+      if(!uname){ tb.appendChild(row(`<td colspan="5">Kullanıcı adı giriniz.</td>`)); return; }
+      // prefix search
+      const end = uname + '\uf8ff';
+      const qUsers = query(collection(db,'users'), where('username','>=',uname), where('username','<=',end), orderBy('username'), limit(50));
+      const snap = await getDocs(qUsers);
+      if(snap.empty){ tb.appendChild(row(`<td colspan="5">Sonuç yok.</td>`)); return; }
+      snap.forEach(u=>{
+        const d=u.data(); tb.appendChild(row(`<td>${d.name||''}</td><td>${d.username||''}</td><td>${d.email||''}</td><td>${d.isActive===false?'Pasif':'Aktif'}</td><td>
+          <button class="btn" data-preview="${u.id}">Görüntüle</button>
+          <button class="btn warn" data-impersonate="${u.id}">Profil gibi gör</button>
+        </td>`));
+      });
+    });
+
+    $('#pane-kullanicilar').addEventListener('click', async(e)=>{
+      const uid=e.target?.dataset?.preview||e.target?.dataset?.impersonate; if(!uid) return;
+      const s=await getDoc(doc(db,'users',uid)); const d=s.data()||{}; $('#userPreview').classList.remove('hide');
+      $('#userCard').innerHTML = `<div class="grid cols-2"><div class="kpi"><span>Ad Soyad</span><b>${d.name||'-'}</b></div>
+        <div class="kpi"><span>Kullanıcı Adı</span><b>@${d.username||'-'}</b></div>
+        <div class="kpi"><span>Şehir</span><b>${d.city||'-'}</b></div>
+        <div class="kpi"><span>Telefon</span><b>${d.phone||'-'}</b></div>
+        <div class="kpi"><span>E-posta</span><b>${d.email||'-'}</b></div>
+        <div class="kpi"><span>Durum</span><b>${d.isActive===false?'Pasif':'Aktif'}</b></div></div>`;
+      if(e.target?.dataset?.impersonate){ alert('"Profil gibi gör" dev mod: Bu kullanıcı gibi görüntüleme; üretimde salt-okunur taklit önerilir.'); }
+    });
+
+    // Ticker controls
+    $('#btnTickerOn').addEventListener('click', async()=>{
+      const icon=$('#tk_icon').value.trim()||'⚠️'; const text=$('#tk_text').value.trim();
+      const color=$('#tk_color').value||'#f59e0b'; const speed=Number($('#tk_speed').value||25);
+      if(!text){ $('#tk_status').textContent='Metin gerekli.'; return; }
+      try{ await setDoc(doc(db,'settings','adminAlert'), { enabled:true, icon, text, color, speed, updatedAt:serverTimestamp() }); $('#tk_status').textContent='Yayınlandı.'; }
+      catch(err){ $('#tk_status').textContent='Hata: '+(err?.code||err?.message); }
+    });
+    $('#btnTickerOff').addEventListener('click', async()=>{
+      try{ await setDoc(doc(db,'settings','adminAlert'), { enabled:false, updatedAt:serverTimestamp() }, { merge:true }); $('#tk_status').textContent='Kaldırıldı.'; }
+      catch(err){ $('#tk_status').textContent='Hata: '+(err?.code||err?.message); }
+    });
+
+    // Reports
+    const qRep = query(collection(db,'reports'), orderBy('createdAt','desc'), limit(50));
+    unsubReports = onSnapshot(qRep,(snap)=>{
+      const tb=$('#tblReports tbody'); tb.innerHTML='';
+      snap.forEach(r=>{
+        const d=r.data(); const img = d.imageUrl? `<img src="${d.imageUrl}" alt="ek" style="max-width:80px;max-height:60px;border-radius:6px">` : '-';
+        tb.appendChild(row(`<td>${fmtTime(d.createdAt)}</td><td>${d.fromUser||''}</td><td>${d.targetUser||d.targetListing||''}</td><td>${d.reason||''}</td><td>${(d.details||'').slice(0,80)}</td><td>${img}</td><td>
+          <button class="btn err" data-action="ban" data-id="${r.id}">Ban</button>
+        </td>`));
+      });
+    });
+
+    $('#pane-sikayet').addEventListener('click', async(e)=>{
+      const id=e.target?.dataset?.id; const act=e.target?.dataset?.action; if(!id||!act) return;
+      if(act==='ban') alert('Ban akışı: kullanıcı/ilan üzerinde işlem yapın (örnek).');
+    });
+
+    // Support Chat (admin tarafı)
+    const qThreads = query(collection(db,'support_threads'), orderBy('updatedAt','desc'), limit(50));
+    unsubThreads = onSnapshot(qThreads,(snap)=>{
+      const list=$('#threadList'); list.innerHTML='';
+      snap.forEach(t=>{
+        const d=t.data(); const div=document.createElement('div'); div.className='row'; div.dataset.id=t.id; div.innerHTML=`<b>${d.username||d.userId}</b><div class="status">${(d.lastMsg||'').slice(0,40)}</div>`; list.appendChild(div);
+      });
+    });
+
+    let activeThread=null; let msgsUnsub=null;
+    $('#threadList').addEventListener('click',(e)=>{
+      const row=e.target.closest('.row'); if(!row) return; $$('#threadList .row').forEach(x=>x.classList.remove('active')); row.classList.add('active');
+      activeThread=row.dataset.id; $('#msgs').innerHTML='';
+      msgsUnsub?.();
+      msgsUnsub = onSnapshot(query(collection(db,'support_threads',activeThread,'messages'), orderBy('createdAt','asc'), limit(200)),(snap)=>{
+        const box=$('#msgs'); let isNew=false; snap.docChanges().forEach(ch=>{ if(ch.type==='added'){ isNew=true; const m=ch.doc.data(); const b=document.createElement('div'); b.className='bubble'+(m.from==='admin'?' me':''); b.textContent=m.text||''; box.appendChild(b); box.scrollTop=box.scrollHeight; } });
+        if(isNew) play('sndMsg');
+      });
+    });
+
+    $('#btnSendMsg').addEventListener('click', async()=>{
+      if(!activeThread){ $('#chat_status').textContent='Konuşma seçin.'; return; }
+      const text=$('#msgInput').value.trim(); if(!text) return;
+      await addDoc(collection(db,'support_threads',activeThread,'messages'), {text, from:'admin', createdAt:serverTimestamp()});
+      await updateDoc(doc(db,'support_threads',activeThread), { lastMsg:text, updatedAt:serverTimestamp() });
+      $('#msgInput').value='';
+    });
+  }
+
+  window.addEventListener('beforeunload',()=>{ [unsubPending,unsubActive,unsubNotifs,unsubTicker,unsubReports,unsubThreads].forEach(f=>{try{f&&f()}catch(_){}}); });
+</script>
+</body>
+</html>
