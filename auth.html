@@ -55,6 +55,9 @@ input:focus{border-color:#60a5fa}
 .terms .bd{padding:16px 20px;color:#334155;max-height:60dvh;overflow:auto}
 .terms .ft{padding:14px 20px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--stroke);background:#f9fafb}
 .terms .chk{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+
+/* BANNER */
+.banner{margin:10px 0;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
 </style>
 </head>
 <body>
@@ -163,7 +166,7 @@ input:focus{border-color:#60a5fa}
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
     setPersistence, browserLocalPersistence
   } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-  import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+  import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
   const $ = (s)=>document.querySelector(s);
   const liStatus = $('#li_status');
@@ -213,15 +216,33 @@ input:focus{border-color:#60a5fa}
     try {
       await setPersistence(auth, browserLocalPersistence);
     } catch(e) {
-      // bazı tarayıcılarda 3rd-party cookie engeli olabilir
       console.warn('Persistence set error:', e);
     }
   })();
 
-  // Eğer zaten girişliyse bu sayfada bekletme
+  // Eğer zaten girişliyse: #signup ile geldiyse yönlendirme yapma; aksi halde Home'a gönder
+  const signupBanner = document.createElement('div');
+  signupBanner.className = 'banner';
+  signupBanner.innerHTML = `Zaten giriş yaptınız. Yeni bir hesap oluşturmak istiyorsanız 
+    <button id="btnSwitch" class="btn ghost" style="margin-left:8px">Çıkış yap ve yeni hesap oluştur</button>`;
+
   onAuthStateChanged(auth, (user) => {
+    const onSignup = (location.hash === '#signup');
     if (user && user.emailVerified) {
-      go();
+      if (onSignup) {
+        const target = paneSignup;
+        if (target && !target.contains(signupBanner)) {
+          target.appendChild(signupBanner);
+          document.getElementById('btnSwitch').addEventListener('click', async () => {
+            try { await signOut(auth); } catch(_) {}
+            activate('signup');
+            signupBanner.remove();
+            setMsg(suStatus,'Yeni hesap oluşturmak için bilgileri doldurun.','ok');
+          });
+        }
+      } else {
+        go();
+      }
     }
   });
 
@@ -245,21 +266,42 @@ input:focus{border-color:#60a5fa}
     catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Google ile giriş
+  // Google ile giriş (hesap seçtir + ilk girişte profil oluştur)
   $('#btnGoogle').addEventListener('click',async()=>{
     try{
       const prov=new GoogleAuthProvider();
+      // Hesap seçtir, sessizce aynı hesaba bağlanmasın
+      prov.setCustomParameters({ prompt: 'select_account' });
+      // Varsa mevcut oturumu kapat ki hesap seçme penceresi kesin açılsın
+      if (auth.currentUser) { try { await signOut(auth); } catch(_) {} }
+
       const res=await signInWithPopup(auth,prov);
-      if(res?.user && res.user.emailVerified !== false){
-        go();
-      } else {
-        // Google hesapları e-posta doğrulanmış gelir; yine de guard:
-        go();
+      const user = res?.user;
+      if (user) {
+        // İlk kez giriyorsa users/<uid> belgesi aç
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          const base = (user.displayName?.trim() || user.email?.split('@')[0] || 'kullanici')
+            .toLowerCase().replace(/[^a-z0-9_\.]+/g,'_').slice(0,20);
+          await setDoc(ref, {
+            name: user.displayName || '',
+            username: base,
+            email: user.email || '',
+            city: '',
+            phone: '',
+            createdAt: serverTimestamp(),
+            role: 'customer',
+            isActive: true,
+            provider: 'google'
+          }, { merge: true });
+        }
       }
+      go();
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Kayıt akışı
+  // Kayıt akışı (email/şifre)
   function collectSignup(){
     const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(),
              city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(),
@@ -274,7 +316,7 @@ input:focus{border-color:#60a5fa}
       const {user}=await createUserWithEmailAndPassword(auth,d.email,d.p1);
       await setDoc(doc(db,'users',user.uid),{
         name:d.name,username:d.uname,city:d.city,phone:d.phone,email:d.email,
-        createdAt:serverTimestamp(),role:'customer',isActive:true
+        createdAt:serverTimestamp(),role:'customer',isActive:true,provider:'password'
       });
       await sendEmailVerification(user);
       setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
@@ -282,6 +324,7 @@ input:focus{border-color:#60a5fa}
     }catch(e){setMsg(suStatus,errText(e),'err');}
   }
 
+  // KVKK modal
   const termsModal=document.getElementById('termsModal');
   const termsChk=document.getElementById('termsChk');
   const termsAccept=document.getElementById('termsAccept');
@@ -292,7 +335,13 @@ input:focus{border-color:#60a5fa}
   termsCancel.addEventListener('click',closeTerms);
   termsModal.addEventListener('click',(e)=>{if(e.target===termsModal) closeTerms();});
 
-  $('#btnSignUp').addEventListener('click',()=>{
+  document.getElementById('btnSignUp').addEventListener('click',()=>{
+    if (auth.currentUser) {
+      // Zaten girişliyken yeni kayıt açmaya çalışıyorsa bilgilendir
+      activate('signup');
+      setMsg(suStatus,'Yeni bir hesap oluşturmak için önce çıkış yapın.','err');
+      return;
+    }
     const d=collectSignup(); if(!d) return;
     openTerms();
     const handler=async()=>{termsAccept.removeEventListener('click',handler);closeTerms();await performSignup(d);};
