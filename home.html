@@ -22,7 +22,7 @@
   --muted:#6b7280;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 .wrap{max-width:1200px;margin:0 auto;padding:16px}
 
 /* NAV */
@@ -137,6 +137,51 @@ footer .wrap{padding:24px}
 
   /* sadece mobilde mesaj balon rengi değişsin */
   .msg.me{background:#dcfce7;border-color:#bbf7d0}
+}
+/* ------- MOBILE FIXES APPEND ------- */
+@media (max-width: 768px){
+  body{padding-bottom:80px}
+  html,body{overflow-x:hidden}
+  .search{display:none}
+  .navlinks{display:none}
+  .mobile-actions{display:flex}
+  .mobile-username{display:inline}
+  .avatar-btn{display:inline-flex;align-items:center;justify-content:center}
+  .mobmenu{position:fixed; right:12px; top:56px; max-width:90vw; width:280px; border-radius:12px; overflow:auto}
+  .mobile-add{display:inline-flex;background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff;padding:8px 10px;border-radius:10px;text-decoration:none}
+  .bottomnav{
+    position:fixed; left:0; right:0; bottom:0;
+    display:flex; justify-content:space-around; align-items:center;
+    height:64px;
+    padding:0 calc(12px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+    background:#fff; border-top:1px solid var(--ring); z-index:70;
+  }
+  .bottomnav a{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; padding:8px 6px; border-radius:10px; text-decoration:none; color:#111; white-space:nowrap;
+  }
+  .bottomnav a.active{background:#eff6ff}
+  .bottomnav small{font-size:11px; line-height:1}
+  .chatfab{right:16px; bottom:96px; z-index:80}
+  .fab{background:#0a1f44; color:#fff; border-color:#0a1f44}
+  .chatwin{right:16px; bottom:108px; width:92vw; max-width:360px; z-index:90}
+  .msg.me{background:#dcfce7;border-color:#bbf7d0}
+}
+/* ------- MOBILE OVERRIDES v2 (force) ------- */
+@media (max-width:768px){
+  html,body{overflow-x:hidden !important;}
+
+  /* Alt bar sabit ve taşmasız */
+  .bottomnav{position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; width:100vw !important; margin:0 !important; transform:none !important; z-index:70 !important;}
+  .bottomnav a{min-width:0 !important; white-space:nowrap !important;}
+
+  /* Canlı destek balonu MAVİ ve sağ ikonları kapatmasın diye SOLA alındı */
+  .chatfab{left:16px !important; right:auto !important; bottom:96px !important; z-index:80 !important;}
+  .fab{background:#2563eb !important; border-color:#2563eb !important; color:#fff !important;}
+  .chatwin{left:16px !important; right:auto !important; bottom:110px !important; width:calc(100vw - 32px) !important; max-width:360px !important; z-index:90 !important;}
+
+  /* Mobil dropdown ekran içinde kalsın */
+  .mobmenu{position:fixed !important; right:12px !important; left:auto !important; top:56px !important; max-width:90vw !important; width:280px !important;}
 }
 </style>
 </head>
