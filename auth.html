@@ -77,48 +77,64 @@ input:focus,select:focus{border-color:#60a5fa}
     <div id="li_status" class="status"></div>
   </section>
 
-  <!-- KAYIT -->
-  <section class="pane" id="paneSignup">
-    <h2 class="h1">Hesap Oluştur</h2>
-    <p class="sub">E-posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir.</p>
-    <div class="row">
-      <label>İsim Soyisim
-        <input type="text" id="su_name" placeholder="Adınız Soyadınız" required>
-      </label>
-      <label>Kullanıcı Adı
-        <input type="text" id="su_uname" placeholder="kullanici_adi" required>
-      </label>
-    </div>
-    <div class="row">
-      <label>Şehir
-        <input type="text" id="su_city" placeholder="Şehir" required>
-      </label>
-      <label>Telefon
-        <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
-      </label>
-    </div>
-    <label>E-posta
-      <input type="email" id="su_email" placeholder="ornek@eposta.com" required>
-    </label>
-    <div class="row">
-      <label>Şifre
-        <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
-      </label>
-      <label>Şifre (Tekrar)
-        <input type="password" id="su_pass2" placeholder="Tekrar" required>
-      </label>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="btnSignUp">Kaydol</button>
-    </div>
-    <p class="note">Kayıt ile birlikte KVKK ve Kullanım Şartları'nı kabul etmiş olursunuz.</p>
-    <div id="su_status" class="status"></div>
-  </section>
+<!-- KAYIT -->
+<section class="pane" id="paneSignup">
+  <h2 class="h1">Hesap Oluştur</h2>
+  <p class="sub">E-posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir. 
+  Kayıt sonrası doğrulama e-postası spam klasörünüze düşebilir, lütfen kontrol edin.</p>
 
-  <div class="footer-mini">
-    <span>© <span id="y"></span> Takas Çemberi</span>
-    <a href="/">Ana sayfaya dön →</a>
+  <div class="row">
+    <label>İsim Soyisim
+      <input type="text" id="su_name" placeholder="Adınız Soyadınız" required>
+    </label>
+    <label>Kullanıcı Adı
+      <input type="text" id="su_uname" placeholder="kullanici_adi" required>
+    </label>
   </div>
+
+  <div class="row">
+    <label>Şehir
+      <input type="text" id="su_city" placeholder="Şehir" required>
+    </label>
+    <label>Telefon
+      <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
+    </label>
+  </div>
+
+  <label>E-posta
+    <input type="email" id="su_email" placeholder="ornek@eposta.com" required>
+  </label>
+
+  <div class="row">
+    <label>Şifre
+      <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
+    </label>
+    <label>Şifre (Tekrar)
+      <input type="password" id="su_pass2" placeholder="Tekrar" required>
+    </label>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="btnSignUp">Kaydol</button>
+  </div>
+
+  <p class="note">Kayıt ile birlikte KVKK ve Kullanım Şartları'nı kabul etmiş olursunuz.</p>
+  <div id="su_status" class="status"></div>
+
+  <!-- GÜVENLİK NOTLARI -->
+  <p class="note">
+    ⚠️ Kapora, peşinat, havale vb. ödemeler talep etmeyiniz / etmeyin.<br><br>
+    💳 Kapora, peşinat vb. ödemelerden <b>takascemberi.com</b> sorumlu değildir.<br><br>
+    🔒 Kişisel bilgilerinizi (TC kimlik, IBAN, şifre vb.) paylaşmayınız.<br><br>
+    🛡️ Şüpheli veya sahte işlemleri destek ekibimize bildiriniz.<br><br>
+    🤝 <b>takascemberi.com ailesi</b> olarak güvenli, keyifli ve mutlu takaslar dileriz.
+  </p>
+</section>
+
+<div class="footer-mini">
+  <span>© <span id="y"></span> Takas Çemberi</span>
+  <a href="/">Ana sayfaya dön →</a>
+</div>
 </div>
 
 <script type="module">
