@@ -1,95 +1,155 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Takas Çemberi • Sıfır Atık, Doğrudan Takas</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Takas Çemberi • Yükle, Takasla, Kazan!</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --txt:#0a0a0a; --muted:#5b6b8f; --stroke:#e5e9f5;
+  --grad1:linear-gradient(135deg,#06b6d4,#3b82f6);
+  --grad2:linear-gradient(135deg,#f59e0b,#ef4444);
+  --grad3:linear-gradient(135deg,#10b981,#22c55e);
+  --grad4:linear-gradient(135deg,#8b5cf6,#06b6d4);
+  --grad5:linear-gradient(135deg,#ec4899,#f43f5e);
+  --grad6:linear-gradient(135deg,#14b8a6,#3b82f6);
+  --grad7:linear-gradient(135deg,#fbbf24,#f97316);
+  --grad8:linear-gradient(135deg,#84cc16,#22c55e);
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+  color:var(--txt);
+  background:linear-gradient(135deg,#e0f7fa,#f0f9ff,#ecfdf5,#fff0f6);
+  background-size:400% 400%;
+  animation:gradmove 18s ease infinite;
+}
+@keyframes gradmove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.wrap{width:min(1100px,92%);margin-inline:auto}
+/* NAV */
+.nav{position:sticky;top:0;z-index:10;background:#ffffffdd;backdrop-filter:blur(10px);border-bottom:1px solid var(--stroke)}
+.nav-in{display:flex;justify-content:space-between;align-items:center;padding:14px 0}
+.brand img{height:42px;width:auto;display:block}
+.menu{display:flex;gap:12px;align-items:center}
+.menu a{color:var(--muted);text-decoration:none}
+.menu a:hover{color:var(--txt)}
+.btn{display:inline-block;padding:11px 16px;border-radius:12px;font-weight:700;text-decoration:none;transition:.2s}
+.btn.primary{background:var(--grad1);color:#fff;border:none;box-shadow:0 4px 14px #06b6d455}
+.btn.ghost{color:var(--txt);background:#f9fafb}
+/* HERO */
+.hero{padding:86px 0 42px;text-align:center}
+.hero h1{font-size:clamp(36px,6.5vw,64px);line-height:1.1;margin:0;color:#111827}
+.lead{margin:14px auto 0;max-width:760px;color:#374151;font-size:18px}
+/* CATEGORY CARDS */
+.categories{padding:50px 0}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:26px}
+.cat-card{border-radius:20px;padding:22px;text-align:center;color:#fff;box-shadow:0 6px 16px #0002;transition:.2s;background-size:200% 200%;animation:gradcard 12s ease infinite}
+.cat-card:hover{transform:translateY(-4px);box-shadow:0 10px 20px #0003}
+.cat-card h3{margin:0 0 8px;font-size:20px}
+.cat-card p{margin:0;font-size:14px;opacity:.9}
+.cat-icon{font-size:34px;margin-bottom:10px;display:block}
+@keyframes gradcard{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+/* FOOTER */
+.footer{border-top:1px solid var(--stroke);padding:22px 0;margin-top:40px;color:#64748b}
+.accord details{border:1px solid var(--stroke);border-radius:14px;background:#ffffff;margin-top:10px}
+.accord summary{cursor:pointer;padding:14px 16px;font-weight:700;list-style:none}
+.accord summary::-webkit-details-marker{display:none}
+.accord .content{padding:0 16px 16px;color:#334155;font-size:14px}
+/* MODAL */
+.modal-back{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}
+.modal{width:min(680px,100%);background:linear-gradient(135deg,#ffffff,#f0faff);border-radius:22px;box-shadow:0 30px 80px #0004;overflow:hidden}
+.modal .hd{padding:20px;font-weight:800;font-size:18px;border-bottom:1px solid var(--stroke);color:#fff;background:var(--grad4)}
+.modal .bd{padding:18px 20px;color:#334155;font-size:15px;background:#fff}
+.modal .ft{padding:16px 20px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--stroke);background:#f9fafb}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+.chk input{margin-top:4px}
+</style>
 </head>
 <body>
 <header class="nav">
-  <div class="wrap">
-    <div class="brand">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" opacity=".3" stroke-width="2"/>
-        <path d="M7 12h10M12 7v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span>Takas Çemberi</span>
-    </div>
+  <div class="wrap nav-in">
+    <a class="brand" href="/"><img src="seffaf.png" alt="Takas Çemberi Logo"/></a>
     <nav class="menu">
-      <a href="#kategoriler">Kategoriler</a>
-      <a href="#neden">Neden Takas?</a>
-      <a href="#iletisim">İletişim</a>
-      <a href="auth.html" class="btn small">Giriş / Kayıt</a>
+      <a class="btn primary" href="#" id="btnOpenSignup">Kayıt Ol</a>
+      <a class="btn ghost" href="/auth.html">Giriş Yap</a>
     </nav>
   </div>
 </header>
 
 <main>
   <section class="hero">
-    <div class="wrap center">
-      <h1>İhtiyacın olanı <span class="emph">takas</span> ile bul.</h1>
-      <p class="lead">Eşyalar çöpe değil, yeni sahibine gitsin. Sıfır atık ve milli sermaye için birlikte.</p>
-      <div class="cta">
-        <a class="btn primary" href="#kategoriler">İlanları Keşfet</a>
-        <a class="btn ghost" href="auth.html">İlan Ver (Üye Girişi)</a>
-      </div>
-      <div class="stats">
-        <div><b>0</b><span>Aktif İlan</span></div>
-        <div><b>0</b><span>Takas</span></div>
-        <div><b>0</b><span>Üye</span></div>
-      </div>
+    <div class="wrap">
+      <h1>YÜKLE, <span style="color:#06b6d4">TAKASLA</span>, KAZAN!</h1>
+      <p class="lead">Kullanmadığın eşyalar çöpe değil, yeni sahibine gitsin. Nakitsiz, güvenli ve hızlı değiş–tokuş.</p>
     </div>
   </section>
 
-  <section id="kategoriler" class="section">
+  <section class="categories">
     <div class="wrap">
-      <h2>Kategoriler</h2>
-      <div class="grid">
-        <article class="card"><h3>Elektronik</h3><p>Laptop, telefon, aksesuar…</p></article>
-        <article class="card"><h3>Ev & Yaşam</h3><p>Mobilya, dekor, mutfak…</p></article>
-        <article class="card"><h3>Giyim</h3><p>Kadın / Erkek / Çocuk</p></article>
-        <article class="card"><h3>Hobi</h3><p>Oyun, enstrüman, spor…</p></article>
-        <article class="card"><h3>Araç & Parça</h3><p>Bisiklet, oto ekipman…</p></article>
-        <article class="card"><h3>Diğer</h3><p>Kitap, koleksiyon…</p></article>
+      <h2 style="text-align:center;color:#0f172a">Kategoriler</h2>
+      <div class="cat-grid">
+        <div class="cat-card" style="background:var(--grad1)"><span class="cat-icon">🏠</span><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
+        <div class="cat-card" style="background:var(--grad2)"><span class="cat-icon">🏡</span><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
+        <div class="cat-card" style="background:var(--grad3)"><span class="cat-icon">🚗</span><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet</p></div>
+        <div class="cat-card" style="background:var(--grad4)"><span class="cat-icon">🧸</span><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></div>
+        <div class="cat-card" style="background:var(--grad5)"><span class="cat-icon">👗</span><h3>Giyim</h3><p>Kadın, erkek, çocuk giyim</p></div>
+        <div class="cat-card" style="background:var(--grad6)"><span class="cat-icon">⚡</span><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak ürünleri</p></div>
+        <div class="cat-card" style="background:var(--grad7)"><span class="cat-icon">💻</span><h3>Teknoloji</h3><p>Bilgisayar, telefon, aksesuar</p></div>
+        <div class="cat-card" style="background:var(--grad8)"><span class="cat-icon">🛋️</span><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
       </div>
-    </div>
-  </section>
-
-  <section id="neden" class="section alt">
-    <div class="wrap">
-      <h2>Neden Takas Çemberi?</h2>
-      <div class="features">
-        <div class="feature"><h3>Sıfır Atık</h3><p>Eşyalar ömrünü tamamlamadan yeni kullanıcıya geçer.</p></div>
-        <div class="feature"><h3>Doğrudan Takas</h3><p>Aracı yok, komisyon yok — güven & şeffaf süreç.</p></div>
-        <div class="feature"><h3>Yerel Topluluk</h3><p>Mahallendeki insanlarla eşleş, kargo derdi azalır.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="iletisim" class="section">
-    <div class="wrap">
-      <h2>İletişim</h2>
-      <p>Önerin var mı? İş birliği veya sponsorluk için bize yaz: <a href="mailto:info@takascemberi.com">info@takascemberi.com</a></p>
     </div>
   </section>
 </main>
 
 <footer class="footer">
-  <div class="wrap small">
+  <div class="wrap">
     <div>© <span id="y"></span> Takas Çemberi • takascemberi.com</div>
-    <div class="links">
-      <a href="/pages/privacy.html">Gizlilik</a>
-      <a href="/pages/terms.html">Kullanım Şartları</a>
+    <div class="accord">
+      <details><summary>Güvenlik & SSL</summary><div class="content">Takas Çemberi, <b>güncel TLS/SSL</b> şifreleme ve HSTS politikası ile korunur. Kullanıcı verileri aktarım sırasında şifrelenir.</div></details>
+      <details><summary>KVKK Aydınlatma Metni</summary><div class="content">Kişisel verileriniz 6698 sayılı KVKK kapsamında; sadece açık rızanızla ve belirlenen amaçlarla işlenir, mevzuata uygun sürelerle saklanır.</div></details>
+      <details><summary>Çerez Politikası</summary><div class="content">Sitemizde yalnızca zorunlu çerezler kullanılmaktadır. Tercih ve analiz çerezlerini tarayıcı ayarlarınızdan yönetebilirsiniz.</div></details>
+      <details><summary>Sorumluluk Reddi</summary><div class="content">Kapora, peşinat, havale vb. <b>ödemeler talep etmeyin/etmeyiniz</b>. Gönderilen kapora veya peşinatlardan takascemberi.com sorumlu tutulamaz. Güvenli alışveriş için rehberimizi okuyunuz.</div></details>
     </div>
   </div>
 </footer>
 
+<!-- Kayıt öncesi onay MODALI -->
+<div class="modal-back" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mhd">
+    <div class="hd" id="mhd">Kayıt Koşulları & Güvenlik Onayı</div>
+    <div class="bd">
+      <p>Devam etmeden önce lütfen aşağıdaki koşulları okuyup onaylayın:</p>
+      <ul>
+        <li>Kapora, peşinat, ödeme gönderilmez veya talep edilemez.</li>
+        <li>Gönderilen kapora veya peşinatlardan takascemberi.com sorumlu tutulamaz.</li>
+        <li>Şüpheli işlemleri bildiriniz. Kişisel bilgilerinizi paylaşmayınız.</li>
+        <li>E-posta doğrulaması yapılmadan hesap aktif edilmez.</li>
+      </ul>
+      <label class="chk"><input type="checkbox" id="mchk"> Yukarıdaki koşulları okudum ve kabul ediyorum.</label>
+    </div>
+    <div class="ft">
+      <button class="btn ghost" id="mclose">Vazgeç</button>
+      <button class="btn primary" id="mgo" disabled>Devam Et</button>
+    </div>
+  </div>
+</div>
+
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
+  const modal = document.getElementById('modal');
+  const openBtn = document.getElementById('btnOpenSignup');
+  const closeBtn = document.getElementById('mclose');
+  const goBtn = document.getElementById('mgo');
+  const chk = document.getElementById('mchk');
+  function openModal(){ modal.style.display = 'flex'; chk.checked = false; goBtn.disabled = true; }
+  function closeModal(){ modal.style.display = 'none'; }
+  openBtn?.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+  closeBtn?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+  chk.addEventListener('change', ()=>{ goBtn.disabled = !chk.checked; });
+  goBtn.addEventListener('click', ()=>{ window.location.href = '/auth.html#signup'; });
 </script>
-<script type="module" src="js/firebase-config.js"></script>
 </body>
 </html>
