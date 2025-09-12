@@ -39,13 +39,21 @@ body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--te
 
 /* HERO */
 .hero{position:relative;overflow:hidden;padding:64px 20px;text-align:center;background:linear-gradient(135deg,#e0f2fe,#ecfdf5)}
-.hero h1{font-size:44px;font-weight:900;margin:0 0 8px;
-  background:linear-gradient(90deg,#2563eb,#22c55e,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:20px;margin:0 0 22px;
-  background:linear-gradient(90deg,#0ea5e9,#16a34a,#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.9}
-.hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero h1,.hero h2,.hero p{margin:0;line-height:1.3}
+.hero h1{font-size:46px;font-weight:900;margin-bottom:10px;
+  background:linear-gradient(90deg,#2563eb,#22c55e,#f59e0b,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:grad 6s linear infinite;background-size:400% 400%}
+.hero h2{font-size:28px;font-weight:600;margin-bottom:10px;
+  background:linear-gradient(90deg,#10b981,#3b82f6,#f43f5e,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:grad 8s linear infinite;background-size:400% 400%}
+.hero p{font-size:20px;font-weight:500;
+  background:linear-gradient(90deg,#f472b6,#2563eb,#22c55e,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:grad 10s linear infinite;background-size:400% 400%}
+.hero .cta{margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .hero .cta a{padding:12px 20px;border-radius:8px;font-weight:700;text-decoration:none}
 .hero .cta .start{background:var(--primary);color:#fff}
+
+@keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 /* CATEGORY CARDS */
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin:40px 0}
@@ -54,8 +62,12 @@ body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--te
 .cat-card h3{margin:0;font-size:18px;position:relative;z-index:1}
 .cat-card p{margin:6px 0 0;font-size:14px;position:relative;z-index:1;opacity:.9}
 .cat-card::before{content:"";position:absolute;inset:0;z-index:0;opacity:1;background:linear-gradient(135deg,#3b82f6,#8b5cf6,#10b981,#f59e0b);background-size:300% 300%;animation:grad 10s ease infinite}
-@keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .cat-card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.15)}
+
+/* FEED */
+.feed{margin:60px 0}
+.feed h2{margin-bottom:20px}
+.feed p{color:var(--muted)}
 
 /* INFO SECTION */
 .info{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin:60px 0}
@@ -113,6 +125,7 @@ footer .wrap{padding:24px}
 <!-- HERO -->
 <section class="hero">
   <h1>TAKAS ÇEMBERİNE HOŞ GELDİN!</h1>
+  <h2>YÜKLE, TAKASLA, KAZAN!</h2>
   <p>Türkiye’nin en güvenilir takas platformunda keşfetmeye hazır mısın?</p>
   <div class="cta">
     <a href="search.html" class="start">🔎 İlan Ara</a>
@@ -132,6 +145,12 @@ footer .wrap{padding:24px}
     <a class="cat-card" href="search.html?cat=teknoloji"><div class="ico">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></a>
     <a class="cat-card" href="search.html?cat=mobilya"><div class="ico">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></a>
   </div>
+
+  <!-- FEED (boş ilan ortamı) -->
+  <section class="feed">
+    <h2>Paylaşılan İlanlar</h2>
+    <p>Henüz ilan bulunmamaktadır. Yeni ilanlar eklendikçe burada görünecek.</p>
+  </section>
 
   <!-- INFO -->
   <div class="info">
@@ -202,26 +221,4 @@ footer .wrap{padding:24px}
     <div class="msg">Merhaba, Takas Çemberi canlı desteğe hoş geldiniz 👋</div>
   </div>
   <div class="ft">
-    <input id="chatInput" type="text" placeholder="Mesajınızı yazın...">
-    <button id="chatSend">Gönder</button>
-  </div>
-</div>
-
-<script>
-  document.getElementById('q')?.addEventListener('keydown',(e)=>{
-    if(e.key==='Enter'){ e.preventDefault(); window.location.href='search.html?q='+encodeURIComponent(e.target.value.trim()); }
-  });
-
-  const chatWin = document.getElementById('chatWin');
-  const fabLabel = document.querySelector('.fab-label');
-  const fabBtn = document.getElementById('openChat');
-  const chatBody = document.getElementById('chatBody');
-  const chatInput = document.getElementById('chatInput');
-  const chatSend = document.getElementById('chatSend');
-  function pushMsg(text, me=false){
-    const d = document.createElement('div');
-    d.className = 'msg' + (me ? ' me' : '');
-    d.textContent = text; chatBody.appendChild(d); chatBody.scrollTop = chatBody.scrollHeight;
-  }
-  fabBtn.addEventListener('mouseenter', ()=>{ if(fabLabel) fabLabel.style.display='block'; });
-  fabBtn
+    <input id="chatInput" type="text
