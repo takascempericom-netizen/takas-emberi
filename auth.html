@@ -197,7 +197,7 @@ input:focus{border-color:#60a5fa}
   if(location.hash==='#signup') activate('signup');
 
   // X kapatma → ana sayfa
-  document.getElementById('btnClose').addEventListener('click',()=>{location.href='home.html';});
+  document.getElementById('btnClose').addEventListener('click',()=>{location.href='index.html';});
 
   // Giriş
   $('#btnSignIn').addEventListener('click',async()=>{
@@ -206,7 +206,7 @@ input:focus{border-color:#60a5fa}
     try{
       const {user}=await signInWithEmailAndPassword(auth,email,pass);
       if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol et.','err');}
-      setMsg(liStatus,'Giriş başarılı. Ana sayfaya gidiliyor…','ok'); location.href='home.html';
+      setMsg(liStatus,'Giriş başarılı. Ana sayfaya gidiliyor…','ok'); location.href='index.html';
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
@@ -220,7 +220,7 @@ input:focus{border-color:#60a5fa}
 
   // Google
   $('#btnGoogle').addEventListener('click',async()=>{
-    try{const prov=new GoogleAuthProvider();await signInWithPopup(auth,prov);location.href='home.html';}
+    try{const prov=new GoogleAuthProvider();await signInWithPopup(auth,prov);location.href='index.html';}
     catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
