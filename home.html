@@ -27,7 +27,7 @@ body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--te
 
 /* NAV */
 .topnav{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--ring)}
-.topnav-in{display:flex;align-items:center;gap:14px;padding:10px 0}
+.topnav-in{display:flex;align-items:center;gap:14px;padding:10px 0;position:relative}
 .brand img{height:57px}
 .search input{width:300px;max-width:40vw;padding:10px;border-radius:8px;border:1px solid var(--ring)}
 .navlinks{margin-left:auto;display:flex;gap:8px}
@@ -39,6 +39,15 @@ body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--te
 .btn.add{background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff}
 .btn.profile{background:linear-gradient(90deg,#ec4899,#f472b6);color:#fff}
 .btn.logout{background:linear-gradient(90deg,#ef4444,#f87171);color:#fff}
+
+/* MOBILE-ONLY header actions */
+.mobile-actions{display:none;gap:8px;align-items:center;margin-left:auto}
+.mobile-username{display:none;font-weight:700}
+.avatar-btn{display:none; width:40px;height:40px;border-radius:999px;border:1px solid var(--ring);background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
+.mobmenu{display:none;position:absolute;right:8px;top:64px;background:#fff;border:1px solid var(--ring);border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.16);min-width:200px;z-index:60}
+.mobmenu .item{display:block;padding:10px 12px;text-decoration:none;color:var(--text);border-bottom:1px solid #f1f5f9}
+.mobmenu .item:last-child{border-bottom:none}
+.mobmenu .item strong{display:block;color:#0f172a}
 
 /* HERO */
 .hero{position:relative;overflow:hidden;padding:64px 20px;text-align:center;background:linear-gradient(135deg,#e0f2fe,#ecfdf5)}
@@ -105,6 +114,30 @@ footer .wrap{padding:24px}
 .msg.me{background:#e0f2fe}
 #chatInput{flex:1;padding:10px;border-radius:10px;border:1px solid var(--ring)}
 #chatSend{padding:10px 14px;border-radius:10px;border:1px solid var(--ring);background:var(--primary);color:#fff;cursor:pointer}
+
+/* BOTTOM NAV (mobile only) */
+.bottomnav{display:none}
+
+/* ------- MOBILE RULES ------- */
+@media (max-width: 768px){
+  body{padding-bottom:76px} /* bottom nav için yer bırak */
+  .search{display:none}
+  .navlinks{display:none} /* üstteki klasik menüyü gizle */
+  .mobile-actions{display:flex}
+  .mobile-username{display:inline}
+  .avatar-btn{display:inline-flex;align-items:center;justify-content:center}
+
+  /* sağ üstte mobil menü + küçük ilan ekle butonu */
+  .mobile-add{display:inline-flex;background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff;padding:8px 10px;border-radius:10px;text-decoration:none}
+
+  /* alt menü */
+  .bottomnav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));background:#fff;border-top:1px solid var(--ring);z-index:50}
+  .bottomnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 10px;border-radius:10px;text-decoration:none;color:#111}
+  .bottomnav a.active{background:#eff6ff}
+
+  /* sadece mobilde mesaj balon rengi değişsin */
+  .msg.me{background:#dcfce7;border-color:#bbf7d0}
+}
 </style>
 </head>
 <body>
@@ -114,6 +147,7 @@ footer .wrap{padding:24px}
   <div class="wrap topnav-in">
     <a class="brand" href="home.html"><img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"></a>
     <div class="search"><input id="q" type="search" placeholder="İlanlarda ara..."></div>
+
     <div class="navlinks">
       <a class="btn home" href="home.html">🏠 Sayfa</a>
       <a class="btn msg" href="messages.html">💬 Mesajlar</a>
@@ -121,6 +155,18 @@ footer .wrap{padding:24px}
       <a class="btn add" href="ilan-ekle.html">➕ İlan Ekle</a>
       <a class="btn profile" href="profile.html">👤 Profil</a>
       <a class="btn logout" href="#" data-logout>🚪 Çıkış</a>
+    </div>
+
+    <!-- MOBILE actions (sağ üst) -->
+    <div class="mobile-actions">
+      <a class="mobile-add" href="ilan-ekle.html" aria-label="İlan Ekle">➕</a>
+      <span id="mobileUsername" class="mobile-username">@kullanici</span>
+      <button class="avatar-btn" id="mobMenuBtn" aria-haspopup="menu" aria-expanded="false">👤</button>
+      <div class="mobmenu" id="mobMenu" role="menu" aria-label="Hızlı menü">
+        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+        <a class="item" href="ilan-ekle.html" role="menuitem">➕ İlan Ekle</a>
+        <a class="item" href="#" role="menuitem" data-logout>🚪 Çıkış</a>
+      </div>
     </div>
   </div>
 </nav>
@@ -213,6 +259,13 @@ footer .wrap{padding:24px}
   </div>
 </footer>
 
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottomnav" aria-label="Alt menü">
+  <a href="home.html" class="active" aria-label="Ana sayfa">🏠<small>Ana sayfa</small></a>
+  <a href="messages.html" aria-label="Mesajlar">💬<small>Mesajlar</small></a>
+  <a href="notifications.html" aria-label="Bildirimler">🔔<small>Bildirimler</small></a>
+</nav>
+
 <!-- CANLI DESTEK BALONU -->
 <div class="chatfab">
   <div class="fab-label">💬 Canlı Destek</div>
@@ -231,31 +284,48 @@ footer .wrap{padding:24px}
 
 <!-- SAYFA BETİKLERİ -->
 <script type="module">
-  // Firebase Auth entegrasyonu
-  import { auth } from './js/firebase-config.js';
+  // Firebase Auth + Firestore (kullanıcı adı)
+  import { auth, db } from './js/firebase-config.js';
   import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+  import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
-  // Oturumu kalıcı yap (bazı tarayıcılarda gerekli olabilir)
-  (async () => {
-    try { await setPersistence(auth, browserLocalPersistence); } catch(_) {}
-  })();
+  // Oturumu kalıcı yap
+  (async () => { try { await setPersistence(auth, browserLocalPersistence); } catch(_) {} })();
 
-  // Oturum kontrolü: kullanıcı yoksa giriş sayfasına yönlendir
-  onAuthStateChanged(auth, (user) => {
+  const mobMenuBtn = document.getElementById('mobMenuBtn');
+  const mobMenu = document.getElementById('mobMenu');
+  const mobileUsername = document.getElementById('mobileUsername');
+
+  function closeMobMenu(){ if(mobMenu){ mobMenu.style.display='none'; mobMenuBtn?.setAttribute('aria-expanded','false'); } }
+  function toggleMobMenu(){ if(!mobMenu) return; const open = getComputedStyle(mobMenu).display !== 'none'; mobMenu.style.display = open? 'none':'block'; mobMenuBtn?.setAttribute('aria-expanded', open? 'false':'true'); }
+
+  mobMenuBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMobMenu(); });
+  document.addEventListener('click', (e)=>{ if(!mobMenu) return; if(!mobMenu.contains(e.target) && e.target !== mobMenuBtn){ closeMobMenu(); } });
+
+  // Oturum kontrolü ve kullanıcı adı
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       location.href = 'auth.html?next=home.html';
+      return;
+    }
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      const uname = data.username || (user.email ? user.email.split('@')[0] : 'kullanici');
+      if (mobileUsername) mobileUsername.textContent = '@' + uname;
+    } catch (_) {
+      if (mobileUsername) mobileUsername.textContent = '@kullanici';
     }
   });
 
-  // Çıkış butonu
-  const logoutBtn = document.querySelector('[data-logout]');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
+  // Çıkış (hem desktop, hem mobil dropdown)
+  document.querySelectorAll('[data-logout]').forEach(el=>{
+    el.addEventListener('click', async (e)=>{
       e.preventDefault();
       try { await signOut(auth); } catch(_) {}
       location.href = 'index.html';
     });
-  }
+  });
 </script>
 
 <script>
@@ -279,9 +349,6 @@ footer .wrap{padding:24px}
     chatInput.value='';
     chatBody.scrollTop = chatBody.scrollHeight;
   };
-
-  // Telif yılı
-  (document.getElementById('y')||{}).textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
