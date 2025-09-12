@@ -1,57 +1,232 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Giriş • Takas Çemberi</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Giriş / Kayıt • Takas Çemberi</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/auth.css">
+<style>
+:root{ --txt:#0a0a0a; --muted:#5b6b8f; --stroke:#e5e9f5; --ok:#22c55e; --err:#ef4444; }
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--txt);
+  background:linear-gradient(135deg,#e0f7fa,#f0f9ff,#ecfdf5,#fff0f6);
+  background-size:400% 400%; animation:gradmove 20s ease infinite;
+  min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:20px;
+}
+@keyframes gradmove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.card{width:min(640px,100%);background:#ffffffee;border:1px solid var(--stroke);border-radius:22px;box-shadow:0 30px 80px #0003;overflow:hidden;position:relative}
+.close{position:absolute;top:10px;right:10px;border:none;background:#ffffffc9;border:1px solid #eaeef6;padding:6px 10px;border-radius:10px;cursor:pointer;font-weight:800}
+.close:hover{transform:translateY(-1px);box-shadow:0 6px 14px #0002}
+.hd{display:flex;gap:12px;align-items:center;justify-content:center;padding:18px;border-bottom:1px solid var(--stroke);background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff}
+.hd img{height:34px}
+.tabs{display:flex;gap:8px;justify-content:center;padding:12px;border-bottom:1px solid var(--stroke);background:#f8fafc}
+.tab{padding:10px 14px;border-radius:999px;border:1px solid #e5e9f5;background:#fff;cursor:pointer;font-weight:800}
+.tab.active{background:linear-gradient(135deg,#06b6d4,#22c55e);color:#001019;border-color:transparent}
+.pane{display:none;padding:22px}
+.pane.active{display:block}
+.h1{font-size:20px;font-weight:800;margin:0 0 6px 0}
+.sub{margin:0 0 14px 0;color:#475569}
+label{display:grid;gap:6px;font-weight:600;margin-top:10px}
+input,select{padding:12px 14px;border:1px solid #c7d2fe;border-radius:12px;outline:none;background:#fff}
+input:focus,select:focus{border-color:#60a5fa}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:10px;margin-top:14px}
+.btn{padding:12px 16px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
+.btn.primary{background:linear-gradient(135deg,#06b6d4,#22c55e);color:#00101a}
+.btn.ghost{background:#eef2ff;color:#111827;border:1px solid #dbeafe}
+.btn.google{background:#fff;border:1px solid #e5e7eb}
+.link{background:none;border:none;text-decoration:underline;color:#475569;cursor:pointer}
+.note{font-size:13px;color:#64748b;margin-top:6px}
+.status{min-height:22px;margin-top:10px;font-size:14px;color:#64748b}
+.err{color:var(--err)} .ok{color:var(--ok)}
+.footer-mini{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--stroke);background:#fafbff;color:#64748b;font-size:13px}
+.footer-mini a{color:#64748b;text-decoration:none;font-weight:700}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <a class="brand" href="/"><span class="logo">⟳</span> Takas Çemberi</a>
-  </header>
+<div class="card">
+  <button class="close" id="btnClose">✕</button>
+  <div class="hd"><img src="seffaf.png" alt="logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!</div>
 
-  <main class="card">
-    <h1>YÜKLE, TAKASLA, KAZAN!</h1>
-    <p class="sub">Hızlı giriş yap veya yeni hesap oluştur.</p>
+  <!-- TAB BUTONLARI -->
+  <div class="tabs">
+    <button class="tab active" id="tabLogin">Giriş Yap</button>
+    <button class="tab" id="tabSignup">Kaydol</button>
+  </div>
 
-    <form id="authForm" class="form" autocomplete="on">
-      <label>E-posta
-        <input type="email" id="email" placeholder="ornek@eposta.com" required>
-      </label>
-      <label>Şifre
-        <input type="password" id="password" placeholder="••••••••" required minlength="6">
-      </label>
-
-      <div class="actions">
-        <button type="button" id="btnSignIn" class="btn primary">Giriş yap</button>
-        <button type="button" id="btnSignUp" class="btn ghost">Hesap oluştur</button>
-      </div>
-
-      <div class="row">
-        <button type="button" id="btnGoogle" class="btn google">Google ile devam et</button>
-        <button type="button" id="btnForgot" class="link">Şifremi unuttum</button>
-      </div>
-    </form>
-
-    <div id="verifyBox" class="verify hidden">
-      <p><b>E-posta doğrulaması gerekli.</b> Mail kutunu kontrol et. Gelmediyse:</p>
-      <button id="btnResend" class="btn small">Doğrulama e-postası gönder</button>
+  <!-- GİRİŞ -->
+  <section class="pane active" id="paneLogin">
+    <h2 class="h1">Giriş Yap</h2>
+    <p class="sub">Hızlı giriş yap veya şifreni sıfırla.</p>
+    <label>E-posta
+      <input type="email" id="li_email" placeholder="ornek@eposta.com" required>
+    </label>
+    <label>Şifre
+      <input type="password" id="li_pass" placeholder="••••••••" required>
+    </label>
+    <div class="actions">
+      <button class="btn primary" id="btnSignIn">Giriş yap</button>
+      <button class="btn ghost" id="btnForgot">Şifremi unuttum</button>
     </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn google" id="btnGoogle">Google ile devam et</button>
+    </div>
+    <div id="li_status" class="status"></div>
+  </section>
 
-    <div id="status" class="status"></div>
-  </main>
+  <!-- KAYIT -->
+  <section class="pane" id="paneSignup">
+    <h2 class="h1">Hesap Oluştur</h2>
+    <p class="sub">E-posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir.</p>
+    <div class="row">
+      <label>İsim Soyisim
+        <input type="text" id="su_name" placeholder="Adınız Soyadınız" required>
+      </label>
+      <label>Kullanıcı Adı
+        <input type="text" id="su_uname" placeholder="kullanici_adi" required>
+      </label>
+    </div>
+    <div class="row">
+      <label>Şehir
+        <input type="text" id="su_city" placeholder="Şehir" required>
+      </label>
+      <label>Telefon
+        <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
+      </label>
+    </div>
+    <label>E-posta
+      <input type="email" id="su_email" placeholder="ornek@eposta.com" required>
+    </label>
+    <div class="row">
+      <label>Şifre
+        <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
+      </label>
+      <label>Şifre (Tekrar)
+        <input type="password" id="su_pass2" placeholder="Tekrar" required>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btnSignUp">Kaydol</button>
+    </div>
+    <p class="note">Kayıt ile birlikte KVKK ve Kullanım Şartları'nı kabul etmiş olursunuz.</p>
+    <div id="su_status" class="status"></div>
+  </section>
 
-  <footer class="foot">
-    © <span id="y"></span> Takas Çemberi • <a href="/pages/privacy.html">Gizlilik</a> • <a href="/pages/terms.html">Kullanım</a>
-  </footer>
+  <div class="footer-mini">
+    <span>© <span id="y"></span> Takas Çemberi</span>
+    <a href="/">Ana sayfaya dön →</a>
+  </div>
 </div>
 
-<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
-<script type="module" src="js/firebase-config.js"></script>
-<script type="module" src="js/auth.js"></script>
+<script type="module">
+  import { app, auth, db } from './js/firebase-config.js';
+  import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    sendPasswordResetEmail,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut
+  } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+  import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+
+  const $ = (s)=>document.querySelector(s);
+  const liStatus = $('#li_status');
+  const suStatus = $('#su_status');
+  const tabLogin = $('#tabLogin');
+  const tabSignup = $('#tabSignup');
+  const paneLogin = $('#paneLogin');
+  const paneSignup = $('#paneSignup');
+
+  function setMsg(el, msg, type){ el.textContent = msg||''; el.className = 'status ' + (type||''); }
+  function errText(err){
+    const c = err?.code || '';
+    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase → Authentication → Settings → Authorized domains bölümüne site alan adını ekleyin.';
+    if(c.includes('email-already-in-use')) return 'Bu e-posta ile hesap zaten var.';
+    if(c.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
+    if(c.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
+    if(c.includes('too-many-requests')) return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
+    return 'Hata: ' + (err?.message || c);
+  }
+
+  function activate(which){
+    const toSignup = which === 'signup';
+    tabLogin.classList.toggle('active', !toSignup);
+    tabSignup.classList.toggle('active', toSignup);
+    paneLogin.classList.toggle('active', !toSignup);
+    paneSignup.classList.toggle('active', toSignup);
+  }
+
+  // X kapatma → Ana sayfa
+  document.getElementById('btnClose').addEventListener('click', ()=>{ location.href = '/'; });
+
+  // Sekmeler
+  tabLogin.addEventListener('click', ()=>activate('login'));
+  tabSignup.addEventListener('click', ()=>activate('signup'));
+
+  // URL hash ile doğrudan kayıt sekmesi
+  if(location.hash === '#signup') activate('signup');
+
+  // Giriş
+  $('#btnSignIn').addEventListener('click', async()=>{
+    const email = $('#li_email').value.trim();
+    const pass  = $('#li_pass').value;
+    if(!email || !pass) return setMsg(liStatus,'E-posta ve şifre gerekli.','err');
+    try{
+      const { user } = await signInWithEmailAndPassword(auth,email,pass);
+      if(!user.emailVerified){
+        await signOut(auth);
+        return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol edip tekrar giriş yap.','err');
+      }
+      setMsg(liStatus,'Giriş başarılı. Ana sayfaya gidiliyor…','ok');
+      location.href = '/';
+    }catch(e){ setMsg(liStatus, errText(e), 'err'); }
+  });
+
+  // Şifre sıfırla
+  $('#btnForgot').addEventListener('click', async()=>{
+    const email = $('#li_email').value.trim();
+    if(!email) return setMsg(liStatus,'Sıfırlama için e-posta gir.','err');
+    try{ await sendPasswordResetEmail(auth,email); setMsg(liStatus,'Sıfırlama e-postası gönderildi.','ok'); }
+    catch(e){ setMsg(liStatus, errText(e),'err'); }
+  });
+
+  // Google ile giriş
+  $('#btnGoogle').addEventListener('click', async()=>{
+    try{ const prov = new GoogleAuthProvider(); await signInWithPopup(auth, prov); location.href='/'; }
+    catch(e){ setMsg(liStatus, errText(e),'err'); }
+  });
+
+  // Kaydol
+  $('#btnSignUp').addEventListener('click', async()=>{
+    const name  = $('#su_name').value.trim();
+    const uname = $('#su_uname').value.trim();
+    const city  = $('#su_city').value.trim();
+    const phone = $('#su_phone').value.trim();
+    const email = $('#su_email').value.trim();
+    const p1    = $('#su_pass').value; const p2 = $('#su_pass2').value;
+    if(!name || !uname || !city || !phone || !email || !p1 || !p2) return setMsg(suStatus,'Lütfen tüm alanları doldurun.','err');
+    if(p1 !== p2) return setMsg(suStatus,'Şifreler aynı değil.','err');
+    if(p1.length < 6) return setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');
+    try{
+      const { user } = await createUserWithEmailAndPassword(auth,email,p1);
+      await setDoc(doc(db,'users',user.uid),{
+        name, username: uname, city, phone, email,
+        createdAt: serverTimestamp(), role: 'customer', isActive: true
+      });
+      await sendEmailVerification(user);
+      setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi; onaydan sonra giriş yapabilirsiniz.','ok');
+      window.scrollTo({top:0,behavior:'smooth'});
+      activate('login');
+    }catch(e){ setMsg(suStatus, errText(e), 'err'); }
+  });
+
+  // Yıl
+  document.getElementById('y').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
