@@ -32,13 +32,13 @@ body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--te
 .search input{width:300px;max-width:40vw;padding:10px;border-radius:8px;border:1px solid var(--ring)}
 .navlinks{margin-left:auto;display:flex;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;text-decoration:none;transition:.2s}
+.btn:hover{opacity:.9}
 .btn.home{background:linear-gradient(90deg,#3b82f6,#60a5fa);color:#fff}
 .btn.msg{background:linear-gradient(90deg,#10b981,#34d399);color:#fff}
 .btn.notif{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#fff}
 .btn.add{background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff}
 .btn.profile{background:linear-gradient(90deg,#ec4899,#f472b6);color:#fff}
 .btn.logout{background:linear-gradient(90deg,#ef4444,#f87171);color:#fff}
-.btn:hover{opacity:.9}
 
 /* HERO */
 .hero{position:relative;overflow:hidden;padding:64px 20px;text-align:center;background:linear-gradient(135deg,#e0f2fe,#ecfdf5)}
@@ -224,4 +224,64 @@ footer .wrap{padding:24px}
     <div class="msg">Merhaba, Takas Çemberi canlı desteğe hoş geldiniz 👋</div>
   </div>
   <div class="ft">
-    <input id="chatInput" type="text
+    <input id="chatInput" type="text" placeholder="Mesajınızı yazın...">
+    <button id="chatSend">Gönder</button>
+  </div>
+</div>
+
+<!-- SAYFA BETİKLERİ -->
+<script type="module">
+  // Firebase Auth entegrasyonu
+  import { auth } from './js/firebase-config.js';
+  import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+
+  // Oturumu kalıcı yap (bazı tarayıcılarda gerekli olabilir)
+  (async () => {
+    try { await setPersistence(auth, browserLocalPersistence); } catch(_) {}
+  })();
+
+  // Oturum kontrolü: kullanıcı yoksa giriş sayfasına yönlendir
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      location.href = 'auth.html?next=home.html';
+    }
+  });
+
+  // Çıkış butonu
+  const logoutBtn = document.querySelector('[data-logout]');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try { await signOut(auth); } catch(_) {}
+      location.href = 'index.html';
+    });
+  }
+</script>
+
+<script>
+  // Basit chat aç/kapat
+  const chatBtn = document.getElementById('openChat');
+  const chatWin = document.getElementById('chatWin');
+  const chatClose = document.getElementById('chatClose');
+  const chatSend = document.getElementById('chatSend');
+  const chatInput = document.getElementById('chatInput');
+  const chatBody = document.getElementById('chatBody');
+
+  if (chatBtn && chatWin) chatBtn.onclick = () => { chatWin.style.display = 'flex'; };
+  if (chatClose) chatClose.onclick = () => { chatWin.style.display = 'none'; };
+  if (chatSend) chatSend.onclick = () => {
+    const v = (chatInput.value || '').trim();
+    if (!v) return;
+    const div = document.createElement('div');
+    div.className = 'msg me';
+    div.textContent = v;
+    chatBody.appendChild(div);
+    chatInput.value='';
+    chatBody.scrollTop = chatBody.scrollHeight;
+  };
+
+  // Telif yılı
+  (document.getElementById('y')||{}).textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
