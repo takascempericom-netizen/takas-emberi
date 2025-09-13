@@ -109,6 +109,24 @@
     @media(min-width:880px){ .mbnav{display:none} }
 
     @media (prefers-reduced-motion: reduce){ .ownerStars, .ownerStars svg{animation:none !important} }
+
+    /* ===== Username seçimi modal (Google için tek seferlik) ===== */
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+      display:none;align-items:center;justify-content:center;z-index:1000;
+    }
+    .modal{width:min(520px,92vw);background:#fff;border:1px solid var(--stroke);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+    .modal .mhd{padding:14px 16px;border-bottom:1px solid var(--stroke);font-weight:800}
+    .modal .mbd{padding:16px;display:grid;gap:12px}
+    .modal .row{display:grid;gap:8px}
+    .modal input{
+      height:50px;border:1px solid var(--stroke);border-radius:12px;padding:0 14px;font-size:1rem
+    }
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end}
+    .modal .btn{height:46px;font-weight:700}
+    .helper{font-size:.9rem;color:var(--muted)}
+    .err{color:var(--err);font-weight:600}
+    .ok{color:var(--ok);font-weight:600}
   </style>
 </head>
 
@@ -195,14 +213,12 @@
       <!-- İlanlar -->
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
-        <div class="bd">
-          <!-- Sekmeler: hem mobil hem masaüstü, büyük -->
+        <div class="bd>
           <div class="list-tabs">
             <button class="pill active" data-target="colActive">Yayındakiler</button>
             <button class="pill" data-target="colPending">Onay Bekleyenler</button>
             <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
           </div>
-
           <div class="lists-triple">
             <div class="col show" id="colActive"><div class="listings" id="listActive"></div></div>
             <div class="col" id="colPending"><div class="listings" id="listPending"></div></div>
@@ -218,6 +234,26 @@
     <a href="messages.html">💬<small>Mesajlar</small></a>
     <a href="notifications.html">🔔<small>Bildirimler</small></a>
   </nav>
+
+  <!-- Username Seçimi Modal (Google için, tek seferlik) -->
+  <div class="modal-backdrop" id="unameModal">
+    <div class="modal">
+      <div class="mhd">Kullanıcı Adını Seç</div>
+      <div class="mbd">
+        <div class="helper">Bir defaya mahsus kullanıcı adını belirle. Sonradan değiştirilemez.</div>
+        <div class="row">
+          <input id="unameInput" placeholder="kullanici_adi" maxlength="20" />
+          <div class="helper" id="unameHint">• Harf/rakam . _ - kullanılabilir, 3–20 karakter.</div>
+          <div class="helper err" id="unameErr" style="display:none"></div>
+          <div class="helper ok"  id="unameOk"  style="display:none">Uygun!</div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="unameCancel">Vazgeç</button>
+          <button class="btn" id="unameSave">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Firebase (CDN, modular) -->
   <script type="module">
@@ -246,7 +282,7 @@
 
     const normalize = s => (s||'').toLowerCase()
       .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
-      .replace(/[^\w.]/g,"").replace(/^_+|_+$/g,"");
+      .replace(/[^\w._-]/g,"").replace(/^_+|_+$/g,"");
 
     function splitDisplay(name){
       if(!name) return {first:'', last:''};
@@ -254,8 +290,7 @@
       return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
     }
 
-    // e-postadan isim/soyisim çıkar: "isim.soyisim" / "isim_soyisim" / "isim-soyisim"
-    // tek parça ise (ör. "xfny") -> firstName= "Xfny"
+    // e-postadan isim/soyisim çıkar — yalnızca Google oturumunda fallback için
     function namesFromEmail(email){
       const local = (email||'').split('@')[0] || '';
       const norm  = normalize(local);
@@ -264,87 +299,28 @@
       if (parts.length >= 2){
         return { first: cap(parts[0]), last: cap(parts[1]) };
       }
-      if (norm){ return { first: cap(norm), last:'' }; }
       return { first:'', last:'' };
     }
 
-    // Maskeli username: "a.soyisim" (isim.soyisim/isim_soyisim/isim-soyisim) değilse local-part
-    function deriveMaskedUsername(email){
-      const local = (email||'').split('@')[0] || '';
-      const norm  = normalize(local);
-      if(!norm) return 'user';
-      const parts = norm.split(/[._-]+/).filter(Boolean);
-      if (parts.length >= 2){
-        const f = parts[0], l = parts[1];
-        if(f && l) return `${f[0]}.${l}`;
-      }
-      return norm;
+    // provider kontrolü
+    const isGoogle = (user)=> (user?.providerData||[]).some(p=>p.providerId==='google.com');
+    const isPassword = (user)=> (user?.providerData||[]).some(p=>p.providerId==='password');
+
+    // username rezerve et (usernames/{uname}) + users/{uid}.username = uname
+    async function reserveAndSaveUsername(uname, uid){
+      const refName = doc(db, "usernames", uname);
+      await runTransaction(db, async (tx)=>{
+        const s = await tx.get(refName);
+        if (s.exists()) throw new Error('taken');
+        tx.set(refName, { ownerUid: uid, createdAt: Date.now() });
+        tx.set(doc(db,"users",uid), { username: uname }, { merge:true });
+      });
     }
 
-    // username rezervasyonu (başarısız olursa yine de users.username yaz)
-    async function reserveUsernameOrFallback(base, uid){
-      let candidate = base || ('user'+Math.floor(Math.random()*10000));
-      let i=0;
-      while(i<50){
-        const ref = doc(db,"usernames",candidate);
-        try{
-          await runTransaction(db, async (tx)=>{
-            const snap = await tx.get(ref);
-            if(snap.exists()){ throw new Error("taken"); }
-            tx.set(ref,{ ownerUid: uid, createdAt: Date.now() });
-          });
-          return candidate; // başarı
-        }catch(_){
-          i++; candidate = `${base}-${i}`;
-        }
-      }
-      // rezervasyon başarısızsa rastgele fallback
-      return base + "-" + Math.floor(1000 + Math.random()*9000);
-    }
-
-    async function ensureUserDocAndUsername(user){
-      const uref = doc(db,"users", user.uid);
-      const snap = await getDoc(uref);
-
-      // username
-      let username = (snap.exists() && snap.data().username) ? snap.data().username : '';
-      if (!username){
-        const base = deriveMaskedUsername(user.email||'');
-        let reserved = base;
-        try{
-          reserved = await reserveUsernameOrFallback(base, user.uid);
-        }catch(_){ /* yok say */ }
-        username = reserved;
-        try{
-          await runTransaction(db, async (tx)=>{ tx.set(uref,{ username: reserved },{merge:true}); });
-        }catch(_){
-          // usernames koleksiyonu kuralları engellese bile en azından users.username yazalım
-          await setDoc(uref, { username: reserved }, { merge:true });
-        }
-      }
-
-      // isim/soyisim/email — eksikse tamamla (Google + e-posta fallback, e-posta kaydında displayName boş olabilir)
-      const cur = snap.exists() ? snap.data() : {};
-      const dn = splitDisplay(user.displayName);
-      const em = namesFromEmail(user.email||'');
-      const payload = {};
-      if (!cur.firstName) payload.firstName = dn.first || em.first || '';
-      if (!cur.lastName)  payload.lastName  = dn.last  || em.last  || '';
-      if (!cur.email)     payload.email     = user.email || '';
-
-      if (Object.keys(payload).length) await setDoc(uref, payload, { merge:true });
-
-      return {
-        username,
-        first: payload.firstName ?? cur.firstName ?? dn.first ?? em.first ?? '',
-        last:  payload.lastName  ?? cur.lastName  ?? dn.last  ?? em.last  ?? '',
-        email: user.email || ''
-      };
-    }
-
-    function fillFields(data={}, authUser=null, username=''){
+    // isim/soyisim/email alanlarını doldur (kural: password hesabında mailden isim türetme YOK)
+    function fillFields(data={}, authUser=null, username='', useEmailFallback=false){
       const dn  = splitDisplay(authUser?.displayName);
-      const em  = namesFromEmail(authUser?.email || '');
+      const em  = useEmailFallback ? namesFromEmail(authUser?.email || '') : {first:'', last:''};
       const first = data.firstName || data.ad || dn.first || em.first || '';
       const last  = data.lastName  || data.soyad || dn.last  || em.last  || '';
       const email = data.email || authUser?.email || '';
@@ -397,24 +373,111 @@
       activate('colActive');
     })();
 
-    // ---- Auth akışı: anında ön doldurma + kesin doldurma ----
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ fillFields({}, null, ''); return; }
+    // ===== Username Modal kontrol =====
+    const modal = $('#unameModal');
+    const unameInput = $('#unameInput');
+    const unameErr = $('#unameErr');
+    const unameOk  = $('#unameOk');
+    const showModal = (val='')=>{
+      unameInput.value = val;
+      unameErr.style.display='none'; unameOk.style.display='none';
+      modal.style.display='flex';
+      unameInput.focus();
+    };
+    const hideModal = ()=>{ modal.style.display='none'; };
 
-      // Ön doldurma (Firestore beklemeden)
-      const preDN = splitDisplay(user.displayName || '');
-      const preEM = namesFromEmail(user.email || '');
-      fillFields({ firstName: preDN.first || preEM.first, lastName: preDN.last || preEM.last, email: user.email }, user, '');
+    function suggestFromEmail(email){
+      const local = (email||'').split('@')[0] || '';
+      let s = normalize(local);
+      s = s.replace(/[^a-z0-9._-]/g,'').slice(0,20);
+      if(s.length<3) s = 'user'+Math.floor(Math.random()*1000);
+      return s;
+    }
+    function validateUname(u){
+      if(!/^[a-z0-9._-]{3,20}$/.test(u)) return '3–20 karakter; harf/rakam . _ - kullanılabilir.';
+      if(/^[._-]/.test(u) || /[._-]$/.test(u)) return 'Başta/sonda . _ - olamaz.';
+      if(/(\.\.|__|--)/.test(u)) return 'Ardışık ayraç kullanmayın.';
+      return '';
+    }
+
+    async function checkAvailable(u){
+      const s = await getDoc(doc(db,"usernames",u));
+      return !s.exists();
+    }
+
+    $('#unameCancel').addEventListener('click', hideModal);
+    $('#unameSave').addEventListener('click', async ()=>{
+      const raw = normalize(unameInput.value);
+      const err = validateUname(raw);
+      if(err){ unameErr.textContent = err; unameErr.style.display='block'; unameOk.style.display='none'; return; }
+      unameErr.style.display='none';
+      try{
+        const available = await checkAvailable(raw);
+        if(!available){ unameErr.textContent='Bu kullanıcı adı alınmış.'; unameErr.style.display='block'; return; }
+        // auth.user burada mevcut; onAuthStateChanged içinde bağlanacak
+        const u = auth.currentUser;
+        await reserveAndSaveUsername(raw, u.uid);
+        unameOk.style.display='block';
+        setTimeout(()=>{ hideModal(); }, 400);
+        // rozet ve inputu güncelle
+        setText('#usernameBadge','@'+raw);
+        setInput('#inpUsername', raw);
+      }catch(e){
+        unameErr.textContent='Kaydedilemedi. Tekrar deneyin.'; unameErr.style.display='block';
+      }
+    });
+
+    // ---- Auth akışı ----
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ fillFields({}, null, '', false); return; }
 
       try{
-        const ensured = await ensureUserDocAndUsername(user);
-        const snap = await getDoc(doc(db,'users',user.uid));
+        const uref = doc(db,'users', user.uid);
+        const snap = await getDoc(uref);
         const data = snap.exists() ? snap.data() : {};
-        fillFields(data, user, ensured.username);
+
+        // Kullanıcı adı:
+        if (data.username){
+          setText('#usernameBadge','@'+data.username);
+          setInput('#inpUsername', data.username);
+        } else if (isGoogle(user)) {
+          // Google ile giriş: kullanıcıya bir defalık seçim yaptır
+          const suggestion = suggestFromEmail(user.email || '');
+          showModal(suggestion);
+        } else {
+          // email/password kaydı: username zaten kayıt akışında belirlenmiş olmalı; yoksa boş bırak
+          setText('#usernameBadge','@—');
+          setInput('#inpUsername','');
+        }
+
+        // İSİM/SOYİSİM DOLDURMA
+        // Google: displayName varsa kullan; yoksa e-postadan türet.
+        // Password: SADECE Firestore'daki firstName/lastName'ı göster (mailden türetme YOK).
+        const useEmailFallback = isGoogle(user);
+        fillFields(data, user, data.username || '', useEmailFallback);
+
+        // E-posta alanı
+        if (!data.email && user.email){
+          await setDoc(uref, { email: user.email }, { merge:true });
+        }
+
+        // Eğer Google ve first/last boşsa, displayName/email'den bir kere yaz (kayıt için)
+        if (isGoogle(user) && (!data.firstName || !data.lastName)){
+          const dn = splitDisplay(user.displayName);
+          const em = namesFromEmail(user.email||'');
+          const payload = {};
+          if (!data.firstName) payload.firstName = dn.first || em.first || '';
+          if (!data.lastName)  payload.lastName  = dn.last  || em.last  || '';
+          if (Object.keys(payload).length){
+            await setDoc(uref, payload, { merge:true });
+          }
+        }
+
       }catch(e){
         console.error('Profil doldurma hatası:', e);
-        const fallbackU = deriveMaskedUsername(user.email || '');
-        fillFields({ firstName: preDN.first || preEM.first, lastName: preDN.last || preEM.last, email: user.email, username: fallbackU }, user, fallbackU);
+        // Yine de ekranda minimum bilgiyi göster
+        setText('#usernameBadge','@—');
+        fillFields({}, user, '', isGoogle(user));
       }
     });
   </script>
