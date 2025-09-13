@@ -15,14 +15,12 @@
       --card:rgba(255,255,255,.86); --card2:rgba(255,255,255,.94);
       --mbnav-h:72px;
 
-      /* 3D yıldız renkleri (SİYAH YOK) */
-      --star-fill:#ffffff;            /* beyaz */
-      --star-stroke:#b91c1c;          /* kırmızı kontur */
-      --star-glow:rgba(239,68,68,.85);/* kırmızı parıltı */
+      /* Flag-Flip yıldız renkleri (beyaz↔️kırmızı) */
+      --star-fill:#ffffff;
+      --star-stroke:#b91c1c;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    html,body{overflow-x:hidden}
+    html,body{height:100%;overflow-x:hidden}
     body{
       margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);
       background:linear-gradient(120deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5));
@@ -44,6 +42,7 @@
     nav.mobileTop{display:flex;gap:8px}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
     .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
+    @media(min-width:880px){nav.desktop{display:flex}nav.mobileTop{display:none}}
 
     /* GRID ve sıralama */
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
@@ -53,8 +52,6 @@
     #secListings{order:4}
 
     @media(min-width:880px){
-      nav.desktop{display:flex}
-      nav.mobileTop{display:none}
       .grid{
         grid-template-columns:1fr 1fr;
         grid-template-areas:
@@ -87,50 +84,20 @@
     .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
     .pwgrid input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
 
-    /* 3D YILDIZLAR – SADECE 5 ADET */
-    .stars{display:inline-flex;gap:10px;filter:drop-shadow(0 2px 3px rgba(239,68,68,.35)) drop-shadow(0 10px 18px rgba(239,68,68,.25))}
-    .stars svg{width:30px;height:30px}
-    .ownerStars{padding:6px 0;margin-bottom:8px}
-    @keyframes wave{0%{transform:translateY(0) scale(1)}25%{transform:translateY(-5px) scale(1.02)}50%{transform:translateY(0) scale(1)}75%{transform:translateY(5px) scale(.98)}100%{transform:translateY(0) scale(1)}}
-    .stars svg:nth-child(1){animation:wave 2.2s ease-in-out -.0s infinite}
-    .stars svg:nth-child(2){animation:wave 2.2s ease-in-out -.2s infinite}
-    .stars svg:nth-child(3){animation:wave 2.2s ease-in-out -.4s infinite}
-    .stars svg:nth-child(4){animation:wave 2.2s ease-in-out -.6s infinite}
-    .stars svg:nth-child(5){animation:wave 2.2s ease-in-out -.8s infinite}
+    /* === Flag-Flip 5 yıldız (tek set) === */
+    .ownerStars{display:flex;gap:10px;justify-content:flex-start;margin-bottom:8px;
+      animation:starColorFlip 3.6s ease-in-out infinite}
+    .ownerStars svg{width:34px;height:34px}
+    @keyframes wave{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)}75%{transform:translateY(4px)}}
+    .ownerStars svg:nth-child(1){animation:wave 2.2s ease-in-out 0s infinite}
+    .ownerStars svg:nth-child(2){animation:wave 2.2s ease-in-out .2s infinite}
+    .ownerStars svg:nth-child(3){animation:wave 2.2s ease-in-out .4s infinite}
+    .ownerStars svg:nth-child(4){animation:wave 2.2s ease-in-out .6s infinite}
+    .ownerStars svg:nth-child(5){animation:wave 2.2s ease-in-out .8s infinite}
     @keyframes starColorFlip{
-      0%  { --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
-      50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; --star-glow:rgba(239,68,68,.9); }
-      100%{ --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
-    }
-    .ownerStars .stars{animation:starColorFlip 3.6s ease-in-out infinite}
-
-    /* İLANLAR */
-    .lists-triple{display:grid;gap:12px}
-    .col{background:rgba(255,255,255,.88);border:1px solid var(--stroke);border-radius:14px;padding:12px}
-    .col h3{margin:6px 0 10px}
-    .listings{display:grid;grid-template-columns:1fr;gap:12px}
-    .listing{border:1px solid var(--stroke);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.98)}
-    .listing .thumb{height:120px;background:#f3f6ff;display:grid;place-items:center}
-    .listing .thumb img{width:100%;height:100%;object-fit:cover}
-    .listing .meta{padding:10px 12px;display:grid;gap:6px}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--stroke);border-radius:999px;font-size:.8rem;color:#334155;background:#ffffff}
-    .badge.ok{border-color:#1b5e32;color:#166534;background:#e8f9ef}
-    .badge.warn{border-color:#6b4a0a;color:#92400e;background:#fff4e5}
-    .badge.err{border-color:#5b1a1a;color:#7f1d1d;background:#ffecec}
-
-    /* MOBİL: kategori butonları */
-    .mobile-tabs{display:flex;gap:8px;margin-bottom:10px}
-    .pill{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;border:1px solid var(--stroke);background:#fff;color:#0b1020;cursor:pointer}
-    .pill.active{background:#0b1020;color:#fff}
-    @media(min-width:880px){
-      .mobile-tabs{display:none}
-      .lists-triple{grid-template-columns:repeat(3,1fr)}
-      .lists-triple .col{display:block}
-    }
-    @media(max-width:879px){
-      .lists-triple{grid-template-columns:1fr}
-      .lists-triple .col{display:none}
-      .lists-triple .col.show{display:block}
+      0%  { --star-fill:#ffffff; --star-stroke:#ffffff; }
+      50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; }
+      100%{ --star-fill:#ffffff; --star-stroke:#ffffff; }
     }
 
     /* ALT BAR (mobil) */
@@ -138,6 +105,11 @@
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
     @media(min-width:880px){ .mbnav{display:none} }
+
+    /* Animasyon erişilebilirliği */
+    @media (prefers-reduced-motion: reduce){
+      .ownerStars, .ownerStars svg{animation:none !important}
+    }
   </style>
 </head>
 
@@ -177,7 +149,7 @@
               <h2 id="displayName" style="margin:0;font-size:1.4rem">—</h2>
               <span class="badge" id="usernameBadge">@—</span>
 
-              <!-- 📷 Resim ekleme/değiştirme -->
+              <!-- 📷 Resim ekleme/değiştirme butonu -->
               <div class="row" style="margin-top:8px">
                 <label class="btn" style="padding:8px 12px">
                   📷 Resim Ekle / Değiştir
@@ -185,10 +157,10 @@
                 </label>
               </div>
 
-              <div class="muted" id="publicInfo">İsim, soyisim, telefon ve e-posta aşağıda görünür.</div>
+              <div class="muted">İsim, soyisim, telefon ve e-posta aşağıda görünür.</div>
             </div>
           </div>
-          <div class="spacer"></div>
+
           <div class="fields">
             <div class="field"><label>İsim</label><input id="inpFirst" disabled></div>
             <div class="field"><label>Soyisim</label><input id="inpLast" disabled></div>
@@ -213,57 +185,18 @@
         </div>
       </section>
 
-      <!-- Puanlama -->
+      <!-- Puanlama (Sadece 5 adet Flag-Flip yıldız) -->
       <section id="secRating" class="card">
         <div class="hd">Puanlama</div>
         <div class="bd">
-          <!-- SADECE 5 DALGALANAN 3D YILDIZ -->
-          <div id="ownerStarsWrap" class="ownerStars">
-            <div class="stars" id="ownerStars">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <defs>
-                  <linearGradient id="starGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="var(--star-fill)"/>
-                    <stop offset="55%" stop-color="var(--star-fill)"/>
-                    <stop offset="56%" stop-color="rgba(255,255,255,.7)"/>
-                    <stop offset="100%" stop-color="var(--star-fill)"/>
-                  </linearGradient>
-                </defs>
-                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
-                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
-              </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
-                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
-              </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
-                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
-              </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
-                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
-              </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
-                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
-              </svg>
-            </div>
+          <div class="ownerStars" id="ownerStars">
+            <!-- 5 adet -->
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
           </div>
-
-          <div class="stars readonly" id="avgStars" aria-label="Ortalama yıldızlar">
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
-          </div>
-          <div class="muted" id="avgText">0/5 • 0 oy</div>
         </div>
       </section>
 
@@ -271,12 +204,14 @@
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
         <div class="bd">
+          <!-- MOBİL: 3 kategori BUTON -->
           <div class="mobile-tabs">
             <button class="pill active" data-target="colActive">Yayındakiler</button>
             <button class="pill" data-target="colPending">Onay Bekleyenler</button>
             <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
           </div>
 
+          <!-- Masaüstü: 3 sütun | Mobil: yalnız seçilen gösterilir -->
           <div class="lists-triple">
             <div class="col show" id="colActive">
               <h3>Yayındakiler</h3>
@@ -296,7 +231,7 @@
     </div>
   </div>
 
-  <!-- MOBİL alt bar -->
+  <!-- MOBİL alt bar: sabit (3 ikon) -->
   <nav class="mbnav">
     <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
@@ -307,9 +242,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ***** SENİN VERDİĞİN CONFIG *****
+    // ***** VERDİĞİN CONFIG *****
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -322,81 +257,110 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // KISA SEÇİCİLER
+    // ----------------- UTIL -----------------
     const $  = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
+    function setInput(sel, val){ const el=$(sel); if(el) el.value = val || ''; }
+    function setText(sel, val){ const el=$(sel); if(el) el.textContent = (val && String(val).trim()) ? val : '—'; }
 
-    // URL & localStorage fallback (yedek)
-    const qp = new URLSearchParams(location.search);
-    function fromQuery() {
-      return {
-        firstName: qp.get('first') || '',
-        lastName:  qp.get('last')  || '',
-        username:  qp.get('username') || '',
-        phone:     qp.get('phone') || '',
-        email:     qp.get('email') || ''
-      };
-    }
-    function fromLocal() {
-      try{ const raw = localStorage.getItem('tc_user_record'); return raw ? JSON.parse(raw) : null; }
-      catch(e){ return null; }
+    // Türkçe karakter ve izinli karakter normalizasyonu
+    const normalize = s => (s||'').toLowerCase()
+      .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
+      .replace(/[^\w.]/g,"")           // harf, rakam, altçizgi, nokta
+      .replace(/^_+|_+$/g,"");         // baş/son altçizgileri temizle
+
+    // Gmail için . ve + etiketi kaldırma (local-part bazlı tekillik)
+    function gmailLocalBase(local){
+      const plusCut = local.split('+')[0] || local;
+      return plusCut.replace(/\./g,'');
     }
 
-    // Ekrana bas
-    function setInput(id, val){ const el = $(id); if(el) el.value = val || ''; }
-    function setText(id, val){ const el = $(id); if(el) el.textContent = (val && String(val).trim()) ? val : '—'; }
-
-    // Auth displayName → isim/soyisim tahmini
-    function namesFromDisplay(displayName){
-      if(!displayName) return {first:'', last:''};
-      const p = displayName.trim().split(/\s+/);
-      return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
+    // a.soyisim / s.isim / tek parça
+    function deriveMaskedUsername(email){
+      const local = (email||'').split('@')[0] || '';
+      const norm  = normalize(local);
+      if (norm.includes('.')){
+        const [p1,p2] = norm.split('.');
+        if(p1 && p2){
+          // varsayılan: a.soyisim
+          return `${p1[0]}.${p2}`;
+        }
+      }
+      // tek parça ya da ayrışmadıysa:
+      return norm;
     }
 
-    // Doldurma
-    function fillFields(src={}, authUser=null){
-      const first = src.firstName || src.ad || src.name || '';
-      const last  = src.lastName  || src.soyad || src.surname || '';
-      const usern = src.username  || src.kullaniciAdi || src.userName || '';
-      const phone = src.phone     || src.telefon || src.gsm || '';
-      const email = src.email     || (authUser?.email || '');
+    // Firestore'da usernames/{username} rezerve ederek tekillik
+    async function reserveUsername(base, uid){
+      let candidate = base || 'user';
+      let i = 0;
+      while(true){
+        const ref = doc(db,"usernames",candidate);
+        try{
+          await runTransaction(db, async (tx)=>{
+            const snap = await tx.get(ref);
+            if (snap.exists()){ throw new Error("taken"); }
+            tx.set(ref,{ ownerUid: uid, createdAt: Date.now() });
+          });
+          return candidate;
+        }catch(_){
+          i++; candidate = `${base}-${i}`;
+        }
+      }
+    }
 
-      const dn = namesFromDisplay(authUser?.displayName);
-      const f = first || dn.first;
-      const l = last  || dn.last;
+    // İlk Google oturumunda username set et (users/{uid}.username yoksa)
+    async function ensureUsername(user){
+      const uref = doc(db,"users",user.uid);
+      const usnap = await getDoc(uref);
+      if (usnap.exists() && usnap.data().username){ return usnap.data().username; }
 
-      setText('#displayName', `${f||''} ${l||''}`.trim() || '—');
-      setText('#usernameBadge', usern ? '@'+usern : '@—');
-      setInput('#inpFirst', f||'');
-      setInput('#inpLast',  l||'');
-      setInput('#inpUsername', usern||'');
-      setInput('#inpPhone', phone||'');
-      setInput('#inpEmail', email||'');
+      const email = user.email || '';
+      let base = deriveMaskedUsername(email);
+
+      // Gmail için tekillikte noktaları ve + etiketi yoksay
+      const gmailBase = gmailLocalBase(base);
+
+      const reserved = await reserveUsername(gmailBase || base, user.uid);
+      await runTransaction(db, async (tx)=>{ tx.set(uref, { username: reserved }, { merge:true }); });
+      return reserved;
+    }
+
+    // İsim/soyisim, telefon, e-posta doldurma (kimlik gizliliği korunur)
+    function fillFields(src={}, authUser=null, username=''){
+      // isim/soyisim alanını dolduralım ama gerçek ad yaymayalım: email local-part’tan tahmin (isteğe bağlı), yoksa "—"
+      const email  = src.email || authUser?.email || '';
+      const first  = src.firstName || src.ad || '';
+      const last   = src.lastName  || src.soyad || '';
+      const phone  = src.phone     || src.telefon || src.gsm || '';
+      const uname  = username || src.username || '';
+
+      // Görsel alanlar
+      setText('#displayName', (first || last) ? `${first} ${last}`.trim() : '—');
+      setText('#usernameBadge', uname ? '@'+uname : '@—');
+      setInput('#inpFirst', first || '');
+      setInput('#inpLast',  last  || '');
+      setInput('#inpUsername', uname || '');
+      setInput('#inpPhone', phone || '');
+      setInput('#inpEmail', email || '');
     }
 
     // Avatar (localStorage kalıcı)
     const AVATAR_KEY = 'tc_profile_avatar';
-    const avatarImg = $('#avatar');
     (function initAvatar(){
+      const img = $('#avatar');
       const saved = localStorage.getItem(AVATAR_KEY);
-      avatarImg.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
+      img.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
       $('#fileAvatar')?.addEventListener('change', (e)=>{
         const f = e.target.files?.[0]; if(!f) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const data = reader.result;
-          avatarImg.src = data;
-          try{ localStorage.setItem(AVATAR_KEY, data); }catch(_){}
-        };
-        reader.readAsDataURL(f);
+        const r = new FileReader();
+        r.onload = ()=>{ img.src = r.result; try{ localStorage.setItem(AVATAR_KEY, r.result); }catch(_){} };
+        r.readAsDataURL(f);
       });
     })();
 
     // Çıkış
-    async function doLogout(){
-      try { await signOut(auth); } catch(_) {}
-      location.href = 'auth.html';
-    }
+    async function doLogout(){ try{ await signOut(auth); }catch(_){} location.href='auth.html'; }
     $('#btnLogout')?.addEventListener('click', doLogout);
     $('#btnLogoutTop')?.addEventListener('click', doLogout);
 
@@ -415,40 +379,30 @@
       });
     })();
 
-    // Ortalama yıldız (statik örnek)
-    function setAvgStars(val){
-      const paths = $('#avgStars').querySelectorAll('path');
-      paths.forEach((p,i)=> p.setAttribute('fill', i<val ? '#b91c1c' : 'none'));
-      $('#avgText').textContent = `${val}/5 • 0 oy`;
-    }
-    setAvgStars(0);
-
-    // --------- ANA: Firestore'dan oku + fallback ----------
+    // ---------- Auth akışı ----------
     onAuthStateChanged(auth, async (user) => {
       if (!user){
-        // Auth yoksa: URL -> localStorage -> boş
-        const rec = fromQuery() || fromLocal() || {};
-        fillFields(rec, null);
+        // Giriş yoksa alanları boş bırak (mevcut davranış korunur)
+        fillFields({}, null, '');
         return;
       }
       try{
-        const ref = doc(db, 'users', user.uid);
-        const snap = await getDoc(ref);
+        // 1) Kullanıcı adı yoksa e-postadan türet + rezerve et (maskeli: a.soyisim / c.isim / tek parça)
+        const uname = await ensureUsername(user);
+
+        // 2) users/{uid} oku, varsa alanlarla doldur
+        const refUser = doc(db,'users', user.uid);
+        const snap = await getDoc(refUser);
         if (snap.exists()){
-          fillFields(snap.data(), user);
-        } else {
-          // Firestore dokümanı yok → Auth + fallback
-          fillFields({}, user);
-          const rec = fromQuery() || fromLocal() || {};
-          // Auth'tan eksik kalanları URL/local ile tamamla
-          fillFields({...rec, email: rec.email || user.email}, user);
+          fillFields(snap.data(), user, uname);
+        }else{
+          // doküman yoksa Auth bilgileri + username
+          fillFields({ email: user.email, username: uname }, user, uname);
         }
       }catch(err){
-        console.error('Firestore read error:', err);
-        // Hata olursa Auth + fallback yine çalışsın
-        fillFields({}, user);
-        const rec = fromQuery() || fromLocal() || {};
-        fillFields({...rec, email: rec.email || user.email}, user);
+        console.error('Profil doldurma hatası:', err);
+        // hata olsa da en azından username rozetini göster
+        fillFields({ email: user.email }, user, '');
       }
     });
   </script>
