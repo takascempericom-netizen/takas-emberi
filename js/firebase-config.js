@@ -1,11 +1,4 @@
-// Firebase yapılandırma ayarları
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
-
-// Senin proje config'in
-const firebaseConfig = {
+window.firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
@@ -13,9 +6,3 @@ const firebaseConfig = {
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
-
-// Firebase başlat
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
