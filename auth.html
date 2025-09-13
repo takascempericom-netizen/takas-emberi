@@ -50,6 +50,7 @@
     .footer-mini{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--stroke);background:#fafbff;color:#64748b;font-size:13px}
     .footer-mini a{color:#64748b;text-decoration:none;font-weight:700}
     @media (max-width:520px){.row{grid-template-columns:1fr}}
+
     /* TERMS MODAL */
     .terms-back{position:fixed;inset:0;background:#0b102080;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
     .terms{width:min(720px,100%);background:#fff;border-radius:18px;box-shadow:0 30px 80px #0004;overflow:hidden;border:1px solid var(--stroke)}
@@ -72,9 +73,9 @@
   <!-- Giriş -->
   <section class="pane active" id="paneLogin">
     <h2 class="h1">Giriş Yap</h2>
-    <label>E-posta
+    <label>E-posta veya Kullanıcı Adı
       <div class="input">
-        <input type="email" id="li_email" placeholder="ornek@eposta.com" required>
+        <input type="text" id="li_email" placeholder="eposta@ornek.com veya kullanici_adi" required>
       </div>
     </label>
     <label>Şifre
@@ -166,9 +167,10 @@
   import {
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     sendEmailVerification, sendPasswordResetEmail,
-    GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence
+    GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence,
+    fetchSignInMethodsForEmail
   } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-  import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+  import { doc, setDoc, serverTimestamp, getDocs, query, where, collection, limit } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
   const $ = (s)=>document.querySelector(s);
   const liStatus = $('#li_status');
@@ -180,13 +182,15 @@
 
   function setMsg(el,msg,type){ el.textContent=msg||''; el.className='status '+(type||''); }
   function errText(err){
-    const c=err?.code||'';
+    const c=(err?.code||'') + ' ' + (err?.message||'');
     if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alanını ekleyin.';
     if(c.includes('email-already-in-use')) return 'Bu e-posta ile hesap zaten var.';
-    if(c.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
+    if(c.includes('invalid-credential')) return 'E-posta/kullanıcı adı veya şifre hatalı.';
     if(c.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
     if(c.includes('too-many-requests')) return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
-    return 'Hata: '+(err?.message||c);
+    if(c.includes('invalid-continue-uri')) return 'Devam URL’si geçersiz ya da eksik.';
+    if(c.includes('unauthorized-continue-uri')) return 'Devam URL domaini yetkili değil. Firebase → Authorized domains’e ekleyin.';
+    return 'Hata: '+(err?.message||err?.code||'bilinmeyen');
   }
 
   function activate(tab){
@@ -208,8 +212,6 @@
   const svgEyeOff = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-6.94"></path><path d="M23 12s-2-4-6-6"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
   function setEye(btn, visible){ btn.innerHTML = visible ? svgEyeOff : svgEye; btn.setAttribute('aria-pressed', String(visible)); }
   document.querySelectorAll('[data-toggle]').forEach(b=> setEye(b,false));
-
-  // Toggle göz / clear
   document.addEventListener('click',(e)=>{
     const t=e.target.closest('[data-toggle]');
     if(t){ const inp=$(t.getAttribute('data-toggle')); if(!inp) return; const toText = inp.type==='password'; inp.type = toText ? 'text':'password'; setEye(t, toText); }
@@ -227,25 +229,88 @@
   // Kalıcı oturum (auto-redirect yok)
   try{ await setPersistence(auth, browserLocalPersistence); }catch{}
 
-  // Giriş (email/şifre)
-  $('#btnSignIn').addEventListener('click',async()=>{
-    const email=$('#li_email').value.trim(), pass=$('#li_pass').value;
-    if(!email||!pass) return setMsg(liStatus,'E-posta ve şifre gerekli.','err');
-    try{
-      const {user}=await signInWithEmailAndPassword(auth,email,pass);
-      if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol et.','err');}
+  // Giriş (kullanıcı adı veya e-posta + şifre)
+  $('#btnSignIn').addEventListener('click', async () => {
+    const loginId = $('#li_email').value.trim();   // e-posta veya kullanıcı adı
+    const pass = $('#li_pass').value;
+    if (!loginId || !pass) return setMsg(liStatus, 'E-posta/kullanıcı adı ve şifre gerekli.', 'err');
+
+    // 1) Kullanıcı adı girildiyse önce e-postayı bul
+    let email = loginId;
+    if (!loginId.includes('@')) {
+      try {
+        const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          return setMsg(liStatus, 'Bu kullanıcı adına bağlı bir hesap bulunamadı.', 'err');
+        }
+        email = snap.docs[0].data().email || '';
+        if (!email) return setMsg(liStatus, 'Bu kullanıcı adına bağlı e-posta bulunamadı.', 'err');
+      } catch (_) {
+        return setMsg(liStatus, 'Kullanıcı adı çözümlenemedi. E-posta ile deneyin.', 'err');
+      }
+    }
+
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, pass);
+      if (!user.emailVerified) {
+        await signOut(auth);
+        return setMsg(liStatus, 'E-posta doğrulanmadı. Mail kutunu/spam klasörünü kontrol et.', 'err');
+      }
       go();
-    }catch(e){setMsg(liStatus,errText(e),'err');}
+    } catch (e) {
+      if ((e.code || '').includes('invalid-credential')) {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (!methods || methods.length === 0) {
+            return setMsg(liStatus, 'Bu e-posta ile kayıtlı hesap bulunamadı.', 'err');
+          }
+          if (!methods.includes('password')) {
+            return setMsg(liStatus, 'Bu hesap parola ile giriş yapmıyor. Google ile giriş yapın veya hesabınıza parola ekleyin.', 'err');
+          }
+          return setMsg(liStatus, 'Şifre hatalı görünüyor. Tekrar deneyin.', 'err');
+        } catch (_e) {
+          // göz ardı edip genel hata verelim
+        }
+      }
+      setMsg(liStatus, errText(e), 'err');
+    }
   });
 
-  // Şifre sıfırlama (bu sayfaya döndür)
-  $('#btnForgot').addEventListener('click',async()=>{
-    const email=$('#li_email').value.trim();
-    if(!email) return setMsg(liStatus,'Sıfırlama için e-posta gir.','err');
-    try{
-      await sendPasswordResetEmail(auth,email,{ url: location.origin + '/auth.html' });
-      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
-    }catch(e){setMsg(liStatus,errText(e),'err');}
+  // Şifre sıfırlama (sağlam sürüm + fallback)
+  $('#btnForgot').addEventListener('click', async () => {
+    const loginId = $('#li_email').value.trim();
+    if (!loginId) return setMsg(liStatus,'Sıfırlama için e-posta veya kullanıcı adınızı yazın.','err');
+
+    // kullanıcı adı ise e-postaya çevir
+    let email = loginId;
+    if (!loginId.includes('@')) {
+      try {
+        const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
+        const snap = await getDocs(q);
+        if (snap.empty) return setMsg(liStatus, 'Bu kullanıcı adına bağlı bir hesap bulunamadı.', 'err');
+        email = snap.docs[0].data().email || '';
+        if (!email) return setMsg(liStatus, 'Bu kullanıcı adına bağlı e-posta bulunamadı.', 'err');
+      } catch (_) { return setMsg(liStatus, 'Kullanıcı adı çözümlenemedi. E-posta ile deneyin.', 'err'); }
+    }
+
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (!methods.includes('password')) {
+        return setMsg(liStatus,'Bu hesap parola ile giriş yapmıyor. "Google ile devam et"i kullanın ya da önce hesaba parola ekleyin.','err');
+      }
+      try {
+        await sendPasswordResetEmail(auth, email, { url: `${location.origin}/auth.html`, handleCodeInApp:false });
+      } catch (e) {
+        const code = e?.code||'';
+        if (code.includes('invalid-continue-uri') || code.includes('unauthorized-continue-uri')) {
+          await sendPasswordResetEmail(auth, email); // fallback: default URL
+        } else { throw e; }
+      }
+      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörünü de kontrol et)','ok');
+    } catch (e) {
+      setMsg(liStatus, errText(e), 'err');
+    }
   });
 
   // Google (hesap seçtir)
