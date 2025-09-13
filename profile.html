@@ -8,43 +8,40 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg1:#ffe6e6; --bg2:#fff5e6; --bg3:#e6f7ff; --bg4:#f5e6ff;
-      --card:#ffffff; --muted:#5b6b8f; --txt:#111827;
-      --accent:#ff163e; --accent2:#ff5a00; --stroke:#e5e7eb;
-      --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
+      --card:#ffffff; --muted:#5b6b8f; --txt:#111827; --accent:#ff163e; --accent2:#ff5a00;
+      --stroke:#d1d5db; --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      background-image:linear-gradient(-45deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4));
-      background-size:400% 400%;
-      animation:bgAnim 16s ease infinite;
-      color:var(--txt);
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
-    }
-    @keyframes bgAnim{
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
-    }
+    html,body{height:100%;margin:0}
+    body{background:#f8fafc;color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
 
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--stroke)}
+    .wrap{flex:1;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:16px;width:100%}
+    .topbar{position:sticky;top:0;z-index:30;background:#fff;backdrop-filter:blur(8px);border-bottom:1px solid var(--stroke)}
     .topbar .in{display:flex;align-items:center;gap:12px;min-height:64px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--accent)}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--accent)}
     .logo img{height:40px}
     .grow{flex:1}
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:14px;background:#fff;cursor:pointer}
     .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:#fff;font-weight:700}
+    .hide{display:none !important}
 
-    /* profile header */
-    .profile{margin-top:18px;background:#fff;border:1px solid var(--stroke);border-radius:20px;overflow:hidden;box-shadow:0 4px 12px #0001}
-    .p-in{display:flex;gap:18px;padding:16px}
-    .avatar{width:120px;height:120px;border-radius:30px;border:3px solid #fff;background:#fff;overflow:hidden;box-shadow:0 8px 24px #0003}
+    /* TAM EKRAN PANO */
+    .profile{
+      flex:1; display:flex; flex-direction:column; overflow:auto;
+      border:1px solid var(--stroke); border-radius:0; box-shadow:inset 0 0 40px #0001;
+      /* renk geçişi panoda */
+      background-image:linear-gradient(-45deg,#ffe1e8,#ffd9c2,#d9f3ff,#efd9ff);
+      background-size:400% 400%;
+      animation:panelShift 16s ease infinite;
+    }
+    @keyframes panelShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .p-in{display:flex;gap:28px;padding:28px}
+    .avatar{width:140px;height:140px;border-radius:34px;border:3px solid #fff;background:#fff;overflow:hidden;box-shadow:0 10px 28px #0003}
     .avatar img{width:100%;height:100%;object-fit:cover}
-    .p-meta{display:flex;flex-direction:column;gap:8px}
-    .p-name{font-size:26px;font-weight:800;color:var(--accent)}
+    .p-meta{display:flex;flex-direction:column;gap:10px}
+    .p-name{font-size:32px;font-weight:800;color:var(--accent)}
     .p-username{opacity:.8}
 
     /* rating */
@@ -56,12 +53,12 @@
     .star.active path{fill:url(#g1)}
 
     /* tabs */
-    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--stroke);padding:6px 12px;background:#f3f4f6}
-    .tab{flex:1;text-align:center;padding:14px 18px;font-size:16px;border:1px solid var(--stroke);border-bottom:none;border-top-left-radius:12px;border-top-right-radius:12px;background:#fff;cursor:pointer}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--stroke);padding:0 12px;background:#f3f4f6}
+    .tab{flex:1;text-align:center;padding:14px;border:1px solid var(--stroke);border-bottom:none;border-top-left-radius:12px;border-top-right-radius:12px;background:#fff;cursor:pointer;font-size:16px}
     .tab.active{background:linear-gradient(180deg,#fff,#f9fafb);font-weight:700;color:var(--accent)}
     .tab .badge{margin-left:6px;background:#fee2e2;border:1px solid #fecaca;padding:2px 8px;border-radius:10px;font-size:12px;color:#b91c1c}
 
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:16px;flex:1}
     .card{background:#fff;border:1px solid var(--stroke);border-radius:16px;overflow:hidden;box-shadow:0 2px 6px #0001}
     .card .hd{padding:10px 12px;border-bottom:1px solid var(--stroke);font-weight:700;display:flex;justify-content:space-between;color:var(--accent)}
     .card .bd{padding:12px}
@@ -77,18 +74,12 @@
     .pill.warn{border-color:#f59e0b;color:#b45309}
     .pill.bad{border-color:#ef4444;color:#b91c1c}
 
-    /* mobile bottom nav */
-    .mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:10px;justify-content:space-around;align-items:center;background:#fff;border-top:1px solid var(--stroke);padding:10px}
-    .mbar a{display:flex;flex-direction:column;align-items:center;font-size:12px;color:#222;opacity:.95}
-
-    /* responsive */
     @media(max-width:900px){
       .grid{grid-template-columns:1fr}
-      .p-in{flex-direction:column;align-items:center}
-      .avatar{width:100px;height:100px}
-      .tab{font-size:14px;padding:10px 12px}
+      .p-in{flex-direction:column;align-items:center;padding:20px;gap:16px}
+      .avatar{width:110px;height:110px}
+      .tab{font-size:14px;padding:10px}
     }
-    @media(min-width:901px){ .mbar{display:none} }
 
     /* modal */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,4,10,.4);z-index:50}
@@ -101,7 +92,7 @@
   </style>
 </head>
 <body>
-  <!-- gradient for stars -->
+  <!-- gradient for star fill -->
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
@@ -135,8 +126,8 @@
             <div id="ratingInfo" class="muted">0.0 • 0 oy</div>
           </div>
           <div class="row">
-            <label class="btn" for="fileAvatar">📷 Resim Ekle / Değiştir</label>
-            <input id="fileAvatar" type="file" accept="image/*" style="display:none"/>
+            <label class="btn" for="fileAvatar" id="lblAvatar">📷 Resim Ekle / Değiştir</label>
+            <input id="fileAvatar" type="file" accept="image/*" class="hide"/>
             <button class="btn" id="btnPwd">🔑 Şifre Değiştir</button>
           </div>
         </div>
@@ -151,14 +142,6 @@
       <div class="grid" id="listings"></div>
     </section>
   </main>
-
-  <!-- Mobile bottom bar (yalnızca mobilde görünür) -->
-  <nav class="mbar">
-    <a href="home.html">🏠<span style="margin-top:4px">Ana Sayfa</span></a>
-    <a href="messages.html">💬<span style="margin-top:4px">Mesajlar</span></a>
-    <a href="notifications.html">🔔<span style="margin-top:4px">Bildirimler</span></a>
-    <a href="profile.html">👤<span style="margin-top:4px">Profil</span></a>
-  </nav>
 
   <!-- Username modal -->
   <div class="modal" id="mUser">
@@ -177,22 +160,22 @@
 
   <script type="module">
     // ==== Firebase SDKs ====
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
-    // --- SENİN KONFİGİN ---
+    // ==== Config (senin verdiğin) ====
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
       projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app", // Hata alırsan 'ureten-eller-v2.appspot.com' yap.
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
       messagingSenderId: "621494781131",
       appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
@@ -200,28 +183,32 @@
     // ==== Helpers ====
     const qs = s => document.querySelector(s);
     const qsa = s => Array.from(document.querySelectorAll(s));
-    const state = { user:null, userDoc:null, tab:'active', ratings:{avg:0,count:0} };
+    const params = new URLSearchParams(location.search);
+    const view = { ownerUid:null, isSelf:false };
+    const state = { viewer:null, ownerDoc:null, tab:'active', ratings:{avg:0,count:0}, cache:{active:[],pending:[],expired:[]} };
+
     const avatarImg = qs('#avatarImg');
     const pName = qs('#pName');
     const pUser = qs('#pUser');
     const listingsEl = qs('#listings');
+    const btnPwd = qs('#btnPwd');
+    const fileAvatar = qs('#fileAvatar');
+    const lblAvatar = qs('#lblAvatar');
+    const cntActive = qs('#cntActive');
+    const cntPending = qs('#cntPending');
+    const cntExpired = qs('#cntExpired');
 
     // Stars
     const starsEl = qs('#stars');
-    const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
+    const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
     starsEl.innerHTML = [1,2,3,4,5].map(STAR_SVG).join('');
-    function setStars(v){ qsa('.star').forEach((el,i)=>{ el.classList.toggle('active', i < v); }); }
-
+    function setStars(v){ qsa('.star').forEach((el,i)=> el.classList.toggle('active', i < v)); }
     qsa('.star').forEach(el=>{
       el.addEventListener('mouseenter',()=> setStars(Number(el.dataset.i)));
       el.addEventListener('mouseleave',()=> setStars(Math.round(state.ratings.avg)));
-      el.addEventListener('click', async()=>{
-        const v = Number(el.dataset.i);
-        await submitRating(v);
-      });
+      el.addEventListener('click', async()=>{ await submitRating(Number(el.dataset.i)); });
     });
 
-    function formatCount(n){ return new Intl.NumberFormat('tr-TR').format(n||0); }
     function slugify(x){
       return (x||'')
         .toLowerCase()
@@ -230,20 +217,40 @@
         .replace(/^_+|_+$/g,'')
         .slice(0,24);
     }
+    function fmt(n){ return new Intl.NumberFormat('tr-TR').format(n||0); }
     function showModal(sel, show=true){ qs(sel).classList.toggle('show', show); }
 
-    // ==== Auth Gate ====
+    // Hangi profili göstereceğiz?
+    async function resolveOwnerUid(){
+      const uid = params.get('u');
+      const username = params.get('user');
+      if(uid){ return uid; }
+      if(username){
+        const qr = query(collection(db,'users'), where('username','==', username));
+        const sn = await getDocs(qr);
+        if(!sn.empty) return sn.docs[0].id;
+      }
+      return null; // self
+    }
+
+    // Auth akışı
     onAuthStateChanged(auth, async (u)=>{
-      if(!u){ window.location.href = 'auth.html?next=profile.html'; return; }
-      state.user = u;
-      await ensureUserDoc(u);
-      await loadProfile(u);
+      state.viewer = u || null;
+      const maybeOwner = await resolveOwnerUid();
+      if(!maybeOwner){
+        if(!u){ location.href = 'auth.html?next=profile.html'; return; }
+        view.ownerUid = u.uid; view.isSelf = true;
+      }else{
+        view.ownerUid = maybeOwner; view.isSelf = !!(u && u.uid === maybeOwner);
+      }
+      await loadOwnerProfile();
       attachHandlers();
-      await loadRatings(u.uid);
+      await loadRatings();
       await loadListings();
     });
 
-    async function ensureUserDoc(u){
+    // Kullanıcı belgesi/username
+    async function ensureSelfDoc(u){
       const uref = doc(db,'users',u.uid);
       const snap = await getDoc(uref);
       const base = { email:u.email||'', displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:serverTimestamp() };
@@ -253,7 +260,6 @@
         if(suggested){ await setDoc(doc(db,'usernames',suggested), { uid:u.uid, createdAt:serverTimestamp() }); }
       }
     }
-
     async function suggestUsername(u){
       const dn = (u.displayName||u.email||'').split('@')[0];
       const base = slugify(dn) || ('user'+(Math.random()*1000|0));
@@ -266,46 +272,60 @@
       return candidate;
     }
 
-    async function loadProfile(u){
-      const snap = await getDoc(doc(db,'users',u.uid));
-      state.userDoc = snap.data()||{};
-      pName.textContent = state.userDoc.displayName || u.displayName || '—';
-      pUser.textContent = '@' + (state.userDoc.username || 'kullanici');
-      avatarImg.src = state.userDoc.photoURL || u.photoURL || 'assets/img/seffaf.png';
-      if(!state.userDoc.username || state.userDoc.username === 'kullanici'){
-        qs('#inpUsername').value = slugify((u.displayName||'kullanici').replace(/\s+/g,''));
+    async function loadOwnerProfile(){
+      if(state.viewer && view.isSelf){ await ensureSelfDoc(state.viewer); }
+      const snap = await getDoc(doc(db,'users', view.ownerUid));
+      const d = snap.data()||{};
+      state.ownerDoc = d;
+      pName.textContent = d.displayName || '—';
+      pUser.textContent = '@' + (d.username || 'kullanici');
+      avatarImg.src = d.photoURL || 'assets/img/seffaf.png';
+
+      // izinler
+      if(view.isSelf){
+        btnPwd.classList.remove('hide');
+        lblAvatar.classList.remove('hide');
+        fileAvatar.classList.remove('hide');
+      }else{
+        btnPwd.classList.add('hide');
+        lblAvatar.classList.add('hide');
+        fileAvatar.classList.add('hide');
+      }
+
+      if(view.isSelf && (!d.username || d.username==='kullanici')){
+        const dn = (state.viewer.displayName||'kullanici').replace(/\s+/g,'');
+        qs('#inpUsername').value = slugify(dn);
         showModal('#mUser',true);
       }
     }
 
     function attachHandlers(){
-      const btnLogout = qs('#btnLogout');
-      if(btnLogout) btnLogout.addEventListener('click', async()=>{ await signOut(auth); window.location.href='auth.html'; });
+      const btnLogout = document.getElementById('btnLogout');
+      if(btnLogout){ btnLogout.onclick = async ()=>{ await signOut(auth); location.href='auth.html'; }; }
 
-      qs('#btnPwd').addEventListener('click', async()=>{
-        if(!state.user?.email){ alert('Hesabınızda e-posta yok.'); return; }
-        await sendPasswordResetEmail(auth, state.user.email);
-        alert('Şifre sıfırlama e-postası gönderildi: '+state.user.email);
+      btnPwd?.addEventListener('click', async()=>{
+        if(!view.isSelf || !state.viewer?.email){ alert('Bu işlem sadece kendi profilinde geçerlidir.'); return; }
+        await sendPasswordResetEmail(auth, state.viewer.email);
+        alert('Şifre sıfırlama e-postası gönderildi: '+state.viewer.email);
       });
 
-      qs('#fileAvatar').addEventListener('change', onAvatarFile);
+      fileAvatar?.addEventListener('change', async(ev)=>{
+        if(!view.isSelf){ alert('Sadece kendi profilinde değiştirilebilir.'); ev.target.value=''; return; }
+        const f = ev.target.files?.[0]; if(!f) return;
+        const ref = sRef(storage, `avatars/${view.ownerUid}.jpg`);
+        await uploadBytes(ref, f);
+        const url = await getDownloadURL(ref);
+        await updateDoc(doc(db,'users',view.ownerUid), { photoURL:url });
+        avatarImg.src = url;
+      });
 
       qsa('.tab').forEach(t=> t.addEventListener('click', ()=>{
-        qsa('.tab').forEach(x=>x.classList.remove('active'));
-        t.classList.add('active'); state.tab = t.dataset.tab; renderListings();
+        qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+        state.tab = t.dataset.tab; renderListings();
       }));
 
       qs('#btnCancelUsername').addEventListener('click', ()=> showModal('#mUser',false));
       qs('#btnSaveUsername').addEventListener('click', saveUsername);
-    }
-
-    async function onAvatarFile(ev){
-      const file = ev.target.files?.[0]; if(!file) return;
-      const ref = sRef(storage, `avatars/${state.user.uid}.jpg`);
-      await uploadBytes(ref, file);
-      const url = await getDownloadURL(ref);
-      await updateDoc(doc(db,'users',state.user.uid), { photoURL:url });
-      avatarImg.src = url;
     }
 
     async function saveUsername(){
@@ -314,73 +334,61 @@
       if(u.length < 3){ qs('#uHelp').textContent = 'En az 3 karakter.'; return; }
       const taken = await getDoc(doc(db,'usernames',u));
       if(taken.exists()){ qs('#uHelp').textContent = 'Bu kullanıcı adı alınmış.'; return; }
-      await setDoc(doc(db,'usernames',u), { uid:state.user.uid, createdAt:serverTimestamp() });
-      await updateDoc(doc(db,'users',state.user.uid), { username:u });
+      await setDoc(doc(db,'usernames',u), { uid:view.ownerUid, createdAt:serverTimestamp() });
+      await updateDoc(doc(db,'users',view.ownerUid), { username:u });
       pUser.textContent = '@'+u; showModal('#mUser',false);
     }
 
-    // ==== Ratings ====
-    async function loadRatings(uid){
-      const u = await getDoc(doc(db,'users',uid));
+    // Oylama (misafir, başkasının profili)
+    async function loadRatings(){
+      const u = await getDoc(doc(db,'users',view.ownerUid));
       const d = u.data()||{};
       state.ratings.avg = Number(d.avgRating||0);
       state.ratings.count = Number(d.ratingCount||0);
-      qs('#ratingInfo').textContent = `${state.ratings.avg.toFixed(1)} • ${formatCount(state.ratings.count)} oy`;
+      qs('#ratingInfo').textContent = `${state.ratings.avg.toFixed(1)} • ${fmt(state.ratings.count)} oy`;
       setStars(Math.round(state.ratings.avg));
     }
-
     async function submitRating(v){
-      // Kendi profiline oy verme
-      if(state.user){ alert('Kendi profiline oy veremezsin.'); return; }
-      const toUid = state.user?.uid; // bu dosya kendi profili için
-      const token = crypto.randomUUID?.() || String(Date.now());
-      await setDoc(doc(collection(db,'ratings')), { toUid, stars:v, createdAt:serverTimestamp(), by:`guest:${token}` });
-      const uref = doc(db,'users',toUid);
+      if(view.isSelf){ alert('Kendi profiline oy veremezsin.'); return; }
+      const token = (crypto.randomUUID?.() || String(Date.now()));
+      const key = `rated:${view.ownerUid}`;
+      if(localStorage.getItem(key)){ alert('Bu profili zaten oyladın.'); return; }
+      await setDoc(doc(collection(db,'ratings')), { toUid:view.ownerUid, stars:v, createdAt:serverTimestamp(), by: state.viewer?.uid || `guest:${token}` });
+      const uref = doc(db,'users',view.ownerUid);
       const snap = await getDoc(uref); const d = snap.data()||{avgRating:0,ratingCount:0};
       const total = (Number(d.avgRating)||0) * (Number(d.ratingCount)||0) + v;
       const count = (Number(d.ratingCount)||0) + 1;
       const avg = total / count;
       await updateDoc(uref, { avgRating: avg, ratingCount: count });
-      state.ratings = {avg, count};
-      await loadRatings(toUid);
+      localStorage.setItem(key,'1');
+      await loadRatings();
       alert('Teşekkürler! Oyun kaydedildi.');
     }
 
-    // ==== Listings ====
-    const cache = { active:[], pending:[], expired:[] };
-
+    // İlanlar (canlı çek)
     async function loadListings(){
-      const qref = query(
-        collection(db,'listings'),
-        where('ownerId','==', state.user.uid),
-        orderBy('createdAt','desc'),
-        limit(100)
-      );
+      const qref = query(collection(db,'listings'), where('ownerId','==', view.ownerUid), orderBy('createdAt','desc'), limit(100));
       const snap = await getDocs(qref);
-      cache.active = []; cache.pending = []; cache.expired = [];
+      state.cache.active = []; state.cache.pending = []; state.cache.expired = [];
       const now = Date.now();
-
       snap.forEach(docu=>{
         const d = docu.data();
-        const expiresAt = (d.expiresAt?.toMillis?.()
-          ? d.expiresAt.toMillis()
-          : (d.createdAt?.toMillis?.()? d.createdAt.toMillis()+30*24*60*60*1000 : 0));
+        const expiresAt = (d.expiresAt?.toMillis?.() ? d.expiresAt.toMillis() : (d.createdAt?.toMillis?.()? d.createdAt.toMillis()+30*24*60*60*1000 : 0));
         let status = d.status || 'pending';
         if(status==='active' && expiresAt && expiresAt < now) status = 'expired';
         const item = { id:docu.id, ...d, status, expiresAt };
-        if(status==='active') cache.active.push(item);
-        else if(status==='pending') cache.pending.push(item);
-        else cache.expired.push(item);
+        if(status==='active') state.cache.active.push(item);
+        else if(status==='pending') state.cache.pending.push(item);
+        else state.cache.expired.push(item);
       });
-
-      qs('#cntActive').textContent = cache.active.length;
-      qs('#cntPending').textContent = cache.pending.length;
-      qs('#cntExpired').textContent = cache.expired.length;
+      cntActive.textContent = state.cache.active.length;
+      cntPending.textContent = state.cache.pending.length;
+      cntExpired.textContent = state.cache.expired.length;
       renderListings();
     }
 
     function renderListings(){
-      const arr = cache[state.tab]||[];
+      const arr = state.cache[state.tab]||[];
       listingsEl.innerHTML = '';
       if(arr.length===0){
         listingsEl.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="bd">Bu bölüm boş. <a href='ilan-ekle.html'>İlan ekle</a>.</div></div>`;
