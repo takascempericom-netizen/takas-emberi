@@ -14,10 +14,15 @@
       --g1:#ff7a7a; --g2:#ffd166; --g3:#6ee7ff; --g4:#9b8cff; --g5:#4ade80;
       --card:rgba(255,255,255,.86); --card2:rgba(255,255,255,.94);
       --mbnav-h:72px;
-      --star-fill:#ffffff; --star-stroke:#b91c1c;
+
+      /* 3D yıldız renkleri (SİYAH YOK) */
+      --star-fill:#ffffff;            /* beyaz */
+      --star-stroke:#b91c1c;          /* kırmızı kontur */
+      --star-glow:rgba(239,68,68,.85);/* kırmızı parıltı */
     }
     *{box-sizing:border-box}
-    html,body{height:100%;overflow-x:hidden}
+    html,body{height:100%}
+    html,body{overflow-x:hidden}
     body{
       margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);
       background:linear-gradient(120deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5));
@@ -27,21 +32,40 @@
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
 
-    .wrap{max-width:1100px;margin:0 auto;padding:16px;padding-bottom:calc(var(--mbnav-h) + 72px + env(safe-area-inset-bottom,0px))}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px;
+      padding-bottom:calc(var(--mbnav-h) + 72px + env(safe-area-inset-bottom,0px));
+    }
     header.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:14px;position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--stroke);border-radius:16px;z-index:50}
     .brand{display:flex;align-items:center;gap:10px}
     .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke);object-fit:contain;background:#fff}
 
+    /* Üst menüler */
     nav.desktop{display:none;gap:8px;align-items:center}
     nav.mobileTop{display:flex;gap:8px}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
     .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
-    @media(min-width:880px){nav.desktop{display:flex}nav.mobileTop{display:none}}
 
+    /* GRID ve sıralama */
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    #secProfile{order:1}
+    #secPassword{order:2}
+    #secRating{order:3}
+    #secListings{order:4}
+
     @media(min-width:880px){
-      .grid{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "full1 full1" "full2 full2"}
-      #secProfile{grid-area:left} #secPassword{grid-area:right} #secRating{grid-area:full1} #secListings{grid-area:full2}
+      nav.desktop{display:flex}
+      nav.mobileTop{display:none}
+      .grid{
+        grid-template-columns:1fr 1fr;
+        grid-template-areas:
+          "left right"
+          "full1 full1"
+          "full2 full2";
+      }
+      #secProfile{grid-area:left;order:0}
+      #secPassword{grid-area:right;order:0}
+      #secRating{grid-area:full1;order:1}
+      #secListings{grid-area:full2;order:2}
     }
 
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08)}
@@ -53,80 +77,67 @@
     .avatar img{width:100%;height:100%;object-fit:cover}
     .muted{color:var(--muted);font-size:.92rem}
 
-    /* Profil alanları */
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .field{display:flex;flex-direction:column;gap:8px}
-    .field label{font-size:1rem;color:var(--muted);font-weight:600}
-    .field input{
-      width:100%;height:52px;background:#ffffff;border:1px solid var(--stroke);
-      border-radius:12px;padding:0 14px;color:#0b1020;font-size:1rem
-    }
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:.86rem;color:var(--muted)}
+    .field input{width:100%;height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
     .field input[disabled]{opacity:.95}
     @media(max-width:879px){ .fields{grid-template-columns:1fr} }
 
-    /* Şifre alanları — büyük ve alt alta */
-    .pwgrid{display:grid;grid-template-columns:1fr;gap:12px}
-    .pwgrid input{
-      height:54px;background:#ffffff;border:1px solid var(--stroke);
-      border-radius:12px;padding:0 14px;color:#0b1020;font-size:1rem
-    }
-    .pwgrid .btn{height:54px;font-size:1rem;font-weight:700}
+    .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
+    .pwgrid input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
 
-    /* 5 adet Flag-Flip yıldız */
-    .ownerStars{display:flex;gap:12px;justify-content:flex-start;margin-bottom:8px;animation:starColorFlip 3.6s ease-in-out infinite}
-    .ownerStars svg{width:36px;height:36px}
-    @keyframes wave{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)}75%{transform:translateY(4px)}}
-    .ownerStars svg:nth-child(1){animation:wave 2.2s ease-in-out 0s infinite}
-    .ownerStars svg:nth-child(2){animation:wave 2.2s ease-in-out .2s infinite}
-    .ownerStars svg:nth-child(3){animation:wave 2.2s ease-in-out .4s infinite}
-    .ownerStars svg:nth-child(4){animation:wave 2.2s ease-in-out .6s infinite}
-    .ownerStars svg:nth-child(5){animation:wave 2.2s ease-in-out .8s infinite}
+    /* 3D YILDIZLAR – SADECE 5 ADET */
+    .stars{display:inline-flex;gap:10px;filter:drop-shadow(0 2px 3px rgba(239,68,68,.35)) drop-shadow(0 10px 18px rgba(239,68,68,.25))}
+    .stars svg{width:30px;height:30px}
+    .ownerStars{padding:6px 0;margin-bottom:8px}
+    @keyframes wave{0%{transform:translateY(0) scale(1)}25%{transform:translateY(-5px) scale(1.02)}50%{transform:translateY(0) scale(1)}75%{transform:translateY(5px) scale(.98)}100%{transform:translateY(0) scale(1)}}
+    .stars svg:nth-child(1){animation:wave 2.2s ease-in-out -.0s infinite}
+    .stars svg:nth-child(2){animation:wave 2.2s ease-in-out -.2s infinite}
+    .stars svg:nth-child(3){animation:wave 2.2s ease-in-out -.4s infinite}
+    .stars svg:nth-child(4){animation:wave 2.2s ease-in-out -.6s infinite}
+    .stars svg:nth-child(5){animation:wave 2.2s ease-in-out -.8s infinite}
     @keyframes starColorFlip{
-      0%  { --star-fill:#ffffff; --star-stroke:#ffffff; }
-      50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; }
-      100%{ --star-fill:#ffffff; --star-stroke:#ffffff; }
+      0%  { --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
+      50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; --star-glow:rgba(239,68,68,.9); }
+      100%{ --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
     }
+    .ownerStars .stars{animation:starColorFlip 3.6s ease-in-out infinite}
 
-    /* Liste başlıklarını gizle, sekme butonlarını büyüt ve masaüstünde de göster */
-    .col h3{display:none}
-    .list-tabs{display:flex;gap:10px;margin:0 0 14px 0;flex-wrap:wrap}
-    .pill{
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:14px 18px;border-radius:999px;border:1px solid var(--stroke);
-      background:#fff;color:#0b1020;cursor:pointer;font-size:1rem;font-weight:700
-    }
-    .pill.active{background:#0b1020;color:#fff}
-
+    /* İLANLAR */
     .lists-triple{display:grid;gap:12px}
     .col{background:rgba(255,255,255,.88);border:1px solid var(--stroke);border-radius:14px;padding:12px}
+    .col h3{margin:6px 0 10px}
     .listings{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:880px){ .lists-triple{grid-template-columns:repeat(3,1fr)} .col{display:block} }
-    @media(max-width:879px){ .lists-triple{grid-template-columns:1fr} .col{display:none} .col.show{display:block} }
+    .listing{border:1px solid var(--stroke);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.98)}
+    .listing .thumb{height:120px;background:#f3f6ff;display:grid;place-items:center}
+    .listing .thumb img{width:100%;height:100%;object-fit:cover}
+    .listing .meta{padding:10px 12px;display:grid;gap:6px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--stroke);border-radius:999px;font-size:.8rem;color:#334155;background:#ffffff}
+    .badge.ok{border-color:#1b5e32;color:#166534;background:#e8f9ef}
+    .badge.warn{border-color:#6b4a0a;color:#92400e;background:#fff4e5}
+    .badge.err{border-color:#5b1a1a;color:#7f1d1d;background:#ffecec}
 
+    /* MOBİL: kategori butonları */
+    .mobile-tabs{display:flex;gap:8px;margin-bottom:10px}
+    .pill{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;border:1px solid var(--stroke);background:#fff;color:#0b1020;cursor:pointer}
+    .pill.active{background:#0b1020;color:#fff}
+    @media(min-width:880px){
+      .mobile-tabs{display:none}
+      .lists-triple{grid-template-columns:repeat(3,1fr)}
+      .lists-triple .col{display:block}
+    }
+    @media(max-width:879px){
+      .lists-triple{grid-template-columns:1fr}
+      .lists-triple .col{display:none}
+      .lists-triple .col.show{display:block}
+    }
+
+    /* ALT BAR (mobil) */
     .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
     @media(min-width:880px){ .mbnav{display:none} }
-
-    @media (prefers-reduced-motion: reduce){ .ownerStars, .ownerStars svg{animation:none !important} }
-
-    /* ===== Username seçimi modal (Google için tek seferlik) ===== */
-    .modal-backdrop{
-      position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
-      display:none;align-items:center;justify-content:center;z-index:1000;
-    }
-    .modal{width:min(520px,92vw);background:#fff;border:1px solid var(--stroke);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.2)}
-    .modal .mhd{padding:14px 16px;border-bottom:1px solid var(--stroke);font-weight:800}
-    .modal .mbd{padding:16px;display:grid;gap:12px}
-    .modal .row{display:grid;gap:8px}
-    .modal input{
-      height:50px;border:1px solid var(--stroke);border-radius:12px;padding:0 14px;font-size:1rem
-    }
-    .modal .actions{display:flex;gap:10px;justify-content:flex-end}
-    .modal .btn{height:46px;font-weight:700}
-    .helper{font-size:.9rem;color:var(--muted)}
-    .err{color:var(--err);font-weight:600}
-    .ok{color:var(--ok);font-weight:600}
   </style>
 </head>
 
@@ -137,15 +148,19 @@
         <img src="./assets/img/seffaf.png" alt="Logo">
         <div>
           <b>Takas Çemberi</b>
-          <div class="muted">Profil</div>
+          <div class="muted" id="hdrSub">Profil</div>
         </div>
       </div>
+
+      <!-- Masaüstü üst menü -->
       <nav class="desktop">
         <a class="btn" href="home.html">🏠 Ana Sayfa</a>
         <a class="btn" href="messages.html">💬 Mesajlar</a>
         <a class="btn" href="notifications.html">🔔 Bildirimler</a>
         <button class="btn warn" id="btnLogout">🚪 Çıkış</button>
       </nav>
+
+      <!-- Mobil üst: sadece Çıkış -->
       <nav class="mobileTop">
         <button class="btn warn" id="btnLogoutTop">🚪 Çıkış</button>
       </nav>
@@ -162,6 +177,7 @@
               <h2 id="displayName" style="margin:0;font-size:1.4rem">—</h2>
               <span class="badge" id="usernameBadge">@—</span>
 
+              <!-- 📷 Resim ekleme/değiştirme -->
               <div class="row" style="margin-top:8px">
                 <label class="btn" style="padding:8px 12px">
                   📷 Resim Ekle / Değiştir
@@ -169,10 +185,10 @@
                 </label>
               </div>
 
-              <div class="muted">İsim, soyisim, telefon ve e-posta aşağıda görünür.</div>
+              <div class="muted" id="publicInfo">İsim, soyisim, telefon ve e-posta aşağıda görünür.</div>
             </div>
           </div>
-
+          <div class="spacer"></div>
           <div class="fields">
             <div class="field"><label>İsim</label><input id="inpFirst" disabled></div>
             <div class="field"><label>Soyisim</label><input id="inpLast" disabled></div>
@@ -183,7 +199,7 @@
         </div>
       </section>
 
-      <!-- Şifre (büyük ve alt alta) -->
+      <!-- Şifre -->
       <section id="secPassword" class="card">
         <div class="hd">Şifre Değiştir</div>
         <div class="bd">
@@ -192,76 +208,108 @@
             <input type="password" id="pwNew" placeholder="Yeni şifre">
             <input type="password" id="pwNew2" placeholder="Yeni şifre (tekrar)">
             <button class="btn pri" id="btnPw">Değişikliği Onayla</button>
+            <div class="muted">• Eski şifre sorulur. • Yeni şifre iki kez girilir.</div>
           </div>
         </div>
       </section>
 
-      <!-- Puanlama (sadece 5 Flag-Flip yıldız) -->
+      <!-- Puanlama -->
       <section id="secRating" class="card">
         <div class="hd">Puanlama</div>
         <div class="bd">
-          <div class="ownerStars" id="ownerStars">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="var(--star-fill)" stroke="var(--star-stroke)" stroke-width=".7"/></svg>
+          <!-- SADECE 5 DALGALANAN 3D YILDIZ -->
+          <div id="ownerStarsWrap" class="ownerStars">
+            <div class="stars" id="ownerStars">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <defs>
+                  <linearGradient id="starGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--star-fill)"/>
+                    <stop offset="55%" stop-color="var(--star-fill)"/>
+                    <stop offset="56%" stop-color="rgba(255,255,255,.7)"/>
+                    <stop offset="100%" stop-color="var(--star-fill)"/>
+                  </linearGradient>
+                </defs>
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+            </div>
           </div>
+
+          <div class="stars readonly" id="avgStars" aria-label="Ortalama yıldızlar">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
+          </div>
+          <div class="muted" id="avgText">0/5 • 0 oy</div>
         </div>
       </section>
 
       <!-- İlanlar -->
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
-        <div class="bd>
-          <div class="list-tabs">
+        <div class="bd">
+          <div class="mobile-tabs">
             <button class="pill active" data-target="colActive">Yayındakiler</button>
             <button class="pill" data-target="colPending">Onay Bekleyenler</button>
             <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
           </div>
+
           <div class="lists-triple">
-            <div class="col show" id="colActive"><div class="listings" id="listActive"></div></div>
-            <div class="col" id="colPending"><div class="listings" id="listPending"></div></div>
-            <div class="col" id="colExpired"><div class="listings" id="listExpired"></div></div>
+            <div class="col show" id="colActive">
+              <h3>Yayındakiler</h3>
+              <div class="listings" id="listActive"></div>
+            </div>
+            <div class="col" id="colPending">
+              <h3>Onay Bekleyenler</h3>
+              <div class="listings" id="listPending"></div>
+            </div>
+            <div class="col" id="colExpired">
+              <h3>Süresi Dolanlar</h3>
+              <div class="listings" id="listExpired"></div>
+            </div>
           </div>
         </div>
       </section>
     </div>
   </div>
 
+  <!-- MOBİL alt bar -->
   <nav class="mbnav">
     <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
     <a href="notifications.html">🔔<small>Bildirimler</small></a>
   </nav>
 
-  <!-- Username Seçimi Modal (Google için, tek seferlik) -->
-  <div class="modal-backdrop" id="unameModal">
-    <div class="modal">
-      <div class="mhd">Kullanıcı Adını Seç</div>
-      <div class="mbd">
-        <div class="helper">Bir defaya mahsus kullanıcı adını belirle. Sonradan değiştirilemez.</div>
-        <div class="row">
-          <input id="unameInput" placeholder="kullanici_adi" maxlength="20" />
-          <div class="helper" id="unameHint">• Harf/rakam . _ - kullanılabilir, 3–20 karakter.</div>
-          <div class="helper err" id="unameErr" style="display:none"></div>
-          <div class="helper ok"  id="unameOk"  style="display:none">Uygun!</div>
-        </div>
-        <div class="actions">
-          <button class="btn" id="unameCancel">Vazgeç</button>
-          <button class="btn" id="unameSave">Kaydet</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Firebase (CDN, modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // CONFIG
+    // ***** SENİN VERDİĞİN CONFIG *****
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -274,210 +322,133 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ---- utils ----
+    // KISA SEÇİCİLER
     const $  = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
-    const setInput = (sel,v)=>{const el=$(sel); if(el) el.value = v||'';}
-    const setText  = (sel,v)=>{const el=$(sel); if(el) el.textContent = (v && String(v).trim()) ? v : '—';}
 
-    const normalize = s => (s||'').toLowerCase()
-      .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
-      .replace(/[^\w._-]/g,"").replace(/^_+|_+$/g,"");
+    // URL & localStorage fallback (yedek)
+    const qp = new URLSearchParams(location.search);
+    function fromQuery() {
+      return {
+        firstName: qp.get('first') || '',
+        lastName:  qp.get('last')  || '',
+        username:  qp.get('username') || '',
+        phone:     qp.get('phone') || '',
+        email:     qp.get('email') || ''
+      };
+    }
+    function fromLocal() {
+      try{ const raw = localStorage.getItem('tc_user_record'); return raw ? JSON.parse(raw) : null; }
+      catch(e){ return null; }
+    }
 
-    function splitDisplay(name){
-      if(!name) return {first:'', last:''};
-      const p = name.trim().split(/\s+/);
+    // Ekrana bas
+    function setInput(id, val){ const el = $(id); if(el) el.value = val || ''; }
+    function setText(id, val){ const el = $(id); if(el) el.textContent = (val && String(val).trim()) ? val : '—'; }
+
+    // Auth displayName → isim/soyisim tahmini
+    function namesFromDisplay(displayName){
+      if(!displayName) return {first:'', last:''};
+      const p = displayName.trim().split(/\s+/);
       return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
     }
 
-    // e-postadan isim/soyisim çıkar — yalnızca Google oturumunda fallback için
-    function namesFromEmail(email){
-      const local = (email||'').split('@')[0] || '';
-      const norm  = normalize(local);
-      const parts = norm.split(/[._-]+/).filter(Boolean);
-      const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
-      if (parts.length >= 2){
-        return { first: cap(parts[0]), last: cap(parts[1]) };
-      }
-      return { first:'', last:'' };
+    // Doldurma
+    function fillFields(src={}, authUser=null){
+      const first = src.firstName || src.ad || src.name || '';
+      const last  = src.lastName  || src.soyad || src.surname || '';
+      const usern = src.username  || src.kullaniciAdi || src.userName || '';
+      const phone = src.phone     || src.telefon || src.gsm || '';
+      const email = src.email     || (authUser?.email || '');
+
+      const dn = namesFromDisplay(authUser?.displayName);
+      const f = first || dn.first;
+      const l = last  || dn.last;
+
+      setText('#displayName', `${f||''} ${l||''}`.trim() || '—');
+      setText('#usernameBadge', usern ? '@'+usern : '@—');
+      setInput('#inpFirst', f||'');
+      setInput('#inpLast',  l||'');
+      setInput('#inpUsername', usern||'');
+      setInput('#inpPhone', phone||'');
+      setInput('#inpEmail', email||'');
     }
 
-    // provider kontrolü
-    const isGoogle = (user)=> (user?.providerData||[]).some(p=>p.providerId==='google.com');
-    const isPassword = (user)=> (user?.providerData||[]).some(p=>p.providerId==='password');
-
-    // username rezerve et (usernames/{uname}) + users/{uid}.username = uname
-    async function reserveAndSaveUsername(uname, uid){
-      const refName = doc(db, "usernames", uname);
-      await runTransaction(db, async (tx)=>{
-        const s = await tx.get(refName);
-        if (s.exists()) throw new Error('taken');
-        tx.set(refName, { ownerUid: uid, createdAt: Date.now() });
-        tx.set(doc(db,"users",uid), { username: uname }, { merge:true });
-      });
-    }
-
-    // isim/soyisim/email alanlarını doldur (kural: password hesabında mailden isim türetme YOK)
-    function fillFields(data={}, authUser=null, username='', useEmailFallback=false){
-      const dn  = splitDisplay(authUser?.displayName);
-      const em  = useEmailFallback ? namesFromEmail(authUser?.email || '') : {first:'', last:''};
-      const first = data.firstName || data.ad || dn.first || em.first || '';
-      const last  = data.lastName  || data.soyad || dn.last  || em.last  || '';
-      const email = data.email || authUser?.email || '';
-      const phone = data.phone || data.telefon || data.gsm || '';
-      const uname = username || data.username || '';
-
-      setText('#displayName', (first||last) ? `${first} ${last}`.trim() : '—');
-      setText('#usernameBadge', uname ? '@'+uname : '@—');
-      setInput('#inpFirst', first);
-      setInput('#inpLast',  last);
-      setInput('#inpUsername', uname);
-      setInput('#inpPhone', phone);
-      setInput('#inpEmail', email);
-    }
-
-    // Avatar (local)
-    const AVATAR_KEY='tc_profile_avatar';
-    (function(){
-      const img = $('#avatar');
+    // Avatar (localStorage kalıcı)
+    const AVATAR_KEY = 'tc_profile_avatar';
+    const avatarImg = $('#avatar');
+    (function initAvatar(){
       const saved = localStorage.getItem(AVATAR_KEY);
-      img.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
+      avatarImg.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
       $('#fileAvatar')?.addEventListener('change', (e)=>{
         const f = e.target.files?.[0]; if(!f) return;
-        const r = new FileReader();
-        r.onload = ()=>{ img.src = r.result; try{ localStorage.setItem(AVATAR_KEY, r.result); }catch(_){} };
-        r.readAsDataURL(f);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const data = reader.result;
+          avatarImg.src = data;
+          try{ localStorage.setItem(AVATAR_KEY, data); }catch(_){}
+        };
+        reader.readAsDataURL(f);
       });
     })();
 
     // Çıkış
-    async function doLogout(){ try{ await signOut(auth); }catch(_){ } location.href='auth.html'; }
+    async function doLogout(){
+      try { await signOut(auth); } catch(_) {}
+      location.href = 'auth.html';
+    }
     $('#btnLogout')?.addEventListener('click', doLogout);
     $('#btnLogoutTop')?.addEventListener('click', doLogout);
 
-    // Sekmeler
+    // Mobil ilan sekmeleri
     (function(){
-      const pills = $$('.list-tabs .pill');
+      const pills = $$('.mobile-tabs .pill');
       const cols = { colActive: $('#colActive'), colPending: $('#colPending'), colExpired: $('#colExpired') };
-      function activate(key){
-        Object.values(cols).forEach(c=>c.classList.remove('show'));
-        cols[key].classList.add('show');
-      }
       pills.forEach(btn=>{
         btn.addEventListener('click', ()=>{
           pills.forEach(b=>b.classList.remove('active'));
           btn.classList.add('active');
-          activate(btn.dataset.target);
+          const t = btn.dataset.target;
+          Object.keys(cols).forEach(k => cols[k].classList.toggle('show', k===t));
+          cols[t].style.marginBottom = '16px';
         });
       });
-      activate('colActive');
     })();
 
-    // ===== Username Modal kontrol =====
-    const modal = $('#unameModal');
-    const unameInput = $('#unameInput');
-    const unameErr = $('#unameErr');
-    const unameOk  = $('#unameOk');
-    const showModal = (val='')=>{
-      unameInput.value = val;
-      unameErr.style.display='none'; unameOk.style.display='none';
-      modal.style.display='flex';
-      unameInput.focus();
-    };
-    const hideModal = ()=>{ modal.style.display='none'; };
-
-    function suggestFromEmail(email){
-      const local = (email||'').split('@')[0] || '';
-      let s = normalize(local);
-      s = s.replace(/[^a-z0-9._-]/g,'').slice(0,20);
-      if(s.length<3) s = 'user'+Math.floor(Math.random()*1000);
-      return s;
+    // Ortalama yıldız (statik örnek)
+    function setAvgStars(val){
+      const paths = $('#avgStars').querySelectorAll('path');
+      paths.forEach((p,i)=> p.setAttribute('fill', i<val ? '#b91c1c' : 'none'));
+      $('#avgText').textContent = `${val}/5 • 0 oy`;
     }
-    function validateUname(u){
-      if(!/^[a-z0-9._-]{3,20}$/.test(u)) return '3–20 karakter; harf/rakam . _ - kullanılabilir.';
-      if(/^[._-]/.test(u) || /[._-]$/.test(u)) return 'Başta/sonda . _ - olamaz.';
-      if(/(\.\.|__|--)/.test(u)) return 'Ardışık ayraç kullanmayın.';
-      return '';
-    }
+    setAvgStars(0);
 
-    async function checkAvailable(u){
-      const s = await getDoc(doc(db,"usernames",u));
-      return !s.exists();
-    }
-
-    $('#unameCancel').addEventListener('click', hideModal);
-    $('#unameSave').addEventListener('click', async ()=>{
-      const raw = normalize(unameInput.value);
-      const err = validateUname(raw);
-      if(err){ unameErr.textContent = err; unameErr.style.display='block'; unameOk.style.display='none'; return; }
-      unameErr.style.display='none';
-      try{
-        const available = await checkAvailable(raw);
-        if(!available){ unameErr.textContent='Bu kullanıcı adı alınmış.'; unameErr.style.display='block'; return; }
-        // auth.user burada mevcut; onAuthStateChanged içinde bağlanacak
-        const u = auth.currentUser;
-        await reserveAndSaveUsername(raw, u.uid);
-        unameOk.style.display='block';
-        setTimeout(()=>{ hideModal(); }, 400);
-        // rozet ve inputu güncelle
-        setText('#usernameBadge','@'+raw);
-        setInput('#inpUsername', raw);
-      }catch(e){
-        unameErr.textContent='Kaydedilemedi. Tekrar deneyin.'; unameErr.style.display='block';
+    // --------- ANA: Firestore'dan oku + fallback ----------
+    onAuthStateChanged(auth, async (user) => {
+      if (!user){
+        // Auth yoksa: URL -> localStorage -> boş
+        const rec = fromQuery() || fromLocal() || {};
+        fillFields(rec, null);
+        return;
       }
-    });
-
-    // ---- Auth akışı ----
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ fillFields({}, null, '', false); return; }
-
       try{
-        const uref = doc(db,'users', user.uid);
-        const snap = await getDoc(uref);
-        const data = snap.exists() ? snap.data() : {};
-
-        // Kullanıcı adı:
-        if (data.username){
-          setText('#usernameBadge','@'+data.username);
-          setInput('#inpUsername', data.username);
-        } else if (isGoogle(user)) {
-          // Google ile giriş: kullanıcıya bir defalık seçim yaptır
-          const suggestion = suggestFromEmail(user.email || '');
-          showModal(suggestion);
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          fillFields(snap.data(), user);
         } else {
-          // email/password kaydı: username zaten kayıt akışında belirlenmiş olmalı; yoksa boş bırak
-          setText('#usernameBadge','@—');
-          setInput('#inpUsername','');
+          // Firestore dokümanı yok → Auth + fallback
+          fillFields({}, user);
+          const rec = fromQuery() || fromLocal() || {};
+          // Auth'tan eksik kalanları URL/local ile tamamla
+          fillFields({...rec, email: rec.email || user.email}, user);
         }
-
-        // İSİM/SOYİSİM DOLDURMA
-        // Google: displayName varsa kullan; yoksa e-postadan türet.
-        // Password: SADECE Firestore'daki firstName/lastName'ı göster (mailden türetme YOK).
-        const useEmailFallback = isGoogle(user);
-        fillFields(data, user, data.username || '', useEmailFallback);
-
-        // E-posta alanı
-        if (!data.email && user.email){
-          await setDoc(uref, { email: user.email }, { merge:true });
-        }
-
-        // Eğer Google ve first/last boşsa, displayName/email'den bir kere yaz (kayıt için)
-        if (isGoogle(user) && (!data.firstName || !data.lastName)){
-          const dn = splitDisplay(user.displayName);
-          const em = namesFromEmail(user.email||'');
-          const payload = {};
-          if (!data.firstName) payload.firstName = dn.first || em.first || '';
-          if (!data.lastName)  payload.lastName  = dn.last  || em.last  || '';
-          if (Object.keys(payload).length){
-            await setDoc(uref, payload, { merge:true });
-          }
-        }
-
-      }catch(e){
-        console.error('Profil doldurma hatası:', e);
-        // Yine de ekranda minimum bilgiyi göster
-        setText('#usernameBadge','@—');
-        fillFields({}, user, '', isGoogle(user));
+      }catch(err){
+        console.error('Firestore read error:', err);
+        // Hata olursa Auth + fallback yine çalışsın
+        fillFields({}, user);
+        const rec = fromQuery() || fromLocal() || {};
+        fillFields({...rec, email: rec.email || user.email}, user);
       }
     });
   </script>
