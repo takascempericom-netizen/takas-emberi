@@ -1,3 +1,11 @@
+# auth.html — TAM DÜZELTİLMİŞ SÜRÜM
+
+> • Ana sayfa/çıkış gibi site navigasyonu **gizlenir** (sadece bu sayfada).
+> • **Şifre göster/gizle** butonları eklendi (giriş + kayıt).
+> • **Şifre sıfırlama** düzgün çalışır (devam URL’si bu sayfaya ayarlı).
+> • Girişten sonra güvenli yönlendirme: `?next=` varsa sadece **aynı sitede ve .html** sayfalarına.
+
+```html
 <!doctype html>
 <html lang="tr">
 <head>
@@ -166,7 +174,8 @@
   import {
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     sendEmailVerification, sendPasswordResetEmail,
-    GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence
+    GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence,
+    fetchSignInMethodsForEmail
   } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
   import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
 
@@ -208,8 +217,6 @@
   const svgEyeOff = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-6.94"></path><path d="M23 12s-2-4-6-6"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
   function setEye(btn, visible){ btn.innerHTML = visible ? svgEyeOff : svgEye; btn.setAttribute('aria-pressed', String(visible)); }
   document.querySelectorAll('[data-toggle]').forEach(b=> setEye(b,false));
-
-  // Toggle göz / clear
   document.addEventListener('click',(e)=>{
     const t=e.target.closest('[data-toggle]');
     if(t){ const inp=$(t.getAttribute('data-toggle')); if(!inp) return; const toText = inp.type==='password'; inp.type = toText ? 'text':'password'; setEye(t, toText); }
@@ -238,14 +245,18 @@
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Şifre sıfırlama (bu sayfaya döndür)
+  // Şifre sıfırlama (sağlam sürüm)
   $('#btnForgot').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim();
     if(!email) return setMsg(liStatus,'Sıfırlama için e-posta gir.','err');
     try{
-      await sendPasswordResetEmail(auth,email,{ url: location.origin + '/auth.html' });
-      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
-    }catch(e){setMsg(liStatus,errText(e),'err');}
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if(!methods.includes('password')){
+        return setMsg(liStatus,'Bu hesap parola ile giriş yapmıyor. "Google ile devam et"i kullanın ya da önce hesaba parola ekleyin.','err');
+      }
+      await sendPasswordResetEmail(auth,email,{ url: `${location.origin}/auth.html`, handleCodeInApp:false });
+      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörünü de kontrol et)','ok');
+    }catch(e){ setMsg(liStatus,errText(e),'err'); }
   });
 
   // Google (hesap seçtir)
