@@ -8,16 +8,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --txt:#0b1020; --muted:#2b3b62; --pri:#5b8aff; --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --stroke:rgba(0,0,0,.12);
+      --txt:#0b1020; --muted:#2b3b62; --pri:#5b8aff;
+      --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --stroke:rgba(0,0,0,.12);
       --g1:#ff7a7a; --g2:#ffd166; --g3:#6ee7ff; --g4:#9b8cff; --g5:#4ade80;
       --card:rgba(255,255,255,.86); --card2:rgba(255,255,255,.94);
       --mbnav-h:72px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);
+    body{
+      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);
       background:linear-gradient(120deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5));
-      background-size:300% 300%;animation:gradientShift 18s ease infinite;min-height:100vh}
+      background-size:300% 300%;animation:gradientShift 18s ease infinite;min-height:100vh
+    }
     @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     a{color:inherit;text-decoration:none}
     img{max-width:100%;display:block}
@@ -28,23 +31,22 @@
     .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke)}
     .brand b{font-weight:800;letter-spacing:.3px}
 
-    /* NAV */
     nav.desktop{display:flex;gap:8px;align-items:center}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
-    .btn.ghost{background:transparent}
-    .btn.pri{background:var(--pri);border-color:transparent;color:white}
     .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
-    .only-desktop{display:inline-flex}
-    .only-mobile{display:none}
 
     /* GRID ALANLARI */
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;grid-template-areas:
-      "left right"
-      "full full";
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    #secProfile{order:1}
+    #secPassword{order:2}
+    #secListings{order:3}
+
+    @media(min-width:880px){
+      .grid{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "full full";}
+      #secProfile{grid-area:left;order:0}
+      #secPassword{grid-area:right;order:0}
+      #secListings{grid-area:full;order:1}
     }
-    #secProfile{grid-area:left}
-    #secPassword{grid-area:right}
-    #secListings{grid-area:full}
 
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08)}
     .card .hd{padding:14px 16px;border-bottom:1px solid var(--stroke);font-weight:800;color:#0b1020;background:var(--card2)}
@@ -61,10 +63,10 @@
     .field input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
     .field input[disabled]{opacity:.8}
 
-    .pwgrid{display:grid;grid-template-columns:1fr;gap:10px;max-width:420px}
+    .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
     .pwgrid input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
 
-    /* LİSTELER: Üçlü kolon */
+    /* İLANLAR */
     .lists-triple{display:grid;gap:12px}
     .col{background:rgba(255,255,255,.88);border:1px solid var(--stroke);border-radius:14px;padding:12px}
     .col h3{margin:6px 0 10px}
@@ -80,43 +82,26 @@
 
     /* Yıldızlar */
     .stars{display:inline-flex;gap:6px}
-    .stars span,.stars button{font-size:22px;line-height:1;background:none;border:none;cursor:pointer}
-    .stars.readonly button{cursor:default}
-    /* Sahip görünümü: bayrak gibi dalgalanan arka plan + yıldız/barkap renk senkron */
+    .stars span{font-size:22px;line-height:1}
     .ownerStars{position:relative;padding:10px 12px;border-radius:12px;overflow:hidden;margin-bottom:8px}
     .ownerStars::before{content:"";position:absolute;inset:0;z-index:0;
-      background:linear-gradient(120deg,#b91c1c,#ef4444,#ffffff,#ffffff,#ef4444,#b91c1c);
+      background:linear-gradient(120deg,#b91c1c,#ef4444,#ffffff,#ef4444,#b91c1c);
       background-size:300% 300%;
-      animation:flagWave 4s ease-in-out infinite, bgFlip 4s ease-in-out infinite;
-      filter:saturate(1.2) brightness(1.05);
+      animation:flagWave 4s ease-in-out infinite;
     }
     .ownerStars .stars{position:relative;z-index:1}
-    .ownerStars .stars span{animation:starFlip 4s ease-in-out infinite; text-shadow:0 0 8px rgba(255,255,255,.75),0 0 16px rgba(239,68,68,.45)}
-
+    .ownerStars .stars span{animation:starFlip 4s ease-in-out infinite;text-shadow:0 0 8px rgba(255,255,255,.9)}
     @keyframes flagWave{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    /* Arka plan kırmızı -> beyaz -> kırmızı */
-    @keyframes bgFlip{0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(0deg) brightness(1.12)}100%{filter:hue-rotate(0deg)}}
-    /* Yıldız rengi senkron: bg kırmızı iken yıldız beyaz; bg beyaz iken yıldız kırmızı */
-    @keyframes starFlip{0%{color:#ffffff}50%{color:#b91c1c}100%{color:#ffffff}}
+    @keyframes starFlip{0%{color:#fff}50%{color:#b91c1c}100%{color:#fff}}
 
-    .row{display:flex;gap:8px;flex-wrap:wrap}display:flex;gap:8px;flex-wrap:wrap}
-    .spacer{height:8px}
-
-    /* Mobil alt bar */
+    /* Alt bar mobil */
     .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
-    .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:10px;border:1px solid transparent;color:#0b1020}
-    .mbnav a.active{border-color:var(--stroke)}
+    .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
+    .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
 
-    /* RESPONSIVE: Mobilde sadece Çıkış üstte, alt barda 3 ikon; masaüstünde alt bar yok */
-    @media(max-width:879px){
-      .only-desktop{display:none}
-      .only-mobile{display:inline-flex}
-      nav.desktop .btn:not(#btnLogout){display:none}
-      .wrap{padding-bottom:calc(var(--mbnav-h) + 16px)}
-      .lists-triple{grid-template-columns:1fr}
-    }
     @media(min-width:880px){
       .mbnav{display:none}
+      .grid{grid-template-columns:1fr 1fr;gap:16px}
       .lists-triple{grid-template-columns:repeat(3,1fr)}
     }
   </style>
@@ -125,163 +110,95 @@
   <div class="wrap">
     <header class="hd">
       <div class="brand">
-        <img src="/logo-64.png" alt="TC" onerror="this.src='https://dummyimage.com/96x96/ffffff/000&text=TC'"/>
+        <img src="./assets/img/seffaf.png" alt="Logo">
         <div>
           <b>Takas Çemberi</b>
           <div class="muted" id="hdrSub">Profil</div>
         </div>
       </div>
       <nav class="desktop">
-        <a class="btn only-desktop" href="home.html">🏠 Sayfa</a>
-        <a class="btn only-desktop" href="messages.html">💬 Mesajlar</a>
-        <a class="btn only-desktop" href="notifications.html">🔔 Bildirimler</a>
-        <button class="btn warn only-mobile" id="btnLogoutTop">🚪 Çıkış</button>
-        <button class="btn warn only-desktop" id="btnLogout">🚪 Çıkış</button>
+        <a class="btn" href="home.html">🏠 Sayfa</a>
+        <a class="btn" href="messages.html">💬 Mesajlar</a>
+        <a class="btn" href="notifications.html">🔔 Bildirimler</a>
+        <button class="btn warn" id="btnLogout">🚪 Çıkış</button>
       </nav>
     </header>
 
     <div class="grid">
-      <!-- SOL: Profil + Puanlama -->
+      <!-- Profil -->
       <section id="secProfile" class="card">
         <div class="hd">Profil</div>
         <div class="bd">
           <div class="profileRow">
-            <div class="avatar"><img id="avatar" alt="Profil"/></div>
+            <div class="avatar"><img id="avatar" alt="Profil"></div>
             <div>
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                <h2 id="displayName" style="margin:0;font-size:1.4rem"></h2>
-                <span class="badge" id="usernameBadge"></span>
-              </div>
+              <h2 id="displayName" style="margin:0;font-size:1.4rem"></h2>
+              <span class="badge" id="usernameBadge"></span>
               <div class="muted" id="publicInfo"></div>
-              <div class="spacer"></div>
-              <div class="row" id="ownerActions" style="display:none">
-                <label class="btn">
-                  📷 Resmi Değiştir
-                  <input type="file" id="fileAvatar" accept="image/*" style="display:none" />
-                </label>
-              </div>
-              <div class="row" id="visitorActions" style="display:none">
-                <a class="btn pri" id="btnMsg">💬 Mesaj Gönder</a>
-              </div>
             </div>
           </div>
-
           <div class="spacer"></div>
-
-          <div class="card" style="margin-top:8px">
-            <div class="hd">Puanlama</div>
-            <div class="bd">
-              <div id="ownerStarsWrap" class="ownerStars" style="display:none">
-                <div class="stars readonly" id="ownerStars"></div>
-              </div>
-              <div class="stars readonly" id="avgStars"></div>
-              <div class="muted" id="avgText">0/5 • 0 oy</div>
-              <div id="rateBox" style="display:none;margin-top:8px">
-                <div class="muted" style="margin-bottom:4px">Bu kullanıcıyı puanla (1‑5)</div>
-                <div class="stars" id="rateStars"></div>
-              </div>
-            </div>
+          <div class="fields">
+            <div class="field"><label>İsim</label><input id="inpFirst" disabled></div>
+            <div class="field"><label>Soyisim</label><input id="inpLast" disabled></div>
+            <div class="field"><label>Kullanıcı Adı</label><input id="inpUsername" disabled></div>
+            <div class="field"><label>Telefon</label><input id="inpPhone" disabled></div>
+            <div class="field"><label>E-posta</label><input id="inpEmail" disabled></div>
           </div>
         </div>
       </section>
 
-      <!-- SAĞ: Şifre Değiştir -->
+      <!-- Şifre -->
       <section id="secPassword" class="card">
         <div class="hd">Şifre Değiştir</div>
         <div class="bd">
           <div class="pwgrid">
-            <input type="password" id="pwOld" placeholder="Mevcut şifre" autocomplete="current-password"/>
-            <input type="password" id="pwNew" placeholder="Yeni şifre" autocomplete="new-password"/>
-            <input type="password" id="pwNew2" placeholder="Yeni şifre (tekrar)" autocomplete="new-password"/>
+            <input type="password" id="pwOld" placeholder="Mevcut şifre">
+            <input type="password" id="pwNew" placeholder="Yeni şifre">
+            <input type="password" id="pwNew2" placeholder="Yeni şifre (tekrar)">
             <button class="btn pri" id="btnPw">Değişikliği Onayla</button>
-            <div class="muted" id="pwHint">• Eski şifre sorulur. • Yeni şifre iki kez girilir.</div>
-            <div id="pwMsg" class="muted"></div>
+            <div class="muted">• Eski şifre sorulur. • Yeni şifre iki kez girilir.</div>
           </div>
         </div>
       </section>
 
-      <!-- ALTA: İlanlar (tam genişlik, üç sütun) -->
+      <!-- Puanlama -->
+      <section class="card">
+        <div class="hd">Puanlama</div>
+        <div class="bd">
+          <div id="ownerStarsWrap" class="ownerStars" style="display:none">
+            <div class="stars" id="ownerStars"></div>
+          </div>
+          <div class="stars readonly" id="avgStars"></div>
+          <div class="muted" id="avgText">0/5 • 0 oy</div>
+          <div id="rateBox" style="display:none;margin-top:8px">
+            <div class="muted">Bu kullanıcıyı puanla (1-5)</div>
+            <div class="stars" id="rateStars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- İlanlar -->
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
         <div class="bd">
-          <div class="muted" id="listInfo" style="margin-bottom:10px"></div>
           <div class="lists-triple">
-            <div class="col">
-              <h3>Yayındakiler</h3>
-              <div class="listings" id="listActive"></div>
-            </div>
-            <div class="col" id="colPending">
-              <h3>Onay Bekleyenler</h3>
-              <div class="listings" id="listPending"></div>
-            </div>
-            <div class="col">
-              <h3>Süresi Dolanlar</h3>
-              <div class="listings" id="listExpired"></div>
-            </div>
+            <div class="col"><h3>Yayındakiler</h3><div class="listings" id="listActive"></div></div>
+            <div class="col"><h3>Onay Bekleyenler</h3><div class="listings" id="listPending"></div></div>
+            <div class="col"><h3>Süresi Dolanlar</h3><div class="listings" id="listExpired"></div></div>
           </div>
         </div>
       </section>
     </div>
   </div>
 
-  <!-- Mobil alt bar: sadece 3 ikon -->
+  <!-- Mobil alt bar -->
   <nav class="mbnav">
-    <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
+    <a href="home.html">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
     <a href="notifications.html">🔔<small>Bildirimler</small></a>
   </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
-
-    const firebaseConfig = { /* kendi config'in */ };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    const $ = s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
-    const fmtDaysLeft = ms=>{const d=Math.ceil(ms/86400000);return d<=0?'Süre doldu':`${d} gün kaldı`};
-    const byParam = k=> new URL(location.href).searchParams.get(k);
-    const state={me:null,viewUid:null,isOwner:false,viewUser:null};
-
-    // Çıkış (masaüstü ve mobil üst buton)
-    $('#btnLogout')?.addEventListener('click', async()=>{try{await signOut(auth);location.href='auth.html?next=home.html'}catch(e){alert('Çıkış başarısız: '+e.message)}});
-    $('#btnLogoutTop')?.addEventListener('click', async()=>{try{await signOut(auth);location.href='auth.html?next=home.html'}catch(e){alert('Çıkış başarısız: '+e.message)}});
-
-    function renderStars(el,val){el.innerHTML='';for(let i=1;i<=5;i++){const s=document.createElement('span');s.textContent=i<=val?'★':'☆';el.appendChild(s)}}
-    function buildClickableStars(el,onPick){el.innerHTML='';for(let i=1;i<=5;i++){const b=document.createElement('button');b.type='button';b.textContent='☆';b.addEventListener('mouseenter',()=>{$$('#rateStars button').forEach((x,ix)=>x.textContent=ix<i?'★':'☆')});b.addEventListener('mouseleave',()=>{$$('#rateStars button').forEach(x=>x.textContent='☆')});b.addEventListener('click',()=>onPick(i));el.appendChild(b)}}
-
-    async function ensureUserDoc(uid){const uref=doc(db,'users',uid);const s=await getDoc(uref);if(!s.exists()) await setDoc(uref,{createdAt:serverTimestamp(),ratingAvg:0,ratingCount:0});return uref}
-    async function submitRating(targetUid,raterUid,val){const rref=doc(db,'ratings',targetUid,'by',raterUid);const rs=await getDoc(rref);if(rs.exists()) throw new Error('Bu kullanıcıyı zaten puanladınız.');await setDoc(rref,{value:val,ts:serverTimestamp()});const uref=await ensureUserDoc(targetUid);const us=await getDoc(uref);const {ratingAvg=0,ratingCount=0}=us.data()||{};const newCount=ratingCount+1;const newAvg=((ratingAvg*ratingCount)+val)/newCount;await updateDoc(uref,{ratingAvg:newAvg,ratingCount:newCount});return {newAvg,newCount}}
-    async function loadAvg(targetUid){const us=await getDoc(doc(db,'users',targetUid));const {ratingAvg=0,ratingCount=0}=us.exists()?(us.data()||{}):{ratingAvg:0,ratingCount:0};renderStars($('#avgStars'),Math.round(ratingAvg));$('#avgText').textContent=`${(ratingAvg||0).toFixed(1)}/5 • ${ratingCount} oy`}
-
-    async function loadProfile(uid){const uref=doc(db,'users',uid);const s=await getDoc(uref);if(!s.exists()) throw new Error('Kullanıcı profili bulunamadı');const u=s.data();state.viewUser=u;$('#displayName').textContent=(u.displayName||`${u.firstName||''} ${u.lastName||''}`).trim();$('#usernameBadge').textContent='@'+(u.username||'kullanici');$('#avatar').src=u.photoURL||'https://dummyimage.com/300x300/ffffff/000&text=👤';$('#inpFirst').value=u.firstName||'';$('#inpLast').value=u.lastName||'';$('#inpUsername').value=u.username||'';$('#inpPhone').value=(state.isOwner?(u.phone||''):'Gizli');if(state.isOwner){$('#publicInfo').textContent=u.email?`E-posta: ${u.email} (gizli) • Telefon: ${(u.phone||'—')} (gizli)`:'';$('#ownerActions').style.display='flex';$('#visitorActions').style.display='none';// Sahip: sabit 5 yıldız ve dalgalı arka plan
-      $('#ownerStarsWrap').style.display='block';renderStars($('#ownerStars'),5);
-    }else{$('#publicInfo').textContent='İsim, soyisim, telefon ve e‑posta gizlidir.';$('#ownerActions').style.display='none';$('#visitorActions').style.display='flex'}
-      await loadAvg(uid);
-      if(state.me && !state.isOwner){const gave=await getDoc(doc(db,'ratings',uid,'by',state.me.uid));$('#rateBox').style.display=gave.exists()?'none':'block'}
-      $('#btnMsg')?.addEventListener('click',()=>{location.href=`messages.html?to=${encodeURIComponent(uid)}`})}
-
-    $('#fileAvatar')?.addEventListener('change',async(e)=>{if(!state.isOwner) return;const f=e.target.files?.[0];if(!f) return;try{const r=sRef(storage,`profiles/${state.me.uid}.jpg`);await uploadBytes(r,f);const url=await getDownloadURL(r);await updateDoc(doc(db,'users',state.me.uid),{photoURL:url});$('#avatar').src=url;alert('Profil fotoğrafı güncellendi.')}catch(err){alert('Yükleme hatası: '+err.message)}});
-
-    $('#btnPw')?.addEventListener('click',async()=>{const oldP=$('#pwOld').value.trim();const np=$('#pwNew').value.trim();const np2=$('#pwNew2').value.trim();const msg=$('#pwMsg');msg.textContent='';if(!oldP||!np||!np2){msg.textContent='Lütfen tüm alanları doldurun.';return}if(np!==np2){msg.textContent='Yeni şifreler eşleşmiyor.';return}try{const user=auth.currentUser;if(!user) throw new Error('Oturum bulunamadı');const cred=EmailAuthProvider.credential(user.email,oldP);await reauthenticateWithCredential(user,cred);await updatePassword(user,np);msg.textContent='✅ Şifre değiştirildi.';$('#pwOld').value=$('#pwNew').value=$('#pwNew2').value=''}catch(e){msg.textContent='❌ '+e.message}});
-
-    buildClickableStars($('#rateStars'), async(val)=>{try{await submitRating(state.viewUid,state.me.uid,val);await loadAvg(state.viewUid);$('#rateBox').style.display='none';alert('Teşekkürler! Oy verdiniz.')}catch(e){alert(e.message)}});
-
-    const DAYS30=30*86400000;
-    function card(item,badgeType,badgeText,daysLeft){const d=document.createElement('div');d.className='listing';d.innerHTML=`<div class="thumb">${ item.coverURL?`<img src="${item.coverURL}" alt="">`:'<span class="muted">Görsel yok</span>'}</div><div class="meta"><div style="font-weight:600">${item.title||'İlan'}</div><div class="row" style="justify-content:space-between;align-items:center"><span class="badge ${badgeType}">${badgeText}</span><span class="muted" style="font-size:.85rem">${daysLeft||''}</span></div></div>`;return d}
-
-    async function loadListings(uid){const q1=query(collection(db,'listings'), where('ownerId','==',uid), orderBy('createdAt','desc'));const snap=await getDocs(q1);const now=Date.now();const active=[],pending=[],expired=[];snap.forEach(docu=>{const it=docu.data();const ts=it.createdAt?.toMillis?it.createdAt.toMillis():(it.createdAt||0);const left=(ts? ts+DAYS30-now:-1);const isExpired=left<=0;const isApproved=it.status==='approved';const isPending=it.status==='pending';if(isPending) pending.push({it,left}); else if(isApproved && !isExpired) active.push({it,left}); else expired.push({it,left})});
-      const A=$('#listActive'),P=$('#listPending'),E=$('#listExpired');A.innerHTML='';P.innerHTML='';E.innerHTML='';active.forEach(({it,left})=>A.appendChild(card(it,'ok','Yayında',fmtDaysLeft(left))));pending.forEach(({it,left})=>P.appendChild(card(it,'warn','Onay bekliyor',fmtDaysLeft(left))));expired.forEach(({it,left})=>E.appendChild(card(it,'err','Süresi doldu','—')));
-      // Ziyaretçi: "Onay Bekleyenler" sütununu gizle
-      if(!state.isOwner){$('#colPending').style.display='none'}
-      $('#listInfo').textContent='İlanlar 30 gün yayında kalır. 1 ücretsiz ilan hakkı (ücret detayları sonra).'}
-
-    onAuthStateChanged(auth, async(user)=>{const paramUid=byParam('uid');if(!user && !paramUid){location.href='auth.html?next=profile.html';return}state.me=user||null;state.viewUid=paramUid||(user?user.uid:null);state.isOwner=!!(user && state.viewUid===user.uid);$('#hdrSub').textContent=state.isOwner?'Profilim':'Kullanıcı Profili';try{await loadProfile(state.viewUid);await loadListings(state.viewUid)}catch(e){alert('Profil yüklenemedi: '+e.message)}});
-  </script>
+  <!-- Firebase kodları buraya gelecek -->
 </body>
 </html>
