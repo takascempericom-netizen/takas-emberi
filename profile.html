@@ -2,323 +2,423 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Profil • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --txt:#0b1020; --muted:#2b3b62; --pri:#5b8aff;
-      --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --stroke:rgba(0,0,0,.12);
-      --g1:#ff7a7a; --g2:#ffd166; --g3:#6ee7ff; --g4:#9b8cff; --g5:#4ade80;
-      --card:rgba(255,255,255,.86); --card2:rgba(255,255,255,.94);
-      --mbnav-h:72px;
-      --star-fill:#ffffff; --star-stroke:#b91c1c;
+      --bg:#0a0a0a; --card:#111319; --muted:#7e8aa6; --txt:#f5f7ff; --accent:#ff163e; --accent2:#ff5a00;
+      --stroke:#202636; --good:#10b981; --warn:#f59e0b; --bad:#ef4444; --pink:#ff006e;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    html,body{overflow-x:hidden}
-    body{
-      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--txt);
-      background:linear-gradient(120deg,var(--g1),var(--g2),var(--g3),var(--g4),var(--g5));
-      background-size:300% 300%;animation:gradientShift 18s ease infinite;min-height:100vh
-    }
-    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    body{margin:0;background:linear-gradient(135deg,#0d0f1a,#141827 25%,#1b2034 55%,#2a1238 80%,#3a0d3a);
+         color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
-    img{max-width:100%;display:block}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px;
-      padding-bottom:calc(var(--mbnav-h) + 72px + env(safe-area-inset-bottom,0px));
-    }
-    header.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:14px;position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--stroke);border-radius:16px;z-index:50}
-    .brand{display:flex;align-items:center;gap:10px}
-    .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke);object-fit:contain;background:#fff}
-    nav.desktop{display:none;gap:8px;align-items:center}
-    nav.mobileTop{display:flex;gap:8px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
-    .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    #secProfile{order:1}
-    #secPassword{order:2}
-    #secRating{order:3}
-    #secListings{order:4}
-    @media(min-width:880px){
-      nav.desktop{display:flex} nav.mobileTop{display:none}
-      .grid{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "full1 full1" "full2 full2"}
-      #secProfile{grid-area:left} #secPassword{grid-area:right} #secRating{grid-area:full1} #secListings{grid-area:full2}
-    }
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-    .card .hd{padding:14px 16px;border-bottom:1px solid var(--stroke);font-weight:800;color:#0b1020;background:var(--card2)}
-    .card .bd{padding:16px}
-    .profileRow{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center}
-    .avatar{width:96px;height:96px;border-radius:18px;overflow:hidden;border:1px solid var(--stroke);background:#fff;display:grid;place-items:center}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .topbar{position:sticky;top:0;z-index:30;background:rgba(9,10,18,.7);backdrop-filter:blur(8px);
+            border-bottom:1px solid var(--stroke)}
+    .topbar .in{display:flex;align-items:center;gap:12px;min-height:64px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .logo .dot{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #ffd2d2 30%, #ff163e 55%, #d6002c 100%);box-shadow:0 0 20px #ff3b5c80}
+    .grow{flex:1}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:14px;background:#0e1220;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:white;font-weight:700}
+    .btn.ghost{background:transparent}
+
+    /* profile header */
+    .profile{margin-top:18px;background:linear-gradient(180deg,#111425cc,#0d1120e6 60%,#0a0d1ad9);
+             border:1px solid var(--stroke); border-radius:20px; overflow:hidden}
+    .cover{height:160px;background:conic-gradient(from 180deg at 30% 50%, #ff163e, #ff5a00, #7c3aed, #06b6d4, #ff163e);
+           filter:contrast(110%) saturate(120%);position:relative}
+    .cover::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 70% -10%,#ffffff33,transparent 40%) }
+    .p-in{display:flex;gap:18px;padding:16px}
+    .avatar{margin-top:-64px;width:120px;height:120px;border-radius:30px;border:3px solid #0b0f1f;
+            background:#0b0f1f;overflow:hidden;box-shadow:0 8px 24px #0007}
     .avatar img{width:100%;height:100%;object-fit:cover}
-    .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field input{width:100%;height:44px;background:#fff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px}
-    .field input[disabled]{opacity:.95}
-    @media(max-width:879px){ .fields{grid-template-columns:1fr} }
-    .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
-    .pwgrid input{height:44px;background:#fff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px}
-    .pwgrid button{height:44px;border:1px solid var(--stroke);border-radius:12px}
-    /* Flag-Flip yıldızlar */
-    .ownerStars{display:flex;gap:12px;margin-bottom:8px}
-    .ownerStars svg{width:34px;height:34px;animation:wave 2s ease-in-out infinite}
-    .ownerStars svg:nth-child(2){animation-delay:.2s}
-    .ownerStars svg:nth-child(3){animation-delay:.4s}
-    .ownerStars svg:nth-child(4){animation-delay:.6s}
-    .ownerStars svg:nth-child(5){animation-delay:.8s}
-    @keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-    @keyframes starColorFlip{0%,100%{fill:#fff;stroke:#fff}50%{fill:#b91c1c;stroke:#b91c1c}}
-    .ownerStars path{animation:starColorFlip 3.5s ease-in-out infinite}
-    /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000}
-    .modal{background:#fff;border-radius:16px;padding:20px;max-width:400px;width:90%}
-    .modal input{width:100%;height:44px;border:1px solid var(--stroke);border-radius:8px;padding:0 12px;margin-top:8px}
-    .modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
-    .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:#fff;backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
-    .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center}
-    .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
-    @media(min-width:880px){ .mbnav{display:none} }
+    .p-meta{display:flex;flex-direction:column;gap:8px}
+    .p-name{font-size:26px;font-weight:800}
+    .p-username{opacity:.8}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* rating */
+    .rating{display:flex;align-items:center;gap:8px}
+    .stars{display:inline-flex;gap:5px;cursor:pointer}
+    .star{width:22px;height:22px;filter:drop-shadow(0 0 8px #ff3d)}
+    .star svg{width:100%;height:100%}
+    .star path{fill:#2d3348;transition:transform .15s ease, fill .15s ease}
+    .star.active path{fill:url(#g1)}
+
+    /* tabs */
+    .tabs{display:flex;gap:8px; border-bottom:1px solid var(--stroke); padding:0 12px}
+    .tab{padding:12px 14px; border:1px solid var(--stroke); border-bottom:none; border-top-left-radius:12px; border-top-right-radius:12px; background:#0e1220; cursor:pointer}
+    .tab.active{background:linear-gradient(180deg,#141b2e,#0e1324); font-weight:700}
+    .tab .badge{margin-left:6px;background:#1a2136;border:1px solid #263056;padding:2px 8px;border-radius:10px;font-size:12px}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+    .card{background:#0e1220;border:1px solid var(--stroke);border-radius:16px;overflow:hidden}
+    .card .hd{padding:10px 12px;border-bottom:1px solid var(--stroke);font-weight:700;display:flex;justify-content:space-between}
+    .card .bd{padding:12px}
+
+    /* quick actions */
+    .quick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .q{display:flex;align-items:center;justify-content:center;background:#0a0f1f;border:1px dashed #2b3246;min-height:44px;border-radius:12px}
+
+    /* listing card */
+    .listing{display:flex;gap:10px}
+    .thumb{width:84px;height:84px;background:#151a2a;border-radius:10px;overflow:hidden;border:1px solid #28304a}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .meta{display:flex;flex-direction:column;gap:6px}
+    .meta .t{font-weight:700}
+    .meta .muted{color:var(--muted);font-size:12px}
+    .pill{font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid #2c3451;background:#111628;display:inline-flex;align-items:center;gap:6px}
+    .pill.ok{border-color:#0c3;}
+    .pill.warn{border-color:#f59e0b}
+    .pill.bad{border-color:#ef4444}
+
+    /* mobile bottom bar */
+    .mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:10px;justify-content:space-around;align-items:center;background:#0b0f1f;border-top:1px solid var(--stroke);padding:10px}
+    .mbar a{display:flex;flex-direction:column;align-items:center;font-size:12px;opacity:.95}
+
+    /* mobile adjustments */
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .p-in{flex-direction:column}
+      .avatar{width:100px;height:100px;margin-top:-50px}
+    }
+
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,4,10,.7);z-index:50}
+    .modal.show{display:flex}
+    .sheet{width:min(520px,92vw);background:#0c1020;border:1px solid var(--stroke);border-radius:16px;overflow:hidden}
+    .sheet .hd{padding:12px 14px;border-bottom:1px solid var(--stroke);font-weight:800}
+    .sheet .bd{padding:14px}
+    .field{display:flex;gap:8px}
+    input[type=text]{flex:1;background:#0a0f1f;color:var(--txt);border:1px solid #2b3246;border-radius:12px;padding:10px 12px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="hd">
-      <div class="brand">
-        <img src="./assets/img/seffaf.png" alt="Logo">
-        <div>
-          <b>Takas Çemberi</b>
-          <div class="muted" id="hdrSub">Profil</div>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ff163e"/>
+        <stop offset="100%" stop-color="#ff5a00"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <div class="wrap in">
+      <div class="logo"><span class="dot"></span><a href="home.html">Takas Çemberi</a></div>
+      <div class="grow"></div>
+      <nav class="row hide-m">
+        <a class="btn ghost" href="messages.html">💬 Mesajlar</a>
+        <a class="btn ghost" href="notifications.html">🔔 Bildirimler</a>
+        <a class="btn" id="btnProfile">👤 Profil</a>
+        <a class="btn" id="btnLogout">🚪 Çıkış</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="profile">
+      <div class="cover"></div>
+      <div class="p-in">
+        <div class="avatar" id="avatarBox"><img id="avatarImg" alt="avatar" src=""/></div>
+        <div class="p-meta">
+          <div class="p-name" id="pName">—</div>
+          <div class="p-username" id="pUser">@—</div>
+          <div class="rating">
+            <div class="stars" id="stars"></div>
+            <div id="ratingInfo" class="muted">0.0 • 0 oy</div>
+          </div>
+          <div class="row">
+            <label class="btn" for="fileAvatar">📷 Resim Ekle / Değiştir</label>
+            <input id="fileAvatar" type="file" accept="image/*" style="display:none" />
+            <button class="btn" id="btnPwd">🔑 Şifre Değiştir</button>
+          </div>
         </div>
       </div>
 
-      <!-- Masaüstü menü -->
-      <nav class="desktop">
-        <a class="btn" href="home.html">🏠 Ana Sayfa</a>
-        <a class="btn" href="messages.html">💬 Mesajlar</a>
-        <a class="btn" href="notifications.html">🔔 Bildirimler</a>
-        <button class="btn warn" id="btnLogout">🚪 Çıkış</button>
-      </nav>
+      <div class="tabs">
+        <button class="tab active" data-tab="active">Yayında Olan <span class="badge" id="cntActive">0</span></button>
+        <button class="tab" data-tab="pending">Onay Bekleyen <span class="badge" id="cntPending">0</span></button>
+        <button class="tab" data-tab="expired">Süresi Dolan <span class="badge" id="cntExpired">0</span></button>
+      </div>
 
-      <!-- Mobil üst -->
-      <nav class="mobileTop">
-        <button class="btn warn" id="btnLogoutTop">🚪 Çıkış</button>
-      </nav>
-    </header>
+      <div class="grid" id="listings"></div>
+    </section>
 
-    <div class="grid">
-      <!-- Profil -->
-      <section id="secProfile" class="card">
-        <div class="hd">Profil</div>
-        <div class="bd">
-          <div class="profileRow">
-            <div class="avatar"><img id="avatar" alt="Profil"></div>
-            <div>
-              <h2 id="displayName" style="margin:0;font-size:1.4rem">—</h2>
-              <span class="badge" id="usernameBadge">@—</span>
-
-              <div class="row" style="margin-top:8px">
-                <label class="btn" style="padding:8px 12px">
-                  📷 Resim Ekle / Değiştir
-                  <input type="file" id="fileAvatar" accept="image/*" style="display:none">
-                </label>
-              </div>
-
-              <div class="muted" id="publicInfo">Kullanıcı bilgileri aşağıda görünür.</div>
-            </div>
-          </div>
-          <div class="fields" style="margin-top:16px">
-            <div class="field"><label>İsim</label><input id="inpFirst" disabled></div>
-            <div class="field"><label>Soyisim</label><input id="inpLast" disabled></div>
-            <div class="field"><label>Kullanıcı Adı</label><input id="inpUsername" disabled></div>
-            <div class="field"><label>Telefon</label><input id="inpPhone" disabled></div>
-            <div class="field"><label>E-posta</label><input id="inpEmail" disabled></div>
-          </div>
+    <section style="margin-top:14px" class="grid">
+      <div class="card">
+        <div class="hd">Hızlı İşlemler</div>
+        <div class="bd quick">
+          <a class="q" href="ilan-ekle.html">➕ İlan Ekle</a>
+          <a class="q" href="profile.html">👤 Profili Gör</a>
+          <a class="q" href="messages.html">💬 Mesajlar</a>
+          <a class="q" href="notifications.html">🔔 Bildirimler</a>
         </div>
-      </section>
+      </div>
+    </section>
+  </main>
 
-      <!-- Şifre -->
-      <section id="secPassword" class="card">
-        <div class="hd">Şifre Değiştir</div>
-        <div class="bd">
-          <div class="pwgrid">
-            <input type="password" id="pwOld" placeholder="Mevcut şifre">
-            <input type="password" id="pwNew" placeholder="Yeni şifre">
-            <input type="password" id="pwNew2" placeholder="Yeni şifre (tekrar)">
-            <button class="btn pri" id="btnPw">Değişikliği Onayla</button>
-            <div class="muted">• Eski şifre sorulur. • Yeni şifre iki kez girilir.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Puanlama -->
-      <section id="secRating" class="card">
-        <div class="hd">Puanlama</div>
-        <div class="bd">
-          <div class="ownerStars" id="ownerStars">
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"/></svg>
-          </div>
-          <div class="muted" id="avgText">0/5 • 0 oy</div>
-        </div>
-      </section>
-
-      <!-- İlanlar -->
-      <section id="secListings" class="card">
-        <div class="hd">İlanlar</div>
-        <div class="bd">
-          <div class="mobile-tabs">
-            <button class="pill active" data-target="colActive">Yayındakiler</button>
-            <button class="pill" data-target="colPending">Onay Bekleyenler</button>
-            <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
-          </div>
-
-          <div class="lists-triple">
-            <div class="col show" id="colActive">
-              <h3>Yayındakiler</h3>
-              <div class="listings" id="listActive"></div>
-            </div>
-            <div class="col" id="colPending">
-              <h3>Onay Bekleyenler</h3>
-              <div class="listings" id="listPending"></div>
-            </div>
-            <div class="col" id="colExpired">
-              <h3>Süresi Dolanlar</h3>
-              <div class="listings" id="listExpired"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <!-- Mobil alt bar -->
-  <nav class="mbnav">
-    <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
-    <a href="messages.html">💬<small>Mesajlar</small></a>
-    <a href="notifications.html">🔔<small>Bildirimler</small></a>
+  <!-- Mobile bottom bar -->
+  <nav class="mbar">
+    <a href="home.html">🏠<span style="margin-top:4px">Ana Sayfa</span></a>
+    <a href="messages.html">💬<span style="margin-top:4px">Mesajlar</span></a>
+    <a href="notifications.html">🔔<span style="margin-top:4px">Bildirimler</span></a>
+    <a href="profile.html">👤<span style="margin-top:4px">Profil</span></a>
   </nav>
 
-  <!-- Kullanıcı adı seçme modalı -->
-  <div class="modal-backdrop" id="usernameModal">
-    <div class="modal">
-      <h3>Kullanıcı Adı Seç</h3>
-      <input type="text" id="newUsername" placeholder="kullanıcı adın">
-      <div class="actions">
-        <button class="btn" id="cancelUsername">İptal</button>
-        <button class="btn pri" id="saveUsername">Kaydet</button>
+  <!-- Username modal -->
+  <div class="modal" id="mUser">
+    <div class="sheet">
+      <div class="hd">Kullanıcı Adı Seç</div>
+      <div class="bd">
+        <div class="field">
+          <input type="text" id="inpUsername" placeholder="kullaniciadi" minlength="3" maxlength="24"/>
+          <button class="btn primary" id="btnSaveUsername">Kaydet</button>
+          <button class="btn" id="btnCancelUsername">İptal</button>
+        </div>
+        <div id="uHelp" class="muted" style="margin-top:8px">Sadece harf, rakam ve alt çizgi. Boşluk yok.</div>
       </div>
-      <div class="muted" style="margin-top:6px">Bir defaya mahsus belirleyebilirsin.</div>
     </div>
   </div>
-  <!-- Firebase (CDN, modular) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
+  <script type="module">
+    // ==== Firebase SDKs (CDN) ====
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+
+    // TODO: Doldurun
+   const firebaseConfig = {
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+  authDomain: "ureten-eller-v2.firebaseapp.com",
+  projectId: "ureten-eller-v2",
+  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  messagingSenderId: "621494781131",
+  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+  };
+    
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
 
-    function setInput(id, val){ const el = $(id); if(el) el.value = val || ''; }
-    function setText(id, val){ const el = $(id); if(el) el.textContent = (val && String(val).trim()) ? val : '—'; }
+    const state = { user:null, userDoc:null, tab:'active', ratings:{avg:0,count:0} };
 
-    function fillFields(data={}, user=null){
-      const first = data.firstName || '';
-      const last  = data.lastName  || '';
-      const uname = data.username  || '';
-      const phone = data.phone     || '';
-      const email = data.email || user?.email || '';
+    // UI refs
+    const avatarImg = qs('#avatarImg');
+    const pName = qs('#pName');
+    const pUser = qs('#pUser');
+    const listingsEl = qs('#listings');
 
-      setText('#displayName', `${first} ${last}`.trim() || '—');
-      setText('#usernameBadge', uname ? '@'+uname : '@—');
-      setInput('#inpFirst', first);
-      setInput('#inpLast',  last);
-      setInput('#inpUsername', uname);
-      setInput('#inpPhone', phone);
-      setInput('#inpEmail', email);
+    // Build star widgets
+    const starsEl = qs('#stars');
+    const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
+    starsEl.innerHTML = [1,2,3,4,5].map(STAR_SVG).join('');
+
+    function setStars(v){
+      qsa('.star').forEach((el,i)=>{ el.classList.toggle('active', i < v); });
     }
 
-    // Avatar
-    const AVATAR_KEY = 'tc_profile_avatar';
-    const avatar = $('#avatar');
-    (function(){
-      const saved = localStorage.getItem(AVATAR_KEY);
-      avatar.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
-      $('#fileAvatar')?.addEventListener('change', e=>{
-        const f = e.target.files?.[0]; if(!f) return;
-        const reader = new FileReader();
-        reader.onload = ()=>{ avatar.src = reader.result; localStorage.setItem(AVATAR_KEY, reader.result); };
-        reader.readAsDataURL(f);
+    qsa('.star').forEach(el=>{
+      el.addEventListener('mouseenter',()=> setStars(Number(el.dataset.i)));
+      el.addEventListener('mouseleave',()=> setStars(Math.round(state.ratings.avg)));
+      el.addEventListener('click', async()=>{
+        const v = Number(el.dataset.i);
+        await submitRating(v);
       });
-    })();
-
-    // Çıkış
-    async function doLogout(){ try{ await signOut(auth);}catch{} location.href='auth.html'; }
-    $('#btnLogout')?.addEventListener('click', doLogout);
-    $('#btnLogoutTop')?.addEventListener('click', doLogout);
-
-    // Modal helper
-    function openModal(){ $('#usernameModal').style.display='flex'; }
-    function closeModal(){ $('#usernameModal').style.display='none'; }
-
-    $('#cancelUsername')?.addEventListener('click', closeModal);
-    $('#saveUsername')?.addEventListener('click', async ()=>{
-      const val = $('#newUsername').value.trim().toLowerCase();
-      if(!val) return;
-      const user = auth.currentUser;
-      if(!user) return;
-      try{
-        await setDoc(doc(db,'usernames',val),{uid:user.uid});
-        await setDoc(doc(db,'users',user.uid),{username:val,email:user.email,firstName:user.displayName?.split(' ')[0]||'',lastName:user.displayName?.split(' ')[1]||''},{merge:true});
-        closeModal();
-        location.reload();
-      }catch(err){ alert("Bu kullanıcı adı alınmış olabilir."); }
     });
 
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ fillFields(); return; }
-      try{
-        const ref = doc(db,'users',user.uid);
-        const snap = await getDoc(ref);
-        if(snap.exists()){
-          const data = snap.data();
-          fillFields(data,user);
-          if(!data.username){ openModal(); }
-        }else{
-          // yeni kullanıcı
-          const nameParts = (user.displayName||'').split(' ');
-          await setDoc(ref,{email:user.email,firstName:nameParts[0]||'',lastName:nameParts[1]||''});
-          fillFields({},user);
-          openModal();
-        }
-      }catch(e){
-        console.error(e);
-        fillFields({},user);
-      }
-    });
+    function formatCount(n){ return new Intl.NumberFormat('tr-TR').format(n||0); }
 
-    // Ortalama yıldız (dummy)
-    function setAvgStars(val){
-      $('#avgText').textContent = `${val}/5 • 0 oy`;
+    function slugify(x){
+      return (x||'')
+        .toLowerCase()
+        .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
+        .replace(/[^a-z0-9_]+/g,'')
+        .replace(/^[_]+|[_]+$/g,'')
+        .slice(0,24);
     }
-    setAvgStars(0);
+
+    function showModal(id, show=true){ qs(id).classList.toggle('show', show); }
+
+    // ====== Auth gate ======
+    onAuthStateChanged(auth, async (u)=>{
+      if(!u){ window.location.href = 'auth.html?next=profile.html'; return; }
+      state.user = u;
+      await ensureUserDoc(u);
+      await loadProfile(u);
+      attachHandlers();
+      await loadRatings(u.uid);
+      await loadListings();
+    });
+
+    async function ensureUserDoc(u){
+      const uref = doc(db,'users',u.uid);
+      const snap = await getDoc(uref);
+      const base = { email:u.email, displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:serverTimestamp() };
+      if(!snap.exists()){
+        // Pre-suggest a username from Google name
+        const suggested = await suggestUsername(u);
+        await setDoc(uref, { ...base, username: suggested, avgRating:0, ratingCount:0 });
+        // Reserve username in /usernames
+        if(suggested){ await setDoc(doc(db,'usernames',suggested), { uid:u.uid, createdAt:serverTimestamp() }); }
+      }
+    }
+
+    async function suggestUsername(u){
+      const dn = (u.displayName||u.email||'').split('@')[0];
+      const base = slugify(dn) || ('user'+(Math.random()*1000|0));
+      let candidate = base, i=0;
+      while(i<5){
+        const taken = await getDoc(doc(db,'usernames',candidate));
+        if(!taken.exists()) return candidate;
+        i++; candidate = base + (Math.random()*100|0);
+      }
+      return candidate;
+    }
+
+    async function loadProfile(u){
+      const snap = await getDoc(doc(db,'users',u.uid));
+      state.userDoc = snap.data();
+      pName.textContent = state.userDoc.displayName || u.displayName || '—';
+      pUser.textContent = '@' + (state.userDoc.username || 'kullanici');
+      avatarImg.src = state.userDoc.photoURL || u.photoURL || 'https://api.dicebear.com/9.x/identicon/svg?seed='+u.uid;
+      // If username missing or placeholder -> open modal
+      if(!state.userDoc.username || state.userDoc.username === 'kullanici'){
+        qs('#inpUsername').value = slugify((u.displayName||'kullanici').replace(/\s+/g,''));
+        showModal('#mUser',true);
+      }
+    }
+
+    function attachHandlers(){
+      qs('#btnLogout').addEventListener('click', async()=>{ await signOut(auth); window.location.href='auth.html'; });
+      qs('#btnPwd').addEventListener('click', async()=>{
+        if(!state.user?.email){ alert('Hesabınızda e‑posta yok.'); return; }
+        await sendPasswordResetEmail(auth, state.user.email);
+        alert('Şifre sıfırlama e‑postası gönderildi: '+state.user.email);
+      });
+      qs('#fileAvatar').addEventListener('change', onAvatarFile);
+      qsa('.tab').forEach(t=> t.addEventListener('click', ()=>{
+        qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+        state.tab = t.dataset.tab; renderListings();
+      }));
+      // username modal
+      qs('#btnCancelUsername').addEventListener('click', ()=> showModal('#mUser',false));
+      qs('#btnSaveUsername').addEventListener('click', saveUsername);
+    }
+
+    async function onAvatarFile(ev){
+      const file = ev.target.files?.[0]; if(!file) return;
+      const ref = sRef(storage, `avatars/${state.user.uid}.jpg`);
+      await uploadBytes(ref, file);
+      const url = await getDownloadURL(ref);
+      await updateDoc(doc(db,'users',state.user.uid), { photoURL:url });
+      avatarImg.src = url;
+    }
+
+    async function saveUsername(){
+      const raw = qs('#inpUsername').value.trim();
+      const u = slugify(raw);
+      if(u.length < 3){ qs('#uHelp').textContent = 'En az 3 karakter.'; return; }
+      const taken = await getDoc(doc(db,'usernames',u));
+      if(taken.exists()){ qs('#uHelp').textContent = 'Bu kullanıcı adı alınmış.'; return; }
+      // release old username if exists (optional: not implemented)
+      await setDoc(doc(db,'usernames',u), { uid:state.user.uid, createdAt:serverTimestamp() });
+      await updateDoc(doc(db,'users',state.user.uid), { username:u });
+      pUser.textContent = '@'+u; showModal('#mUser',false);
+    }
+
+    // ===== Ratings =====
+    async function loadRatings(uid){
+      // aggregate stored on user doc for speed
+      const u = await getDoc(doc(db,'users',uid));
+      const d = u.data();
+      state.ratings.avg = Number(d?.avgRating||0);
+      state.ratings.count = Number(d?.ratingCount||0);
+      qs('#ratingInfo').textContent = `${state.ratings.avg.toFixed(1)} • ${formatCount(state.ratings.count)} oy`;
+      setStars(Math.round(state.ratings.avg));
+    }
+
+    async function submitRating(v){
+      const key = `rated:${state.user.uid}`;
+      if(localStorage.getItem(key)){ alert('Bu profili zaten oyladın.'); return; }
+      // allow guest rating: if signed-in user is rating self, block; else record anonymous token
+      const toUid = state.user.uid; // profile owner (self page) — if later viewing others, set accordingly
+      const token = crypto.randomUUID?.() || String(Date.now());
+      await setDoc(doc(collection(db,'ratings')), { toUid, stars:v, createdAt:serverTimestamp(), by:`guest:${token}` });
+      // update aggregate
+      const uref = doc(db,'users',toUid);
+      const snap = await getDoc(uref); const d = snap.data()||{avgRating:0,ratingCount:0};
+      const total = d.avgRating * d.ratingCount + v;
+      const count = d.ratingCount + 1;
+      const avg = total / count;
+      await updateDoc(uref, { avgRating: avg, ratingCount: count });
+      state.ratings = {avg, count};
+      localStorage.setItem(key,'1');
+      await loadRatings(toUid);
+      alert('Teşekkürler! Oyun kaydedildi.');
+    }
+
+    // ===== Listings =====
+    const cache = { active:[], pending:[], expired:[] };
+
+    async function loadListings(){
+      // fetch my listings
+      const qref = query(collection(db,'listings'), where('ownerId','==', state.user.uid), orderBy('createdAt','desc'), limit(100));
+      const snap = await getDocs(qref);
+      cache.active = []; cache.pending = []; cache.expired = [];
+      const now = Date.now();
+      snap.forEach(docu=>{
+        const d = docu.data();
+        const expiresAt = (d.expiresAt?.toMillis?.() ? d.expiresAt.toMillis() : (d.createdAt?.toMillis?.()? d.createdAt.toMillis()+30*24*60*60*1000 : 0));
+        let status = d.status || 'pending';
+        if(status==='active' && expiresAt && expiresAt < now) status = 'expired';
+        const item = { id:docu.id, ...d, status, expiresAt };
+        if(status==='active') cache.active.push(item);
+        else if(status==='pending') cache.pending.push(item);
+        else cache.expired.push(item);
+      });
+      qs('#cntActive').textContent = cache.active.length;
+      qs('#cntPending').textContent = cache.pending.length;
+      qs('#cntExpired').textContent = cache.expired.length;
+      renderListings();
+    }
+
+    function renderListings(){
+      const arr = cache[state.tab]||[];
+      listingsEl.innerHTML = '';
+      if(arr.length===0){
+        listingsEl.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="bd">Bu bölüm boş. <a href='ilan-ekle.html'>İlan ekle</a>.</div></div>`;
+        return;
+      }
+      for(const it of arr){
+        const el = document.createElement('div'); el.className='card';
+        const badge = it.status==='active' ? '<span class="pill ok">Yayında</span>' : it.status==='pending' ? '<span class="pill warn">Onay Bekliyor</span>' : '<span class="pill bad">Süresi Doldu</span>';
+        const left = it.expiresAt ? Math.max(0, Math.ceil((it.expiresAt - Date.now())/86400000)) : 0;
+        el.innerHTML = `
+          <div class="hd"><span>${it.title||'Başlıksız'}</span><span>${badge}</span></div>
+          <div class="bd">
+            <div class="listing">
+              <div class="thumb">${it.photoURL ? `<img src="${it.photoURL}" alt="">` : ''}</div>
+              <div class="meta">
+                <div class="t">${it.title||''}</div>
+                <div class="muted">${it.category||'Kategori Yok'} • ${it.city||''}</div>
+                ${it.status==='active'? `<div class="muted">Kalan: ${left} gün</div>`: ''}
+              </div>
+            </div>
+          </div>`;
+        listingsEl.appendChild(el);
+      }
+    }
   </script>
 </body>
 </html>
