@@ -11,7 +11,7 @@
       --bg:#0b0b10; --card:#12131a; --muted:#6b7a99; --txt:#f6f7fb; --accent:#ff1f3d;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:#0b0b10;color:var(--txt);font:15px/1.6 Inter,sans-serif}
+    body{margin:0;background:#0b0b10;color:var(--txt);font:15px/1.6 Inter,system-ui,Segoe UI,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
     .wrap{max-width:980px;margin:0 auto;padding:16px 16px 96px}
     header.hd{display:flex;align-items:center;gap:16px;padding:16px;border:1px solid #222;border-radius:20px;background:#111420;flex-wrap:wrap}
@@ -19,22 +19,27 @@
     .avatar img{width:100%;height:100%;object-fit:cover}
     .info{flex:1;min-width:200px}
     .info h1{font-size:22px;margin:0 0 4px}
+    .handle{opacity:.9;color:#cfd4ff;font-weight:700}
     .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
     .card{flex:1 1 280px;border:1px solid #222;border-radius:20px;background:#141827;padding:16px}
     .card h2{margin:0 0 12px;font-size:17px}
     label{display:block;font-size:13px;color:var(--muted);margin:8px 0 4px}
     input{width:100%;padding:10px;border-radius:12px;border:1px solid #24273a;background:#0f1220;color:var(--txt)}
-    .btn{padding:10px 14px;border-radius:12px;border:1px solid #2a2e46;background:#171b2b;color:#fff;font-weight:600;cursor:pointer;display:inline-block;margin-top:8px}
-    .btn.primary{background:var(--accent)}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid #2a2e46;background:#171b2b;color:#fff;font-weight:700;cursor:pointer;display:inline-block;margin-top:8px}
+    .btn.primary{background:linear-gradient(180deg,#ff3956,#ff1f3d);border-color:#ff3d5b}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
     .stars3d{display:flex;gap:8px;align-items:center;margin-top:6px}
-    .star{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#0f1320;border:1px solid #24293d;cursor:pointer}
+    .star{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#0f1320;border:1px solid #24293d;cursor:pointer;transition:.15s}
+    .star:hover{transform:translateY(-1px)}
     .star.active{background:var(--accent)}
     .btmnav{position:fixed;left:0;right:0;bottom:0;background:#0b0b10;border-top:1px solid #1f2234}
     .btmnav .bar{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
     .btmnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 6px;color:#cfd4ff;font-weight:700}
+    .btmnav a.active{color:#fff}
     @media(max-width:600px){
       .row{flex-direction:column}
       header.hd{flex-direction:column;align-items:flex-start}
+      .btn{width:100%}
     }
   </style>
 </head>
@@ -46,17 +51,17 @@
       </div>
       <div class="info">
         <h1 id="fullName">—</h1>
-        <div id="handle">@kullanici</div>
+        <div class="handle" id="handle">@kullanici</div>
         <div class="stars3d" id="starsBlock"></div>
       </div>
-      <button class="btn" id="btnLogout">Çıkış</button>
+      <button class="btn" id="btnLogout">🚪 Çıkış</button>
     </header>
 
     <div class="row">
       <section class="card">
         <h2>Şifre Değiştir</h2>
         <label>Yeni Şifre</label>
-        <input id="inpPass" type="password">
+        <input id="inpPass" type="password" placeholder="••••••••">
         <button class="btn primary" id="btnPass">Şifreyi Güncelle</button>
       </section>
     </div>
@@ -64,18 +69,19 @@
 
   <nav class="btmnav">
     <div class="bar">
-      <a href="home.html">🏠 Ana Sayfa</a>
-      <a href="notifications.html">🔔 Bildirimler</a>
-      <a href="messages.html">💬 Mesajlar</a>
+      <a href="home.html" id="navHome">🏠 Ana Sayfa</a>
+      <a href="notifications.html" id="navNotif">🔔 Bildirimler</a>
+      <a href="messages.html" id="navMsg">💬 Mesajlar</a>
     </div>
   </nav>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-    import { getFirestore, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, updatePassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
+    // ——— Firebase Config (senin verdiğin) ———
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -85,127 +91,101 @@
       appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     };
 
+    // ——— Firebase init ———
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const avatarImg=document.getElementById('avatarImg');
-    const avatarArea=document.getElementById('avatarArea');
-    const btnPass=document.getElementById('btnPass');
-    const inpPass=document.getElementById('inpPass');
+    // ——— DOM ———
+    const avatarImg = document.getElementById('avatarImg');
+    const avatarArea = document.getElementById('avatarArea');
+    const btnPass    = document.getElementById('btnPass');
+    const inpPass    = document.getElementById('inpPass');
+    const starsBlock = document.getElementById('starsBlock');
 
-    let currentUser=null;
+    let currentUser = null;
+    let targetUserId = null;
 
-    onAuthStateChanged(auth,async(user)=>{
-      if(!user){location.href='auth.html';return;}
-      currentUser=user;
-      if(user.displayName) document.getElementById('fullName').textContent=user.displayName;
-      if(user.email) document.getElementById('handle').textContent='@'+user.email.split('@')[0];
-      if(user.photoURL) avatarImg.src=user.photoURL;
+    // ——— Auth state ———
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { location.href = 'auth.html?next=profile.html'; return; }
+      currentUser = user;
+      targetUserId = user.uid; // bu sayfa kendi profilini gösteriyor
+
+      document.getElementById('fullName').textContent = user.displayName || '—';
+      document.getElementById('handle').textContent = '@' + (user.email ? user.email.split('@')[0] : 'kullanici');
+      avatarImg.src = user.photoURL || 'https://i.pravatar.cc/200?img=8';
+
+      // Kendi profili: oylama pasif
+      renderStars(starsBlock, 0, true);
     });
 
-    btnPass.addEventListener('click',async()=>{
-      if(currentUser&&inpPass.value){
-        await updatePassword(currentUser,inpPass.value);
+    // ——— Şifre güncelle ———
+    btnPass.addEventListener('click', async () => {
+      if (!(currentUser && inpPass.value)) return;
+      btnPass.disabled = true; const oldTxt = btnPass.textContent; btnPass.textContent = 'Güncelleniyor…';
+      try {
+        await updatePassword(currentUser, inpPass.value);
         alert('Şifre güncellendi');
-        inpPass.value='';
+        inpPass.value = '';
+      } catch (err) {
+        if (err?.code === 'auth/requires-recent-login') {
+          await sendPasswordResetEmail(auth, currentUser.email);
+          alert('Güvenlik doğrulaması gerekiyor. E-postana şifre sıfırlama bağlantısı gönderdik.');
+        } else {
+          alert('Hata: ' + (err?.message || err));
+        }
+      } finally {
+        btnPass.disabled = false; btnPass.textContent = oldTxt;
       }
     });
 
-    // Avatar resim seçme
-    avatarArea.addEventListener('click',async()=>{
-      if(!currentUser) return;
-      const input=document.createElement('input');
-      input.type='file';
-      input.accept='image/*';
-      input.onchange=async(e)=>{
-        const file=e.target.files?.[0]; if(!file) return;
-        const r=ref(storage,`profile_photos/${currentUser.uid}.jpg`);
-        await uploadBytes(r,file);
-        const url=await getDownloadURL(r);
-        await updateDoc(doc(db,'users',currentUser.uid),{photoURL:url,updatedAt:serverTimestamp()});
-        avatarImg.src=url;
+    // ——— Çıkış ———
+    document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+    // ——— Avatar: galeriden seç & Storage’a yükle ———
+    avatarArea.addEventListener('click', async () => {
+      if (!currentUser) return;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        try {
+          const r = ref(storage, `profile_photos/${currentUser.uid}.jpg`);
+          await uploadBytes(r, file);
+          const url = await getDownloadURL(r);
+          await setDoc(doc(db, 'users', currentUser.uid), { photoURL: url, updatedAt: serverTimestamp() }, { merge: true });
+          avatarImg.src = url;
+        } catch (err) {
+          alert('Yükleme hatası: ' + (err?.message || err));
+        }
       };
       input.click();
     });
 
-    document.getElementById('btnLogout').addEventListener('click',()=>signOut(auth));
-  </script>
-</body>
-</html>
-
-    // ——— YILDIZ OYLAMA: Firestore'a yaz (avg göstermiyoruz) ———
-    function renderStars(container,current=0,disabled=false){
-      container.innerHTML='';
-      for(let i=1;i<=5;i++){
-        const s=document.createElement('div'); s.className='star'+(i<=current?' active':''); s.title=i+' yıldız';
-        const ico=document.createElement('i'); ico.style.fontStyle='normal'; ico.textContent='★'; s.appendChild(ico);
-        if(!disabled){ s.addEventListener('click',()=>saveRating(i)); }
-        else { s.style.cursor='not-allowed'; }
+    // ——— YILDIZ OYLAMA (avg göstermiyoruz; bu sayfa kendi profilinde pasif) ———
+    function renderStars(container, current = 0, disabled = false) {
+      container.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const s = document.createElement('div');
+        s.className = 'star' + (i <= current ? ' active' : '');
+        s.title = i + ' yıldız';
+        const ico = document.createElement('i');
+        ico.style.fontStyle = 'normal';
+        ico.textContent = '★';
+        s.appendChild(ico);
+        if (disabled) s.style.cursor = 'not-allowed';
         container.appendChild(s);
       }
     }
-    async function saveRating(stars){
-      if(!currentUser) return alert('Giriş yapmalısın.');
-      if(currentUser.uid===targetUserId) return alert('Kendi profilini oylayamazsın.');
-      const key=`${targetUserId}_${currentUser.uid}`;
-      await setDoc(doc(db,'ratings',key),{targetId:targetUserId,raterId:currentUser.uid,stars,updatedAt:serverTimestamp(),createdAt:serverTimestamp()},{merge:true});
-      renderStars(starsBlock,stars,false);
-      alert('Oyun kaydedildi.');
-    }
 
-    // ——— İLANLAR: pending → admin onayıyla active → 30 günde expired ———
-    async function refreshListings(){
-      await ensureExpireTransitions();
-      await loadByStatus('pending',listPending);
-      await loadByStatus('active',listActive);
-      await loadByStatus('expired',listExpired);
-    }
-    async function loadByStatus(status,container){
-      container.innerHTML='';
-      const qref=query(collection(db,'listings'), where('ownerId','==',targetUserId), where('status','==',status), orderBy('createdAt','desc'));
-      const qs=await getDocs(qref);
-      if(qs.empty){ container.innerHTML='<div style="color:var(--muted)">Bu bölümde ilan yok.</div>'; return; }
-      qs.forEach(docu=>{
-        const d=docu.data(); const id=docu.id;
-        const it=document.createElement('div'); it.className='item';
-        const th=document.createElement('div'); th.className='thumb'; th.innerHTML=`<img src="${d.photoURL||'https://picsum.photos/seed/takas/120/120'}" alt="thumb">`;
-        const body=document.createElement('div'); body.innerHTML=`<div style="font-weight:800">${escapeHtml(d.title||'İlan')}</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml((d.desc||'').slice(0,120))}</div>
-          <div style="margin-top:6px" class="status">Durum: ${statusLabel(status)}</div>`;
-        const acts=document.createElement('div'); acts.className='actions';
-
-        // Şikayet et
-        const rep=document.createElement('button'); rep.className='btn'; rep.textContent='⚠️ Şikayet et'; rep.addEventListener('click',()=>reportListing(id)); acts.appendChild(rep);
-        // Admin aksiyonları
-        if(currentUserData?.isAdmin){
-          if(status==='pending'){ const b=document.createElement('button'); b.className='btn primary'; b.textContent='Onayla → Yayına Al'; b.addEventListener('click',()=>approveListing(id)); acts.appendChild(b); }
-          if(status==='active'){ const b2=document.createElement('button'); b2.className='btn'; b2.textContent='Yayından Kaldır'; b2.addEventListener('click',()=>expireListingNow(id)); acts.appendChild(b2); }
-        }
-
-        it.appendChild(th); it.appendChild(body); it.appendChild(acts); container.appendChild(it);
-      });
-    }
-    function statusLabel(s){ return s==='pending'?'Onay Bekliyor': s==='active'?'Yayında':'Süresi Doldu'; }
-    async function approveListing(id){ const now=Timestamp.now(); const expires=Timestamp.fromMillis(now.toMillis()+30*24*60*60*1000); await updateDoc(doc(db,'listings',id),{status:'active',approvedAt:now,expiresAt:expires}); await refreshListings(); }
-    async function expireListingNow(id){ await updateDoc(doc(db,'listings',id),{status:'expired'}); await refreshListings(); }
-    async function ensureExpireTransitions(){ const now=Timestamp.now(); const qs=await getDocs(query(collection(db,'listings'), where('ownerId','==',targetUserId), where('status','==','active'))); for(const d of qs.docs){ const x=d.data(); if(x.expiresAt && x.expiresAt.toMillis()<now.toMillis()){ await updateDoc(doc(db,'listings',d.id),{status:'expired'}); } } }
-
-    async function reportListing(listingId){
-      if(!currentUser) return alert('Giriş yapmalısın.');
-      const reason=prompt('Şikayet nedeni:'); if(!reason) return;
-      await addDoc(collection(db,'reports'),{listingId,reason,reporterId:currentUser.uid,createdAt:serverTimestamp(),handled:false});
-      alert('Şikayet alındı.');
-    }
-
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
-
-    // Alt menü aktif durumu
+    // ——— Alt menü aktif durumu ———
     const path = location.pathname.split('/').pop() || '';
-    if(path.includes('home')) $('navHome').classList.add('active');
-    if(path.includes('notifications')) $('navNotif').classList.add('active');
-    if(path.includes('messages')) $('navMsg').classList.add('active');
+    if (path.includes('home')) document.getElementById('navHome').classList.add('active');
+    if (path.includes('notifications')) document.getElementById('navNotif').classList.add('active');
+    if (path.includes('messages')) document.getElementById('navMsg').classList.add('active');
   </script>
 
   <!-- FIRESTORE RULES (özet)
@@ -222,18 +202,6 @@
       match /ratings/{rid} {
         allow read: if true;
         allow create, update: if isSignedIn() && request.resource.data.raterId == request.auth.uid;
-      }
-      match /listings/{id} {
-        allow read: if true;
-        allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid && request.resource.data.status == 'pending';
-        allow update: if isSignedIn() && (
-          (isOwner(resource.data.ownerId) && request.resource.data.status == resource.data.status)
-          || (request.auth.token.admin == true)
-        );
-      }
-      match /reports/{id} {
-        allow read: if request.auth.token.admin == true; // sadece admin
-        allow create: if isSignedIn() && request.resource.data.reporterId == request.auth.uid;
       }
     }
   }
