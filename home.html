@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="tr">
 <head>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" href="favicon.ico">
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Takas Çemberi • Ana Sayfa</title>
@@ -19,23 +22,32 @@
   --muted:#6b7280;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 .wrap{max-width:1200px;margin:0 auto;padding:16px}
 
 /* NAV */
 .topnav{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--ring)}
-.topnav-in{display:flex;align-items:center;gap:14px;padding:10px 0}
-.brand img{height:42px}
+.topnav-in{display:flex;align-items:center;gap:14px;padding:10px 0;position:relative}
+.brand img{height:57px}
 .search input{width:300px;max-width:40vw;padding:10px;border-radius:8px;border:1px solid var(--ring)}
 .navlinks{margin-left:auto;display:flex;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;text-decoration:none;transition:.2s}
+.btn:hover{opacity:.9}
 .btn.home{background:linear-gradient(90deg,#3b82f6,#60a5fa);color:#fff}
 .btn.msg{background:linear-gradient(90deg,#10b981,#34d399);color:#fff}
 .btn.notif{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#fff}
 .btn.add{background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff}
 .btn.profile{background:linear-gradient(90deg,#ec4899,#f472b6);color:#fff}
 .btn.logout{background:linear-gradient(90deg,#ef4444,#f87171);color:#fff}
-.btn:hover{opacity:.9}
+
+/* MOBILE-ONLY header actions */
+.mobile-actions{display:none;gap:8px;align-items:center;margin-left:auto}
+.mobile-username{display:none;font-weight:700}
+.avatar-btn{display:none; width:40px;height:40px;border-radius:999px;border:1px solid var(--ring);background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
+.mobmenu{display:none;position:absolute;right:8px;top:64px;background:#fff;border:1px solid var(--ring);border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.16);min-width:200px;z-index:60}
+.mobmenu .item{display:block;padding:10px 12px;text-decoration:none;color:var(--text);border-bottom:1px solid #f1f5f9}
+.mobmenu .item:last-child{border-bottom:none}
+.mobmenu .item strong{display:block;color:#0f172a}
 
 /* HERO */
 .hero{position:relative;overflow:hidden;padding:64px 20px;text-align:center;background:linear-gradient(135deg,#e0f2fe,#ecfdf5)}
@@ -102,6 +114,75 @@ footer .wrap{padding:24px}
 .msg.me{background:#e0f2fe}
 #chatInput{flex:1;padding:10px;border-radius:10px;border:1px solid var(--ring)}
 #chatSend{padding:10px 14px;border-radius:10px;border:1px solid var(--ring);background:var(--primary);color:#fff;cursor:pointer}
+
+/* BOTTOM NAV (mobile only) */
+.bottomnav{display:none}
+
+/* ------- MOBILE RULES ------- */
+@media (max-width: 768px){
+  body{padding-bottom:76px} /* bottom nav için yer bırak */
+  .search{display:none}
+  .navlinks{display:none} /* üstteki klasik menüyü gizle */
+  .mobile-actions{display:flex}
+  .mobile-username{display:inline}
+  .avatar-btn{display:inline-flex;align-items:center;justify-content:center}
+
+  /* sağ üstte mobil menü + küçük ilan ekle butonu */
+  .mobile-add{display:inline-flex;background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff;padding:8px 10px;border-radius:10px;text-decoration:none}
+
+  /* alt menü */
+  .bottomnav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));background:#fff;border-top:1px solid var(--ring);z-index:50}
+  .bottomnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 10px;border-radius:10px;text-decoration:none;color:#111}
+  .bottomnav a.active{background:#eff6ff}
+
+  /* sadece mobilde mesaj balon rengi değişsin */
+  .msg.me{background:#dcfce7;border-color:#bbf7d0}
+}
+/* ------- MOBILE FIXES APPEND ------- */
+@media (max-width: 768px){
+  body{padding-bottom:80px}
+  html,body{overflow-x:hidden}
+  .search{display:none}
+  .navlinks{display:none}
+  .mobile-actions{display:flex}
+  .mobile-username{display:inline}
+  .avatar-btn{display:inline-flex;align-items:center;justify-content:center}
+  .mobmenu{position:fixed; right:12px; top:56px; max-width:90vw; width:280px; border-radius:12px; overflow:auto}
+  .mobile-add{display:inline-flex;background:linear-gradient(90deg,#6366f1,#8b5cf6);color:#fff;padding:8px 10px;border-radius:10px;text-decoration:none}
+  .bottomnav{
+    position:fixed; left:0; right:0; bottom:0;
+    display:flex; justify-content:space-around; align-items:center;
+    height:64px;
+    padding:0 calc(12px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+    background:#fff; border-top:1px solid var(--ring); z-index:70;
+  }
+  .bottomnav a{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; padding:8px 6px; border-radius:10px; text-decoration:none; color:#111; white-space:nowrap;
+  }
+  .bottomnav a.active{background:#eff6ff}
+  .bottomnav small{font-size:11px; line-height:1}
+  .chatfab{right:16px; bottom:96px; z-index:80}
+  .fab{background:#0a1f44; color:#fff; border-color:#0a1f44}
+  .chatwin{right:16px; bottom:108px; width:92vw; max-width:360px; z-index:90}
+  .msg.me{background:#dcfce7;border-color:#bbf7d0}
+}
+/* ------- MOBILE OVERRIDES v2 (force) ------- */
+@media (max-width:768px){
+  html,body{overflow-x:hidden !important;}
+
+  /* Alt bar sabit ve taşmasız */
+  .bottomnav{position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; width:100vw !important; margin:0 !important; transform:none !important; z-index:70 !important;}
+  .bottomnav a{min-width:0 !important; white-space:nowrap !important;}
+
+  /* Canlı destek balonu MAVİ ve sağ ikonları kapatmasın diye SOLA alındı */
+  .chatfab{left:16px !important; right:auto !important; bottom:96px !important; z-index:80 !important;}
+  .fab{background:#2563eb !important; border-color:#2563eb !important; color:#fff !important;}
+  .chatwin{left:16px !important; right:auto !important; bottom:110px !important; width:calc(100vw - 32px) !important; max-width:360px !important; z-index:90 !important;}
+
+  /* Mobil dropdown ekran içinde kalsın */
+  .mobmenu{position:fixed !important; right:12px !important; left:auto !important; top:56px !important; max-width:90vw !important; width:280px !important;}
+}
 </style>
 </head>
 <body>
@@ -109,15 +190,28 @@ footer .wrap{padding:24px}
 <!-- NAV -->
 <nav class="topnav">
   <div class="wrap topnav-in">
-    <a class="brand" href="home.html"><img src="assets/img/şeffaf.png" alt="Takas Çemberi"></a>
+    <a class="brand" href="home.html"><img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"></a>
     <div class="search"><input id="q" type="search" placeholder="İlanlarda ara..."></div>
+
     <div class="navlinks">
       <a class="btn home" href="home.html">🏠 Sayfa</a>
       <a class="btn msg" href="messages.html">💬 Mesajlar</a>
       <a class="btn notif" href="notifications.html">🔔 Bildirimler</a>
       <a class="btn add" href="ilan-ekle.html">➕ İlan Ekle</a>
       <a class="btn profile" href="profile.html">👤 Profil</a>
-      <a class="btn logout" href="auth.html">🚪 Çıkış</a>
+      <a class="btn logout" href="#" data-logout>🚪 Çıkış</a>
+    </div>
+
+    <!-- MOBILE actions (sağ üst) -->
+    <div class="mobile-actions">
+      <a class="mobile-add" href="ilan-ekle.html" aria-label="İlan Ekle">➕</a>
+      <span id="mobileUsername" class="mobile-username">@kullanici</span>
+      <button class="avatar-btn" id="mobMenuBtn" aria-haspopup="menu" aria-expanded="false">👤</button>
+      <div class="mobmenu" id="mobMenu" role="menu" aria-label="Hızlı menü">
+        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+        <a class="item" href="ilan-ekle.html" role="menuitem">➕ İlan Ekle</a>
+        <a class="item" href="#" role="menuitem" data-logout>🚪 Çıkış</a>
+      </div>
     </div>
   </div>
 </nav>
@@ -210,6 +304,13 @@ footer .wrap{padding:24px}
   </div>
 </footer>
 
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottomnav" aria-label="Alt menü">
+  <a href="home.html" class="active" aria-label="Ana sayfa">🏠<small>Ana sayfa</small></a>
+  <a href="messages.html" aria-label="Mesajlar">💬<small>Mesajlar</small></a>
+  <a href="notifications.html" aria-label="Bildirimler">🔔<small>Bildirimler</small></a>
+</nav>
+
 <!-- CANLI DESTEK BALONU -->
 <div class="chatfab">
   <div class="fab-label">💬 Canlı Destek</div>
@@ -221,4 +322,78 @@ footer .wrap{padding:24px}
     <div class="msg">Merhaba, Takas Çemberi canlı desteğe hoş geldiniz 👋</div>
   </div>
   <div class="ft">
-    <input id="chatInput" type="text  
+    <input id="chatInput" type="text" placeholder="Mesajınızı yazın...">
+    <button id="chatSend">Gönder</button>
+  </div>
+</div>
+
+<!-- SAYFA BETİKLERİ -->
+<script type="module">
+  // Firebase Auth + Firestore (kullanıcı adı)
+  import { auth, db } from './js/firebase-config.js';
+  import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+  import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
+
+  // Oturumu kalıcı yap
+  (async () => { try { await setPersistence(auth, browserLocalPersistence); } catch(_) {} })();
+
+  const mobMenuBtn = document.getElementById('mobMenuBtn');
+  const mobMenu = document.getElementById('mobMenu');
+  const mobileUsername = document.getElementById('mobileUsername');
+
+  function closeMobMenu(){ if(mobMenu){ mobMenu.style.display='none'; mobMenuBtn?.setAttribute('aria-expanded','false'); } }
+  function toggleMobMenu(){ if(!mobMenu) return; const open = getComputedStyle(mobMenu).display !== 'none'; mobMenu.style.display = open? 'none':'block'; mobMenuBtn?.setAttribute('aria-expanded', open? 'false':'true'); }
+
+  mobMenuBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMobMenu(); });
+  document.addEventListener('click', (e)=>{ if(!mobMenu) return; if(!mobMenu.contains(e.target) && e.target !== mobMenuBtn){ closeMobMenu(); } });
+
+  // Oturum kontrolü ve kullanıcı adı
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      location.href = 'auth.html?next=home.html';
+      return;
+    }
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      const uname = data.username || (user.email ? user.email.split('@')[0] : 'kullanici');
+      if (mobileUsername) mobileUsername.textContent = '@' + uname;
+    } catch (_) {
+      if (mobileUsername) mobileUsername.textContent = '@kullanici';
+    }
+  });
+
+  // Çıkış (hem desktop, hem mobil dropdown)
+  document.querySelectorAll('[data-logout]').forEach(el=>{
+    el.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      try { await signOut(auth); } catch(_) {}
+      location.href = 'index.html';
+    });
+  });
+</script>
+
+<script>
+  // Basit chat aç/kapat
+  const chatBtn = document.getElementById('openChat');
+  const chatWin = document.getElementById('chatWin');
+  const chatClose = document.getElementById('chatClose');
+  const chatSend = document.getElementById('chatSend');
+  const chatInput = document.getElementById('chatInput');
+  const chatBody = document.getElementById('chatBody');
+
+  if (chatBtn && chatWin) chatBtn.onclick = () => { chatWin.style.display = 'flex'; };
+  if (chatClose) chatClose.onclick = () => { chatWin.style.display = 'none'; };
+  if (chatSend) chatSend.onclick = () => {
+    const v = (chatInput.value || '').trim();
+    if (!v) return;
+    const div = document.createElement('div');
+    div.className = 'msg me';
+    div.textContent = v;
+    chatBody.appendChild(div);
+    chatInput.value='';
+    chatBody.scrollTop = chatBody.scrollHeight;
+  };
+</script>
+</body>
+</html>
