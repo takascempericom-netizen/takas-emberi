@@ -5,206 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Profil • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0b10; --card:#12131a; --muted:#6b7a99; --txt:#f6f7fb; --accent:#ff1f3d;
+      --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee;
+      --red:#e10600; --redDark:#b70500; --accent:#ff2a2a;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:#0b0b10;color:var(--txt);font:15px/1.6 Inter,system-ui,Segoe UI,Arial,sans-serif}
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 96px}
-    header.hd{display:flex;align-items:center;gap:16px;padding:16px;border:1px solid #222;border-radius:20px;background:#111420;flex-wrap:wrap}
-    .avatar{position:relative;width:96px;height:96px;border-radius:50%;background:#0e0f16;border:2px solid #22263a;overflow:hidden;cursor:pointer}
-    .avatar img{width:100%;height:100%;object-fit:cover}
-    .info{flex:1;min-width:200px}
-    .info h1{font-size:22px;margin:0 0 4px}
-    .handle{opacity:.9;color:#cfd4ff;font-weight:700}
-    .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
-    .card{flex:1 1 280px;border:1px solid #222;border-radius:20px;background:#141827;padding:16px}
-    .card h2{margin:0 0 12px;font-size:17px}
-    label{display:block;font-size:13px;color:var(--muted);margin:8px 0 4px}
-    input{width:100%;padding:10px;border-radius:12px;border:1px solid #24273a;background:#0f1220;color:var(--txt)}
-    .btn{padding:10px 14px;border-radius:12px;border:1px solid #2a2e46;background:#171b2b;color:#fff;font-weight:700;cursor:pointer;display:inline-block;margin-top:8px}
-    .btn.primary{background:linear-gradient(180deg,#ff3956,#ff1f3d);border-color:#ff3d5b}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .stars3d{display:flex;gap:8px;align-items:center;margin-top:6px}
-    .star{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#0f1320;border:1px solid #24293d;cursor:pointer;transition:.15s}
-    .star:hover{transform:translateY(-1px)}
-    .star.active{background:var(--accent)}
-    .btmnav{position:fixed;left:0;right:0;bottom:0;background:#0b0b10;border-top:1px solid #1f2234}
-    .btmnav .bar{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
-    .btmnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 6px;color:#cfd4ff;font-weight:700}
-    .btmnav a.active{color:#fff}
-    @media(max-width:600px){
-      .row{flex-direction:column}
-      header.hd{flex-direction:column;align-items:flex-start}
-      .btn{width:100%}
-    }
+    html,body{height:100%;}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);
+      background:linear-gradient(135deg,#fff0f0,#fffbe7,#e7f8ff,#f3e7ff);background-size:400% 400%;animation:bgAnim 18s ease infinite;}
+    @keyframes bgAnim{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    a{text-decoration:none;color:inherit}
+
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 96px;}
+
+    /* Header */
+    .header{display:flex;align-items:center;gap:16px;margin:8px 0 16px}
+    .h1{font-size:22px;font-weight:800;line-height:1.2}
+    .sub{font-size:13px;color:var(--muted)}
+
+    /* Card */
+    .card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.06);overflow:hidden;margin-bottom:12px}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700}
+    .card .bd{padding:16px}
+
+    /* Profile header */
+    .profile{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center}
+    .avatar{width:96px;height:96px;border-radius:999px;border:3px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.12);background:#f3f4f6;position:relative;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .ava-btn{position:absolute;bottom:6px;right:6px;background:var(--red);color:#fff;border:none;border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+
+    .uname{font-weight:700;color:#111827;font-size:18px}
+
+    /* Form */
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:840px){.grid{grid-template-columns:1fr}}
+
+    label{font-size:12px;color:#4b5563;margin-bottom:6px;display:block}
+    input{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    input:focus{outline:none;border-color:#d1d5db;box-shadow:0 0 0 4px rgba(225,6,0,.08)}
+
+    .btn{padding:11px 14px;border-radius:12px;border:1px solid var(--line);cursor:pointer;background:var(--red);color:#fff;font-weight:700}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;justify-content:space-around;margin-bottom:12px}
+    .tab{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:12px;font-size:14px;cursor:pointer;background:#fff;transition:.2s}
+    .tab.active{background:var(--red);border-color:var(--redDark);color:#fff;font-weight:700}
+
+    /* Listings */
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+    .listing{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+    .listing .ph{aspect-ratio:16/10;background:#f3f4f6;position:relative;overflow:hidden}
+    .listing .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .listing .ttl{padding:10px 12px;font-weight:700}
+
+    /* Bottom bar */
+    .bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);z-index:50}
+    .tabb{padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center}
+    .tabb .ico{font-size:18px}
+    .tabb .lbl{font-size:11px;color:#374151}
+    .tabb.active .lbl{color:var(--red)}
+
+    .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 12px;border-radius:10px;font-size:13px;display:none}
+    .toast.ok{background:#065f46}
+    .toast.err{background:#7f1d1d}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header class="hd">
-      <div class="avatar" id="avatarArea" title="Resim Seç">
-        <img id="avatarImg" alt="Profil Fotoğrafı" src="">
-      </div>
-      <div class="info">
-        <h1 id="fullName">—</h1>
-        <div class="handle" id="handle">@kullanici</div>
-        <div class="stars3d" id="starsBlock"></div>
-      </div>
-      <button class="btn" id="btnLogout">🚪 Çıkış</button>
-    </header>
+    <div class="header">
+      <div class="h1">Profil</div>
+      <div class="sub">Gerçek ad gizli • Herkese açık: @kullanici, avatar, şehir</div>
+    </div>
 
-    <div class="row">
-      <section class="card">
-        <h2>Şifre Değiştir</h2>
-        <label>Yeni Şifre</label>
-        <input id="inpPass" type="password" placeholder="••••••••">
-        <button class="btn primary" id="btnPass">Şifreyi Güncelle</button>
-      </section>
+    <div class="card" id="cardProfile">
+      <div class="hd">Hesap Özeti</div>
+      <div class="bd profile">
+        <div class="avatar">
+          <img id="avatarImg" alt="Profil fotoğrafı" src="assets/img/seffaf.png">
+          <button class="ava-btn" id="btnPick">📷</button>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+        <div>
+          <div class="uname" id="uname">@kullanici</div>
+          <div class="sub" id="emailLbl">–</div>
+          <div class="note">Gerçek ad ve telefon özel alanda saklanır.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">Bilgiler</div>
+      <div class="bd">
+        <div class="grid">
+          <div>
+            <label for="username">Kullanıcı Adı (herkese açık)</label>
+            <input id="username" placeholder="ornek_kullanici" maxlength="24" />
+          </div>
+          <div>
+            <label for="city">Şehir (herkese açık)</label>
+            <input id="city" placeholder="İl / İlçe" />
+          </div>
+          <div>
+            <label for="fname">İsim (özel)</label>
+            <input id="fname" placeholder="Sadece sen ve admin görür" />
+          </div>
+          <div>
+            <label for="lname">Soyisim (özel)</label>
+            <input id="lname" placeholder="Sadece sen ve admin görür" />
+          </div>
+          <div>
+            <label for="phone">Telefon (özel)</label>
+            <input id="phone" placeholder="05xx ..." />
+          </div>
+          <div>
+            <label for="email">E‑posta</label>
+            <input id="email" disabled />
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <button class="btn" id="btnSaveAll">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">İlanlarım</div>
+      <div class="bd">
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-key="active">Yayındakiler</div>
+          <div class="tab" data-key="pending">Onay Bekleyenler</div>
+          <div class="tab" data-key="expired">Süresi Dolanlar</div>
+        </div>
+        <div class="cards" id="cards"></div>
+      </div>
     </div>
   </div>
 
-  <nav class="btmnav">
-    <div class="bar">
-      <a href="home.html" id="navHome">🏠 Ana Sayfa</a>
-      <a href="notifications.html" id="navNotif">🔔 Bildirimler</a>
-      <a href="messages.html" id="navMsg">💬 Mesajlar</a>
-    </div>
+  <nav class="bottom">
+    <a class="tabb" href="home.html">
+      <div class="ico">🏠</div>
+      <div class="lbl">Ana Sayfa</div>
+    </a>
+    <a class="tabb" href="messages.html">
+      <div class="ico">💬</div>
+      <div class="lbl">Mesajlar</div>
+    </a>
+    <a class="tabb active" href="#">
+      <div class="ico">👤</div>
+      <div class="lbl">Profil</div>
+    </a>
   </nav>
 
+  <div class="toast" id="toast">Kaydedildi</div>
+
+  <script src="js/firebase-config.js"></script>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, updatePassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+    import { collection, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js';
 
-    // ——— Firebase Config (senin verdiğin) ———
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.appspot.com",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
+    const $ = sel => document.querySelector(sel);
+    const toast = (msg, type) => { const t=$('#toast'); t.textContent=msg; t.className='toast '+(type||''); t.style.display='block'; setTimeout(()=>t.style.display='none',2000)};
 
-    // ——— Firebase init ———
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    const cfg = window.firebaseConfig || null;
+    const app = getApps().length? getApps()[0]:initializeApp(cfg);
+    const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
 
-    // ——— DOM ———
-    const avatarImg = document.getElementById('avatarImg');
-    const avatarArea = document.getElementById('avatarArea');
-    const btnPass    = document.getElementById('btnPass');
-    const inpPass    = document.getElementById('inpPass');
-    const starsBlock = document.getElementById('starsBlock');
+    const avatarImg=$('#avatarImg');const btnPick=$('#btnPick');const fileInput=$('#fileInput');
+    const unameLbl=$('#uname');const inpUser=$('#username');const inpCity=$('#city');const inpF=$('#fname');const inpL=$('#lname');const inpPhone=$('#phone');const inpEmail=$('#email');const btnSaveAll=$('#btnSaveAll');
 
-    let currentUser = null;
-    let targetUserId = null;
+    async function fileToWebp(file,max=640){const bm=await createImageBitmap(file);const sc=Math.min(1,max/Math.max(bm.width,bm.height));const w=Math.max(1,Math.round(bm.width*sc));const h=Math.max(1,Math.round(bm.height*sc));const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(bm,0,0,w,h);const bl=await new Promise(r=>c.toBlob(b=>r(b),'image/webp',0.9));return new File([bl],'profile.webp',{type:'image/webp'});}
 
-    // ——— Auth state ———
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { location.href = 'auth.html?next=profile.html'; return; }
-      currentUser = user;
-      targetUserId = user.uid; // bu sayfa kendi profilini gösteriyor
+    async function uploadAvatar(uid,file){const sm=await fileToWebp(file,640);const r=ref(storage,`avatars/${uid}/profile.webp`);await uploadBytes(r,sm,{contentType:sm.type});const url=await getDownloadURL(r);avatarImg.src=url;await setDoc(doc(db,'publicUsers',uid),{avatarURL:url},{merge:true});toast('Profil fotoğrafı güncellendi','ok');}
+    async function loadAvatar(uid){try{const r=ref(storage,`avatars/${uid}/profile.webp`);const url=await getDownloadURL(r);avatarImg.src=url;}catch(e){} }
 
-      document.getElementById('fullName').textContent = user.displayName || '—';
-      document.getElementById('handle').textContent = '@' + (user.email ? user.email.split('@')[0] : 'kullanici');
-      avatarImg.src = user.photoURL || 'https://i.pravatar.cc/200?img=8';
+    async function loadAll(uid){const pRef=doc(db,'publicUsers',uid);const pSnap=await getDoc(pRef);if(pSnap.exists()){const d=pSnap.data();if(d.username){inpUser.value=d.username;unameLbl.textContent='@'+d.username;}if(d.city){inpCity.value=d.city;}}const uRef=doc(db,'users',uid);const uSnap=await getDoc(uRef);if(uSnap.exists()){const d=uSnap.data();if(d.firstName) inpF.value=d.firstName;if(d.lastName) inpL.value=d.lastName;if(d.phone) inpPhone.value=d.phone;}await loadAvatar(uid);}
 
-      // Kendi profili: oylama pasif
-      renderStars(starsBlock, 0, true);
-    });
+    async function savePublic(uid){const username=inpUser.value.trim().replace(/[^a-zA-Z0-9_\.\-]/g,'').toLowerCase();const city=inpCity.value.trim();if(!username){toast('Kullanıcı adı boş olamaz','err');return;}await setDoc(doc(db,'publicUsers',uid),{username,city},{merge:true});unameLbl.textContent='@'+username;toast('Bilgiler güncellendi','ok');}
+    async function savePrivate(uid){await setDoc(doc(db,'users',uid),{firstName:inpF.value.trim(),lastName:inpL.value.trim(),phone:inpPhone.value.trim()},{merge:true});}
 
-    // ——— Şifre güncelle ———
-    btnPass.addEventListener('click', async () => {
-      if (!(currentUser && inpPass.value)) return;
-      btnPass.disabled = true; const oldTxt = btnPass.textContent; btnPass.textContent = 'Güncelleniyor…';
-      try {
-        await updatePassword(currentUser, inpPass.value);
-        alert('Şifre güncellendi');
-        inpPass.value = '';
-      } catch (err) {
-        if (err?.code === 'auth/requires-recent-login') {
-          await sendPasswordResetEmail(auth, currentUser.email);
-          alert('Güvenlik doğrulaması gerekiyor. E-postana şifre sıfırlama bağlantısı gönderdik.');
-        } else {
-          alert('Hata: ' + (err?.message || err));
-        }
-      } finally {
-        btnPass.disabled = false; btnPass.textContent = oldTxt;
-      }
-    });
+    onAuthStateChanged(auth,async(user)=>{if(!user){location.href='auth.html?next=profile.html';return;}inpEmail.value=user.email||'';await loadAll(user.uid);btnPick.onclick=()=>fileInput.click();fileInput.onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{await uploadAvatar(user.uid,f);}catch(err){toast('Yükleme hatası','err');}};btnSaveAll.onclick=async()=>{await savePrivate(user.uid);await savePublic(user.uid);} });
 
-    // ——— Çıkış ———
-    document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
-
-    // ——— Avatar: galeriden seç & Storage’a yükle ———
-    avatarArea.addEventListener('click', async () => {
-      if (!currentUser) return;
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e) => {
-        const file = e.target.files?.[0]; if (!file) return;
-        try {
-          const r = ref(storage, `profile_photos/${currentUser.uid}.jpg`);
-          await uploadBytes(r, file);
-          const url = await getDownloadURL(r);
-          await setDoc(doc(db, 'users', currentUser.uid), { photoURL: url, updatedAt: serverTimestamp() }, { merge: true });
-          avatarImg.src = url;
-        } catch (err) {
-          alert('Yükleme hatası: ' + (err?.message || err));
-        }
-      };
-      input.click();
-    });
-
-    // ——— YILDIZ OYLAMA (avg göstermiyoruz; bu sayfa kendi profilinde pasif) ———
-    function renderStars(container, current = 0, disabled = false) {
-      container.innerHTML = '';
-      for (let i = 1; i <= 5; i++) {
-        const s = document.createElement('div');
-        s.className = 'star' + (i <= current ? ' active' : '');
-        s.title = i + ' yıldız';
-        const ico = document.createElement('i');
-        ico.style.fontStyle = 'normal';
-        ico.textContent = '★';
-        s.appendChild(ico);
-        if (disabled) s.style.cursor = 'not-allowed';
-        container.appendChild(s);
-      }
-    }
-
-    // ——— Alt menü aktif durumu ———
-    const path = location.pathname.split('/').pop() || '';
-    if (path.includes('home')) document.getElementById('navHome').classList.add('active');
-    if (path.includes('notifications')) document.getElementById('navNotif').classList.add('active');
-    if (path.includes('messages')) document.getElementById('navMsg').classList.add('active');
+    const cards=$('#cards');const tabs=document.querySelectorAll('.tab');
+    function cardHTML(d){const t=d.title||'İsimsiz İlan';const p=d.price!=null?`${d.price} TL`:'';return `<div class="listing"><div class="ph"><img alt="${t}" data-src="${d._img||''}"/></div><div class="ttl">${t}${p?' • '+p:''}</div></div>`;}
+    async function resolveImage(uid,lid,docData){if(docData&&Array.isArray(docData.images)&&docData.images[0]) return docData.images[0];try{const r=ref(storage,`listings/${uid}/${lid}/1.webp`);return await getDownloadURL(r);}catch(e){return ''}}
+    async function loadListingsTab(key,uid){cards.innerHTML='<div class="sub" style="padding:8px">Yükleniyor…</div>';const baseCol=collection(db,'listings',uid,'items');let q=query(baseCol,orderBy('createdAt','desc'),limit(30));try{q=query(baseCol,where('status','==',key),orderBy('createdAt','desc'),limit(30));}catch(e){}const snap=await getDocs(q);const docs=[];snap.forEach(x=>docs.push({id:x.id,...x.data()}));const filtered=docs.filter(d=>!d.status?(key==='active'):(d.status===key));for(const d of filtered){d._img=await resolveImage(uid,d.id,d);}cards.innerHTML=filtered.length===0?'<div class="sub" style="padding:8px">Bu sekmede ilan yok.</div>':filtered.map(cardHTML).join('');cards.querySelectorAll('img[data-src]').forEach(img=>{const s=img.getAttribute('data-src');if(s) img.src=s;});}
+    tabs.forEach(el=>{el.addEventListener('click',async()=>{tabs.forEach(x=>x.classList.remove('active'));el.classList.add('active');const k=el.getAttribute('data-key');const u=auth.currentUser?.uid;if(u) await loadListingsTab(k,u);});});
+    onAuthStateChanged(auth,async u=>{if(u) await loadListingsTab('active',u.uid)});
   </script>
-
-  <!-- FIRESTORE RULES (özet)
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      function isSignedIn(){ return request.auth != null; }
-      function isOwner(uid){ return request.auth != null && request.auth.uid == uid; }
-
-      match /users/{uid} {
-        allow read: if true;
-        allow create, update: if isOwner(uid);
-      }
-      match /ratings/{rid} {
-        allow read: if true;
-        allow create, update: if isSignedIn() && request.resource.data.raterId == request.auth.uid;
-      }
-    }
-  }
-  -->
 </body>
 </html>
