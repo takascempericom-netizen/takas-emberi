@@ -56,11 +56,11 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
   </div>
 
 <script type="module">
-  import { app, auth } from '../js/firebase-config.js';
+  import { auth } from '../js/firebase-config.js';
   import {
     setPersistence, browserLocalPersistence,
-    onAuthStateChanged, signInWithEmailAndPassword,
-    sendPasswordResetEmail, signOut
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail
   } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
 
   const $ = (s)=>document.querySelector(s);
@@ -69,7 +69,7 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
   // Kullanıcı adı → e-posta (case-insensitive)
   const USERMAP = {
     'takascembericom': 'takascembericom@gmail.com',
-    'nejla3844': 'takascembericom@gmail.com'
+    'nejla3844':       'takascembericom@gmail.com'
   };
   // Sadece bu e-posta admin
   const ALLOW = new Set(['takascembericom@gmail.com']);
@@ -81,30 +81,23 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
     if(v.includes('@')) return v;
     return USERMAP[v.toLowerCase()] || '';
   }
+  function goAdminHome(){
+    // Her koşulda /admin/home.html'e git (yanlış yere gitmeyi önler)
+    location.replace('/admin/home.html');
+    setTimeout(()=>{ try{ location.assign('/admin/home.html'); }catch(_){} }, 400);
+  }
 
-  // Kalıcı oturum
+  // Oturumu kalıcı yap (ama otomatik yönlendirme yok!)
   (async()=>{ try{ await setPersistence(auth, browserLocalPersistence); }catch(_){} })();
-
-  // Zaten girişliyse ve yetkiliyse → home
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    if (!ALLOW.has(user.email||'')) { await signOut(auth); show('Bu panele erişiminiz yok.', 'err'); return; }
-    // Yetkili
-    if (!location.pathname.endsWith('/home.html')) {
-      location.replace('home.html');
-      setTimeout(()=>{ try{ location.assign('home.html'); }catch(_){} }, 400);
-    }
-  });
 
   async function doLogin(){
     const email = emailFrom($('#id_user').value);
     const pass  = ($('#id_pass').value||'').trim();
     if(!email || !pass){ return show('Lütfen gerekli alanları doldurun.','err'); }
+    if(!ALLOW.has(email)){ return show('Bu panele erişiminiz yok.','err'); }
     try{
       await signInWithEmailAndPassword(auth, email, pass);
-      // Başarılı girişte anında yönlendir — mesaj göstermiyoruz
-      location.replace('home.html');
-      setTimeout(()=>{ try{ location.assign('home.html'); }catch(_){} }, 400);
+      goAdminHome(); // sadece başarılı girişte yönlendir
     }catch(e){
       const c = e?.code || '';
       if(c.includes('auth/invalid-credential')) return show('Bilgiler hatalı.','err');
@@ -120,6 +113,7 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
   $('#btnForgot').addEventListener('click', async()=>{
     const email = emailFrom($('#id_user').value);
     if(!email) return show('Şifre sıfırlamak için kullanıcı adı veya e-posta girin.','err');
+    if(!ALLOW.has(email)) return show('Bu panele erişiminiz yok.','err');
     try{ await sendPasswordResetEmail(auth, email); show('Sıfırlama bağlantısı gönderildi.'); }
     catch(e){ show('Hata: '+(e?.message||e?.code), 'err'); }
   });
