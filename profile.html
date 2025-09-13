@@ -82,7 +82,7 @@
     <div class="card" id="cardProfile">
       <div class="hd">Hesap Özeti</div>
       <div class="bd profile">
-        <div class="avatar">
+        <div class="avatar" id="avatarBox">
           <img id="avatarImg" alt="Profil fotoğrafı" src="assets/img/seffaf.png">
           <button class="ava-btn" id="btnPick">📷</button>
           <input type="file" id="fileInput" accept="image/*" hidden>
@@ -171,7 +171,7 @@
     const $ = sel => document.querySelector(sel);
     const toast = (msg, type) => { const t=$('#toast'); t.textContent=msg; t.className='toast '+(type||''); t.style.display='block'; setTimeout(()=>t.style.display='none',2000)};
 
-    const cfg = window.firebaseConfig || null;
+    const cfg = window.firebaseConfig; if(!cfg){ alert('firebase-config yok (js/firebase-config.js içinde window.firebaseConfig = {...})'); throw new Error('Missing firebaseConfig'); }
     const app = getApps().length? getApps()[0]:initializeApp(cfg);
     const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
 
@@ -188,12 +188,19 @@
     async function savePublic(uid){const username=inpUser.value.trim().replace(/[^a-zA-Z0-9_\.\-]/g,'').toLowerCase();const city=inpCity.value.trim();if(!username){toast('Kullanıcı adı boş olamaz','err');return;}await setDoc(doc(db,'publicUsers',uid),{username,city},{merge:true});unameLbl.textContent='@'+username;toast('Bilgiler güncellendi','ok');}
     async function savePrivate(uid){await setDoc(doc(db,'users',uid),{firstName:inpF.value.trim(),lastName:inpL.value.trim(),phone:inpPhone.value.trim()},{merge:true});}
 
-    onAuthStateChanged(auth,async(user)=>{if(!user){location.href='auth.html?next=profile.html';return;}inpEmail.value=user.email||'';await loadAll(user.uid);btnPick.onclick=()=>fileInput.click();fileInput.onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{await uploadAvatar(user.uid,f);}catch(err){toast('Yükleme hatası','err');}};btnSaveAll.onclick=async()=>{await savePrivate(user.uid);await savePublic(user.uid);} });
+    onAuthStateChanged(auth,async(user)=>{ if(!user){location.href='auth.html?next=profile.html';return;} inpEmail.value=user.email||''; await loadAll(user.uid);
+      const triggerPick=()=>fileInput.click(); btnPick.onclick=triggerPick; document.getElementById('avatarBox')?.addEventListener('click',triggerPick); avatarImg.onclick=triggerPick;
+      fileInput.onchange=async e=>{const f=e.target.files?.[0]; if(!f) return; try{await uploadAvatar(user.uid,f);}catch(err){console.error(err); toast('Yükleme hatası: '+(err?.code||''),'err');}};
+      btnSaveAll.onclick=async()=>{ try{ await savePrivate(user.uid); await savePublic(user.uid); toast('Bilgiler güncellendi','ok'); }catch(e){ console.error(e); toast('Kaydedilemedi','err'); } };
+    });
 
     const cards=$('#cards');const tabs=document.querySelectorAll('.tab');
     function cardHTML(d){const t=d.title||'İsimsiz İlan';const p=d.price!=null?`${d.price} TL`:'';return `<div class="listing"><div class="ph"><img alt="${t}" data-src="${d._img||''}"/></div><div class="ttl">${t}${p?' • '+p:''}</div></div>`;}
     async function resolveImage(uid,lid,docData){if(docData&&Array.isArray(docData.images)&&docData.images[0]) return docData.images[0];try{const r=ref(storage,`listings/${uid}/${lid}/1.webp`);return await getDownloadURL(r);}catch(e){return ''}}
-    async function loadListingsTab(key,uid){cards.innerHTML='<div class="sub" style="padding:8px">Yükleniyor…</div>';const baseCol=collection(db,'listings',uid,'items');let q=query(baseCol,orderBy('createdAt','desc'),limit(30));try{q=query(baseCol,where('status','==',key),orderBy('createdAt','desc'),limit(30));}catch(e){}const snap=await getDocs(q);const docs=[];snap.forEach(x=>docs.push({id:x.id,...x.data()}));const filtered=docs.filter(d=>!d.status?(key==='active'):(d.status===key));for(const d of filtered){d._img=await resolveImage(uid,d.id,d);}cards.innerHTML=filtered.length===0?'<div class="sub" style="padding:8px">Bu sekmede ilan yok.</div>':filtered.map(cardHTML).join('');cards.querySelectorAll('img[data-src]').forEach(img=>{const s=img.getAttribute('data-src');if(s) img.src=s;});}
+    async function loadListingsTab(key,uid){ try{ cards.innerHTML='<div class="sub" style="padding:8px">Yükleniyor…</div>'; const baseCol=collection(db,'listings',uid,'items'); let q=query(baseCol,orderBy('createdAt','desc'),limit(30)); try{ q=query(baseCol,where('status','==',key),orderBy('createdAt','desc'),limit(30)); }catch(e){}
+        const snap=await getDocs(q); const docs=[]; snap.forEach(x=>docs.push({id:x.id,...x.data()})); const filtered=docs.filter(d=>!d.status?(key==='active'):(d.status===key)); for(const d of filtered){ d._img=await resolveImage(uid,d.id,d); }
+        cards.innerHTML = filtered.length===0 ? '<div class="sub" style="padding:8px">Bu sekmede ilan yok.</div>' : filtered.map(cardHTML).join(''); cards.querySelectorAll('img[data-src]').forEach(img=>{ const s=img.getAttribute('data-src'); if(s) img.src=s; });
+      }catch(err){ console.error(err); const msg=(err&&err.code==='permission-denied')?'İlanlar okunamıyor (Firestore Rules).':'İlanlar yüklenemedi.'; cards.innerHTML='<div class="sub" style="padding:8px">'+msg+'</div>'; } }catch(e){}const snap=await getDocs(q);const docs=[];snap.forEach(x=>docs.push({id:x.id,...x.data()}));const filtered=docs.filter(d=>!d.status?(key==='active'):(d.status===key));for(const d of filtered){d._img=await resolveImage(uid,d.id,d);}cards.innerHTML=filtered.length===0?'<div class="sub" style="padding:8px">Bu sekmede ilan yok.</div>':filtered.map(cardHTML).join('');cards.querySelectorAll('img[data-src]').forEach(img=>{const s=img.getAttribute('data-src');if(s) img.src=s;});}
     tabs.forEach(el=>{el.addEventListener('click',async()=>{tabs.forEach(x=>x.classList.remove('active'));el.classList.add('active');const k=el.getAttribute('data-key');const u=auth.currentUser?.uid;if(u) await loadListingsTab(k,u);});});
     onAuthStateChanged(auth,async u=>{if(u) await loadListingsTab('active',u.uid)});
   </script>
