@@ -16,13 +16,16 @@
     body{background:#f8fafc;color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
     a{color:inherit;text-decoration:none}
 
-    .wrap{flex:1;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:16px 16px 88px;width:100%} /* alt menü için padding */
+    .wrap{flex:1;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:16px;width:100%}
+
+    /* ÜST BAR */
     .topbar{position:sticky;top:0;z-index:30;background:#fff;backdrop-filter:blur(8px);border-bottom:1px solid var(--stroke)}
-    .topbar .in{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px;min-height:64px}
-    .logo{font-weight:800;letter-spacing:.2px;color:var(--accent);text-decoration:none}
+    .topbar .in{display:flex;align-items:center;gap:12px;min-height:64px}
+    .logo{font-weight:800;letter-spacing:.2px;color:var(--accent)}
     .grow{flex:1}
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:14px;background:#fff;cursor:pointer}
     .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:#fff;font-weight:700}
+    .iconlink{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--stroke);border-radius:12px;background:#fff}
     .hide{display:none !important}
 
     /* Modern 4 renk arka plan (animasyonlu) */
@@ -35,9 +38,7 @@
 
     .p-in{display:flex;gap:28px;padding:28px}
     .avatar{width:140px;height:140px;border-radius:34px;border:3px solid #fff;background:#fff;overflow:hidden;box-shadow:0 10px 28px #0003;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;position:relative}
-    .avatar input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
     .avatar img{width:100%;height:100%;object-fit:cover;display:none}
-
     .p-meta{display:flex;flex-direction:column;gap:10px}
     .p-name{font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.2)}
     .p-username{opacity:.9;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.2)}
@@ -102,9 +103,13 @@
 
   <header class="topbar">
     <div class="wrap in">
-      <!-- LOGO görseli yok; yalnız metin -->
       <a class="logo" href="home.html">Takas Çemberi</a>
       <div class="grow"></div>
+
+      <!-- Masaüstü üst menü: Bildirimler, Ana Sayfa, Mesajlar, Çıkış -->
+      <a class="iconlink" href="notifications.html" id="topNotify">🔔 <span class="lbl">Bildirimler</span></a>
+      <a class="iconlink" href="home.html" id="topHome">🏠 <span class="lbl">Ana Sayfa</span></a>
+      <a class="iconlink" href="messages.html" id="topMsgs">💬 <span class="lbl">Mesajlar</span></a>
       <button class="btn" id="btnLogout">🚪 Çıkış</button>
     </div>
   </header>
@@ -112,21 +117,26 @@
   <main class="wrap">
     <section class="profile">
       <div class="p-in">
-        <!-- Varsayılan profil resmi yok; kullanıcı seçerse görünür -->
+        <!-- Profil resmi: seç/yükle/değiştir butonlu -->
         <div class="avatar" id="avatarBox">
-          📷 Profil
-          <input id="fileAvatar" type="file" accept="image/*"/>
           <img id="avatarImg" alt="avatar"/>
         </div>
         <div class="p-meta">
           <div class="p-name" id="pName">—</div>
           <div class="p-username" id="pUser">@—</div>
+
           <div class="rating">
             <div class="stars" id="stars"></div>
             <div id="ratingInfo" class="muted">0.0 • 0 oy</div>
           </div>
+
           <div class="row" style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="fileAvatar" type="file" accept="image/*" class="hide"/>
+            <button class="btn" id="btnPick">📁 Resim Seç</button>
+            <button class="btn primary" id="btnUpload" disabled>⬆️ Yükle</button>
+            <button class="btn" id="btnChange" disabled>♻️ Değiştir</button>
             <button class="btn" id="btnPwd">🔑 Şifre Değiştir</button>
+            <span id="selInfo" class="muted" style="align-self:center"></span>
           </div>
         </div>
       </div>
@@ -200,44 +210,47 @@
     } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
     import {
       getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp,
-      collection, query, where, orderBy, onSnapshot, Timestamp, limit
+      collection, query, where, getDocs
     } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
     import {
       getStorage, ref as sRef, uploadBytes, getDownloadURL
     } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain:"ureten-eller-v2.firebaseapp.com",
-      projectId:"ureten-eller-v2",
-      storageBucket:"ureten-eller-v2.firebasestorage.app", /* gerekiyorsa ...appspot.com */
-      messagingSenderId:"621494781131",
-      appId:"1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    const firebaseConfig={ apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",authDomain:"ureten-eller-v2.firebaseapp.com",projectId:"ureten-eller-v2",storageBucket:"ureten-eller-v2.firebasestorage.app",messagingSenderId:"621494781131",appId:"1:621494781131:web:13cc3b061a5e94b7cf874e" };
+    const app=getApps().length?getApp():initializeApp(firebaseConfig);
+    const auth=getAuth(app);
+    const db=getFirestore(app);
+    const storage=getStorage(app);
 
-    /* Kısayollar */
-    const qs = s => document.querySelector(s);
-    const qsa = s => Array.from(document.querySelectorAll(s));
-    const params = new URLSearchParams(location.search);
+    const qs=s=>document.querySelector(s);
+    const qsa=s=>Array.from(document.querySelectorAll(s));
 
-    const avatarImg = qs('#avatarImg');
-    const fileAvatar = qs('#fileAvatar');
-    const pName = qs('#pName');
-    const pUser = qs('#pUser');
-    const listingsEl = qs('#listings');
-    const cntActive = qs('#cntActive');
-    const cntPending = qs('#cntPending');
-    const cntExpired = qs('#cntExpired');
-
-    function showModal(id, show=true){ qs('#'+id).classList.toggle('show', show); }
-    qsa('[data-close]').forEach(b=> b.addEventListener('click', ()=> showModal(b.dataset.close,false)));
+    /* Çıkış */
     qs('#btnLogout')?.addEventListener('click', async()=>{ await signOut(auth); location.href='auth.html'; });
 
-    /* 3D yıldızlar */
+    /* Şifre: aç / değiştir */
+    qs('#btnPwd')?.addEventListener('click', ()=>{
+      qs('#oldPwd').value = qs('#newPwd1').value = qs('#newPwd2').value = '';
+      qs('#pwdMsg').textContent = '';
+      document.getElementById('mPwd').classList.add('show');
+    });
+    qs('#btnDoPwd')?.addEventListener('click', async()=>{
+      const msg = qs('#pwdMsg'); msg.textContent='';
+      const u = auth.currentUser; if(!u){ msg.textContent='Oturum bulunamadı.'; return; }
+      const oldP = qs('#oldPwd').value, n1 = qs('#newPwd1').value, n2 = qs('#newPwd2').value;
+      if(!oldP||!n1||!n2){ msg.textContent='Lütfen tüm alanları doldurun.'; return; }
+      if(n1!==n2){ msg.textContent='Yeni şifreler aynı değil.'; return; }
+      if(n1.length<6){ msg.textContent='Yeni şifre en az 6 karakter.'; return; }
+      try{
+        const cred = EmailAuthProvider.credential(u.email, oldP);
+        await reauthenticateWithCredential(u, cred);
+        await updatePassword(u, n1);
+        msg.textContent = 'Şifre değiştirildi ✅';
+        setTimeout(()=> document.getElementById('mPwd').classList.remove('show'), 600);
+      }catch(e){ msg.textContent = 'Hata: ' + (e?.message||e); }
+    });
+
+    /* Yıldızlar */
     const starsEl = qs('#stars');
     starsEl.innerHTML = [1,2,3,4,5].map(i=>`
       <div class="star" data-i="${i}">
@@ -247,78 +260,69 @@
     starsEl.querySelectorAll('.star').forEach(el=>{
       el.addEventListener('mouseenter',()=> setStars(Number(el.dataset.i)));
       el.addEventListener('mouseleave',()=> setStars(0));
-      el.addEventListener('click',()=> alert('Teşekkürler! (Kalıcı oy kaydı bu sürümde kapalı)'));
+      el.addEventListener('click',()=> alert('Teşekkürler! (Oy kaydı bu sürümde kapalı)'));
     });
-    qs('#ratingInfo').textContent='0.0 • 0 oy';
+    qs('#ratingInfo').textContent = '0.0 • 0 oy';
 
-    /* Kullanıcı adı yardımcıları */
+    /* Kullanıcı adı */
     const slug = s => (s||'').toLowerCase()
       .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
       .replace(/[^a-z0-9_]+/g,'').slice(0,24);
 
-    /* Hangi profil? (self ya da ?u= UID / ?user= username) */
-    async function resolveOwnerUid(){
-      const uid = params.get('u');
-      const uname = params.get('user');
-      if(uid) return uid;
-      if(uname){
-        const qr = query(collection(db,'users'), where('username','==', uname));
-        const sn = await getDocs(qr);
-        if(!sn.empty) return sn.docs[0].id;
+    onAuthStateChanged(auth, async(u)=>{
+      if(!u){ return; }
+      const uref=doc(db,'users',u.uid);
+      const snap=await getDoc(uref);
+      const d=snap.data()||{};
+      qs('#pName').textContent = d.displayName || u.displayName || (u.email?u.email.split('@')[0]:'—');
+      if(d.username) qs('#pUser').textContent='@'+d.username;
+      else{
+        const suggested = slug(u.displayName || (u.email?u.email.split('@')[0]:'kullanici'));
+        qs('#inpUsername').value = suggested;
+        document.getElementById('mUser').classList.add('show');
       }
-      return null; // self varsayılan
-    }
+      if(d.photoURL){
+        const img=qs('#avatarImg'); img.src=d.photoURL; img.style.display='block';
+      }
 
-    /* Şifre modal */
-    qs('#btnPwd')?.addEventListener('click', ()=>{
-      qs('#oldPwd').value = qs('#newPwd1').value = qs('#newPwd2').value = '';
-      qs('#pwdMsg').textContent = '';
-      showModal('mPwd', true);
-    });
-    qs('#btnDoPwd')?.addEventListener('click', async()=>{
-      const msg = qs('#pwdMsg'); msg.textContent='';
-      const u = auth.currentUser; if(!u){ msg.textContent='Oturum bulunamadı.'; return; }
-      const oldP = qs('#oldPwd').value, n1 = qs('#newPwd1').value, n2 = qs('#newPwd2').value;
-      if(!oldP||!n1||!n2){ msg.textContent='Lütfen tüm alanları doldurun.'; return; }
-      if(n1!==n2){ msg.textContent='Yeni şifreler aynı değil.'; return; }
-      if(n1.length<6){ msg.textContent='Yeni şifre en az 6 karakter olmalı.'; return; }
-      try{
-        const cred = EmailAuthProvider.credential(u.email, oldP);
-        await reauthenticateWithCredential(u, cred);
-        await updatePassword(u, n1);
-        msg.textContent='Şifre başarıyla değiştirildi ✅';
-        setTimeout(()=> showModal('mPwd', false), 600);
-      }catch(e){ msg.textContent='Hata: '+(e?.message||e); }
+      qs('#btnSaveUsername')?.addEventListener('click', async()=>{
+        const val = slug(qs('#inpUsername').value.trim());
+        if(val.length<3){ qs('#uHelp').textContent='En az 3 karakter.'; return; }
+        await setDoc(uref, { username:val, email:u.email||'', displayName:u.displayName||'', updatedAt:serverTimestamp() }, { merge:true });
+        await setDoc(doc(db,'usernames',val), { uid:u.uid, createdAt:serverTimestamp() });
+        qs('#pUser').textContent='@'+val; document.getElementById('mUser').classList.remove('show');
+      });
+
+      /* İlanlar (tek seferlik yükleme; istersen canlıya çevirebilirim) */
+      loadListings(u.uid);
     });
 
-    /* Avatar yükleme: kullanıcı seçerse storage’a yükle ve göster */
-    fileAvatar?.addEventListener('change', async(ev)=>{
-      const f = ev.target.files?.[0]; if(!f) return;
-      const u = auth.currentUser; if(!u){ alert('Önce giriş yap.'); return; }
-      const ref = sRef(storage, `avatars/${u.uid}.jpg`);
-      await uploadBytes(ref, f);
-      const url = await getDownloadURL(ref);
-      await setDoc(doc(db,'users',u.uid), { photoURL:url }, { merge:true });
-      avatarImg.src = url; avatarImg.style.display = 'block';
-    });
+    /* İlanları çek (owner, status alanlarını kullanır) */
+    async function loadListings(uid){
+      const cont=qs('#listings');
+      cont.innerHTML='';
+      const activeQ=query(collection(db,'listings'),where('owner','==',uid),where('status','==','active'));
+      const pendingQ=query(collection(db,'listings'),where('owner','==',uid),where('status','==','pending'));
+      const expiredQ=query(collection(db,'listings'),where('owner','==',uid),where('status','==','expired'));
+      const [active,pending,expired]=await Promise.all([getDocs(activeQ),getDocs(pendingQ),getDocs(expiredQ)]);
+      qs('#cntActive').textContent=active.size;
+      qs('#cntPending').textContent=pending.size;
+      qs('#cntExpired').textContent=expired.size;
 
-    /* Canlı ilanlar (self veya başkasının profili) */
-    let unsubActive=null, unsubPending=null, unsubExpired=null;
-    function clearSubs(){ unsubActive&&unsubActive(); unsubPending&&unsubPending(); unsubExpired&&unsubExpired(); }
-
-    function renderEmpty(){
-      listingsEl.innerHTML = `<div class="card" style="grid-column:1/-1">
-        <div class="bd">Bu bölüm boş. <a href="ilan-ekle.html">İlan ekle</a>.</div>
-      </div>`;
+      const all=[...active.docs.map(d=>({...d.data(),id:d.id})),...pending.docs.map(d=>({...d.data(),id:d.id})),...expired.docs.map(d=>({...d.data(),id:d.id}))];
+      if(all.length===0){
+        cont.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="bd">Bu bölüm boş. <a href="ilan-ekle.html">İlan ekle</a>.</div></div>`;
+        return;
+      }
+      cont.innerHTML = all.map(l=> card(l)).join('');
     }
 
     function card(l){
       const img = (l.images && l.images[0]) || '';
       const t = l.title || 'İlan';
       const st = l.status || 'pending';
-      const created = (l.createdAt?.toDate?.() || l.createdAt || new Date());
-      const dd = created instanceof Date ? created : new Date(created);
-      const fmt = new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium', timeStyle:'short'}).format(dd);
+      const created = l.createdAt?.toDate?.() ? l.createdAt.toDate() : (l.createdAt ? new Date(l.createdAt) : new Date());
+      const fmt = new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium'}).format(created);
       const pillCls = st==='active'?'ok':(st==='pending'?'warn':'bad');
       return `<div class="card">
         <div class="hd"><span>${t}</span><span class="pill ${pillCls}">${st}</span></div>
@@ -335,137 +339,48 @@
       </div>`;
     }
 
-    function renderLists(tab, data){
-      // data: {active:[], pending:[], expired:[]}
-      const map = { active:'Yayında Olan', pending:'Onay Bekleyen', expired:'Süresi Dolan' };
-      cntActive.textContent = (data.active||[]).length;
-      cntPending.textContent = (data.pending||[]).length;
-      cntExpired.textContent = (data.expired||[]).length;
-      const arr = data[tab] || [];
-      if(!arr.length){ renderEmpty(); return; }
-      listingsEl.innerHTML = arr.map(card).join('');
-    }
+    /* Profil resmi: Seç / Yükle / Değiştir */
+    const fileInput = qs('#fileAvatar');
+    const btnPick = qs('#btnPick');
+    const btnUpload = qs('#btnUpload');
+    const btnChange = qs('#btnChange');
+    const selInfo = qs('#selInfo');
+    const avatarImg = qs('#avatarImg');
+    let selectedFile = null;
 
-    function attachTabs(state){
-      qsa('.tab').forEach(t=> t.addEventListener('click', ()=>{
-        qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-        const tab = t.dataset.tab;
-        renderLists(tab, state);
-      }));
-    }
-
-    function isExpiredDoc(d){
-      // 30 gün kuralı: createdAt + 30 gün < now
-      const created = d.createdAt?.toDate?.() || d.createdAt;
-      if(!created) return false;
-      const c = created instanceof Date ? created : new Date(created);
-      const expires = new Date(c.getTime() + 30*24*60*60*1000);
-      return new Date() > expires;
-    }
-
-    async function autoExpireIfNeeded(docRef, d){
-      if(d.status === 'active' && isExpiredDoc(d)){
-        try{ await updateDoc(docRef, { status:'expired' }); }catch(_){}
+    btnPick?.addEventListener('click', ()=> fileInput.click());
+    fileInput?.addEventListener('change', ()=>{
+      selectedFile = fileInput.files?.[0] || null;
+      if(selectedFile){
+        selInfo.textContent = 'Seçildi: ' + selectedFile.name;
+        btnUpload.disabled = false;
+        btnChange.disabled = false;
+        // geçici önizleme
+        const url = URL.createObjectURL(selectedFile);
+        avatarImg.src = url; avatarImg.style.display='block';
+      }else{
+        selInfo.textContent = '';
+        btnUpload.disabled = true;
+        btnChange.disabled = true;
       }
-    }
-
-    async function bindListings(ownerUid){
-      clearSubs();
-      const state = { active:[], pending:[], expired:[] };
-
-      // ACTIVE
-      unsubActive = onSnapshot(
-        query(collection(db,'listings'),
-          where('ownerUid','==', ownerUid),
-          where('status','==','active'),
-          orderBy('createdAt','desc'),
-          limit(100)
-        ),
-        sn=>{
-          state.active = sn.docs.map(d=>({id:d.id,...d.data()}));
-          // client-side auto expire
-          sn.docs.forEach(docSnap=> autoExpireIfNeeded(docSnap.ref, docSnap.data()));
-          if(qs('.tab.active')?.dataset.tab==='active') renderLists('active', state);
-          cntActive.textContent = state.active.length;
-        }
-      );
-
-      // PENDING
-      unsubPending = onSnapshot(
-        query(collection(db,'listings'),
-          where('ownerUid','==', ownerUid),
-          where('status','==','pending'),
-          orderBy('createdAt','desc'),
-          limit(100)
-        ),
-        sn=>{
-          state.pending = sn.docs.map(d=>({id:d.id,...d.data()}));
-          if(qs('.tab.active')?.dataset.tab==='pending') renderLists('pending', state);
-          cntPending.textContent = state.pending.length;
-        }
-      );
-
-      // EXPIRED (hem status=expired, hem active olup 30 günü geçenler autoExpire ile güncelleniyor)
-      unsubExpired = onSnapshot(
-        query(collection(db,'listings'),
-          where('ownerUid','==', ownerUid),
-          where('status','==','expired'),
-          orderBy('createdAt','desc'),
-          limit(100)
-        ),
-        sn=>{
-          state.expired = sn.docs.map(d=>({id:d.id,...d.data()}));
-          if(qs('.tab.active')?.dataset.tab==='expired') renderLists('expired', state);
-          cntExpired.textContent = state.expired.length;
-        }
-      );
-
-      // Sekme klikleri
-      attachTabs(state);
-      // İlk render
-      renderLists('active', state);
-    }
-
-    /* İlk girişte kullanıcı adı (Google) + profil bilgileri */
-    onAuthStateChanged(auth, async(u)=>{
-      if(!u){ location.href = 'auth.html?next=profile.html'; return; }
-
-      // Profil belgesi
-      const uref = doc(db,'users',u.uid);
-      let snap = await getDoc(uref);
-      let d = snap.data() || {};
-      // İsim ve username
-      pName.textContent = d.displayName || u.displayName || (u.email?u.email.split('@')[0]:'—');
-      if(d.username){ pUser.textContent = '@'+d.username; }
-      else{
-        const suggested = slug(u.displayName || (u.email?u.email.split('@')[0]:'kullanici'));
-        qs('#inpUsername').value = suggested;
-        showModal('mUser', true);
-      }
-      if(d.photoURL){ avatarImg.src = d.photoURL; avatarImg.style.display='block'; }
-
-      // Username kaydet
-      qs('#btnSaveUsername')?.addEventListener('click', async()=>{
-        const val = slug(qs('#inpUsername').value.trim());
-        if(val.length<3){ qs('#uHelp').textContent='En az 3 karakter.'; return; }
-        await setDoc(uref, { username:val, email:u.email||'', displayName:u.displayName||'', updatedAt:serverTimestamp() }, { merge:true });
-        await setDoc(doc(db,'usernames',val), { uid:u.uid, createdAt:serverTimestamp() });
-        pUser.textContent='@'+val; showModal('mUser', false);
-      });
-
-      // Hangi profil görüntülenecek?
-      const owner = await resolveOwnerUid() || u.uid;
-      // Sahip adı vs.
-      if(owner !== u.uid){
-        const owners = await getDoc(doc(db,'users',owner));
-        const od = owners.data()||{};
-        pName.textContent = od.displayName || (od.email?od.email.split('@')[0]:'—');
-        pUser.textContent = '@'+(od.username||'kullanici');
-        if(od.photoURL){ avatarImg.src = od.photoURL; avatarImg.style.display='block'; }
-      }
-
-      // Canlı ilan bağla
-      bindListings(owner);
+    });
+    btnUpload?.addEventListener('click', async()=>{
+      if(!selectedFile){ alert('Önce bir resim seç.'); return; }
+      const u = auth.currentUser; if(!u){ alert('Önce giriş yap.'); return; }
+      try{
+        const ref = sRef(storage, `avatars/${u.uid}.jpg`);
+        await uploadBytes(ref, selectedFile);
+        const url = await getDownloadURL(ref);
+        await setDoc(doc(db,'users',u.uid), { photoURL:url }, { merge:true });
+        avatarImg.src = url; avatarImg.style.display='block';
+        selInfo.textContent = 'Yüklendi ✅';
+      }catch(e){ alert('Yükleme hatası: '+(e?.message||e)); }
+    });
+    btnChange?.addEventListener('click', ()=>{
+      fileInput.value = ''; selectedFile = null;
+      btnUpload.disabled = true; btnChange.disabled = true;
+      selInfo.textContent = 'Yeni resim seç.';
+      fileInput.click();
     });
   </script>
 </body>
