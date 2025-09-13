@@ -1,10 +1,3 @@
-# auth.html — TAM DÜZELTİLMİŞ SÜRÜM
-
-> • Ana sayfa/çıkış gibi site navigasyonu **gizlenir** (sadece bu sayfada).
-> • **Şifre göster/gizle** butonları eklendi (giriş + kayıt).
-> • **Şifre sıfırlama** düzgün çalışır (devam URL’si bu sayfaya ayarlı).
-> • Girişten sonra güvenli yönlendirme: `?next=` varsa sadece **aynı sitede ve .html** sayfalarına.
-
 ```html
 <!doctype html>
 <html lang="tr">
@@ -17,8 +10,8 @@
 <style>
 :root{ --txt:#0a0a0a; --muted:#5b6b8f; --stroke:#e5e9f5; --ok:#22c55e; --err:#ef4444; }
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-/* Bu sayfada site navigasyonunu gizle */
-.topnav, header.nav, footer, .bottomnav, .app-nav{display:none!important}
+/* Bu sayfada her türlü site navigasyonunu kapat (şifresiz kaçışı önlemek için) */
+header, nav, footer, .topnav, .bottomnav, .app-bottom, .app-nav, .navlinks, .chatfab { display:none !important; }
 body{
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--txt);
   background:linear-gradient(135deg,#e0f7fa,#f0f9ff,#ecfdf5,#fff0f6);
@@ -141,7 +134,7 @@ input:focus{border-color:#60a5fa}
 
   <div class="footer-mini">
     <span>© <span id="y"></span> Takas Çemberi</span>
-    <!-- Ana sayfa linkini kaldırdık ki şifresiz geçiş algısı olmasın -->
+    <!-- Ana sayfa linkini bilerek kaldırdık -->
   </div>
 </div>
 
@@ -184,7 +177,7 @@ input:focus{border-color:#60a5fa}
   function setMsg(el,msg,type){ el.textContent=msg||''; el.className='status '+(type||''); }
   function errText(err){
     const c=err?.code||'';
-    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alan adını ekleyin.';
+    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alanını ekleyin.';
     if(c.includes('email-already-in-use')) return 'Bu e‑posta ile hesap zaten var.';
     if(c.includes('invalid-credential')) return 'E‑posta veya şifre hatalı.';
     if(c.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
@@ -199,13 +192,11 @@ input:focus{border-color:#60a5fa}
     paneLogin.classList.toggle('active',!toSignup);
     paneSignup.classList.toggle('active',toSignup);
   }
-
-  // Sekmeler
   tabLogin.addEventListener('click',()=>activate('login'));
   tabSignup.addEventListener('click',()=>activate('signup'));
   if(location.hash==='#signup') activate('signup');
 
-  // Toggle ve clear butonları
+  // Toggle & clear
   document.addEventListener('click',(e)=>{
     const t=e.target.closest('[data-toggle]');
     if(t){ const inp=$(t.getAttribute('data-toggle')); if(!inp) return; inp.type = inp.type==='password' ? 'text':'password'; t.textContent = inp.type==='password' ? 'Göster' : 'Gizle'; }
@@ -221,10 +212,10 @@ input:focus{border-color:#60a5fa}
     location.href = safe;
   };
 
-  // Kalıcı oturum (auto‑redirect yok; home koruması var)
+  // Oturumu kalıcı yap (AMA otomatik yönlendirme YOK)
   try{ await setPersistence(auth, browserLocalPersistence); }catch{}
 
-  // Giriş (email/şifre)
+  // Giriş
   $('#btnSignIn').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim(), pass=$('#li_pass').value;
     if(!email||!pass) return setMsg(liStatus,'E‑posta ve şifre gerekli.','err');
@@ -235,15 +226,14 @@ input:focus{border-color:#60a5fa}
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Şifre sıfırlama (bu sayfaya döndür)
+  // Şifre sıfırlama (bu sayfaya dönüş)
   $('#btnForgot').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim();
     if(!email) return setMsg(liStatus,'Sıfırlama için e‑posta gir.','err');
     try{
       await sendPasswordResetEmail(auth,email,{ url: location.origin + '/auth.html' });
       setMsg(liStatus,'Sıfırlama e‑postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
-    }
-    catch(e){setMsg(liStatus,errText(e),'err');}
+    }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
   // Google (hesap seçtir)
@@ -256,11 +246,9 @@ input:focus{border-color:#60a5fa}
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Kayıt akışı
+  // Kayıt
   function collectSignup(){
-    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(),
-             city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(),
-             email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
+    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(), city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(), email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
     if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsg(suStatus,'Tüm alanlar zorunlu.','err');return null;}
     if(d.p1!==d.p2){setMsg(suStatus,'Şifreler aynı değil.','err');return null;}
     if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');return null;}
@@ -276,7 +264,6 @@ input:focus{border-color:#60a5fa}
     }catch(e){setMsg(suStatus,errText(e),'err');}
   }
 
-  // KVKK Modal
   const termsModal=document.getElementById('termsModal');
   const termsChk=document.getElementById('termsChk');
   const termsAccept=document.getElementById('termsAccept');
@@ -299,41 +286,3 @@ input:focus{border-color:#60a5fa}
 </body>
 </html>
 ```
-
----
-
-# home.html — “Bekçi” (route guard) KISA YAMA
-
-> Amaç: Kullanıcı **giriş yapmadan** home’ı görmesin,
-> “Ana sayfa” linkine tıklayınca da anında **auth**’a yönlensin.
-
-**1) `<body>` başına, tüm içeriği saran bir `div id="app"` ekleyin** (yoksa):
-
-```html
-<body>
-  <div id="app" style="visibility:hidden">
-    <!-- mevcut home içeriğiniz burada -->
-  </div>
-</body>
-```
-
-**2) Sayfanın en altına şu script’i ekleyin (veya mevcut auth kontrolünü bununla değiştirin):**
-
-```html
-<script type="module">
-  import { auth } from './js/firebase-config.js';
-  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-
-  const app = document.getElementById('app');
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      location.replace('auth.html?next=home.html');
-      return;
-    }
-    // sadece girişli kullanıcı görsün
-    app.style.visibility = 'visible';
-  });
-</script>
-```
-
-> İsterseniz görünmez yerine küçük bir “Yükleniyor…” overlay’i gösterebilirsiniz; mantık aynı.
