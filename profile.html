@@ -32,12 +32,14 @@
     .brand{display:flex;align-items:center;gap:10px}
     .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke);object-fit:contain;background:#fff}
 
+    /* Üst menüler */
     nav.desktop{display:none;gap:8px;align-items:center}
     nav.mobileTop{display:flex;gap:8px}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
     .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
     @media(min-width:880px){nav.desktop{display:flex}nav.mobileTop{display:none}}
 
+    /* GRID ve sıralama */
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     @media(min-width:880px){
       .grid{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "full1 full1" "full2 full2"}
@@ -52,16 +54,31 @@
     .avatar{width:96px;height:96px;border-radius:18px;overflow:hidden;border:1px solid var(--stroke);background:linear-gradient(135deg,#ffffff,#f5f7ff);display:grid;place-items:center}
     .avatar img{width:100%;height:100%;object-fit:cover}
     .muted{color:var(--muted);font-size:.92rem}
+
+    /* Form alanları */
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field label{font-size:.86rem;color:var(--muted)}
-    .field input{width:100%;height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .field label{font-size:1rem;color:var(--muted);font-weight:600}
+    .field input{
+      width:100%;height:52px;background:#ffffff;border:1px solid var(--stroke);
+      border-radius:12px;padding:0 14px;color:#0b1020;font-size:1rem
+    }
     .field input[disabled]{opacity:.95}
     @media(max-width:879px){ .fields{grid-template-columns:1fr} }
 
+    /* Şifre alanları — büyük ve alt alta */
+    .pwgrid{display:grid;grid-template-columns:1fr;gap:12px}
+    .pwgrid input{
+      height:54px;background:#ffffff;border:1px solid var(--stroke);
+      border-radius:12px;padding:0 14px;color:#0b1020;font-size:1rem
+    }
+    .pwgrid .btn{
+      height:54px;font-size:1rem;font-weight:700
+    }
+
     /* 5 adet Flag-Flip yıldız */
-    .ownerStars{display:flex;gap:10px;justify-content:flex-start;margin-bottom:8px;animation:starColorFlip 3.6s ease-in-out infinite}
-    .ownerStars svg{width:34px;height:34px}
+    .ownerStars{display:flex;gap:12px;justify-content:flex-start;margin-bottom:8px;animation:starColorFlip 3.6s ease-in-out infinite}
+    .ownerStars svg{width:36px;height:36px}
     @keyframes wave{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)}75%{transform:translateY(4px)}}
     .ownerStars svg:nth-child(1){animation:wave 2.2s ease-in-out 0s infinite}
     .ownerStars svg:nth-child(2){animation:wave 2.2s ease-in-out .2s infinite}
@@ -74,6 +91,33 @@
       100%{ --star-fill:#ffffff; --star-stroke:#ffffff; }
     }
 
+    /* Liste başlıklarını gizle, sekme butonlarını büyüt ve masaüstünde de göster */
+    .col h3{display:none}
+    .list-tabs{
+      display:flex;gap:10px;margin:0 0 14px 0;flex-wrap:wrap
+    }
+    .pill{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:14px 18px;border-radius:999px;border:1px solid var(--stroke);
+      background:#fff;color:#0b1020;cursor:pointer;font-size:1rem;font-weight:700
+    }
+    .pill.active{background:#0b1020;color:#fff}
+
+    .lists-triple{display:grid;gap:12px}
+    .col{background:rgba(255,255,255,.88);border:1px solid var(--stroke);border-radius:14px;padding:12px}
+    .listings{display:grid;grid-template-columns:1fr;gap:12px}
+
+    @media(min-width:880px){
+      .lists-triple{grid-template-columns:repeat(3,1fr)}
+      .col{display:block}
+    }
+    @media(max-width:879px){
+      .lists-triple{grid-template-columns:1fr}
+      .col{display:none}
+      .col.show{display:block}
+    }
+
+    /* ALT BAR (mobil) */
     .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
@@ -136,7 +180,7 @@
         </div>
       </section>
 
-      <!-- Şifre -->
+      <!-- Şifre (büyük ve alt alta) -->
       <section id="secPassword" class="card">
         <div class="hd">Şifre Değiştir</div>
         <div class="bd">
@@ -167,34 +211,43 @@
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
         <div class="bd">
-          <div class="mobile-tabs">
+          <!-- Sekmeler: hem mobil hem masaüstü, büyük -->
+          <div class="list-tabs">
             <button class="pill active" data-target="colActive">Yayındakiler</button>
             <button class="pill" data-target="colPending">Onay Bekleyenler</button>
             <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
           </div>
 
           <div class="lists-triple">
-            <div class="col show" id="colActive"><h3>Yayındakiler</h3><div class="listings" id="listActive"></div></div>
-            <div class="col" id="colPending"><h3>Onay Bekleyenler</h3><div class="listings" id="listPending"></div></div>
-            <div class="col" id="colExpired"><h3>Süresi Dolanlar</h3><div class="listings" id="listExpired"></div></div>
+            <div class="col show" id="colActive">
+              <div class="listings" id="listActive"></div>
+            </div>
+            <div class="col" id="colPending">
+              <div class="listings" id="listPending"></div>
+            </div>
+            <div class="col" id="colExpired">
+              <div class="listings" id="listExpired"></div>
+            </div>
           </div>
         </div>
       </section>
     </div>
   </div>
 
+  <!-- MOBİL alt bar: sabit (3 ikon) -->
   <nav class="mbnav">
     <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
     <a href="notifications.html">🔔<small>Bildirimler</small></a>
   </nav>
 
-  <!-- Firebase -->
+  <!-- Firebase (CDN, modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // ***** CONFIG *****
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -207,29 +260,42 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --------- helpers ---------
-    const $ = s => document.querySelector(s);
+    // ---------- utils ----------
+    const $  = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
     const setInput = (sel,v)=>{const el=$(sel); if(el) el.value = v||'';}
-    const setText  = (sel,v)=>{const el=$(sel); if(el) el.textContent = (v&&String(v).trim())?v:'—';}
+    const setText  = (sel,v)=>{const el=$(sel); if(el) el.textContent = (v && String(v).trim()) ? v : '—';}
 
     const normalize = s => (s||'').toLowerCase()
       .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
       .replace(/[^\w.]/g,"").replace(/^_+|_+$/g,"");
 
-    // displayName → {first,last}
     function splitDisplay(name){
       if(!name) return {first:'', last:''};
       const p = name.trim().split(/\s+/);
       return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
     }
 
-    // Maskeli username: "a.soyisim" (isim.soyisim varsa), aksi halde local-part normalizasyonu
+    function namesFromEmail(email){
+      const local = (email||'').split('@')[0] || '';
+      const norm  = normalize(local);
+      // isim.soyisim | isim_soyisim | isim-soyisim destekle
+      const parts = norm.split(/[._-]+/).filter(Boolean);
+      if (parts.length >= 2){
+        // Baş harfleri büyüt
+        const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+        return { first: cap(parts[0]), last: cap(parts[1]) };
+      }
+      return { first:'', last:'' };
+    }
+
+    // Maskeli username: "a.soyisim" (isim.soyisim ise), değilse local-part
     function deriveMaskedUsername(email){
       const local = (email||'').split('@')[0] || '';
       const norm  = normalize(local);
-      if (norm.includes('.')){
-        const [p1,p2] = norm.split('.');
-        if(p1 && p2){ return `${p1[0]}.${p2}`; }
+      const parts = norm.split(/[._-]+/).filter(Boolean);
+      if (parts.length >= 2){
+        return `${parts[0][0]}.${parts[1]}`; // a.soyisim
       }
       return norm || 'user';
     }
@@ -253,7 +319,7 @@
       const uref = doc(db,"users", user.uid);
       const snap = await getDoc(uref);
 
-      // Username var mı?
+      // Username
       let username = '';
       if (snap.exists() && snap.data().username){
         username = snap.data().username;
@@ -264,22 +330,25 @@
         await runTransaction(db, async (tx)=>{ tx.set(uref,{ username: reserved },{merge:true}); });
       }
 
-      // İLK girişte isim/soyisim/email alanlarını da yaz (eksikse)
-      const { first, last } = splitDisplay(user.displayName);
+      // İsim/Soyisim doldurma (ilk girişte veya eksikse)
+      const dn = splitDisplay(user.displayName);
+      const em = namesFromEmail(user.email||'');
       const payload = {};
-      if (!snap.exists() || !snap.data().firstName) payload.firstName = first||'';
-      if (!snap.exists() || !snap.data().lastName)  payload.lastName  = last||'';
-      if (!snap.exists() || !snap.data().email)     payload.email     = user.email||'';
+      const cur = snap.exists() ? snap.data() : {};
+      if (!cur.firstName) payload.firstName = dn.first || em.first || '';
+      if (!cur.lastName)  payload.lastName  = dn.last  || em.last  || '';
+      if (!cur.email)     payload.email     = user.email || '';
+
       if (Object.keys(payload).length) await setDoc(uref, payload, { merge:true });
 
-      return { username, first, last, email: user.email||'' };
+      return { username, first: payload.firstName ?? cur.firstName ?? dn.first ?? em.first ?? '', last: payload.lastName ?? cur.lastName ?? dn.last ?? em.last ?? '', email: user.email||'' };
     }
 
     function fillFields(data={}, authUser=null, username=''){
-      // Firestore alanları + displayName fallback
       const dn  = splitDisplay(authUser?.displayName);
-      const first = data.firstName || data.ad || dn.first || '';
-      const last  = data.lastName  || data.soyad || dn.last  || '';
+      const em  = namesFromEmail(authUser?.email || '');
+      const first = data.firstName || data.ad || dn.first || em.first || '';
+      const last  = data.lastName  || data.soyad || dn.last  || em.last  || '';
       const email = data.email || authUser?.email || '';
       const phone = data.phone || data.telefon || data.gsm || '';
       const uname = username || data.username || '';
@@ -312,28 +381,30 @@
     $('#btnLogout')?.addEventListener('click', doLogout);
     $('#btnLogoutTop')?.addEventListener('click', doLogout);
 
-    // Mobil ilan sekmeleri
+    // Sekmeler (mobil + masaüstü)
     (function(){
-      const pills=[...document.querySelectorAll('.mobile-tabs .pill')];
-      const cols={ colActive:$('#colActive'), colPending:$('#colPending'), colExpired:$('#colExpired') };
+      const pills = $$('.list-tabs .pill');
+      const cols = { colActive: $('#colActive'), colPending: $('#colPending'), colExpired: $('#colExpired') };
+      function activate(key){
+        Object.values(cols).forEach(c=>c.classList.remove('show'));
+        cols[key].classList.add('show');
+      }
       pills.forEach(btn=>{
         btn.addEventListener('click', ()=>{
           pills.forEach(b=>b.classList.remove('active'));
           btn.classList.add('active');
-          const t=btn.dataset.target;
-          Object.keys(cols).forEach(k=>cols[k].classList.toggle('show', k===t));
-          cols[t].style.marginBottom='16px';
+          activate(btn.dataset.target);
         });
       });
+      // ilk açılış
+      activate('colActive');
     })();
 
     // ---- Auth akışı ----
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ fillFields({}, null, ''); return; }
       try{
-        // username + ilk doküman alanlarını garanti et
         const ensured = await ensureUserDocAndUsername(user);
-        // güncel users/{uid} dokümanını çek
         const snap = await getDoc(doc(db,'users',user.uid));
         const data = snap.exists() ? snap.data() : {};
         fillFields(data, user, ensured.username);
