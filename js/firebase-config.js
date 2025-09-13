@@ -4,8 +4,8 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
 
-// Senin proje config'in
-const firebaseConfig = {
+// js/firebase-config.js
+window.firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
