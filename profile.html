@@ -6,6 +6,7 @@
   <title>Profil • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --txt:#0b1020; --muted:#2b3b62; --pri:#5b8aff;
@@ -14,10 +15,10 @@
       --card:rgba(255,255,255,.86); --card2:rgba(255,255,255,.94);
       --mbnav-h:72px;
 
-      /* 3D yıldız renkleri – sadece kırmızı/beyaz arasında gider gelir (siyah yok) */
-      --star-fill:#ffffff;
-      --star-stroke:#ffffff;
-      --star-glow:rgba(255,255,255,.9);
+      /* 3D yıldız renkleri (SİYAH YOK) */
+      --star-fill:#ffffff;            /* beyaz */
+      --star-stroke:#b91c1c;          /* kırmızı kontur */
+      --star-glow:rgba(239,68,68,.85);/* kırmızı parıltı */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -32,13 +33,12 @@
     img{max-width:100%;display:block}
 
     .wrap{max-width:1100px;margin:0 auto;padding:16px;
-      /* mobilde alt barın üstüne düşmesin diye fazladan boşluk */
-      padding-bottom:calc(var(--mbnav-h) + 56px + env(safe-area-inset-bottom,0px));
+      /* Mobilde alt bar yazıları ezmesin diye ekstra boşluk + safe-area */
+      padding-bottom:calc(var(--mbnav-h) + 72px + env(safe-area-inset-bottom,0px));
     }
     header.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:14px;position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--stroke);border-radius:16px;z-index:50}
     .brand{display:flex;align-items:center;gap:10px}
-    .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke)}
-    .brand b{font-weight:800;letter-spacing:.3px}
+    .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke);object-fit:contain;background:#fff}
 
     /* Üst menüler */
     nav.desktop{display:none;gap:8px;align-items:center}
@@ -50,7 +50,7 @@
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     #secProfile{order:1}
     #secPassword{order:2}
-    #secRating{order:3}
+    #secRating{order:3}   /* Masaüstünde ilanların üstünde */
     #secListings{order:4}
 
     @media(min-width:880px){
@@ -65,7 +65,7 @@
       }
       #secProfile{grid-area:left;order:0}
       #secPassword{grid-area:right;order:0}
-      #secRating{grid-area:full1;order:1}  /* Puanlama ilanların üstünde */
+      #secRating{grid-area:full1;order:1}
       #secListings{grid-area:full2;order:2}
     }
 
@@ -82,27 +82,30 @@
     .field{display:flex;flex-direction:column;gap:6px}
     .field label{font-size:.86rem;color:var(--muted)}
     .field input{width:100%;height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
-    .field input[disabled]{opacity:.8}
-    @media(max-width:879px){ .fields{grid-template-columns:1fr} } /* MOBİL: kutucuklar tam genişlik; kayma yok */
+    .field input[disabled]{opacity:.95}
+    @media(max-width:879px){ .fields{grid-template-columns:1fr} } /* MOBİL: tam genişlik; sağa sola kayma yok */
 
     .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
     .pwgrid input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
 
-    /* 3D Yıldızlar */
-    .stars{display:inline-flex;gap:8px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15)) drop-shadow(0 6px 12px rgba(239,68,68,.25))}
-    .stars svg{width:28px;height:28px}
-    .ownerStars{position:relative;padding:12px 14px;border-radius:12px;overflow:hidden;margin-bottom:8px}
-    .ownerStars::before{content:"";position:absolute;inset:0;z-index:0;
-      background:linear-gradient(120deg,#b91c1c,#ef4444,#ffffff,#ef4444,#b91c1c);
-      background-size:300% 300%;
-      animation:flagWave 4s ease-in-out infinite;
-      filter:saturate(1.15) brightness(1.05);
+    /* 3D YILDIZLAR (ARKA PLAN YOK – SADECE DALGALANAN 5 YILDIZ) */
+    .stars{display:inline-flex;gap:10px;filter:drop-shadow(0 2px 3px rgba(239,68,68,.35)) drop-shadow(0 10px 18px rgba(239,68,68,.25))}
+    .stars svg{width:30px;height:30px}
+    .ownerStars{padding:6px 0;margin-bottom:8px}
+    /* Dalga animasyonu: her yıldız farklı faz ile yukarı-aşağı */
+    @keyframes wave{0%{transform:translateY(0) scale(1)}25%{transform:translateY(-5px) scale(1.02)}50%{transform:translateY(0) scale(1)}75%{transform:translateY(5px) scale(.98)}100%{transform:translateY(0) scale(1)}}
+    .stars svg:nth-child(1){animation:wave 2.2s ease-in-out -.0s infinite}
+    .stars svg:nth-child(2){animation:wave 2.2s ease-in-out -.2s infinite}
+    .stars svg:nth-child(3){animation:wave 2.2s ease-in-out -.4s infinite}
+    .stars svg:nth-child(4){animation:wave 2.2s ease-in-out -.6s infinite}
+    .stars svg:nth-child(5){animation:wave 2.2s ease-in-out -.8s infinite}
+    /* Kırmızı↔️Beyaz senkron renk geçişi – siyah yok */
+    @keyframes starColorFlip{
+      0%  { --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
+      50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; --star-glow:rgba(239,68,68,.9); }
+      100%{ --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
     }
-    .ownerStars .stars{position:relative;z-index:1}
-    /* yıldızların rengi beyaz<->kırmızı arası döner, siyah yok */
-    @keyframes flagWave{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    @keyframes starColorFlip{0%{--star-fill:#ffffff;--star-stroke:#ffffff;--star-glow:rgba(255,255,255,.95)}50%{--star-fill:#b91c1c;--star-stroke:#b91c1c;--star-glow:rgba(239,68,68,.9)}100%{--star-fill:#ffffff;--star-stroke:#ffffff;--star-glow:rgba(255,255,255,.95)}}
-    .ownerStars .stars{animation:starColorFlip 4s ease-in-out infinite}
+    .ownerStars .stars{animation:starColorFlip 3.6s ease-in-out infinite}
 
     /* İLANLAR */
     .lists-triple{display:grid;gap:12px}
@@ -118,7 +121,7 @@
     .badge.warn{border-color:#6b4a0a;color:#92400e;background:#fff4e5}
     .badge.err{border-color:#5b1a1a;color:#7f1d1d;background:#ffecec}
 
-    /* MOBİL İlan sekme butonları */
+    /* MOBİL: kategori butonları (Yayında/Pending/Expired) */
     .mobile-tabs{display:flex;gap:8px;margin-bottom:10px}
     .pill{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;border:1px solid var(--stroke);background:#fff;color:#0b1020;cursor:pointer}
     .pill.active{background:#0b1020;color:#fff}
@@ -134,12 +137,13 @@
     }
 
     /* ALT BAR (mobil sabit) */
-    .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
+    .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
     @media(min-width:880px){ .mbnav{display:none} }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <header class="hd">
@@ -174,7 +178,7 @@
             <div class="avatar"><img id="avatar" alt="Profil"></div>
             <div>
               <h2 id="displayName" style="margin:0;font-size:1.4rem">—</h2>
-              <span class="badge" id="usernameBadge">@kullanici</span>
+              <span class="badge" id="usernameBadge">@—</span>
 
               <!-- 📷 Resim ekleme/değiştirme butonu (username'in ALTINDA) -->
               <div class="row" style="margin-top:8px">
@@ -184,7 +188,7 @@
                 </label>
               </div>
 
-              <div class="muted" id="publicInfo">İsim, soyisim, telefon ve e-posta gizlidir.</div>
+              <div class="muted" id="publicInfo">İsim, soyisim, telefon ve e-posta aşağıda görünür.</div>
             </div>
           </div>
           <div class="spacer"></div>
@@ -216,31 +220,49 @@
       <section id="secRating" class="card">
         <div class="hd">Puanlama</div>
         <div class="bd">
-          <!-- Kırmızı-beyaz dalgalı arka plan + 3D 5 sabit yıldız -->
+          <!-- SADECE 5 DALGALANAN 3D YILDIZ (arka plan yok) -->
           <div id="ownerStarsWrap" class="ownerStars">
             <div class="stars" id="ownerStars">
-              <!-- 3D STAR (inline SVG) x5 -->
-              <svg viewBox="0 0 24 24" aria-hidden="true"><defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="var(--star-fill)"/>
-                  <stop offset="55%" stop-color="var(--star-fill)"/>
-                  <stop offset="56%" stop-color="rgba(255,255,255,.6)"/>
-                  <stop offset="100%" stop-color="var(--star-fill)"/>
-                </linearGradient>
-              </defs>
-              <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
-                fill="url(#g1)" stroke="var(--star-stroke)" stroke-width="0.6"
-                style="filter:drop-shadow(0 2px 2px var(--star-glow)) drop-shadow(0 6px 12px rgba(239,68,68,.28))"/>
+              <!-- Inline 3D STAR x5 -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <defs>
+                  <linearGradient id="starGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--star-fill)"/>
+                    <stop offset="55%" stop-color="var(--star-fill)"/>
+                    <stop offset="56%" stop-color="rgba(255,255,255,.7)"/>
+                    <stop offset="100%" stop-color="var(--star-fill)"/>
+                  </linearGradient>
+                </defs>
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
               </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#"/></svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#"/></svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#"/></svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#x"></use>
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
+                      fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
+                      style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
+              </svg>
             </div>
           </div>
 
-          <div class="stars readonly" id="avgStars">
-            <!-- ortalama gösterimi için boş 5 yıldız (grey değil; saydam çizgi) -->
+          <div class="stars readonly" id="avgStars" aria-label="Ortalama yıldızlar">
+            <!-- referans kontur (dolu/boşu JS doldurur) -->
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
@@ -248,12 +270,6 @@
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
           </div>
           <div class="muted" id="avgText">0/5 • 0 oy</div>
-
-          <!-- Ziyaretçi için oy verme alanı (isteğe bağlı) -->
-          <div id="rateBox" style="display:none;margin-top:8px">
-            <div class="muted">Bu kullanıcıyı puanla (1-5)</div>
-            <div class="stars" id="rateStars"></div>
-          </div>
         </div>
       </section>
 
@@ -296,53 +312,68 @@
   </nav>
 
   <script>
-    // --- Yardımcılar ---
+    /* ---------------------------------------------------
+       KULLANICI VERİSİ — GERÇEK KAYITTAN DOLDUR
+       ---------------------------------------------------
+       Tercihler (öncelik sırası):
+       1) localStorage.tc_user_record (JSON)  Örn:
+          {"firstName":"Ali","lastName":"Yılmaz","username":"aliyilmaz","phone":"+90 555 000 00 00","email":"ali@ornek.com"}
+       2) URL parametreleri: ?first=...&last=...&username=...&phone=...&email=...
+       3) (Yoksa) alanları boş bırakır — KESİNLİKLE @kullanici gibi sabit yazmaz.
+    ----------------------------------------------------*/
     const $ = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
     const qp = new URLSearchParams(location.search);
-    const get = k => qp.get(k);
+    function fromQuery() {
+      return {
+        firstName: qp.get('first') || '',
+        lastName:  qp.get('last')  || '',
+        username:  qp.get('username') || '',
+        phone:     qp.get('phone') || '',
+        email:     qp.get('email') || ''
+      };
+    }
+    function fromLocal() {
+      try{
+        const raw = localStorage.getItem('tc_user_record');
+        if(!raw) return null;
+        return JSON.parse(raw);
+      }catch(e){ return null; }
+    }
+    const record = fromLocal() || fromQuery() || {};
 
-    // Kullanıcı bilgilerini query'den al (yoksa örnekler)
-    const user = {
-      firstName: get('first') || 'Ali',
-      lastName:  get('last')  || 'Yılmaz',
-      username:  get('username') || 'kullanici',
-      phone:     get('phone') || 'Gizli',
-      email:     get('email') || 'Gizli',
-    };
+    // @kullanici YOK: gerçek kullanıcı adı
+    const fullName = `${record.firstName||''} ${record.lastName||''}`.trim();
+    $('#displayName').textContent = fullName || '—';
+    $('#usernameBadge').textContent = record.username ? '@'+record.username : '@—';
+    $('#inpFirst').value = record.firstName || '';
+    $('#inpLast').value  = record.lastName  || '';
+    $('#inpUsername').value = record.username || '';
+    $('#inpPhone').value = record.phone || '';
+    $('#inpEmail').value = record.email || '';
 
-    // Profil doldur
-    $('#displayName').textContent = `${user.firstName} ${user.lastName}`.trim();
-    $('#usernameBadge').textContent = '@' + user.username;
-    $('#inpFirst').value = user.firstName;
-    $('#inpLast').value  = user.lastName;
-    $('#inpUsername').value = user.username;
-    $('#inpPhone').value = user.phone;
-    $('#inpEmail').value = user.email;
-
-    // Avatar (localStorage)
+    // Avatar (localStorage kalıcı)
     const AVATAR_KEY = 'tc_profile_avatar';
     const avatar = $('#avatar');
     const saved = localStorage.getItem(AVATAR_KEY);
     avatar.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
-
-    $('#fileAvatar')?.addEventListener('change', async (e)=>{
+    $('#fileAvatar')?.addEventListener('change', (e)=>{
       const f = e.target.files && e.target.files[0];
       if(!f) return;
       const reader = new FileReader();
       reader.onload = () => {
         const data = reader.result;
         avatar.src = data;
-        try { localStorage.setItem(AVATAR_KEY, data); } catch(e) { console.log('LocalStorage dolu olabilir:', e); }
+        try { localStorage.setItem(AVATAR_KEY, data); } catch(e) {}
       };
       reader.readAsDataURL(f);
     });
 
-    // Çıkış butonları (dummy yönlendirme)
+    // Çıkış (örn. auth.html'e yönlendir)
     $('#btnLogout')?.addEventListener('click', ()=> location.href='auth.html');
     $('#btnLogoutTop')?.addEventListener('click', ()=> location.href='auth.html');
 
-    // Mobil ilan sekmeleri
+    // Mobil ilan sekmeleri: buton tıklayınca ilgili kolon açılır
     (function(){
       const pills = $$('.mobile-tabs .pill');
       const cols = {
@@ -356,19 +387,18 @@
           btn.classList.add('active');
           const t = btn.dataset.target;
           Object.keys(cols).forEach(k => cols[k].classList.toggle('show', k===t));
-          // Alt barda ezilmesin: aktif sütunun altına boşluk
           cols[t].style.marginBottom = '16px';
         });
       });
     })();
 
-    // Ortalama yıldızları (görsel amaçlı) doldur/boşalt örneği
-    function setAvgStars(val){ /* val: 0..5 */ 
-      const stars = $('#avgStars').querySelectorAll('path');
-      stars.forEach((p,i)=> p.setAttribute('fill', i<val ? '#b91c1c' : 'none'));
+    // Ortalama yıldızları (örnek kullanım: 0 başlat)
+    function setAvgStars(val){ /* val: 0..5 */
+      const paths = $('#avgStars').querySelectorAll('path');
+      paths.forEach((p,i)=> p.setAttribute('fill', i<val ? '#b91c1c' : 'none'));
+      $('#avgText').textContent = `${val}/5 • 0 oy`;
     }
-    setAvgStars(0); // 0/5 başlangıç
-
+    setAvgStars(0);
   </script>
 </body>
 </html>
