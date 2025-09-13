@@ -33,7 +33,6 @@
     img{max-width:100%;display:block}
 
     .wrap{max-width:1100px;margin:0 auto;padding:16px;
-      /* Mobilde alt bar yazıları ezmesin diye ekstra boşluk + safe-area */
       padding-bottom:calc(var(--mbnav-h) + 72px + env(safe-area-inset-bottom,0px));
     }
     header.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:14px;position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--stroke);border-radius:16px;z-index:50}
@@ -50,7 +49,7 @@
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     #secProfile{order:1}
     #secPassword{order:2}
-    #secRating{order:3}   /* Masaüstünde ilanların üstünde */
+    #secRating{order:3}
     #secListings{order:4}
 
     @media(min-width:880px){
@@ -83,23 +82,21 @@
     .field label{font-size:.86rem;color:var(--muted)}
     .field input{width:100%;height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
     .field input[disabled]{opacity:.95}
-    @media(max-width:879px){ .fields{grid-template-columns:1fr} } /* MOBİL: tam genişlik; sağa sola kayma yok */
+    @media(max-width:879px){ .fields{grid-template-columns:1fr} }
 
     .pwgrid{display:grid;grid-template-columns:1fr;gap:10px}
     .pwgrid input{height:44px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:0 12px;color:#0b1020}
 
-    /* 3D YILDIZLAR (ARKA PLAN YOK – SADECE DALGALANAN 5 YILDIZ) */
+    /* 3D YILDIZLAR – SADECE 5 ADET */
     .stars{display:inline-flex;gap:10px;filter:drop-shadow(0 2px 3px rgba(239,68,68,.35)) drop-shadow(0 10px 18px rgba(239,68,68,.25))}
     .stars svg{width:30px;height:30px}
     .ownerStars{padding:6px 0;margin-bottom:8px}
-    /* Dalga animasyonu: her yıldız farklı faz ile yukarı-aşağı */
     @keyframes wave{0%{transform:translateY(0) scale(1)}25%{transform:translateY(-5px) scale(1.02)}50%{transform:translateY(0) scale(1)}75%{transform:translateY(5px) scale(.98)}100%{transform:translateY(0) scale(1)}}
     .stars svg:nth-child(1){animation:wave 2.2s ease-in-out -.0s infinite}
     .stars svg:nth-child(2){animation:wave 2.2s ease-in-out -.2s infinite}
     .stars svg:nth-child(3){animation:wave 2.2s ease-in-out -.4s infinite}
     .stars svg:nth-child(4){animation:wave 2.2s ease-in-out -.6s infinite}
     .stars svg:nth-child(5){animation:wave 2.2s ease-in-out -.8s infinite}
-    /* Kırmızı↔️Beyaz senkron renk geçişi – siyah yok */
     @keyframes starColorFlip{
       0%  { --star-fill:#ffffff; --star-stroke:#ffffff; --star-glow:rgba(255,255,255,.95); }
       50% { --star-fill:#b91c1c; --star-stroke:#b91c1c; --star-glow:rgba(239,68,68,.9); }
@@ -121,7 +118,7 @@
     .badge.warn{border-color:#6b4a0a;color:#92400e;background:#fff4e5}
     .badge.err{border-color:#5b1a1a;color:#7f1d1d;background:#ffecec}
 
-    /* MOBİL: kategori butonları (Yayında/Pending/Expired) */
+    /* MOBİL: kategori butonları */
     .mobile-tabs{display:flex;gap:8px;margin-bottom:10px}
     .pill{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;border:1px solid var(--stroke);background:#fff;color:#0b1020;cursor:pointer}
     .pill.active{background:#0b1020;color:#fff}
@@ -136,7 +133,7 @@
       .lists-triple .col.show{display:block}
     }
 
-    /* ALT BAR (mobil sabit) */
+    /* ALT BAR (mobil) */
     .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
@@ -155,9 +152,9 @@
         </div>
       </div>
 
-      <!-- Masaüstü üst menü: sadece 4 buton -->
+      <!-- Masaüstü üst menü -->
       <nav class="desktop">
-        <a class="btn" href="home.html">🏠 Sayfa</a>
+        <a class="btn" href="home.html">🏠 Ana Sayfa</a>
         <a class="btn" href="messages.html">💬 Mesajlar</a>
         <a class="btn" href="notifications.html">🔔 Bildirimler</a>
         <button class="btn warn" id="btnLogout">🚪 Çıkış</button>
@@ -180,7 +177,7 @@
               <h2 id="displayName" style="margin:0;font-size:1.4rem">—</h2>
               <span class="badge" id="usernameBadge">@—</span>
 
-              <!-- 📷 Resim ekleme/değiştirme butonu (username'in ALTINDA) -->
+              <!-- 📷 Resim ekleme/değiştirme -->
               <div class="row" style="margin-top:8px">
                 <label class="btn" style="padding:8px 12px">
                   📷 Resim Ekle / Değiştir
@@ -202,7 +199,7 @@
         </div>
       </section>
 
-      <!-- Şifre (mobilde profilin altında) -->
+      <!-- Şifre -->
       <section id="secPassword" class="card">
         <div class="hd">Şifre Değiştir</div>
         <div class="bd">
@@ -216,14 +213,13 @@
         </div>
       </section>
 
-      <!-- Puanlama (Masaüstünde ilanların üstünde) -->
+      <!-- Puanlama -->
       <section id="secRating" class="card">
         <div class="hd">Puanlama</div>
         <div class="bd">
-          <!-- SADECE 5 DALGALANAN 3D YILDIZ (arka plan yok) -->
+          <!-- SADECE 5 DALGALANAN 3D YILDIZ -->
           <div id="ownerStarsWrap" class="ownerStars">
             <div class="stars" id="ownerStars">
-              <!-- Inline 3D STAR x5 -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <defs>
                   <linearGradient id="starGrad" x1="0" y1="0" x2="0" y2="1">
@@ -238,7 +234,6 @@
                       style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
               </svg>
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <use href="#x"></use>
                 <path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z"
                       fill="url(#starGrad)" stroke="var(--star-stroke)" stroke-width=".7"
                       style="filter:drop-shadow(0 2px 3px var(--star-glow)) drop-shadow(0 10px 18px rgba(239,68,68,.25))"/>
@@ -262,7 +257,6 @@
           </div>
 
           <div class="stars readonly" id="avgStars" aria-label="Ortalama yıldızlar">
-            <!-- referans kontur (dolu/boşu JS doldurur) -->
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
             <svg viewBox="0 0 24 24"><path d="M12 2.5l2.6 5.3 5.9.86-4.25 4.14 1 5.86L12 16.9 6.75 18.7l1-5.86L3.5 8.66l5.9-.86L12 2.5z" fill="none" stroke="#b91c1c" stroke-width="1"/></svg>
@@ -277,14 +271,12 @@
       <section id="secListings" class="card">
         <div class="hd">İlanlar</div>
         <div class="bd">
-          <!-- MOBİL: 3 kategori BUTON -->
           <div class="mobile-tabs">
             <button class="pill active" data-target="colActive">Yayındakiler</button>
             <button class="pill" data-target="colPending">Onay Bekleyenler</button>
             <button class="pill" data-target="colExpired">Süresi Dolanlar</button>
           </div>
 
-          <!-- Masaüstü: 3 sütun | Mobil: yalnız seçilen gösterilir -->
           <div class="lists-triple">
             <div class="col show" id="colActive">
               <h3>Yayındakiler</h3>
@@ -304,25 +296,37 @@
     </div>
   </div>
 
-  <!-- MOBİL alt bar: sabit (3 ikon) -->
+  <!-- MOBİL alt bar -->
   <nav class="mbnav">
     <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
     <a href="notifications.html">🔔<small>Bildirimler</small></a>
   </nav>
 
-  <script>
-    /* ---------------------------------------------------
-       KULLANICI VERİSİ — GERÇEK KAYITTAN DOLDUR
-       ---------------------------------------------------
-       Tercihler (öncelik sırası):
-       1) localStorage.tc_user_record (JSON)  Örn:
-          {"firstName":"Ali","lastName":"Yılmaz","username":"aliyilmaz","phone":"+90 555 000 00 00","email":"ali@ornek.com"}
-       2) URL parametreleri: ?first=...&last=...&username=...&phone=...&email=...
-       3) (Yoksa) alanları boş bırakır — KESİNLİKLE @kullanici gibi sabit yazmaz.
-    ----------------------------------------------------*/
-    const $ = s => document.querySelector(s);
+  <!-- Firebase (CDN, modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ***** SENİN VERDİĞİN CONFIG *****
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // KISA SEÇİCİLER
+    const $  = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
+
+    // URL & localStorage fallback (yedek)
     const qp = new URLSearchParams(location.search);
     function fromQuery() {
       return {
@@ -334,53 +338,72 @@
       };
     }
     function fromLocal() {
-      try{
-        const raw = localStorage.getItem('tc_user_record');
-        if(!raw) return null;
-        return JSON.parse(raw);
-      }catch(e){ return null; }
+      try{ const raw = localStorage.getItem('tc_user_record'); return raw ? JSON.parse(raw) : null; }
+      catch(e){ return null; }
     }
-    const record = fromLocal() || fromQuery() || {};
 
-    // @kullanici YOK: gerçek kullanıcı adı
-    const fullName = `${record.firstName||''} ${record.lastName||''}`.trim();
-    $('#displayName').textContent = fullName || '—';
-    $('#usernameBadge').textContent = record.username ? '@'+record.username : '@—';
-    $('#inpFirst').value = record.firstName || '';
-    $('#inpLast').value  = record.lastName  || '';
-    $('#inpUsername').value = record.username || '';
-    $('#inpPhone').value = record.phone || '';
-    $('#inpEmail').value = record.email || '';
+    // Ekrana bas
+    function setInput(id, val){ const el = $(id); if(el) el.value = val || ''; }
+    function setText(id, val){ const el = $(id); if(el) el.textContent = (val && String(val).trim()) ? val : '—'; }
+
+    // Auth displayName → isim/soyisim tahmini
+    function namesFromDisplay(displayName){
+      if(!displayName) return {first:'', last:''};
+      const p = displayName.trim().split(/\s+/);
+      return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
+    }
+
+    // Doldurma
+    function fillFields(src={}, authUser=null){
+      const first = src.firstName || src.ad || src.name || '';
+      const last  = src.lastName  || src.soyad || src.surname || '';
+      const usern = src.username  || src.kullaniciAdi || src.userName || '';
+      const phone = src.phone     || src.telefon || src.gsm || '';
+      const email = src.email     || (authUser?.email || '');
+
+      const dn = namesFromDisplay(authUser?.displayName);
+      const f = first || dn.first;
+      const l = last  || dn.last;
+
+      setText('#displayName', `${f||''} ${l||''}`.trim() || '—');
+      setText('#usernameBadge', usern ? '@'+usern : '@—');
+      setInput('#inpFirst', f||'');
+      setInput('#inpLast',  l||'');
+      setInput('#inpUsername', usern||'');
+      setInput('#inpPhone', phone||'');
+      setInput('#inpEmail', email||'');
+    }
 
     // Avatar (localStorage kalıcı)
     const AVATAR_KEY = 'tc_profile_avatar';
-    const avatar = $('#avatar');
-    const saved = localStorage.getItem(AVATAR_KEY);
-    avatar.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
-    $('#fileAvatar')?.addEventListener('change', (e)=>{
-      const f = e.target.files && e.target.files[0];
-      if(!f) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const data = reader.result;
-        avatar.src = data;
-        try { localStorage.setItem(AVATAR_KEY, data); } catch(e) {}
-      };
-      reader.readAsDataURL(f);
-    });
+    const avatarImg = $('#avatar');
+    (function initAvatar(){
+      const saved = localStorage.getItem(AVATAR_KEY);
+      avatarImg.src = saved || 'https://dummyimage.com/300x300/ffffff/000&text=👤';
+      $('#fileAvatar')?.addEventListener('change', (e)=>{
+        const f = e.target.files?.[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const data = reader.result;
+          avatarImg.src = data;
+          try{ localStorage.setItem(AVATAR_KEY, data); }catch(_){}
+        };
+        reader.readAsDataURL(f);
+      });
+    })();
 
-    // Çıkış (örn. auth.html'e yönlendir)
-    $('#btnLogout')?.addEventListener('click', ()=> location.href='auth.html');
-    $('#btnLogoutTop')?.addEventListener('click', ()=> location.href='auth.html');
+    // Çıkış
+    async function doLogout(){
+      try { await signOut(auth); } catch(_) {}
+      location.href = 'auth.html';
+    }
+    $('#btnLogout')?.addEventListener('click', doLogout);
+    $('#btnLogoutTop')?.addEventListener('click', doLogout);
 
-    // Mobil ilan sekmeleri: buton tıklayınca ilgili kolon açılır
+    // Mobil ilan sekmeleri
     (function(){
       const pills = $$('.mobile-tabs .pill');
-      const cols = {
-        colActive: $('#colActive'),
-        colPending: $('#colPending'),
-        colExpired: $('#colExpired'),
-      };
+      const cols = { colActive: $('#colActive'), colPending: $('#colPending'), colExpired: $('#colExpired') };
       pills.forEach(btn=>{
         btn.addEventListener('click', ()=>{
           pills.forEach(b=>b.classList.remove('active'));
@@ -392,13 +415,42 @@
       });
     })();
 
-    // Ortalama yıldızları (örnek kullanım: 0 başlat)
-    function setAvgStars(val){ /* val: 0..5 */
+    // Ortalama yıldız (statik örnek)
+    function setAvgStars(val){
       const paths = $('#avgStars').querySelectorAll('path');
       paths.forEach((p,i)=> p.setAttribute('fill', i<val ? '#b91c1c' : 'none'));
       $('#avgText').textContent = `${val}/5 • 0 oy`;
     }
     setAvgStars(0);
+
+    // --------- ANA: Firestore'dan oku + fallback ----------
+    onAuthStateChanged(auth, async (user) => {
+      if (!user){
+        // Auth yoksa: URL -> localStorage -> boş
+        const rec = fromQuery() || fromLocal() || {};
+        fillFields(rec, null);
+        return;
+      }
+      try{
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          fillFields(snap.data(), user);
+        } else {
+          // Firestore dokümanı yok → Auth + fallback
+          fillFields({}, user);
+          const rec = fromQuery() || fromLocal() || {};
+          // Auth'tan eksik kalanları URL/local ile tamamla
+          fillFields({...rec, email: rec.email || user.email}, user);
+        }
+      }catch(err){
+        console.error('Firestore read error:', err);
+        // Hata olursa Auth + fallback yine çalışsın
+        fillFields({}, user);
+        const rec = fromQuery() || fromLocal() || {};
+        fillFields({...rec, email: rec.email || user.email}, user);
+      }
+    });
   </script>
 </body>
 </html>
