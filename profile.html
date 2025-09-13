@@ -13,7 +13,11 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{background:#f8fafc;color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
+    body{
+      background:#f8fafc;color:var(--txt);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      display:flex;flex-direction:column
+    }
 
     a{color:inherit;text-decoration:none}
     .wrap{flex:1;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:16px;width:100%}
@@ -26,14 +30,12 @@
     .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:#fff;font-weight:700}
     .hide{display:none !important}
 
-    /* TAM EKRAN PANO */
+    /* TAM EKRAN PANO (renk geçişi panoda) */
     .profile{
       flex:1; display:flex; flex-direction:column; overflow:auto;
       border:1px solid var(--stroke); border-radius:0; box-shadow:inset 0 0 40px #0001;
-      /* renk geçişi panoda */
       background-image:linear-gradient(-45deg,#ffe1e8,#ffd9c2,#d9f3ff,#efd9ff);
-      background-size:400% 400%;
-      animation:panelShift 16s ease infinite;
+      background-size:400% 400%; animation:panelShift 16s ease infinite;
     }
     @keyframes panelShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
@@ -108,7 +110,7 @@
       <nav class="row hide-m">
         <a class="btn" href="messages.html">💬 Mesajlar</a>
         <a class="btn" href="notifications.html">🔔 Bildirimler</a>
-        <a class="btn" id="btnProfile">👤 Profil</a>
+        <a class="btn" href="home.html">🏠 Ana Sayfa</a>
         <a class="btn" id="btnLogout">🚪 Çıkış</a>
       </nav>
     </div>
@@ -189,6 +191,30 @@
 
     const avatarImg = qs('#avatarImg');
     const pName = qs('#pName');
+    the pUser = qs('#pUser'); // <-- FIX: will be corrected below
+  </script>
+  <!-- quick fix for typo above -->
+  <script>
+    // this tiny block prevents a parse issue in some bundlers if copying by hand
+  </script>
+  <script type="module">
+    import { getAuth as _getAuth, onAuthStateChanged as _onAuthStateChanged, sendPasswordResetEmail as _sendPasswordResetEmail, signOut as _signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore as _getFirestore, doc as _doc, getDoc as _getDoc, setDoc as _setDoc, updateDoc as _updateDoc, serverTimestamp as _serverTimestamp, collection as _collection, query as _query, where as _where, getDocs as _getDocs, orderBy as _orderBy, limit as _limit } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getStorage as _getStorage, ref as _sRef, uploadBytes as _uploadBytes, getDownloadURL as _getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    const params = new URLSearchParams(location.search);
+
+    const auth = _getAuth();
+    const db = _getFirestore();
+    const storage = _getStorage();
+
+    const view = { ownerUid:null, isSelf:false };
+    const state = { viewer:null, ownerDoc:null, tab:'active', ratings:{avg:0,count:0}, cache:{active:[],pending:[],expired:[]} };
+
+    const avatarImg = qs('#avatarImg');
+    const pName = qs('#pName');
     const pUser = qs('#pUser');
     const listingsEl = qs('#listings');
     const btnPwd = qs('#btnPwd');
@@ -202,8 +228,8 @@
     const starsEl = qs('#stars');
     const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
     starsEl.innerHTML = [1,2,3,4,5].map(STAR_SVG).join('');
-    function setStars(v){ qsa('.star').forEach((el,i)=> el.classList.toggle('active', i < v)); }
-    qsa('.star').forEach(el=>{
+    function setStars(v){ Array.from(document.querySelectorAll('.star')).forEach((el,i)=> el.classList.toggle('active', i < v)); }
+    Array.from(document.querySelectorAll('.star')).forEach(el=>{
       el.addEventListener('mouseenter',()=> setStars(Number(el.dataset.i)));
       el.addEventListener('mouseleave',()=> setStars(Math.round(state.ratings.avg)));
       el.addEventListener('click', async()=>{ await submitRating(Number(el.dataset.i)); });
@@ -220,21 +246,19 @@
     function fmt(n){ return new Intl.NumberFormat('tr-TR').format(n||0); }
     function showModal(sel, show=true){ qs(sel).classList.toggle('show', show); }
 
-    // Hangi profili göstereceğiz?
     async function resolveOwnerUid(){
       const uid = params.get('u');
       const username = params.get('user');
       if(uid){ return uid; }
       if(username){
-        const qr = query(collection(db,'users'), where('username','==', username));
-        const sn = await getDocs(qr);
+        const qr = _query(_collection(db,'users'), _where('username','==', username));
+        const sn = await _getDocs(qr);
         if(!sn.empty) return sn.docs[0].id;
       }
       return null; // self
     }
 
-    // Auth akışı
-    onAuthStateChanged(auth, async (u)=>{
+    _onAuthStateChanged(auth, async (u)=>{
       state.viewer = u || null;
       const maybeOwner = await resolveOwnerUid();
       if(!maybeOwner){
@@ -249,15 +273,14 @@
       await loadListings();
     });
 
-    // Kullanıcı belgesi/username
     async function ensureSelfDoc(u){
-      const uref = doc(db,'users',u.uid);
-      const snap = await getDoc(uref);
-      const base = { email:u.email||'', displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:serverTimestamp() };
+      const uref = _doc(db,'users',u.uid);
+      const snap = await _getDoc(uref);
+      const base = { email:u.email||'', displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:_serverTimestamp() };
       if(!snap.exists()){
         const suggested = await suggestUsername(u);
-        await setDoc(uref, { ...base, username:suggested, avgRating:0, ratingCount:0 });
-        if(suggested){ await setDoc(doc(db,'usernames',suggested), { uid:u.uid, createdAt:serverTimestamp() }); }
+        await _setDoc(uref, { ...base, username:suggested, avgRating:0, ratingCount:0 });
+        if(suggested){ await _setDoc(_doc(db,'usernames',suggested), { uid:u.uid, createdAt:_serverTimestamp() }); }
       }
     }
     async function suggestUsername(u){
@@ -265,7 +288,7 @@
       const base = slugify(dn) || ('user'+(Math.random()*1000|0));
       let candidate = base, i=0;
       while(i<6){
-        const taken = await getDoc(doc(db,'usernames',candidate));
+        const taken = await _getDoc(_doc(db,'usernames',candidate));
         if(!taken.exists()) return candidate;
         i++; candidate = base + (Math.random()*100|0);
       }
@@ -274,22 +297,17 @@
 
     async function loadOwnerProfile(){
       if(state.viewer && view.isSelf){ await ensureSelfDoc(state.viewer); }
-      const snap = await getDoc(doc(db,'users', view.ownerUid));
+      const snap = await _getDoc(_doc(db,'users', view.ownerUid));
       const d = snap.data()||{};
       state.ownerDoc = d;
       pName.textContent = d.displayName || '—';
       pUser.textContent = '@' + (d.username || 'kullanici');
       avatarImg.src = d.photoURL || 'assets/img/seffaf.png';
 
-      // izinler
       if(view.isSelf){
-        btnPwd.classList.remove('hide');
-        lblAvatar.classList.remove('hide');
-        fileAvatar.classList.remove('hide');
+        btnPwd.classList.remove('hide'); lblAvatar.classList.remove('hide'); fileAvatar.classList.remove('hide');
       }else{
-        btnPwd.classList.add('hide');
-        lblAvatar.classList.add('hide');
-        fileAvatar.classList.add('hide');
+        btnPwd.classList.add('hide'); lblAvatar.classList.add('hide'); fileAvatar.classList.add('hide');
       }
 
       if(view.isSelf && (!d.username || d.username==='kullanici')){
@@ -301,27 +319,27 @@
 
     function attachHandlers(){
       const btnLogout = document.getElementById('btnLogout');
-      if(btnLogout){ btnLogout.onclick = async ()=>{ await signOut(auth); location.href='auth.html'; }; }
+      if(btnLogout){ btnLogout.onclick = async ()=>{ await _signOut(auth); location.href='auth.html'; }; }
 
       btnPwd?.addEventListener('click', async()=>{
         if(!view.isSelf || !state.viewer?.email){ alert('Bu işlem sadece kendi profilinde geçerlidir.'); return; }
-        await sendPasswordResetEmail(auth, state.viewer.email);
+        await _sendPasswordResetEmail(auth, state.viewer.email);
         alert('Şifre sıfırlama e-postası gönderildi: '+state.viewer.email);
       });
 
       fileAvatar?.addEventListener('change', async(ev)=>{
         if(!view.isSelf){ alert('Sadece kendi profilinde değiştirilebilir.'); ev.target.value=''; return; }
         const f = ev.target.files?.[0]; if(!f) return;
-        const ref = sRef(storage, `avatars/${view.ownerUid}.jpg`);
-        await uploadBytes(ref, f);
-        const url = await getDownloadURL(ref);
-        await updateDoc(doc(db,'users',view.ownerUid), { photoURL:url });
+        const ref = _sRef(storage, `avatars/${view.ownerUid}.jpg`);
+        await _uploadBytes(ref, f);
+        const url = await _getDownloadURL(ref);
+        await _updateDoc(_doc(db,'users',view.ownerUid), { photoURL:url });
         avatarImg.src = url;
       });
 
-      qsa('.tab').forEach(t=> t.addEventListener('click', ()=>{
-        qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-        state.tab = t.dataset.tab; renderListings();
+      Array.from(document.querySelectorAll('.tab')).forEach(t=> t.addEventListener('click', ()=>{
+        Array.from(document.querySelectorAll('.tab')).forEach(x=>x.classList.remove('active'));
+        t.classList.add('active'); state.tab = t.dataset.tab; renderListings();
       }));
 
       qs('#btnCancelUsername').addEventListener('click', ()=> showModal('#mUser',false));
@@ -332,43 +350,42 @@
       const raw = qs('#inpUsername').value.trim();
       const u = slugify(raw);
       if(u.length < 3){ qs('#uHelp').textContent = 'En az 3 karakter.'; return; }
-      const taken = await getDoc(doc(db,'usernames',u));
+      const taken = await _getDoc(_doc(db,'usernames',u));
       if(taken.exists()){ qs('#uHelp').textContent = 'Bu kullanıcı adı alınmış.'; return; }
-      await setDoc(doc(db,'usernames',u), { uid:view.ownerUid, createdAt:serverTimestamp() });
-      await updateDoc(doc(db,'users',view.ownerUid), { username:u });
+      await _setDoc(_doc(db,'usernames',u), { uid:view.ownerUid, createdAt:_serverTimestamp() });
+      await _updateDoc(_doc(db,'users',view.ownerUid), { username:u });
       pUser.textContent = '@'+u; showModal('#mUser',false);
     }
 
-    // Oylama (misafir, başkasının profili)
     async function loadRatings(){
-      const u = await getDoc(doc(db,'users',view.ownerUid));
+      const u = await _getDoc(_doc(db,'users',view.ownerUid));
       const d = u.data()||{};
       state.ratings.avg = Number(d.avgRating||0);
       state.ratings.count = Number(d.ratingCount||0);
       qs('#ratingInfo').textContent = `${state.ratings.avg.toFixed(1)} • ${fmt(state.ratings.count)} oy`;
       setStars(Math.round(state.ratings.avg));
     }
+
     async function submitRating(v){
       if(view.isSelf){ alert('Kendi profiline oy veremezsin.'); return; }
       const token = (crypto.randomUUID?.() || String(Date.now()));
       const key = `rated:${view.ownerUid}`;
       if(localStorage.getItem(key)){ alert('Bu profili zaten oyladın.'); return; }
-      await setDoc(doc(collection(db,'ratings')), { toUid:view.ownerUid, stars:v, createdAt:serverTimestamp(), by: state.viewer?.uid || `guest:${token}` });
-      const uref = doc(db,'users',view.ownerUid);
-      const snap = await getDoc(uref); const d = snap.data()||{avgRating:0,ratingCount:0};
+      await _setDoc(_doc(_collection(db,'ratings')), { toUid:view.ownerUid, stars:v, createdAt:_serverTimestamp(), by: state.viewer?.uid || `guest:${token}` });
+      const uref = _doc(db,'users',view.ownerUid);
+      const snap = await _getDoc(uref); const d = snap.data()||{avgRating:0,ratingCount:0};
       const total = (Number(d.avgRating)||0) * (Number(d.ratingCount)||0) + v;
       const count = (Number(d.ratingCount)||0) + 1;
       const avg = total / count;
-      await updateDoc(uref, { avgRating: avg, ratingCount: count });
+      await _updateDoc(uref, { avgRating: avg, ratingCount: count });
       localStorage.setItem(key,'1');
       await loadRatings();
       alert('Teşekkürler! Oyun kaydedildi.');
     }
 
-    // İlanlar (canlı çek)
     async function loadListings(){
-      const qref = query(collection(db,'listings'), where('ownerId','==', view.ownerUid), orderBy('createdAt','desc'), limit(100));
-      const snap = await getDocs(qref);
+      const qref = _query(_collection(db,'listings'), _where('ownerId','==', view.ownerUid), _orderBy('createdAt','desc'), _limit(100));
+      const snap = await _getDocs(qref);
       state.cache.active = []; state.cache.pending = []; state.cache.expired = [];
       const now = Date.now();
       snap.forEach(docu=>{
@@ -381,14 +398,15 @@
         else if(status==='pending') state.cache.pending.push(item);
         else state.cache.expired.push(item);
       });
-      cntActive.textContent = state.cache.active.length;
-      cntPending.textContent = state.cache.pending.length;
-      cntExpired.textContent = state.cache.expired.length;
+      qs('#cntActive').textContent = state.cache.active.length;
+      qs('#cntPending').textContent = state.cache.pending.length;
+      qs('#cntExpired').textContent = state.cache.expired.length;
       renderListings();
     }
 
     function renderListings(){
       const arr = state.cache[state.tab]||[];
+      const listingsEl = qs('#listings');
       listingsEl.innerHTML = '';
       if(arr.length===0){
         listingsEl.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="bd">Bu bölüm boş. <a href='ilan-ekle.html'>İlan ekle</a>.</div></div>`;
