@@ -18,7 +18,7 @@ body{
 }
 @keyframes gradmove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .card{width:min(640px,100%);background:#ffffffee;border:1px solid var(--stroke);border-radius:22px;box-shadow:0 30px 80px #0003;overflow:hidden;position:relative}
-.hd{display:flex;gap:12px;align-items:center;justify-content:center;padding:18px;border-bottom:1px solid var(--stroke);background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff}
+.hd{display:flex;gap:12px;align-items:center;justify-content:center;padding:18px;border-bottom:1px solid var(--stroke);background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff;position:relative}
 .hd img{height:34px}
 .auth-close{
   position:absolute; top:10px; right:12px; width:36px; height:36px; border-radius:10px;
@@ -37,11 +37,10 @@ label{display:grid;gap:6px;font-weight:600;margin-top:10px}
 .input{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center}
 input{padding:12px 44px 12px 14px;border:1px solid #c7d2fe;border-radius:12px;outline:none;background:#fff;width:100%}
 input:focus{border-color:#60a5fa}
-.toggle,.clear-btn{
+.clear-btn{
   margin-left:8px; cursor:pointer; border:1px solid #dbeafe; background:#eef2ff; color:#111827;
   padding:8px 10px; border-radius:10px; font-weight:800
 }
-/* Göz ikonu düğmesi (metinsiz, SVG ile) */
 .eye-btn{
   position:absolute; right:10px; top:50%; transform:translateY(-50%);
   width:28px; height:28px; border:0; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px;
@@ -59,19 +58,12 @@ input:focus{border-color:#60a5fa}
 .footer-mini{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--stroke);background:#fafbff;color:#64748b;font-size:13px}
 .footer-mini a{color:#64748b;text-decoration:none;font-weight:700}
 @media (max-width:520px){.row{grid-template-columns:1fr}}
-/* TERMS MODAL */
-.terms-back{position:fixed;inset:0;background:#0b102080;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
-.terms{width:min(720px,100%);background:#fff;border-radius:18px;box-shadow:0 30px 80px #0004;overflow:hidden;border:1px solid var(--stroke)}
-.terms .hd{padding:16px 20px;background:linear-gradient(135deg,#06b6d4,#22c55e);color:#fff;font-weight:800}
-.terms .bd{padding:16px 20px;color:#334155;max-height:60dvh;overflow:auto}
-.terms .ft{padding:14px 20px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--stroke);background:#f9fafb}
-.terms .chk{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="card" id="authCard">
   <div class="hd">
-    <img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!
+    <img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"><b>Takas Çemberi</b>
     <button type="button" id="btnAuthClose" class="auth-close" aria-label="Kapat">×</button>
   </div>
 
@@ -92,7 +84,6 @@ input:focus{border-color:#60a5fa}
     <label>Şifre
       <div class="input">
         <input type="password" id="li_pass" placeholder="••••••••" required>
-        <!-- Göz ikonu JS ile eklenecek -->
       </div>
     </label>
     <div class="actions">
@@ -108,22 +99,12 @@ input:focus{border-color:#60a5fa}
   <!-- Kayıt -->
   <section class="pane" id="paneSignup">
     <h2 class="h1">Hesap Oluştur</h2>
-    <p class="sub">E-posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir.</p>
-
     <div class="row">
       <label>İsim Soyisim
         <input type="text" id="su_name" placeholder="Adınız Soyadınız" required>
       </label>
       <label>Kullanıcı Adı
         <input type="text" id="su_uname" placeholder="kullanici_adi" required>
-      </label>
-    </div>
-    <div class="row">
-      <label>Şehir
-        <input type="text" id="su_city" placeholder="Şehir" required>
-      </label>
-      <label>Telefon
-        <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
       </label>
     </div>
     <label>E-posta
@@ -133,13 +114,11 @@ input:focus{border-color:#60a5fa}
       <label>Şifre
         <div class="input">
           <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
-          <!-- Göz ikonu JS ile eklenecek -->
         </div>
       </label>
       <label>Şifre (Tekrar)
         <div class="input">
           <input type="password" id="su_pass2" placeholder="Tekrar" required>
-          <!-- Göz ikonu JS ile eklenecek -->
         </div>
       </label>
     </div>
@@ -153,186 +132,22 @@ input:focus{border-color:#60a5fa}
     <span>© <span id="y"></span> Takas Çemberi</span>
   </div>
 </div>
-
-<!-- KVKK & Güvenlik Modalı -->
-<div class="terms-back" id="termsModal">
-  <div class="terms">
-    <div class="hd">Kayıt Öncesi Onay</div>
-    <div class="bd">
-      <ul>
-        <li>⚠️ Kapora, peşinat, havale vb. ödemeler talep etmeyin.</li>
-        <li>🔒 Kişisel bilgilerinizi paylaşmayın.</li>
-        <li>🛡️ Şüpheli işlemleri destek ekibine bildiriniz.</li>
-      </ul>
-      <label class="chk"><input type="checkbox" id="termsChk"> Yukarıdaki bilgilendirmeyi okudum ve kabul ediyorum.</label>
-    </div>
-    <div class="ft">
-      <button class="btn ghost" id="termsCancel">Vazgeç</button>
-      <button class="btn primary" id="termsAccept" disabled>Kaydı Onayla ve Devam Et</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
-  import { app, auth, db } from './js/firebase-config.js';
-  import {
-    signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendEmailVerification, sendPasswordResetEmail,
-    GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence
-  } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-  import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
-
-  const $ = (s)=>document.querySelector(s);
-  const liStatus = $('#li_status');
-  const suStatus = $('#su_status');
-  const tabLogin = $('#tabLogin');
-  const tabSignup = $('#tabSignup');
-  const paneLogin = $('#paneLogin');
-  const paneSignup = $('#paneSignup');
-
-  function setMsg(el,msg,type){ el.textContent=msg||''; el.className='status '+(type||''); }
-  function errText(err){
-    const c=err?.code||'';
-    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alanını ekleyin.';
-    if(c.includes('email-already-in-use')) return 'Bu e-posta ile hesap zaten var.';
-    if(c.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
-    if(c.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
-    if(c.includes('too-many-requests')) return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
-    if(c.includes('user-not-found')) return 'Bu e-posta ile kayıt bulunamadı.';
-    if(c.includes('invalid-email')) return 'Geçersiz e-posta adresi.';
-    return 'Hata: '+(err?.message||c);
-  }
-
-  function activate(tab){
-    const toSignup = tab==='signup';
-    tabLogin.classList.toggle('active',!toSignup);
-    tabSignup.classList.toggle('active',toSignup);
-    paneLogin.classList.toggle('active',!toSignup);
-    paneSignup.classList.toggle('active',toSignup);
-  }
-  tabLogin.addEventListener('click',()=>activate('login'));
-  tabSignup.addEventListener('click',()=>activate('signup'));
-  if(location.hash==='#signup') activate('signup');
-
-  // X (kapat) — sadece paneli kapatır, yönlendirme yapmaz
-  $('#btnAuthClose').addEventListener('click', ()=>{
-    const card = document.getElementById('authCard');
-    card.style.display='none';
-    document.body.style.display='block';
-    // İstersen: modal açık kalırsa kapat
-    const tm = document.getElementById('termsModal');
-    if (tm) tm.style.display='none';
-  });
-
-  // Göz ikonlarını yerleştir
-  function addEye(input){
-    if(!input || input.dataset.eyeAttached==='1') return;
-    input.dataset.eyeAttached='1';
-    const btn = document.createElement('button');
-    btn.type='button'; btn.className='eye-btn'; btn.setAttribute('aria-label','Şifreyi göster/gizle');
-    const eyeSVG = (open)=>`
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        ${open
-          ? '<path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" stroke="currentColor" stroke-width="1.6"/>'
-          : '<path d="M3 3l18 18M9.9 9.9A4 4 0 0 0 12 17a4 4 0 0 0 3.9-5.1M6.2 6.6C4.1 8 3 10 3 12c0 2 4 7 9 7 2.1 0 4-.8 5.6-1.9M14.1 7.2A8.7 8.7 0 0 1 12 7C7 7 3 12 3 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
-        }
-      </svg>`;
-    btn.innerHTML = eyeSVG(true);
-    btn.addEventListener('click', ()=>{
-      const show = input.type==='password';
-      input.type = show ? 'text' : 'password';
-      btn.innerHTML = eyeSVG(show ? false : true);
-      input.focus();
-    });
-    input.parentElement.appendChild(btn);
-  }
-  ['#li_pass','#su_pass','#su_pass2'].forEach(sel=>addEye($(sel)));
-
-  // Sil (clear)
-  document.addEventListener('click',(e)=>{
-    const c=e.target.closest('[data-clear]');
-    if(c){ const inp=$(c.getAttribute('data-clear')); if(inp) inp.value=''; }
-  });
-
-  // Güvenli yönlendirme (login sonrası)
-  const params = new URLSearchParams(location.search);
-  const next = params.get('next');
-  const go = () => {
-    const safe = (next && /^\/?[\w\-]+\.html$/.test(next)) ? next : 'home.html';
-    location.href = safe;
-  };
-
-  // Oturumu kalıcı yap (otomatik yönlendirme YOK)
-  try{ await setPersistence(auth, browserLocalPersistence); }catch{}
-
-  // Giriş
-  $('#btnSignIn').addEventListener('click',async()=>{
-    const email=$('#li_email').value.trim(), pass=$('#li_pass').value;
-    if(!email||!pass) return setMsg(liStatus,'E-posta ve şifre gerekli.','err');
-    try{
-      const {user}=await signInWithEmailAndPassword(auth,email,pass);
-      if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol et.','err');}
-      go();
-    }catch(e){setMsg(liStatus,errText(e),'err');}
-  });
-
-  // Şifre sıfırlama — reset maili gönderir, bu sayfaya döner
-  $('#btnForgot').addEventListener('click',async()=>{
-    const email=$('#li_email').value.trim();
-    if(!email) return setMsg(liStatus,'Sıfırlama için e-posta gir.','err');
-    try{
-      await sendPasswordResetEmail(auth,email,{ url: location.origin + '/auth.html' });
-      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
-    }catch(e){setMsg(liStatus,errText(e),'err');}
-  });
-
-  // Google (hesap seçtir)
-  $('#btnGoogle').addEventListener('click',async()=>{
-    try{
-      const prov=new GoogleAuthProvider();
-      prov.setCustomParameters({ prompt:'select_account' });
-      await signInWithPopup(auth,prov);
-      go();
-    }catch(e){setMsg(liStatus,errText(e),'err');}
-  });
-
-  // Kayıt
-  function collectSignup(){
-    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(), city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(), email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
-    if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsg(suStatus,'Tüm alanlar zorunlu.','err');return null;}
-    if(d.p1!==d.p2){setMsg(suStatus,'Şifreler aynı değil.','err');return null;}
-    if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');return null;}
-    return d;
-  }
-  async function performSignup(d){
-    try{
-      const {user}=await createUserWithEmailAndPassword(auth,d.email,d.p1);
-      await setDoc(doc(db,'users',user.uid),{name:d.name,username:d.uname,city:d.city,phone:d.phone,email:d.email,createdAt:serverTimestamp(),role:'customer',isActive:true});
-      await sendEmailVerification(user);
-      setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
-      activate('login');
-    }catch(e){setMsg(suStatus,errText(e),'err');}
-  }
-
-  // KVKK & Güvenlik Modal
-  const termsModal=document.getElementById('termsModal');
-  const termsChk=document.getElementById('termsChk');
-  const termsAccept=document.getElementById('termsAccept');
-  const termsCancel=document.getElementById('termsCancel');
-  function openTerms(){termsModal.style.display='flex';termsChk.checked=false;termsAccept.disabled=true;}
-  function closeTerms(){termsModal.style.display='none';}
-  termsChk.addEventListener('change',()=>{termsAccept.disabled=!termsChk.checked;});
-  termsCancel.addEventListener('click',closeTerms);
-  termsModal.addEventListener('click',(e)=>{if(e.target===termsModal) closeTerms();});
-
-  $('#btnSignUp').addEventListener('click',()=>{
-    const d=collectSignup(); if(!d) return;
-    openTerms();
-    const handler=async()=>{termsAccept.removeEventListener('click',handler);closeTerms();await performSignup(d);};
-    termsAccept.addEventListener('click',handler);
-  });
-
-  document.getElementById('y').textContent=new Date().getFullYear();
+// göz ikonları
+function addEye(input){
+  if(!input || input.dataset.eyeAttached==='1') return;
+  input.dataset.eyeAttached='1';
+  const btn=document.createElement('button');
+  btn.type='button';btn.className='eye-btn';btn.innerHTML='<svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>';
+  btn.addEventListener('click',()=>{input.type=input.type==='password'?'text':'password';});
+  input.parentElement.appendChild(btn);
+}
+['#li_pass','#su_pass','#su_pass2'].forEach(sel=>addEye(document.querySelector(sel)));
+// kapatma butonu
+const closeBtn=document.getElementById('btnAuthClose');
+if(closeBtn){closeBtn.addEventListener('click',()=>{document.getElementById('authCard').style.display='none';});}
+// yıl
+ document.getElementById('y').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
