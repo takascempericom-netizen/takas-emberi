@@ -277,7 +277,7 @@
     }
   });
 
-  // Şifre sıfırlama (sağlam sürüm + fallback)
+  // Şifre sıfırlama (doğrudan gönder, provider kontrolü yok + authorized-continue-uri fallback)
   $('#btnForgot').addEventListener('click', async () => {
     const loginId = $('#li_email').value.trim();
     if (!loginId) return setMsg(liStatus,'Sıfırlama için e-posta veya kullanıcı adınızı yazın.','err');
@@ -288,19 +288,28 @@
       try {
         const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
         const snap = await getDocs(q);
-        if (snap.empty) return setMsg(liStatus, 'Bu kullanıcı adına bağlı bir hesap bulunamadı.', 'err');
+        if (snap.empty) return setMsg(liStatus, 'Bu kullanıcı adına bağlı hesap bulunamadı.', 'err');
         email = snap.docs[0].data().email || '';
         if (!email) return setMsg(liStatus, 'Bu kullanıcı adına bağlı e-posta bulunamadı.', 'err');
       } catch (_) { return setMsg(liStatus, 'Kullanıcı adı çözümlenemedi. E-posta ile deneyin.', 'err'); }
     }
 
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      if (!methods.includes('password')) {
-        return setMsg(liStatus,'Bu hesap parola ile giriş yapmıyor. "Google ile devam et"i kullanın ya da önce hesaba parola ekleyin.','err');
-      }
       try {
         await sendPasswordResetEmail(auth, email, { url: `${location.origin}/auth.html`, handleCodeInApp:false });
+      } catch (e) {
+        const code = e?.code||'';
+        if (code.includes('invalid-continue-uri') || code.includes('unauthorized-continue-uri')) {
+          await sendPasswordResetEmail(auth, email); // fallback: default URL
+        } else { throw e; }
+      }
+      // Güvenlik için genel başarı mesajı
+      setMsg(liStatus,'Eğer bu e‑posta kayıtlıysa, sıfırlama bağlantısı gönderildi. (Spam klasörünü kontrol et)','ok');
+    } catch (e) {
+      // user-not-found vb. durumlarda da aynı genel mesajı göster
+      setMsg(liStatus,'Eğer bu e‑posta kayıtlıysa, sıfırlama bağlantısı gönderildi. (Spam klasörünü kontrol et)','ok');
+    }
+  });
       } catch (e) {
         const code = e?.code||'';
         if (code.includes('invalid-continue-uri') || code.includes('unauthorized-continue-uri')) {
