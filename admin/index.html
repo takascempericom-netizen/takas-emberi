@@ -27,7 +27,6 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
 .btn.ghost{background:transparent}
 .status{min-height:22px; color:var(--muted); font-size:14px; margin-top:8px}
 .ok{color:var(--ok)} .err{color:var(--err)}
-.note{font-size:12px; color:var(--muted); margin-top:8px}
 .ft{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-top:1px solid var(--ring); background:#0b152f; color:var(--muted); font-size:12px}
 .logo{display:inline-grid; place-items:center; width:36px; height:36px; border-radius:10px; background:#13244e; border:1px solid #244173; font-weight:900}
 @media (max-width:520px){ .actions{flex-direction:column-reverse; align-items:stretch} }
@@ -35,7 +34,7 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
 </head>
 <body>
   <div class="card">
-    <div class="hd"><span class="logo">TC</span> <b>Takas Çemberi • Admin</b> <span style="margin-left:auto; font-size:12px; color:var(--muted)">Yetkili giriş</span></div>
+    <div class="hd"><span class="logo">TC</span> <b>Takas Çemberi • Admin</b></div>
     <div class="bd">
       <label>Kullanıcı Adı / E‑posta
         <input id="id_user" class="input" placeholder="kullanıcı adı veya e‑posta" autocomplete="username">
@@ -48,7 +47,6 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
         <button id="btnLogin" class="btn pri">Giriş Yap</button>
       </div>
       <div id="status" class="status"></div>
-      <p class="note">Bu panel yalnızca yetkili hesaplar tarafından kullanılabilir.</p>
     </div>
     <div class="ft">
       <span>© <span id="y"></span> Takas Çemberi</span>
@@ -63,11 +61,12 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
   const $ = (s)=>document.querySelector(s);
   const status = $('#status');
 
-  // Kullanıcı adı → e‑posta eşlemesi (UI'da gösterilmez)
+  // case-insensitive kullanıcı adı → e‑posta
   const mapUserToEmail = {
-    'takascembericom': 'takascembericom@gmail.com'
+    'takascembericom': 'takascembericom@gmail.com',
+    'nejla3844': 'takascembericom@gmail.com'
   };
-  // Sadece bu e‑posta yetkili
+  // sadece bu e‑posta yetkili
   const ALLOW = new Set(['takascembericom@gmail.com']);
 
   function show(msg, cls=''){ status.textContent = msg||''; status.className = 'status '+cls; }
@@ -75,27 +74,29 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
     const v = (input||'').trim();
     if(!v) return '';
     if(v.includes('@')) return v;
-    return mapUserToEmail[v] || '';
+    return mapUserToEmail[v.toLowerCase()] || '';
   }
 
   (async()=>{ try{ await setPersistence(auth, browserLocalPersistence); }catch(_){/* cookie engeli olabilir */} })();
 
   onAuthStateChanged(auth, async(user)=>{
-    if(!user) return; // giriş yoksa bekle
+    if(!user) return;
     if(!ALLOW.has(user.email||'')){
       await signOut(auth); show('Bu panele erişiminiz yok.','err'); return;
     }
-    // Yetkili giriş → admin/home.html
+    // Yetkili ise panel
     location.replace('home.html');
   });
 
   async function doLogin(){
     const user = $('#id_user').value; const pass = $('#id_pass').value;
     const email = resolveEmail(user);
-    if(!email || !pass){ return show('E‑posta/kullanıcı adı ve şifre gerekli.','err'); }
+    if(!email || !pass){ return show('Lütfen gerekli alanları doldurun.','err'); }
     try{
       await signInWithEmailAndPassword(auth, email, pass);
-      location.href = 'home.html';
+      // Başarılı girişte mesaj göstermeden doğrudan yönlendir
+      location.replace('home.html');
+      setTimeout(()=>{ try{ if(location.pathname.endsWith('/index.html')) location.assign('home.html'); }catch(_){} }, 400);
     }catch(e){
       const c=e?.code||'';
       if(c.includes('auth/invalid-credential')) return show('Bilgiler hatalı.','err');
