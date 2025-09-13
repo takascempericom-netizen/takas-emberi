@@ -7,16 +7,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{ --bg1:#0b1324; --bg2:#102048; --card:#0f1a33; --ring:#1f2a44; --txt:#e8ecf8; --muted:#9aa4bf; --ok:#10b981; --err:#ef4444; --pri:#3b82f6; }
+:root{ --bg1:#0b1324; --bg2:#102048; --card:#0f1a33; --ring:#1f2a44; --txt:#e8ecf8; --muted:#9aa4bf; --err:#ef4444; --pri:#3b82f6; }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--txt);
+body{
+  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--txt);
   background: radial-gradient(1200px 600px at 10% -10%, #203264aa, #0b1324),
               linear-gradient(135deg, var(--bg1), var(--bg2));
-  display:grid; place-items:center; padding:16px}
+  display:grid; place-items:center; padding:16px
+}
 .card{width:min(520px,100%); background:rgba(15,26,51,.92); border:1px solid var(--ring); border-radius:16px; box-shadow:0 30px 80px rgba(0,0,0,.35); overflow:hidden}
 .hd{display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid var(--ring); background:linear-gradient(135deg,#1b2b57,#132044)}
-.hd b{font-size:16px}
+.hd .logo{display:inline-grid; place-items:center; width:36px; height:36px; border-radius:10px; background:#13244e; border:1px solid #244173; font-weight:900}
 .bd{padding:16px}
 label{display:grid; gap:6px; margin-top:10px; font-weight:700}
 .input{padding:12px 14px; border-radius:12px; border:1px solid #25365f; background:#0b152f; color:var(--txt); outline:none}
@@ -26,20 +28,17 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
 .btn.pri{background:linear-gradient(90deg,#2563eb,#3b82f6); border:0}
 .btn.ghost{background:transparent}
 .status{min-height:22px; color:var(--muted); font-size:14px; margin-top:8px}
-.ok{color:var(--ok)} .err{color:var(--err)}
-.note{font-size:12px; color:var(--muted); margin-top:8px}
+.err{color:var(--err)}
 .ft{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-top:1px solid var(--ring); background:#0b152f; color:var(--muted); font-size:12px}
-.logo{display:inline-grid; place-items:center; width:36px; height:36px; border-radius:10px; background:#13244e; border:1px solid #244173; font-weight:900}
 @media (max-width:520px){ .actions{flex-direction:column-reverse; align-items:stretch} }
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="hd"><span class="logo">TC</span> <b>Takas Çemberi • Admin</b> <span style="margin-left:auto; font-size:12px; color:var(--muted)">Sadece yetkili giriş</span></div>
+    <div class="hd"><span class="logo">TC</span> <b>Takas Çemberi • Admin</b></div>
     <div class="bd">
-      <p class="note">Giriş için <b>kullanıcı adı</b> veya <b>e‑posta</b> kullanabilirsiniz. Şifreyi unuttuysanız doğrulama maili belirtilen adrese gider.</p>
-      <label>Kullanıcı Adı / E‑posta
-        <input id="id_user" class="input" placeholder="Nejla3844 veya takascembericom@gmail.com" autocomplete="username">
+      <label>Kullanıcı Adı / E-posta
+        <input id="id_user" class="input" placeholder="kullanıcı adı veya e-posta" autocomplete="username">
       </label>
       <label>Şifre
         <input id="id_pass" class="input" type="password" placeholder="••••••••" autocomplete="current-password">
@@ -49,7 +48,6 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
         <button id="btnLogin" class="btn pri">Giriş Yap</button>
       </div>
       <div id="status" class="status"></div>
-      <p class="note">İlk kurulumda kullanıcı adı: <b>Nejla3844</b> → e‑posta: <b>takascembericom@gmail.com</b> olarak eşlenir.</p>
     </div>
     <div class="ft">
       <span>© <span id="y"></span> Takas Çemberi</span>
@@ -59,52 +57,71 @@ label{display:grid; gap:6px; margin-top:10px; font-weight:700}
 
 <script type="module">
   import { app, auth } from '../js/firebase-config.js';
-  import { setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
+  import {
+    setPersistence, browserLocalPersistence,
+    onAuthStateChanged, signInWithEmailAndPassword,
+    sendPasswordResetEmail, signOut
+  } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
 
   const $ = (s)=>document.querySelector(s);
-  const status = $('#status');
-  const map = { 'nejla3844':'takascembericom@gmail.com', 'Nejla3844':'takascembericom@gmail.com' };
+  const S = $('#status');
+
+  // Kullanıcı adı → e-posta (case-insensitive)
+  const USERMAP = {
+    'takascembericom': 'takascembericom@gmail.com',
+    'nejla3844': 'takascembericom@gmail.com'
+  };
+  // Sadece bu e-posta admin
   const ALLOW = new Set(['takascembericom@gmail.com']);
 
-  function show(msg, cls=''){ status.textContent = msg||''; status.className = 'status '+cls; }
-  function resolveEmail(input){
+  function show(msg, cls=''){ S.textContent = msg||''; S.className = 'status '+cls; }
+  function emailFrom(input){
     const v = (input||'').trim();
     if(!v) return '';
     if(v.includes('@')) return v;
-    return map[v] || '';
+    return USERMAP[v.toLowerCase()] || '';
   }
 
-  (async()=>{ try{ await setPersistence(auth, browserLocalPersistence); }catch(_){/* cookie engeli olabilir */} })();
+  // Kalıcı oturum
+  (async()=>{ try{ await setPersistence(auth, browserLocalPersistence); }catch(_){} })();
 
-  onAuthStateChanged(auth, async(user)=>{
-    if(!user) return;
-    if(!ALLOW.has(user.email||'')){
-      await signOut(auth); show('Bu panele erişiminiz yok.','err'); return;
+  // Zaten girişliyse ve yetkiliyse → home
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    if (!ALLOW.has(user.email||'')) { await signOut(auth); show('Bu panele erişiminiz yok.', 'err'); return; }
+    // Yetkili
+    if (!location.pathname.endsWith('/home.html')) {
+      location.replace('home.html');
+      setTimeout(()=>{ try{ location.assign('home.html'); }catch(_){} }, 400);
     }
-    show('Giriş başarılı. (Panel sayfaları yakında eklenecek)','ok');
   });
 
-  $('#btnLogin').addEventListener('click', async()=>{
-    const user = $('#id_user').value; const pass = $('#id_pass').value;
-    const email = resolveEmail(user);
-    if(!email || !pass){ return show('E‑posta/kullanıcı adı ve şifre gerekli.','err'); }
+  async function doLogin(){
+    const email = emailFrom($('#id_user').value);
+    const pass  = ($('#id_pass').value||'').trim();
+    if(!email || !pass){ return show('Lütfen gerekli alanları doldurun.','err'); }
     try{
       await signInWithEmailAndPassword(auth, email, pass);
-      show('Giriş başarılı.','ok');
+      // Başarılı girişte anında yönlendir — mesaj göstermiyoruz
+      location.replace('home.html');
+      setTimeout(()=>{ try{ location.assign('home.html'); }catch(_){} }, 400);
     }catch(e){
-      const c=e?.code||'';
+      const c = e?.code || '';
       if(c.includes('auth/invalid-credential')) return show('Bilgiler hatalı.','err');
-      if(c.includes('auth/user-not-found')) return show('Kullanıcı bulunamadı.','err');
+      if(c.includes('auth/user-not-found'))    return show('Kullanıcı bulunamadı.','err');
       if(c.includes('auth/too-many-requests')) return show('Çok fazla deneme, birazdan tekrar deneyin.','err');
       show('Hata: '+(e?.message||c),'err');
     }
-  });
+  }
+
+  $('#btnLogin').addEventListener('click', doLogin);
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') doLogin(); });
 
   $('#btnForgot').addEventListener('click', async()=>{
-    const user = $('#id_user').value; const email = resolveEmail(user);
-    if(!email) return show('Şifre sıfırlamak için kullanıcı adı veya e‑posta girin.','err');
-    try{ await sendPasswordResetEmail(auth, email); show('Sıfırlama bağlantısı e‑posta kutunuza gönderildi.','ok'); }
-    catch(e){ show('Hata: '+(e?.message||e?.code),'err'); }
+    const email = emailFrom($('#id_user').value);
+    if(!email) return show('Şifre sıfırlamak için kullanıcı adı veya e-posta girin.','err');
+    try{ await sendPasswordResetEmail(auth, email); show('Sıfırlama bağlantısı gönderildi.'); }
+    catch(e){ show('Hata: '+(e?.message||e?.code), 'err'); }
   });
 
   $('#y').textContent = new Date().getFullYear();
