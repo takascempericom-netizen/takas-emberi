@@ -254,14 +254,17 @@
       return { first: p[0]||'', last: p.length>1 ? p.slice(1).join(' ') : '' };
     }
 
+    // e-postadan isim/soyisim çıkar: "isim.soyisim" / "isim_soyisim" / "isim-soyisim"
+    // tek parça ise (ör. "xfny") -> firstName= "Xfny"
     function namesFromEmail(email){
       const local = (email||'').split('@')[0] || '';
       const norm  = normalize(local);
       const parts = norm.split(/[._-]+/).filter(Boolean);
+      const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
       if (parts.length >= 2){
-        const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
         return { first: cap(parts[0]), last: cap(parts[1]) };
       }
+      if (norm){ return { first: cap(norm), last:'' }; }
       return { first:'', last:'' };
     }
 
@@ -278,9 +281,11 @@
       return norm;
     }
 
-    async function reserveUsername(base, uid){
-      let candidate = base, i=0;
-      while(true){
+    // username rezervasyonu (başarısız olursa yine de users.username yaz)
+    async function reserveUsernameOrFallback(base, uid){
+      let candidate = base || ('user'+Math.floor(Math.random()*10000));
+      let i=0;
+      while(i<50){
         const ref = doc(db,"usernames",candidate);
         try{
           await runTransaction(db, async (tx)=>{
@@ -288,9 +293,13 @@
             if(snap.exists()){ throw new Error("taken"); }
             tx.set(ref,{ ownerUid: uid, createdAt: Date.now() });
           });
-          return candidate;
-        }catch(_){ i++; candidate = `${base}-${i}`; }
+          return candidate; // başarı
+        }catch(_){
+          i++; candidate = `${base}-${i}`;
+        }
       }
+      // rezervasyon başarısızsa rastgele fallback
+      return base + "-" + Math.floor(1000 + Math.random()*9000);
     }
 
     async function ensureUserDocAndUsername(user){
@@ -301,12 +310,20 @@
       let username = (snap.exists() && snap.data().username) ? snap.data().username : '';
       if (!username){
         const base = deriveMaskedUsername(user.email||'');
-        const reserved = await reserveUsername(base, user.uid);
+        let reserved = base;
+        try{
+          reserved = await reserveUsernameOrFallback(base, user.uid);
+        }catch(_){ /* yok say */ }
         username = reserved;
-        await runTransaction(db, async (tx)=>{ tx.set(uref,{ username: reserved },{merge:true}); });
+        try{
+          await runTransaction(db, async (tx)=>{ tx.set(uref,{ username: reserved },{merge:true}); });
+        }catch(_){
+          // usernames koleksiyonu kuralları engellese bile en azından users.username yazalım
+          await setDoc(uref, { username: reserved }, { merge:true });
+        }
       }
 
-      // isim/soyisim/email — eksikse tamamla
+      // isim/soyisim/email — eksikse tamamla (Google + e-posta fallback, e-posta kaydında displayName boş olabilir)
       const cur = snap.exists() ? snap.data() : {};
       const dn = splitDisplay(user.displayName);
       const em = namesFromEmail(user.email||'');
