@@ -1,120 +1,122 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Profil • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0a0a0a; --card:#111319; --muted:#7e8aa6; --txt:#f5f7ff; --accent:#ff163e; --accent2:#ff5a00;
-      --stroke:#202636; --good:#10b981; --warn:#f59e0b; --bad:#ef4444; --pink:#ff006e;
+      --bg1:#ffe6e6; --bg2:#fff5e6; --bg3:#e6f7ff; --bg4:#f5e6ff;
+      --card:#ffffff; --muted:#5b6b8f; --txt:#111827;
+      --accent:#ff163e; --accent2:#ff5a00; --stroke:#e5e7eb;
+      --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(135deg,#0d0f1a,#141827 25%,#1b2034 55%,#2a1238 80%,#3a0d3a);
-         color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{
+      margin:0;
+      background-image:linear-gradient(-45deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4));
+      background-size:400% 400%;
+      animation:bgAnim 16s ease infinite;
+      color:var(--txt);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
+    }
+    @keyframes bgAnim{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .topbar{position:sticky;top:0;z-index:30;background:rgba(9,10,18,.7);backdrop-filter:blur(8px);
-            border-bottom:1px solid var(--stroke)}
+    .topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--stroke)}
     .topbar .in{display:flex;align-items:center;gap:12px;min-height:64px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
-    .logo .dot{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #ffd2d2 30%, #ff163e 55%, #d6002c 100%);box-shadow:0 0 20px #ff3b5c80}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--accent)}
+    .logo img{height:40px}
     .grow{flex:1}
-    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:14px;background:#0e1220;cursor:pointer}
-    .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:white;font-weight:700}
-    .btn.ghost{background:transparent}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:14px;background:#fff;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,#ff163e,#ff5a00);border-color:#000;color:#fff;font-weight:700}
 
     /* profile header */
-    .profile{margin-top:18px;background:linear-gradient(180deg,#111425cc,#0d1120e6 60%,#0a0d1ad9);
-             border:1px solid var(--stroke); border-radius:20px; overflow:hidden}
-    .cover{height:160px;background:conic-gradient(from 180deg at 30% 50%, #ff163e, #ff5a00, #7c3aed, #06b6d4, #ff163e);
-           filter:contrast(110%) saturate(120%);position:relative}
-    .cover::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 70% -10%,#ffffff33,transparent 40%) }
+    .profile{margin-top:18px;background:#fff;border:1px solid var(--stroke);border-radius:20px;overflow:hidden;box-shadow:0 4px 12px #0001}
     .p-in{display:flex;gap:18px;padding:16px}
-    .avatar{margin-top:-64px;width:120px;height:120px;border-radius:30px;border:3px solid #0b0f1f;
-            background:#0b0f1f;overflow:hidden;box-shadow:0 8px 24px #0007}
+    .avatar{width:120px;height:120px;border-radius:30px;border:3px solid #fff;background:#fff;overflow:hidden;box-shadow:0 8px 24px #0003}
     .avatar img{width:100%;height:100%;object-fit:cover}
     .p-meta{display:flex;flex-direction:column;gap:8px}
-    .p-name{font-size:26px;font-weight:800}
+    .p-name{font-size:26px;font-weight:800;color:var(--accent)}
     .p-username{opacity:.8}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
 
     /* rating */
     .rating{display:flex;align-items:center;gap:8px}
     .stars{display:inline-flex;gap:5px;cursor:pointer}
     .star{width:22px;height:22px;filter:drop-shadow(0 0 8px #ff3d)}
     .star svg{width:100%;height:100%}
-    .star path{fill:#2d3348;transition:transform .15s ease, fill .15s ease}
+    .star path{fill:#e5e7eb;transition:fill .15s ease}
     .star.active path{fill:url(#g1)}
 
     /* tabs */
-    .tabs{display:flex;gap:8px; border-bottom:1px solid var(--stroke); padding:0 12px}
-    .tab{padding:12px 14px; border:1px solid var(--stroke); border-bottom:none; border-top-left-radius:12px; border-top-right-radius:12px; background:#0e1220; cursor:pointer}
-    .tab.active{background:linear-gradient(180deg,#141b2e,#0e1324); font-weight:700}
-    .tab .badge{margin-left:6px;background:#1a2136;border:1px solid #263056;padding:2px 8px;border-radius:10px;font-size:12px}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--stroke);padding:6px 12px;background:#f3f4f6}
+    .tab{flex:1;text-align:center;padding:14px 18px;font-size:16px;border:1px solid var(--stroke);border-bottom:none;border-top-left-radius:12px;border-top-right-radius:12px;background:#fff;cursor:pointer}
+    .tab.active{background:linear-gradient(180deg,#fff,#f9fafb);font-weight:700;color:var(--accent)}
+    .tab .badge{margin-left:6px;background:#fee2e2;border:1px solid #fecaca;padding:2px 8px;border-radius:10px;font-size:12px;color:#b91c1c}
 
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
-    .card{background:#0e1220;border:1px solid var(--stroke);border-radius:16px;overflow:hidden}
-    .card .hd{padding:10px 12px;border-bottom:1px solid var(--stroke);font-weight:700;display:flex;justify-content:space-between}
+    .card{background:#fff;border:1px solid var(--stroke);border-radius:16px;overflow:hidden;box-shadow:0 2px 6px #0001}
+    .card .hd{padding:10px 12px;border-bottom:1px solid var(--stroke);font-weight:700;display:flex;justify-content:space-between;color:var(--accent)}
     .card .bd{padding:12px}
 
-    /* quick actions */
-    .quick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    .q{display:flex;align-items:center;justify-content:center;background:#0a0f1f;border:1px dashed #2b3246;min-height:44px;border-radius:12px}
-
-    /* listing card */
     .listing{display:flex;gap:10px}
-    .thumb{width:84px;height:84px;background:#151a2a;border-radius:10px;overflow:hidden;border:1px solid #28304a}
+    .thumb{width:84px;height:84px;background:#f3f4f6;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb}
     .thumb img{width:100%;height:100%;object-fit:cover}
     .meta{display:flex;flex-direction:column;gap:6px}
-    .meta .t{font-weight:700}
+    .meta .t{font-weight:700;color:var(--accent2)}
     .meta .muted{color:var(--muted);font-size:12px}
-    .pill{font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid #2c3451;background:#111628;display:inline-flex;align-items:center;gap:6px}
-    .pill.ok{border-color:#0c3;}
-    .pill.warn{border-color:#f59e0b}
-    .pill.bad{border-color:#ef4444}
+    .pill{font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;display:inline-flex;align-items:center;gap:6px}
+    .pill.ok{border-color:#0c3;color:#0c3}
+    .pill.warn{border-color:#f59e0b;color:#b45309}
+    .pill.bad{border-color:#ef4444;color:#b91c1c}
 
-    /* mobile bottom bar */
-    .mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:10px;justify-content:space-around;align-items:center;background:#0b0f1f;border-top:1px solid var(--stroke);padding:10px}
-    .mbar a{display:flex;flex-direction:column;align-items:center;font-size:12px;opacity:.95}
+    /* mobile bottom nav */
+    .mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:10px;justify-content:space-around;align-items:center;background:#fff;border-top:1px solid var(--stroke);padding:10px}
+    .mbar a{display:flex;flex-direction:column;align-items:center;font-size:12px;color:#222;opacity:.95}
 
-    /* mobile adjustments */
+    /* responsive */
     @media(max-width:900px){
       .grid{grid-template-columns:1fr}
-      .p-in{flex-direction:column}
-      .avatar{width:100px;height:100px;margin-top:-50px}
+      .p-in{flex-direction:column;align-items:center}
+      .avatar{width:100px;height:100px}
+      .tab{font-size:14px;padding:10px 12px}
     }
+    @media(min-width:901px){ .mbar{display:none} }
 
     /* modal */
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,4,10,.7);z-index:50}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,4,10,.4);z-index:50}
     .modal.show{display:flex}
-    .sheet{width:min(520px,92vw);background:#0c1020;border:1px solid var(--stroke);border-radius:16px;overflow:hidden}
-    .sheet .hd{padding:12px 14px;border-bottom:1px solid var(--stroke);font-weight:800}
+    .sheet{width:min(520px,92vw);background:#fff;border:1px solid var(--stroke);border-radius:16px;overflow:hidden}
+    .sheet .hd{padding:12px 14px;border-bottom:1px solid var(--stroke);font-weight:800;color:var(--accent)}
     .sheet .bd{padding:14px}
     .field{display:flex;gap:8px}
-    input[type=text]{flex:1;background:#0a0f1f;color:var(--txt);border:1px solid #2b3246;border-radius:12px;padding:10px 12px}
+    input[type=text]{flex:1;background:#fff;color:var(--txt);border:1px solid var(--stroke);border-radius:12px;padding:10px 12px}
   </style>
 </head>
 <body>
+  <!-- gradient for stars -->
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ff163e"/>
-        <stop offset="100%" stop-color="#ff5a00"/>
+        <stop offset="0%" stop-color="#ff163e"/><stop offset="100%" stop-color="#ff5a00"/>
       </linearGradient>
     </defs>
   </svg>
 
   <header class="topbar">
     <div class="wrap in">
-      <div class="logo"><span class="dot"></span><a href="home.html">Takas Çemberi</a></div>
+      <div class="logo"><img src="assets/img/seffaf.png" alt="logo"><a href="home.html">Takas Çemberi</a></div>
       <div class="grow"></div>
       <nav class="row hide-m">
-        <a class="btn ghost" href="messages.html">💬 Mesajlar</a>
-        <a class="btn ghost" href="notifications.html">🔔 Bildirimler</a>
+        <a class="btn" href="messages.html">💬 Mesajlar</a>
+        <a class="btn" href="notifications.html">🔔 Bildirimler</a>
         <a class="btn" id="btnProfile">👤 Profil</a>
         <a class="btn" id="btnLogout">🚪 Çıkış</a>
       </nav>
@@ -123,7 +125,6 @@
 
   <main class="wrap">
     <section class="profile">
-      <div class="cover"></div>
       <div class="p-in">
         <div class="avatar" id="avatarBox"><img id="avatarImg" alt="avatar" src=""/></div>
         <div class="p-meta">
@@ -135,7 +136,7 @@
           </div>
           <div class="row">
             <label class="btn" for="fileAvatar">📷 Resim Ekle / Değiştir</label>
-            <input id="fileAvatar" type="file" accept="image/*" style="display:none" />
+            <input id="fileAvatar" type="file" accept="image/*" style="display:none"/>
             <button class="btn" id="btnPwd">🔑 Şifre Değiştir</button>
           </div>
         </div>
@@ -149,21 +150,9 @@
 
       <div class="grid" id="listings"></div>
     </section>
-
-    <section style="margin-top:14px" class="grid">
-      <div class="card">
-        <div class="hd">Hızlı İşlemler</div>
-        <div class="bd quick">
-          <a class="q" href="ilan-ekle.html">➕ İlan Ekle</a>
-          <a class="q" href="profile.html">👤 Profili Gör</a>
-          <a class="q" href="messages.html">💬 Mesajlar</a>
-          <a class="q" href="notifications.html">🔔 Bildirimler</a>
-        </div>
-      </div>
-    </section>
   </main>
 
-  <!-- Mobile bottom bar -->
+  <!-- Mobile bottom bar (yalnızca mobilde görünür) -->
   <nav class="mbar">
     <a href="home.html">🏠<span style="margin-top:4px">Ana Sayfa</span></a>
     <a href="messages.html">💬<span style="margin-top:4px">Mesajlar</span></a>
@@ -187,46 +176,41 @@
   </div>
 
   <script type="module">
-    // ==== Firebase SDKs (CDN) ====
+    // ==== Firebase SDKs ====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
-    // TODO: Doldurun
-   const firebaseConfig = {
-  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-  authDomain: "ureten-eller-v2.firebaseapp.com",
-  projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.firebasestorage.app",
-  messagingSenderId: "621494781131",
-  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-  };
-    
+    // --- SENİN KONFİGİN ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app", // Hata alırsan 'ureten-eller-v2.appspot.com' yap.
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // ==== Helpers ====
     const qs = s => document.querySelector(s);
     const qsa = s => Array.from(document.querySelectorAll(s));
-
     const state = { user:null, userDoc:null, tab:'active', ratings:{avg:0,count:0} };
-
-    // UI refs
     const avatarImg = qs('#avatarImg');
     const pName = qs('#pName');
     const pUser = qs('#pUser');
     const listingsEl = qs('#listings');
 
-    // Build star widgets
+    // Stars
     const starsEl = qs('#stars');
-    const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
+    const STAR_SVG = (idx)=>`<div class="star" data-i="${idx}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>`;
     starsEl.innerHTML = [1,2,3,4,5].map(STAR_SVG).join('');
-
-    function setStars(v){
-      qsa('.star').forEach((el,i)=>{ el.classList.toggle('active', i < v); });
-    }
+    function setStars(v){ qsa('.star').forEach((el,i)=>{ el.classList.toggle('active', i < v); }); }
 
     qsa('.star').forEach(el=>{
       el.addEventListener('mouseenter',()=> setStars(Number(el.dataset.i)));
@@ -238,19 +222,17 @@
     });
 
     function formatCount(n){ return new Intl.NumberFormat('tr-TR').format(n||0); }
-
     function slugify(x){
       return (x||'')
         .toLowerCase()
         .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
         .replace(/[^a-z0-9_]+/g,'')
-        .replace(/^[_]+|[_]+$/g,'')
+        .replace(/^_+|_+$/g,'')
         .slice(0,24);
     }
+    function showModal(sel, show=true){ qs(sel).classList.toggle('show', show); }
 
-    function showModal(id, show=true){ qs(id).classList.toggle('show', show); }
-
-    // ====== Auth gate ======
+    // ==== Auth Gate ====
     onAuthStateChanged(auth, async (u)=>{
       if(!u){ window.location.href = 'auth.html?next=profile.html'; return; }
       state.user = u;
@@ -264,12 +246,10 @@
     async function ensureUserDoc(u){
       const uref = doc(db,'users',u.uid);
       const snap = await getDoc(uref);
-      const base = { email:u.email, displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:serverTimestamp() };
+      const base = { email:u.email||'', displayName:u.displayName||'', photoURL:u.photoURL||'', createdAt:serverTimestamp() };
       if(!snap.exists()){
-        // Pre-suggest a username from Google name
         const suggested = await suggestUsername(u);
-        await setDoc(uref, { ...base, username: suggested, avgRating:0, ratingCount:0 });
-        // Reserve username in /usernames
+        await setDoc(uref, { ...base, username:suggested, avgRating:0, ratingCount:0 });
         if(suggested){ await setDoc(doc(db,'usernames',suggested), { uid:u.uid, createdAt:serverTimestamp() }); }
       }
     }
@@ -278,7 +258,7 @@
       const dn = (u.displayName||u.email||'').split('@')[0];
       const base = slugify(dn) || ('user'+(Math.random()*1000|0));
       let candidate = base, i=0;
-      while(i<5){
+      while(i<6){
         const taken = await getDoc(doc(db,'usernames',candidate));
         if(!taken.exists()) return candidate;
         i++; candidate = base + (Math.random()*100|0);
@@ -288,11 +268,10 @@
 
     async function loadProfile(u){
       const snap = await getDoc(doc(db,'users',u.uid));
-      state.userDoc = snap.data();
+      state.userDoc = snap.data()||{};
       pName.textContent = state.userDoc.displayName || u.displayName || '—';
       pUser.textContent = '@' + (state.userDoc.username || 'kullanici');
-      avatarImg.src = state.userDoc.photoURL || u.photoURL || 'https://api.dicebear.com/9.x/identicon/svg?seed='+u.uid;
-      // If username missing or placeholder -> open modal
+      avatarImg.src = state.userDoc.photoURL || u.photoURL || 'assets/img/seffaf.png';
       if(!state.userDoc.username || state.userDoc.username === 'kullanici'){
         qs('#inpUsername').value = slugify((u.displayName||'kullanici').replace(/\s+/g,''));
         showModal('#mUser',true);
@@ -300,18 +279,22 @@
     }
 
     function attachHandlers(){
-      qs('#btnLogout').addEventListener('click', async()=>{ await signOut(auth); window.location.href='auth.html'; });
+      const btnLogout = qs('#btnLogout');
+      if(btnLogout) btnLogout.addEventListener('click', async()=>{ await signOut(auth); window.location.href='auth.html'; });
+
       qs('#btnPwd').addEventListener('click', async()=>{
-        if(!state.user?.email){ alert('Hesabınızda e‑posta yok.'); return; }
+        if(!state.user?.email){ alert('Hesabınızda e-posta yok.'); return; }
         await sendPasswordResetEmail(auth, state.user.email);
-        alert('Şifre sıfırlama e‑postası gönderildi: '+state.user.email);
+        alert('Şifre sıfırlama e-postası gönderildi: '+state.user.email);
       });
+
       qs('#fileAvatar').addEventListener('change', onAvatarFile);
+
       qsa('.tab').forEach(t=> t.addEventListener('click', ()=>{
-        qsa('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-        state.tab = t.dataset.tab; renderListings();
+        qsa('.tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active'); state.tab = t.dataset.tab; renderListings();
       }));
-      // username modal
+
       qs('#btnCancelUsername').addEventListener('click', ()=> showModal('#mUser',false));
       qs('#btnSaveUsername').addEventListener('click', saveUsername);
     }
@@ -331,55 +314,57 @@
       if(u.length < 3){ qs('#uHelp').textContent = 'En az 3 karakter.'; return; }
       const taken = await getDoc(doc(db,'usernames',u));
       if(taken.exists()){ qs('#uHelp').textContent = 'Bu kullanıcı adı alınmış.'; return; }
-      // release old username if exists (optional: not implemented)
       await setDoc(doc(db,'usernames',u), { uid:state.user.uid, createdAt:serverTimestamp() });
       await updateDoc(doc(db,'users',state.user.uid), { username:u });
       pUser.textContent = '@'+u; showModal('#mUser',false);
     }
 
-    // ===== Ratings =====
+    // ==== Ratings ====
     async function loadRatings(uid){
-      // aggregate stored on user doc for speed
       const u = await getDoc(doc(db,'users',uid));
-      const d = u.data();
-      state.ratings.avg = Number(d?.avgRating||0);
-      state.ratings.count = Number(d?.ratingCount||0);
+      const d = u.data()||{};
+      state.ratings.avg = Number(d.avgRating||0);
+      state.ratings.count = Number(d.ratingCount||0);
       qs('#ratingInfo').textContent = `${state.ratings.avg.toFixed(1)} • ${formatCount(state.ratings.count)} oy`;
       setStars(Math.round(state.ratings.avg));
     }
 
     async function submitRating(v){
-      const key = `rated:${state.user.uid}`;
-      if(localStorage.getItem(key)){ alert('Bu profili zaten oyladın.'); return; }
-      // allow guest rating: if signed-in user is rating self, block; else record anonymous token
-      const toUid = state.user.uid; // profile owner (self page) — if later viewing others, set accordingly
+      // Kendi profiline oy verme
+      if(state.user){ alert('Kendi profiline oy veremezsin.'); return; }
+      const toUid = state.user?.uid; // bu dosya kendi profili için
       const token = crypto.randomUUID?.() || String(Date.now());
       await setDoc(doc(collection(db,'ratings')), { toUid, stars:v, createdAt:serverTimestamp(), by:`guest:${token}` });
-      // update aggregate
       const uref = doc(db,'users',toUid);
       const snap = await getDoc(uref); const d = snap.data()||{avgRating:0,ratingCount:0};
-      const total = d.avgRating * d.ratingCount + v;
-      const count = d.ratingCount + 1;
+      const total = (Number(d.avgRating)||0) * (Number(d.ratingCount)||0) + v;
+      const count = (Number(d.ratingCount)||0) + 1;
       const avg = total / count;
       await updateDoc(uref, { avgRating: avg, ratingCount: count });
       state.ratings = {avg, count};
-      localStorage.setItem(key,'1');
       await loadRatings(toUid);
       alert('Teşekkürler! Oyun kaydedildi.');
     }
 
-    // ===== Listings =====
+    // ==== Listings ====
     const cache = { active:[], pending:[], expired:[] };
 
     async function loadListings(){
-      // fetch my listings
-      const qref = query(collection(db,'listings'), where('ownerId','==', state.user.uid), orderBy('createdAt','desc'), limit(100));
+      const qref = query(
+        collection(db,'listings'),
+        where('ownerId','==', state.user.uid),
+        orderBy('createdAt','desc'),
+        limit(100)
+      );
       const snap = await getDocs(qref);
       cache.active = []; cache.pending = []; cache.expired = [];
       const now = Date.now();
+
       snap.forEach(docu=>{
         const d = docu.data();
-        const expiresAt = (d.expiresAt?.toMillis?.() ? d.expiresAt.toMillis() : (d.createdAt?.toMillis?.()? d.createdAt.toMillis()+30*24*60*60*1000 : 0));
+        const expiresAt = (d.expiresAt?.toMillis?.()
+          ? d.expiresAt.toMillis()
+          : (d.createdAt?.toMillis?.()? d.createdAt.toMillis()+30*24*60*60*1000 : 0));
         let status = d.status || 'pending';
         if(status==='active' && expiresAt && expiresAt < now) status = 'expired';
         const item = { id:docu.id, ...d, status, expiresAt };
@@ -387,6 +372,7 @@
         else if(status==='pending') cache.pending.push(item);
         else cache.expired.push(item);
       });
+
       qs('#cntActive').textContent = cache.active.length;
       qs('#cntPending').textContent = cache.pending.length;
       qs('#cntExpired').textContent = cache.expired.length;
