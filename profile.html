@@ -15,7 +15,7 @@
     html,body{height:100%}
     body{margin:0;background:radial-gradient(1200px 600px at 10% -10%, #1b1e2d 0%, #0b0b10 60%),linear-gradient(135deg,#0b0b10,#0b0b10 60%);color:var(--txt);font:16px/1.6 Inter,system-ui,Segoe UI,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 96px}
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 108px}
     header.hd{display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--stroke);border-radius:20px;background:linear-gradient(180deg,#151828,#111420)}
     .avatar{position:relative;width:96px;height:96px;border-radius:50%;background:#0e0f16;border:2px solid #22263a;box-shadow:0 8px 24px rgba(0,0,0,.5), inset 0 0 40px rgba(255,255,255,.04);overflow:hidden}
     .avatar img{width:100%;height:100%;object-fit:cover;display:block}
@@ -28,8 +28,9 @@
     .card{flex:1 1 300px;border:1px solid var(--stroke);border-radius:20px;background:linear-gradient(180deg,#141827,#0f1320);padding:16px;min-width:260px}
     .card h2{margin:0 0 12px;font-size:18px}
     label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-    input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid #24273a;background:#0f1220;color:var(--txt);outline:none}
-    input:focus{border-color:#35406b;box-shadow:0 0 0 4px rgba(53,64,107,.25)}
+    input, textarea, select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid #24273a;background:#0f1220;color:var(--txt);outline:none}
+    input:focus, textarea:focus, select:focus{border-color:#35406b;box-shadow:0 0 0 4px rgba(53,64,107,.25)}
+    textarea{min-height:100px;resize:vertical}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:14px;border:1px solid #2a2e46;background:linear-gradient(180deg,#1a1f34,#171b2b);color:#fff;font-weight:700;cursor:pointer}
     .btn.primary{background:linear-gradient(180deg,#ff3956,#ff1f3d);border-color:#ff3d5b;box-shadow:0 10px 30px rgba(255,61,91,.35)}
     .btn.ghost{background:transparent}
@@ -49,6 +50,17 @@
     .btmnav a .ic{font-size:20px;line-height:1}
     .btmnav a.active{color:#fff}
 
+    /* İlan sekmeleri */
+    .tabs{display:flex;gap:8px;margin:4px 0 12px}
+    .tab{padding:8px 12px;border:1px solid #2a2e46;border-radius:999px;background:#12162a;color:#e6e8ff;font-weight:700;cursor:pointer}
+    .tab.active{background:linear-gradient(180deg,#ff3956,#ff1f3d);border-color:#ff6a84}
+    .list{display:grid;gap:10px}
+    .item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;border:1px solid #22263a;background:#0f1322;border-radius:14px;padding:10px}
+    .thumb{width:64px;height:64px;border-radius:10px;background:#0e0f16;overflow:hidden;border:1px solid #272b42}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .status{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid #2a2e46;background:#141a2d;color:#c9d0ff}
+    .actions{display:flex;gap:8px}
+
     .hide{display:none}
   </style>
 </head>
@@ -63,9 +75,7 @@
       <div class="info">
         <h1 id="fullName">—</h1>
         <div class="handle" id="handle">@kullanici</div>
-        <div class="stars3d" id="starsBlock">
-          <!-- 3D yıldızlar burada render edilecek -->
-        </div>
+        <div class="stars3d" id="starsBlock"><!-- 3D yıldızlar --></div>
       </div>
       <button class="btn ghost" id="btnLogout">🚪 Çıkış</button>
     </header>
@@ -83,18 +93,45 @@
         <input id="inpPhone" placeholder="5xx xxx xx xx">
         <label>E‑posta</label>
         <input id="inpEmail" placeholder="mail@ornek.com" disabled>
-        <div style="margin-top:12px;display:flex;gap:8px">
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn primary" id="btnSave">Kaydet</button>
           <button class="btn" id="btnRefresh">Yenile</button>
+          <button class="btn" id="btnChangePass">Şifre Değiştir</button>
         </div>
       </section>
 
       <section class="card">
         <h2>Hakkında</h2>
-        <p id="aboutText" style="opacity:.9">Ev emeklerini görünür kılan Takas Çemberi topluluğuna hoş geldin. Profil bilgilerini güncelle, fotoğrafını ekle ve güven puanını yükseltmek için puan al.</p>
+        <p id="aboutText" style="opacity:.9">Takas Çemberi; insanların ihtiyaçlarına uygun ürünleri takas ettiği, güven odaklı bir platformdur. Profilini güncelle, fotoğrafını ekle ve güven puanını artırmak için oylara katkı ver.</p>
         <div style="margin-top:8px;font-size:14px;color:var(--muted)">Ortalama Puan: <b id="avgScore">—</b> • Oy sayısı: <b id="ratingsCount">—</b></div>
       </section>
     </div>
+
+    <section class="card" style="margin-top:16px">
+      <h2>İlanlarım</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="pending">Onay Bekleyen</button>
+        <button class="tab" data-tab="active">Yayında</button>
+        <button class="tab" data-tab="expired">Süresi Dolan</button>
+      </div>
+
+      <!-- Yeni ilan formu -->
+      <div style="display:grid;gap:8px;margin-bottom:12px">
+        <label>Başlık</label>
+        <input id="adTitle" placeholder="Örn: Akıllı Saat (A ile takas olur)">
+        <label>Açıklama</label>
+        <textarea id="adDesc" placeholder="Durum, takas şartları, istenenler…"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="adPhoto" type="file" accept="image/*">
+          <button class="btn primary" id="btnAddAd">İlan Ver (Onaya Gider)</button>
+        </div>
+      </div>
+
+      <!-- Listeler -->
+      <div id="list-pending" class="list"></div>
+      <div id="list-active" class="list hide"></div>
+      <div id="list-expired" class="list hide"></div>
+    </section>
   </div>
 
   <!-- Alt menü -->
@@ -109,18 +146,18 @@
   <script type="module">
     /* === Firebase v10 (Modüler) === */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, where, getDocs, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
-    // TODO: BURAYI KENDI PROJE AYARLARINLA DOLDUR
+    // ——— Kullanıcının verdiği Firebase config ———
     const firebaseConfig = {
-    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-    authDomain: "ureten-eller-v2.firebaseapp.com",
-    projectId: "ureten-eller-v2",
-    storageBucket: "ureten-eller-v2.firebasestorage.app",
-    messagingSenderId: "621494781131",
-    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -146,41 +183,64 @@
     const btnSave = el('btnSave');
     const btnRefresh = el('btnRefresh');
     const btnLogout = el('btnLogout');
+    const btnChangePass = el('btnChangePass');
+
+    // İlan elemanları
+    const adTitle = el('adTitle');
+    const adDesc = el('adDesc');
+    const adPhoto = el('adPhoto');
+    const btnAddAd = el('btnAddAd');
+
+    const listPending = el('list-pending');
+    const listActive = el('list-active');
+    const listExpired = el('list-expired');
+
+    document.querySelectorAll('.tab').forEach(t=>{
+      t.addEventListener('click',()=>{
+        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        const k = t.dataset.tab;
+        listPending.classList.toggle('hide', k!=='pending');
+        listActive.classList.toggle('hide', k!=='active');
+        listExpired.classList.toggle('hide', k!=='expired');
+      })
+    });
 
     let currentUser = null;     // oturum sahibi
     let targetUserId = null;    // görüntülenen profil
+    let currentUserData = null; // isAdmin vb.
 
     onAuthStateChanged(auth, async (user)=>{
       if(!user){
-        // Oturum yoksa girişe yönlendir
         location.href = 'auth.html?next=profile.html';
         return;
       }
       currentUser = user;
       inpEmail.value = user.email || '';
 
-      // URL'de uid verilmişse o profili gör, yoksa kendi profilin
+      // kendi profilin
       const params = new URLSearchParams(location.search);
       targetUserId = params.get('uid') || user.uid;
 
+      currentUserData = (await getDoc(doc(db,'users', user.uid))).data() || {};
+
       await loadProfile(targetUserId);
       await loadRatingsSummary(targetUserId);
-
-      // Kendi profilini görüntülüyorsa puanlama pasif
       renderStars(starsBlock, 0, targetUserId === currentUser.uid);
+
+      await refreshListings();
     });
 
     async function loadProfile(uid){
       const uref = doc(db, 'users', uid);
       const snap = await getDoc(uref);
       if(!snap.exists()){
-        // İlk kez görünüyor olabilir – temel belgeyi yarat
         await setDoc(uref, { createdAt: serverTimestamp(), averageRating: 0, ratingsCount: 0 }, { merge:true });
       }
       const data = (await getDoc(uref)).data() || {};
       const first = data.firstName || '';
       const last = data.lastName || '';
-      const uname = data.username || (data.handle) || 'kullanici';
+      const uname = data.username || data.handle || 'kullanici';
       const photo = data.photoURL || '';
 
       avatarImg.src = photo || `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(uname)}`;
@@ -197,7 +257,6 @@
       avgScoreEl.textContent = (data.averageRating ?? '—');
       ratingsCountEl.textContent = (data.ratingsCount ?? '—');
 
-      // Kullanıcının daha önce verdiği oy varsa yıldızları dolu başlat
       if(currentUser && uid !== currentUser.uid){
         const qref = query(collection(db, 'ratings'), where('targetId','==',uid), where('raterId','==',currentUser.uid));
         const qs = await getDocs(qref);
@@ -227,7 +286,13 @@
 
     btnLogout.addEventListener('click', async ()=>{ await signOut(auth); });
 
-    // === AVATAR YÜKLE ===
+    btnChangePass.addEventListener('click', async ()=>{
+      if(!currentUser?.email){ alert('E‑posta bağlı değil.'); return; }
+      await sendPasswordResetEmail(auth, currentUser.email);
+      alert('E‑postana şifre sıfırlama bağlantısı gönderdik.');
+    });
+
+    // === AVATAR YÜKLE (galeriden kalıcı) ===
     avatarFile.addEventListener('change', async (e)=>{
       if(!currentUser) return;
       const file = e.target.files?.[0];
@@ -236,7 +301,7 @@
       await uploadBytes(r, file);
       const url = await getDownloadURL(r);
       await updateDoc(doc(db,'users', currentUser.uid), { photoURL: url, updatedAt: serverTimestamp() });
-      avatarImg.src = url;
+      avatarImg.src = url; // tüm kullanıcılar görür (public URL)
     });
 
     // === 3D YILDIZLAR + Firestore'a Oy Yaz ===
@@ -261,7 +326,6 @@
             if(!targetUserId){ return; }
             if(currentUser.uid === targetUserId){ alert('Kendi profilini oylayamazsın.'); return; }
             await submitRating(targetUserId, stars);
-            // UI güncelle
             renderStars(container, stars, false);
             await recomputeAndUpdateAverage(targetUserId);
             await loadRatingsSummary(targetUserId);
@@ -276,36 +340,138 @@
     }
 
     async function submitRating(targetId, stars){
-      // Tekil oy belgesi: target_rater -> aynı kişi tekrar oy verirse günceller
       const key = `${targetId}_${currentUser.uid}`;
       const rdoc = doc(db, 'ratings', key);
-      await setDoc(rdoc, {
-        targetId,
-        raterId: currentUser.uid,
-        stars,
-        updatedAt: serverTimestamp(),
-        createdAt: serverTimestamp()
-      }, { merge:true });
+      await setDoc(rdoc, { targetId, raterId: currentUser.uid, stars, updatedAt: serverTimestamp(), createdAt: serverTimestamp() }, { merge:true });
     }
 
     async function recomputeAndUpdateAverage(targetId){
-      // Tüm oyları oku, ortalamayı yaz (demo amaçlı – büyük ölçekte Cloud Function önerilir)
       const qref = query(collection(db, 'ratings'), where('targetId','==',targetId));
       const qs = await getDocs(qref);
-      let sum=0, cnt=0;
-      qs.forEach(d=>{ const v=d.data().stars|0; if(v>0){ sum+=v; cnt++; } });
+      let sum=0, cnt=0; qs.forEach(d=>{ const v=d.data().stars|0; if(v>0){ sum+=v; cnt++; } });
       const avg = cnt? +(sum/cnt).toFixed(2) : 0;
       await updateDoc(doc(db,'users', targetId), { averageRating: avg, ratingsCount: cnt, ratingsUpdatedAt: serverTimestamp() });
     }
 
-    // === Basit aktif durum ===
+    // === İLAN İŞLEMLERİ ===
+    btnAddAd.addEventListener('click', async()=>{
+      if(!currentUser) return alert('Giriş yapmalısın.');
+      const title = adTitle.value.trim();
+      const desc = adDesc.value.trim();
+      if(!title) return alert('Başlık gerekli');
+      let photoURL = '';
+      const f = adPhoto.files?.[0];
+      if(f){
+        const p = ref(storage, `listing_photos/${currentUser.uid}_${Date.now()}.jpg`);
+        await uploadBytes(p, f); photoURL = await getDownloadURL(p);
+      }
+      await addDoc(collection(db,'listings'),{
+        title, desc, photoURL,
+        ownerId: currentUser.uid,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        approvedAt: null,
+        expiresAt: null
+      });
+      adTitle.value=''; adDesc.value=''; adPhoto.value='';
+      alert('İlan alındı. Admin onayından sonra yayınlanacak.');
+      await refreshListings();
+    });
+
+    async function refreshListings(){
+      await ensureExpireTransitions();
+      await loadByStatus('pending', listPending);
+      await loadByStatus('active', listActive);
+      await loadByStatus('expired', listExpired);
+    }
+
+    async function loadByStatus(status, container){
+      container.innerHTML = '';
+      const qref = query(collection(db,'listings'), where('ownerId','==', targetUserId), where('status','==', status), orderBy('createdAt','desc'));
+      const qs = await getDocs(qref);
+      if(qs.empty){ container.innerHTML = `<div style="color:var(--muted)">Bu bölümde ilan yok.</div>`; return; }
+      qs.forEach(docu=>{
+        const d = docu.data(); const id = docu.id;
+        const it = document.createElement('div'); it.className='item';
+        const th = document.createElement('div'); th.className='thumb'; th.innerHTML = `<img src="${d.photoURL||'https://picsum.photos/seed/takas/120/120'}" alt="thumb">`;
+        const body = document.createElement('div');
+        body.innerHTML = `<div style="font-weight:800">${escapeHtml(d.title||'İlan')}</div>
+                          <div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml((d.desc||'').slice(0,120))}</div>
+                          <div style="margin-top:6px" class="status">Durum: ${statusLabel(status)}</div>`;
+        const acts = document.createElement('div'); acts.className='actions';
+
+        // Şikayet et
+        const btnRep = document.createElement('button'); btnRep.className='btn'; btnRep.textContent='⚠️ Şikayet et';
+        btnRep.addEventListener('click',()=>reportListing(id));
+        acts.appendChild(btnRep);
+
+        // Admin onayla / yayından kaldır
+        if(currentUserData?.isAdmin){
+          if(status==='pending'){
+            const b = document.createElement('button'); b.className='btn primary'; b.textContent='Onayla → Yayına Al';
+            b.addEventListener('click',()=>approveListing(id)); acts.appendChild(b);
+          }
+          if(status==='active'){
+            const b2 = document.createElement('button'); b2.className='btn'; b2.textContent='Yayından Kaldır';
+            b2.addEventListener('click',()=>expireListingNow(id)); acts.appendChild(b2);
+          }
+        }
+
+        it.appendChild(th); it.appendChild(body); it.appendChild(acts);
+        container.appendChild(it);
+      });
+    }
+
+    function statusLabel(s){
+      return s==='pending'?'Onay Bekliyor': s==='active'?'Yayında':'Süresi Doldu';
+    }
+
+    async function approveListing(id){
+      const now = Timestamp.now();
+      const expires = Timestamp.fromMillis(now.toMillis() + 30*24*60*60*1000);
+      await updateDoc(doc(db,'listings', id), { status:'active', approvedAt: now, expiresAt: expires });
+      await refreshListings();
+    }
+
+    async function expireListingNow(id){
+      await updateDoc(doc(db,'listings', id), { status:'expired' });
+      await refreshListings();
+    }
+
+    async function ensureExpireTransitions(){
+      // aktif ilanların süresi dolmuşsa expired yap
+      const now = Timestamp.now();
+      const qref = query(collection(db,'listings'), where('ownerId','==', targetUserId), where('status','==','active'));
+      const qs = await getDocs(qref);
+      for(const d of qs.docs){
+        const data = d.data();
+        if(data.expiresAt && data.expiresAt.toMillis() < now.toMillis()){
+          await updateDoc(doc(db,'listings', d.id), { status:'expired' });
+        }
+      }
+    }
+
+    async function reportListing(listingId){
+      if(!currentUser) return alert('Giriş yapmalısın.');
+      const reason = prompt('Şikayet nedeni:');
+      if(!reason) return;
+      await addDoc(collection(db,'reports'),{
+        listingId, reason, reporterId: currentUser.uid, createdAt: serverTimestamp(), handled:false
+      });
+      alert('Şikayet alındı. Admin inceleyecek.');
+    }
+
+    // Basit XSS koruması için
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+    // === Alt menü aktif durum ===
     const path = location.pathname.split('/').pop() || '';
     if(path.includes('home')) document.getElementById('navHome').classList.add('active');
     if(path.includes('notifications')) document.getElementById('navNotif').classList.add('active');
     if(path.includes('messages')) document.getElementById('navMsg').classList.add('active');
   </script>
 
-  <!-- ÖNERILEN FIRESTORE RULES (özet) – isteğe bağlı bilgi, prod için daraltın)
+  <!-- FIRESTORE RULES (özet) – prod için daraltın)
   rules_version = '2';
   service cloud.firestore {
     match /databases/{database}/documents {
@@ -314,12 +480,24 @@
 
       match /users/{uid} {
         allow read: if true;
-        allow create: if isOwner(uid);
-        allow update: if isOwner(uid);
+        allow create, update: if isOwner(uid);
       }
       match /ratings/{rid} {
         allow read: if true;
         allow create, update: if isSignedIn() && request.resource.data.raterId == request.auth.uid;
+      }
+      match /listings/{id} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid && request.resource.data.status == 'pending';
+        allow update: if isSignedIn() && (
+          (isOwner(resource.data.ownerId) && request.resource.data.status == resource.data.status)
+          ||
+          (request.auth.token.admin == true)
+        );
+      }
+      match /reports/{id} {
+        allow read: if request.auth.token.admin == true; // sadece admin
+        allow create: if isSignedIn() && request.resource.data.reporterId == request.auth.uid;
       }
     }
   }
