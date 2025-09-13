@@ -32,14 +32,12 @@
     .brand{display:flex;align-items:center;gap:10px}
     .brand img{height:38px;width:38px;border-radius:12px;border:1px solid var(--stroke);object-fit:contain;background:#fff}
 
-    /* Üst menüler */
     nav.desktop{display:none;gap:8px;align-items:center}
     nav.mobileTop{display:flex;gap:8px}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--stroke);padding:10px 14px;border-radius:12px;background:var(--card);color:#0b1020;cursor:pointer}
     .btn.warn{background:transparent;border-color:var(--warn);color:#8a5400}
     @media(min-width:880px){nav.desktop{display:flex}nav.mobileTop{display:none}}
 
-    /* GRID ve sıralama */
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     @media(min-width:880px){
       .grid{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "full1 full1" "full2 full2"}
@@ -55,7 +53,7 @@
     .avatar img{width:100%;height:100%;object-fit:cover}
     .muted{color:var(--muted);font-size:.92rem}
 
-    /* Form alanları */
+    /* Profil alanları */
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .field{display:flex;flex-direction:column;gap:8px}
     .field label{font-size:1rem;color:var(--muted);font-weight:600}
@@ -72,9 +70,7 @@
       height:54px;background:#ffffff;border:1px solid var(--stroke);
       border-radius:12px;padding:0 14px;color:#0b1020;font-size:1rem
     }
-    .pwgrid .btn{
-      height:54px;font-size:1rem;font-weight:700
-    }
+    .pwgrid .btn{height:54px;font-size:1rem;font-weight:700}
 
     /* 5 adet Flag-Flip yıldız */
     .ownerStars{display:flex;gap:12px;justify-content:flex-start;margin-bottom:8px;animation:starColorFlip 3.6s ease-in-out infinite}
@@ -93,9 +89,7 @@
 
     /* Liste başlıklarını gizle, sekme butonlarını büyüt ve masaüstünde de göster */
     .col h3{display:none}
-    .list-tabs{
-      display:flex;gap:10px;margin:0 0 14px 0;flex-wrap:wrap
-    }
+    .list-tabs{display:flex;gap:10px;margin:0 0 14px 0;flex-wrap:wrap}
     .pill{
       display:inline-flex;align-items:center;justify-content:center;
       padding:14px 18px;border-radius:999px;border:1px solid var(--stroke);
@@ -106,18 +100,9 @@
     .lists-triple{display:grid;gap:12px}
     .col{background:rgba(255,255,255,.88);border:1px solid var(--stroke);border-radius:14px;padding:12px}
     .listings{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:880px){ .lists-triple{grid-template-columns:repeat(3,1fr)} .col{display:block} }
+    @media(max-width:879px){ .lists-triple{grid-template-columns:1fr} .col{display:none} .col.show{display:block} }
 
-    @media(min-width:880px){
-      .lists-triple{grid-template-columns:repeat(3,1fr)}
-      .col{display:block}
-    }
-    @media(max-width:879px){
-      .lists-triple{grid-template-columns:1fr}
-      .col{display:none}
-      .col.show{display:block}
-    }
-
-    /* ALT BAR (mobil) */
     .mbnav{position:fixed;bottom:0;left:0;right:0;height:var(--mbnav-h);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--stroke);z-index:60}
     .mbnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#0b1020}
     .mbnav a.active{border:1px solid var(--stroke);border-radius:8px}
@@ -219,22 +204,15 @@
           </div>
 
           <div class="lists-triple">
-            <div class="col show" id="colActive">
-              <div class="listings" id="listActive"></div>
-            </div>
-            <div class="col" id="colPending">
-              <div class="listings" id="listPending"></div>
-            </div>
-            <div class="col" id="colExpired">
-              <div class="listings" id="listExpired"></div>
-            </div>
+            <div class="col show" id="colActive"><div class="listings" id="listActive"></div></div>
+            <div class="col" id="colPending"><div class="listings" id="listPending"></div></div>
+            <div class="col" id="colExpired"><div class="listings" id="listExpired"></div></div>
           </div>
         </div>
       </section>
     </div>
   </div>
 
-  <!-- MOBİL alt bar: sabit (3 ikon) -->
   <nav class="mbnav">
     <a href="home.html" class="active">🏠<small>Ana Sayfa</small></a>
     <a href="messages.html">💬<small>Mesajlar</small></a>
@@ -247,7 +225,7 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ***** CONFIG *****
+    // CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -260,7 +238,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ---------- utils ----------
+    // ---- utils ----
     const $  = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
     const setInput = (sel,v)=>{const el=$(sel); if(el) el.value = v||'';}
@@ -279,25 +257,25 @@
     function namesFromEmail(email){
       const local = (email||'').split('@')[0] || '';
       const norm  = normalize(local);
-      // isim.soyisim | isim_soyisim | isim-soyisim destekle
       const parts = norm.split(/[._-]+/).filter(Boolean);
       if (parts.length >= 2){
-        // Baş harfleri büyüt
         const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
         return { first: cap(parts[0]), last: cap(parts[1]) };
       }
       return { first:'', last:'' };
     }
 
-    // Maskeli username: "a.soyisim" (isim.soyisim ise), değilse local-part
+    // Maskeli username: "a.soyisim" (isim.soyisim/isim_soyisim/isim-soyisim) değilse local-part
     function deriveMaskedUsername(email){
       const local = (email||'').split('@')[0] || '';
       const norm  = normalize(local);
+      if(!norm) return 'user';
       const parts = norm.split(/[._-]+/).filter(Boolean);
       if (parts.length >= 2){
-        return `${parts[0][0]}.${parts[1]}`; // a.soyisim
+        const f = parts[0], l = parts[1];
+        if(f && l) return `${f[0]}.${l}`;
       }
-      return norm || 'user';
+      return norm;
     }
 
     async function reserveUsername(base, uid){
@@ -319,29 +297,32 @@
       const uref = doc(db,"users", user.uid);
       const snap = await getDoc(uref);
 
-      // Username
-      let username = '';
-      if (snap.exists() && snap.data().username){
-        username = snap.data().username;
-      } else {
+      // username
+      let username = (snap.exists() && snap.data().username) ? snap.data().username : '';
+      if (!username){
         const base = deriveMaskedUsername(user.email||'');
         const reserved = await reserveUsername(base, user.uid);
         username = reserved;
         await runTransaction(db, async (tx)=>{ tx.set(uref,{ username: reserved },{merge:true}); });
       }
 
-      // İsim/Soyisim doldurma (ilk girişte veya eksikse)
+      // isim/soyisim/email — eksikse tamamla
+      const cur = snap.exists() ? snap.data() : {};
       const dn = splitDisplay(user.displayName);
       const em = namesFromEmail(user.email||'');
       const payload = {};
-      const cur = snap.exists() ? snap.data() : {};
       if (!cur.firstName) payload.firstName = dn.first || em.first || '';
       if (!cur.lastName)  payload.lastName  = dn.last  || em.last  || '';
       if (!cur.email)     payload.email     = user.email || '';
 
       if (Object.keys(payload).length) await setDoc(uref, payload, { merge:true });
 
-      return { username, first: payload.firstName ?? cur.firstName ?? dn.first ?? em.first ?? '', last: payload.lastName ?? cur.lastName ?? dn.last ?? em.last ?? '', email: user.email||'' };
+      return {
+        username,
+        first: payload.firstName ?? cur.firstName ?? dn.first ?? em.first ?? '',
+        last:  payload.lastName  ?? cur.lastName  ?? dn.last  ?? em.last  ?? '',
+        email: user.email || ''
+      };
     }
 
     function fillFields(data={}, authUser=null, username=''){
@@ -381,7 +362,7 @@
     $('#btnLogout')?.addEventListener('click', doLogout);
     $('#btnLogoutTop')?.addEventListener('click', doLogout);
 
-    // Sekmeler (mobil + masaüstü)
+    // Sekmeler
     (function(){
       const pills = $$('.list-tabs .pill');
       const cols = { colActive: $('#colActive'), colPending: $('#colPending'), colExpired: $('#colExpired') };
@@ -396,13 +377,18 @@
           activate(btn.dataset.target);
         });
       });
-      // ilk açılış
       activate('colActive');
     })();
 
-    // ---- Auth akışı ----
+    // ---- Auth akışı: anında ön doldurma + kesin doldurma ----
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ fillFields({}, null, ''); return; }
+
+      // Ön doldurma (Firestore beklemeden)
+      const preDN = splitDisplay(user.displayName || '');
+      const preEM = namesFromEmail(user.email || '');
+      fillFields({ firstName: preDN.first || preEM.first, lastName: preDN.last || preEM.last, email: user.email }, user, '');
+
       try{
         const ensured = await ensureUserDocAndUsername(user);
         const snap = await getDoc(doc(db,'users',user.uid));
@@ -410,7 +396,8 @@
         fillFields(data, user, ensured.username);
       }catch(e){
         console.error('Profil doldurma hatası:', e);
-        fillFields({ email: user.email }, user, '');
+        const fallbackU = deriveMaskedUsername(user.email || '');
+        fillFields({ firstName: preDN.first || preEM.first, lastName: preDN.last || preEM.last, email: user.email, username: fallbackU }, user, fallbackU);
       }
     });
   </script>
