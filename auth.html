@@ -1,11 +1,3 @@
-# auth.html — TAM DÜZELTİLMİŞ SÜRÜM
-
-> • Ana sayfa/çıkış gibi site navigasyonu **gizlenir** (sadece bu sayfada).
-> • **Şifre göster/gizle** butonları eklendi (giriş + kayıt).
-> • **Şifre sıfırlama** düzgün çalışır (devam URL’si bu sayfaya ayarlı).
-> • Girişten sonra güvenli yönlendirme: `?next=` varsa sadece **aynı sitede ve .html** sayfalarına.
-
-```html
 <!doctype html>
 <html lang="tr">
 <head>
@@ -17,8 +9,7 @@
 <style>
 :root{ --txt:#0a0a0a; --muted:#5b6b8f; --stroke:#e5e9f5; --ok:#22c55e; --err:#ef4444; }
 *{box-sizing:border-box}html,body{margin:0;padding:0}
-/* Bu sayfada site navigasyonunu gizle */
-.topnav, header.nav, footer, .bottomnav, .app-nav{display:none!important}
+header, nav, footer, .topnav, .bottomnav, .app-bottom, .app-nav, .navlinks, .chatfab{display:none!important}
 body{
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--txt);
   background:linear-gradient(135deg,#e0f7fa,#f0f9ff,#ecfdf5,#fff0f6);
@@ -29,6 +20,12 @@ body{
 .card{width:min(640px,100%);background:#ffffffee;border:1px solid var(--stroke);border-radius:22px;box-shadow:0 30px 80px #0003;overflow:hidden;position:relative}
 .hd{display:flex;gap:12px;align-items:center;justify-content:center;padding:18px;border-bottom:1px solid var(--stroke);background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff}
 .hd img{height:34px}
+.auth-close{
+  position:absolute; top:10px; right:12px; width:36px; height:36px; border-radius:10px;
+  background:#ffffff33; border:1px solid #ffffff66; color:#fff; font-size:22px; line-height:34px; text-align:center;
+  cursor:pointer; backdrop-filter:blur(6px); transition:.15s; z-index:5;
+}
+.auth-close:hover{background:#ffffff55}
 .tabs{display:flex;gap:8px;justify-content:center;padding:12px;border-bottom:1px solid var(--stroke);background:#f8fafc}
 .tab{padding:10px 14px;border-radius:999px;border:1px solid #e5e9f5;background:#fff;cursor:pointer;font-weight:800}
 .tab.active{background:linear-gradient(135deg,#06b6d4,#22c55e);color:#001019;border-color:transparent}
@@ -38,9 +35,19 @@ body{
 .sub{margin:0 0 14px 0;color:#475569}
 label{display:grid;gap:6px;font-weight:600;margin-top:10px}
 .input{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center}
-input{padding:12px 14px;border:1px solid #c7d2fe;border-radius:12px;outline:none;background:#fff}
+input{padding:12px 44px 12px 14px;border:1px solid #c7d2fe;border-radius:12px;outline:none;background:#fff;width:100%}
 input:focus{border-color:#60a5fa}
-.toggle{margin-left:8px;cursor:pointer;border:1px solid #dbeafe;background:#eef2ff;color:#111827;padding:8px 10px;border-radius:10px;font-weight:800}
+.toggle,.clear-btn{
+  margin-left:8px; cursor:pointer; border:1px solid #dbeafe; background:#eef2ff; color:#111827;
+  padding:8px 10px; border-radius:10px; font-weight:800
+}
+/* Göz ikonu düğmesi (metinsiz, SVG ile) */
+.eye-btn{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:28px; height:28px; border:0; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px;
+  display:grid; place-items:center; cursor:pointer; padding:0;
+}
+.eye-btn svg{width:18px; height:18px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions{display:flex;gap:10px;margin-top:14px}
 .btn{padding:12px 16px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
@@ -62,8 +69,11 @@ input:focus{border-color:#60a5fa}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="hd"><img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!</div>
+<div class="card" id="authCard">
+  <div class="hd">
+    <img src="assets/img/seffaf.png" alt="Takas Çemberi Logo"><b>Takas Çemberi</b> • YÜKLE, TAKASLA, KAZAN!
+    <button type="button" id="btnAuthClose" class="auth-close" aria-label="Kapat">×</button>
+  </div>
 
   <div class="tabs">
     <button class="tab active" id="tabLogin">Giriş Yap</button>
@@ -73,16 +83,16 @@ input:focus{border-color:#60a5fa}
   <!-- Giriş -->
   <section class="pane active" id="paneLogin">
     <h2 class="h1">Giriş Yap</h2>
-    <label>E‑posta
+    <label>E-posta
       <div class="input">
         <input type="email" id="li_email" placeholder="ornek@eposta.com" required>
-        <button type="button" class="toggle" data-clear="#li_email">Sil</button>
+        <button type="button" class="clear-btn" data-clear="#li_email">Sil</button>
       </div>
     </label>
     <label>Şifre
       <div class="input">
         <input type="password" id="li_pass" placeholder="••••••••" required>
-        <button type="button" class="toggle" data-toggle="#li_pass">Göster</button>
+        <!-- Göz ikonu JS ile eklenecek -->
       </div>
     </label>
     <div class="actions">
@@ -98,7 +108,7 @@ input:focus{border-color:#60a5fa}
   <!-- Kayıt -->
   <section class="pane" id="paneSignup">
     <h2 class="h1">Hesap Oluştur</h2>
-    <p class="sub">E‑posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir.</p>
+    <p class="sub">E-posta doğrulaması şarttır; doğrulama yapılmadan giriş mümkün değildir.</p>
 
     <div class="row">
       <label>İsim Soyisim
@@ -116,20 +126,20 @@ input:focus{border-color:#60a5fa}
         <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
       </label>
     </div>
-    <label>E‑posta
+    <label>E-posta
       <input type="email" id="su_email" placeholder="ornek@eposta.com" required>
     </label>
     <div class="row">
       <label>Şifre
         <div class="input">
           <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
-          <button type="button" class="toggle" data-toggle="#su_pass">Göster</button>
+          <!-- Göz ikonu JS ile eklenecek -->
         </div>
       </label>
       <label>Şifre (Tekrar)
         <div class="input">
           <input type="password" id="su_pass2" placeholder="Tekrar" required>
-          <button type="button" class="toggle" data-toggle="#su_pass2">Göster</button>
+          <!-- Göz ikonu JS ile eklenecek -->
         </div>
       </label>
     </div>
@@ -141,7 +151,6 @@ input:focus{border-color:#60a5fa}
 
   <div class="footer-mini">
     <span>© <span id="y"></span> Takas Çemberi</span>
-    <!-- Ana sayfa linkini kaldırdık ki şifresiz geçiş algısı olmasın -->
   </div>
 </div>
 
@@ -184,11 +193,13 @@ input:focus{border-color:#60a5fa}
   function setMsg(el,msg,type){ el.textContent=msg||''; el.className='status '+(type||''); }
   function errText(err){
     const c=err?.code||'';
-    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alan adını ekleyin.';
-    if(c.includes('email-already-in-use')) return 'Bu e‑posta ile hesap zaten var.';
-    if(c.includes('invalid-credential')) return 'E‑posta veya şifre hatalı.';
+    if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alanını ekleyin.';
+    if(c.includes('email-already-in-use')) return 'Bu e-posta ile hesap zaten var.';
+    if(c.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
     if(c.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
     if(c.includes('too-many-requests')) return 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
+    if(c.includes('user-not-found')) return 'Bu e-posta ile kayıt bulunamadı.';
+    if(c.includes('invalid-email')) return 'Geçersiz e-posta adresi.';
     return 'Hata: '+(err?.message||c);
   }
 
@@ -199,21 +210,51 @@ input:focus{border-color:#60a5fa}
     paneLogin.classList.toggle('active',!toSignup);
     paneSignup.classList.toggle('active',toSignup);
   }
-
-  // Sekmeler
   tabLogin.addEventListener('click',()=>activate('login'));
   tabSignup.addEventListener('click',()=>activate('signup'));
   if(location.hash==='#signup') activate('signup');
 
-  // Toggle ve clear butonları
+  // X (kapat) — sadece paneli kapatır, yönlendirme yapmaz
+  $('#btnAuthClose').addEventListener('click', ()=>{
+    const card = document.getElementById('authCard');
+    card.style.display='none';
+    document.body.style.display='block';
+    // İstersen: modal açık kalırsa kapat
+    const tm = document.getElementById('termsModal');
+    if (tm) tm.style.display='none';
+  });
+
+  // Göz ikonlarını yerleştir
+  function addEye(input){
+    if(!input || input.dataset.eyeAttached==='1') return;
+    input.dataset.eyeAttached='1';
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='eye-btn'; btn.setAttribute('aria-label','Şifreyi göster/gizle');
+    const eyeSVG = (open)=>`
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        ${open
+          ? '<path d="M12 5c-5 0-9 5-9 7s4 7 9 7 9-5 9-7-4-7-9-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" stroke="currentColor" stroke-width="1.6"/>'
+          : '<path d="M3 3l18 18M9.9 9.9A4 4 0 0 0 12 17a4 4 0 0 0 3.9-5.1M6.2 6.6C4.1 8 3 10 3 12c0 2 4 7 9 7 2.1 0 4-.8 5.6-1.9M14.1 7.2A8.7 8.7 0 0 1 12 7C7 7 3 12 3 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        }
+      </svg>`;
+    btn.innerHTML = eyeSVG(true);
+    btn.addEventListener('click', ()=>{
+      const show = input.type==='password';
+      input.type = show ? 'text' : 'password';
+      btn.innerHTML = eyeSVG(show ? false : true);
+      input.focus();
+    });
+    input.parentElement.appendChild(btn);
+  }
+  ['#li_pass','#su_pass','#su_pass2'].forEach(sel=>addEye($(sel)));
+
+  // Sil (clear)
   document.addEventListener('click',(e)=>{
-    const t=e.target.closest('[data-toggle]');
-    if(t){ const inp=$(t.getAttribute('data-toggle')); if(!inp) return; inp.type = inp.type==='password' ? 'text':'password'; t.textContent = inp.type==='password' ? 'Göster' : 'Gizle'; }
     const c=e.target.closest('[data-clear]');
     if(c){ const inp=$(c.getAttribute('data-clear')); if(inp) inp.value=''; }
   });
 
-  // Güvenli yönlendirme
+  // Güvenli yönlendirme (login sonrası)
   const params = new URLSearchParams(location.search);
   const next = params.get('next');
   const go = () => {
@@ -221,29 +262,28 @@ input:focus{border-color:#60a5fa}
     location.href = safe;
   };
 
-  // Kalıcı oturum (auto‑redirect yok; home koruması var)
+  // Oturumu kalıcı yap (otomatik yönlendirme YOK)
   try{ await setPersistence(auth, browserLocalPersistence); }catch{}
 
-  // Giriş (email/şifre)
+  // Giriş
   $('#btnSignIn').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim(), pass=$('#li_pass').value;
-    if(!email||!pass) return setMsg(liStatus,'E‑posta ve şifre gerekli.','err');
+    if(!email||!pass) return setMsg(liStatus,'E-posta ve şifre gerekli.','err');
     try{
       const {user}=await signInWithEmailAndPassword(auth,email,pass);
-      if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E‑posta doğrulanmadı. Mail kutunu kontrol et.','err');}
+      if(!user.emailVerified){await signOut(auth);return setMsg(liStatus,'E-posta doğrulanmadı. Mail kutunu kontrol et.','err');}
       go();
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Şifre sıfırlama (bu sayfaya döndür)
+  // Şifre sıfırlama — reset maili gönderir, bu sayfaya döner
   $('#btnForgot').addEventListener('click',async()=>{
     const email=$('#li_email').value.trim();
-    if(!email) return setMsg(liStatus,'Sıfırlama için e‑posta gir.','err');
+    if(!email) return setMsg(liStatus,'Sıfırlama için e-posta gir.','err');
     try{
       await sendPasswordResetEmail(auth,email,{ url: location.origin + '/auth.html' });
-      setMsg(liStatus,'Sıfırlama e‑postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
-    }
-    catch(e){setMsg(liStatus,errText(e),'err');}
+      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörüne bakmayı unutma)','ok');
+    }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
   // Google (hesap seçtir)
@@ -256,11 +296,9 @@ input:focus{border-color:#60a5fa}
     }catch(e){setMsg(liStatus,errText(e),'err');}
   });
 
-  // Kayıt akışı
+  // Kayıt
   function collectSignup(){
-    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(),
-             city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(),
-             email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
+    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(), city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(), email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
     if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsg(suStatus,'Tüm alanlar zorunlu.','err');return null;}
     if(d.p1!==d.p2){setMsg(suStatus,'Şifreler aynı değil.','err');return null;}
     if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');return null;}
@@ -271,12 +309,12 @@ input:focus{border-color:#60a5fa}
       const {user}=await createUserWithEmailAndPassword(auth,d.email,d.p1);
       await setDoc(doc(db,'users',user.uid),{name:d.name,username:d.uname,city:d.city,phone:d.phone,email:d.email,createdAt:serverTimestamp(),role:'customer',isActive:true});
       await sendEmailVerification(user);
-      setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e‑postası gönderildi. (Spam klasörünü kontrol et.)','ok');
+      setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
       activate('login');
     }catch(e){setMsg(suStatus,errText(e),'err');}
   }
 
-  // KVKK Modal
+  // KVKK & Güvenlik Modal
   const termsModal=document.getElementById('termsModal');
   const termsChk=document.getElementById('termsChk');
   const termsAccept=document.getElementById('termsAccept');
@@ -298,42 +336,3 @@ input:focus{border-color:#60a5fa}
 </script>
 </body>
 </html>
-```
-
----
-
-# home.html — “Bekçi” (route guard) KISA YAMA
-
-> Amaç: Kullanıcı **giriş yapmadan** home’ı görmesin,
-> “Ana sayfa” linkine tıklayınca da anında **auth**’a yönlensin.
-
-**1) `<body>` başına, tüm içeriği saran bir `div id="app"` ekleyin** (yoksa):
-
-```html
-<body>
-  <div id="app" style="visibility:hidden">
-    <!-- mevcut home içeriğiniz burada -->
-  </div>
-</body>
-```
-
-**2) Sayfanın en altına şu script’i ekleyin (veya mevcut auth kontrolünü bununla değiştirin):**
-
-```html
-<script type="module">
-  import { auth } from './js/firebase-config.js';
-  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-
-  const app = document.getElementById('app');
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      location.replace('auth.html?next=home.html');
-      return;
-    }
-    // sadece girişli kullanıcı görsün
-    app.style.visibility = 'visible';
-  });
-</script>
-```
-
-> İsterseniz görünmez yerine küçük bir “Yükleniyor…” overlay’i gösterebilirsiniz; mantık aynı.
