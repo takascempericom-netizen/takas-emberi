@@ -162,6 +162,44 @@
   </div>
 </div>
 
+<!-- UI betikleri (Firebase bağımsız) -->
+<script>
+  const $ = (s)=>document.querySelector(s);
+  const liStatus = null; // Firebase betiği içinde gerçek elemana atanacak
+  // Sekmeler
+  document.addEventListener('click', (e)=>{
+    const t = e.target;
+    if (t && t.id === 'tabLogin') {
+      $('#tabLogin').classList.add('active');
+      $('#tabSignup').classList.remove('active');
+      $('#paneLogin').classList.add('active');
+      $('#paneSignup').classList.remove('active');
+    }
+    if (t && t.id === 'tabSignup') {
+      $('#tabSignup').classList.add('active');
+      $('#tabLogin').classList.remove('active');
+      $('#paneSignup').classList.add('active');
+      $('#paneLogin').classList.remove('active');
+    }
+  });
+  // Göz ikonları
+  (function initEyes(){
+    const svgEye = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const svgEyeOff = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-6.94"></path><path d="M23 12s-2-4-6-6"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    function setEye(btn, visible){ btn.innerHTML = visible ? svgEyeOff : svgEye; btn.setAttribute('aria-pressed', String(visible)); }
+    document.querySelectorAll('[data-toggle]').forEach(b=> setEye(b,false));
+    document.addEventListener('click',(e)=>{
+      const t=e.target.closest('[data-toggle]');
+      if(t){ const inp=document.querySelector(t.getAttribute('data-toggle')); if(!inp) return; const toText = inp.type==='password'; inp.type = toText ? 'text':'password'; setEye(t, toText); }
+    });
+  })();
+  // X kapatma
+  document.getElementById('btnClose').addEventListener('click',()=>{location.href='index.html';});
+  // Yıl
+  document.getElementById('y').textContent=new Date().getFullYear();
+</script>
+
+<!-- Firebase betikleri -->
 <script type="module">
   import { auth, db } from './js/firebase-config.js';
   import {
@@ -175,12 +213,8 @@
   const $ = (s)=>document.querySelector(s);
   const liStatus = $('#li_status');
   const suStatus = $('#su_status');
-  const tabLogin = $('#tabLogin');
-  const tabSignup = $('#tabSignup');
-  const paneLogin = $('#paneLogin');
-  const paneSignup = $('#paneSignup');
 
-  function setMsg(el,msg,type){ el.textContent=msg||''; el.className='status '+(type||''); }
+  function setMsg(el,msg,type){ if(!el) return; el.textContent=msg||''; el.className='status '+(type||''); }
   function errText(err){
     const c=(err?.code||'') + ' ' + (err?.message||'');
     if(c.includes('unauthorized-domain')) return 'Yetkisiz alan adı: Firebase Authentication → Authorized domains kısmına site alanını ekleyin.';
@@ -193,30 +227,6 @@
     return 'Hata: '+(err?.message||err?.code||'bilinmeyen');
   }
 
-  function activate(tab){
-    const toSignup = tab==='signup';
-    tabLogin.classList.toggle('active',!toSignup);
-    tabSignup.classList.toggle('active',toSignup);
-    paneLogin.classList.toggle('active',!toSignup);
-    paneSignup.classList.toggle('active',toSignup);
-  }
-  tabLogin.addEventListener('click',()=>activate('login'));
-  tabSignup.addEventListener('click',()=>activate('signup'));
-  if(location.hash==='#signup') activate('signup');
-
-  // Üst sağ X → ana sayfa
-  document.getElementById('btnClose').addEventListener('click',()=>{location.href='index.html';});
-
-  // Göz ikonları (SVG)
-  const svgEye = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-  const svgEyeOff = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-6.94"></path><path d="M23 12s-2-4-6-6"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-  function setEye(btn, visible){ btn.innerHTML = visible ? svgEyeOff : svgEye; btn.setAttribute('aria-pressed', String(visible)); }
-  document.querySelectorAll('[data-toggle]').forEach(b=> setEye(b,false));
-  document.addEventListener('click',(e)=>{
-    const t=e.target.closest('[data-toggle]');
-    if(t){ const inp=$(t.getAttribute('data-toggle')); if(!inp) return; const toText = inp.type==='password'; inp.type = toText ? 'text':'password'; setEye(t, toText); }
-  });
-
   // Güvenli yönlendirme
   const params = new URLSearchParams(location.search);
   const next = params.get('next');
@@ -226,30 +236,26 @@
     location.href = target;
   };
 
-  // Kalıcı oturum (auto-redirect yok)
-  try{ await setPersistence(auth, browserLocalPersistence); }catch{}
+  // Oturumu kalıcı yap (top-level await YOK)
+  (async()=>{ try{ await setPersistence(auth, browserLocalPersistence); }catch(e){} })();
 
-  // Giriş (kullanıcı adı veya e-posta + şifre)
+  async function resolveEmail(loginId){
+    if (loginId.includes('@')) return loginId;
+    const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
+    const snap = await getDocs(q);
+    if (snap.empty) throw new Error('no-username');
+    const data = snap.docs[0].data();
+    if (!data.email) throw new Error('no-email');
+    return data.email;
+  }
+
+  // Giriş
   $('#btnSignIn').addEventListener('click', async () => {
-    const loginId = $('#li_email').value.trim();   // e-posta veya kullanıcı adı
-    const pass = $('#li_pass').value;
+    const loginId = ($('#li_email')?.value||'').trim();
+    const pass = ($('#li_pass')?.value||'');
     if (!loginId || !pass) return setMsg(liStatus, 'E-posta/kullanıcı adı ve şifre gerekli.', 'err');
-
-    // 1) Kullanıcı adı girildiyse önce e-postayı bul
     let email = loginId;
-    if (!loginId.includes('@')) {
-      try {
-        const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          return setMsg(liStatus, 'Bu kullanıcı adına bağlı bir hesap bulunamadı.', 'err');
-        }
-        email = snap.docs[0].data().email || '';
-        if (!email) return setMsg(liStatus, 'Bu kullanıcı adına bağlı e-posta bulunamadı.', 'err');
-      } catch (_) {
-        return setMsg(liStatus, 'Kullanıcı adı çözümlenemedi. E-posta ile deneyin.', 'err');
-      }
-    }
+    try{ email = await resolveEmail(loginId); }catch(_){ /* e-posta ise sorun yok; username bulunamadıysa aşağıda hata dönecek */ }
 
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, pass);
@@ -259,87 +265,58 @@
       }
       go();
     } catch (e) {
-      if ((e.code || '').includes('invalid-credential')) {
-        try {
+      if ((e.code||'').includes('invalid-credential')) {
+        try { // daha anlamlı geri bildirim
           const methods = await fetchSignInMethodsForEmail(auth, email);
-          if (!methods || methods.length === 0) {
-            return setMsg(liStatus, 'Bu e-posta ile kayıtlı hesap bulunamadı.', 'err');
-          }
-          if (!methods.includes('password')) {
-            return setMsg(liStatus, 'Bu hesap parola ile giriş yapmıyor. Google ile giriş yapın veya hesabınıza parola ekleyin.', 'err');
-          }
-          return setMsg(liStatus, 'Şifre hatalı görünüyor. Tekrar deneyin.', 'err');
-        } catch (_e) {
-          // göz ardı edip genel hata verelim
-        }
+          if (!methods || methods.length===0) return setMsg(liStatus,'Bu e‑posta ile kayıtlı hesap bulunamadı.','err');
+          if (!methods.includes('password')) return setMsg(liStatus,'Bu hesap parola ile giriş yapmıyor. Google ile giriş yapın veya parolayı etkinleştirin.','err');
+          return setMsg(liStatus,'Şifre hatalı görünüyor. Tekrar deneyin.','err');
+        } catch(_) {}
       }
       setMsg(liStatus, errText(e), 'err');
     }
   });
 
-  // Şifre sıfırlama (doğrudan gönder, provider kontrolü yok + authorized-continue-uri fallback)
+  // Şifre sıfırlama — doğrudan gönder + authorized fallback
   $('#btnForgot').addEventListener('click', async () => {
-    const loginId = $('#li_email').value.trim();
+    const loginId = ($('#li_email')?.value||'').trim();
     if (!loginId) return setMsg(liStatus,'Sıfırlama için e-posta veya kullanıcı adınızı yazın.','err');
-
-    // kullanıcı adı ise e-postaya çevir
     let email = loginId;
-    if (!loginId.includes('@')) {
-      try {
-        const q = query(collection(db, 'users'), where('username', '==', loginId), limit(1));
-        const snap = await getDocs(q);
-        if (snap.empty) return setMsg(liStatus, 'Bu kullanıcı adına bağlı hesap bulunamadı.', 'err');
-        email = snap.docs[0].data().email || '';
-        if (!email) return setMsg(liStatus, 'Bu kullanıcı adına bağlı e-posta bulunamadı.', 'err');
-      } catch (_) { return setMsg(liStatus, 'Kullanıcı adı çözümlenemedi. E-posta ile deneyin.', 'err'); }
-    }
-
+    try{ email = await resolveEmail(loginId); }catch(_){}
     try {
       try {
         await sendPasswordResetEmail(auth, email, { url: `${location.origin}/auth.html`, handleCodeInApp:false });
       } catch (e) {
-        const code = e?.code||'';
+        const code=e?.code||'';
         if (code.includes('invalid-continue-uri') || code.includes('unauthorized-continue-uri')) {
-          await sendPasswordResetEmail(auth, email); // fallback: default URL
+          await sendPasswordResetEmail(auth, email); // fallback default
         } else { throw e; }
       }
-      // Güvenlik için genel başarı mesajı
       setMsg(liStatus,'Eğer bu e‑posta kayıtlıysa, sıfırlama bağlantısı gönderildi. (Spam klasörünü kontrol et)','ok');
-    } catch (e) {
-      // user-not-found vb. durumlarda da aynı genel mesajı göster
+    } catch (_) {
       setMsg(liStatus,'Eğer bu e‑posta kayıtlıysa, sıfırlama bağlantısı gönderildi. (Spam klasörünü kontrol et)','ok');
-    }
-  });
-      } catch (e) {
-        const code = e?.code||'';
-        if (code.includes('invalid-continue-uri') || code.includes('unauthorized-continue-uri')) {
-          await sendPasswordResetEmail(auth, email); // fallback: default URL
-        } else { throw e; }
-      }
-      setMsg(liStatus,'Sıfırlama e-postası gönderildi. (Spam klasörünü de kontrol et)','ok');
-    } catch (e) {
-      setMsg(liStatus, errText(e), 'err');
     }
   });
 
   // Google (hesap seçtir)
-  $('#btnGoogle').addEventListener('click',async()=>{
-    try{
-      const prov=new GoogleAuthProvider();
+  $('#btnGoogle').addEventListener('click', async () => {
+    try {
+      const prov = new GoogleAuthProvider();
       prov.setCustomParameters({ prompt:'select_account' });
-      await signInWithPopup(auth,prov);
+      await signInWithPopup(auth, prov);
       go();
-    }catch(e){setMsg(liStatus,errText(e),'err');}
+    } catch(e) { setMsg(liStatus, errText(e), 'err'); }
   });
 
-  // Kayıt akışı
+  // Kayıt
+  function setMsgSU(msg,type){ setMsg(suStatus,msg,type); }
   function collectSignup(){
-    const d={name:$('#su_name').value.trim(), uname:$('#su_uname').value.trim(),
-             city:$('#su_city').value.trim(), phone:$('#su_phone').value.trim(),
-             email:$('#su_email').value.trim(), p1:$('#su_pass').value, p2:$('#su_pass2').value};
-    if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsg(suStatus,'Tüm alanlar zorunlu.','err');return null;}
-    if(d.p1!==d.p2){setMsg(suStatus,'Şifreler aynı değil.','err');return null;}
-    if(d.p1.length<6){setMsg(suStatus,'Şifre en az 6 karakter olmalı.','err');return null;}
+    const d={name:$('#su_name')?.value.trim(), uname:$('#su_uname')?.value.trim(),
+             city:$('#su_city')?.value.trim(), phone:$('#su_phone')?.value.trim(),
+             email:$('#su_email')?.value.trim(), p1:$('#su_pass')?.value, p2:$('#su_pass2')?.value};
+    if(!d.name||!d.uname||!d.city||!d.phone||!d.email||!d.p1||!d.p2){setMsgSU('Tüm alanlar zorunlu.','err');return null;}
+    if(d.p1!==d.p2){setMsgSU('Şifreler aynı değil.','err');return null;}
+    if(d.p1.length<6){setMsgSU('Şifre en az 6 karakter olmalı.','err');return null;}
     return d;
   }
   async function performSignup(d){
@@ -350,9 +327,12 @@
         createdAt:serverTimestamp(),role:'customer',isActive:true
       });
       await sendEmailVerification(user);
-      setMsg(suStatus,'Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
-      activate('login');
-    }catch(e){setMsg(suStatus,errText(e),'err');}
+      setMsgSU('Hesap oluşturuldu. Doğrulama e-postası gönderildi. (Spam klasörünü kontrol et.)','ok');
+      // küçük uyarı
+      alert('Kayıt tamamlandı. Doğrulama e-postası gönderildi. Lütfen SPAM klasörünü de kontrol edin.');
+      // giriş sekmesine dön
+      $('#tabLogin').click();
+    }catch(e){setMsgSU(errText(e),'err');}
   }
 
   // KVKK Modal
@@ -366,14 +346,12 @@
   termsCancel.addEventListener('click',closeTerms);
   termsModal.addEventListener('click',(e)=>{if(e.target===termsModal) closeTerms();});
 
-  $('#btnSignUp').addEventListener('click',()=>{
+  document.getElementById('btnSignUp').addEventListener('click',()=>{
     const d=collectSignup(); if(!d) return;
     openTerms();
     const handler=async()=>{termsAccept.removeEventListener('click',handler);closeTerms();await performSignup(d);};
     termsAccept.addEventListener('click',handler);
   });
-
-  document.getElementById('y').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
