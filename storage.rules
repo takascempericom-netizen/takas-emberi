@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Kullanıcı kendi alanı: users/<uid>/...
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true; // istersen sadece oturum açmışlara kısıtlayabilirsin
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/(jpeg|png|webp|heic)');
+    }
+
+    // İlan görselleri: listings/<listingId>/...
+    // Yükleyen kişi -> Firestore'da ilgili ilanın sahibi olmalı
+    match /listings/{listingId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/(jpeg|png|webp|heic)')
+                   && exists(/databases/$(database)/documents/listings/$(listingId))
+                   && get(/databases/$(database)/documents/listings/$(listingId)).data.ownerId == request.auth.uid;
+    }
+  }
+}

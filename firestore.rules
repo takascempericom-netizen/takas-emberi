@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isAdmin() { return isSignedIn() && request.auth.token.admin == true; }
+
+    // ---- users/{uid}
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+      // username bir kere set edildiyse, admin dışında değişemez
+      allow update: if ( isOwner(uid) && (
+                          !('username' in resource.data) ||
+                          request.resource.data.username == resource.data.username
+                        )
+                     ) || isAdmin();
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // ---- usernames/{uname}  { uid, at }
+    match /usernames/{uname} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && !exists(/databases/$(database)/documents/usernames/$(uname))
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.at is timestamp
+                    // format: 3-20, a-z0-9_ (küçük)
+                    && uname.matches('^[a-z0-9_]{3,20}$');
+      allow update, delete: if false;
+    }
+
+    // ---- listings/{id}
+    // Şema kontrolü: beklenen alanlar ve immutable alanlar
+    function allowedListingKeys() {
+      return [
+        'ownerId','status','createdAt',
+        'title','desc','category','subcategory',
+        'brand','model','year','km',
+        'condition','city','district',
+        'images','updatedAt'
+      ];
+    }
+    function onlyAllowedKeys(newData) {
+      return newData.keys().hasOnly(allowedListingKeys());
+    }
+
+    match /listings/{id} {
+      // Görünürlük: aktif olanlar herkese; sahibi veya admin her hâlükârda
+      allow read: if resource.data.status == 'active'
+                  || (isSignedIn() && resource.data.ownerId == request.auth.uid)
+                  || isAdmin();
+
+      // Oluşturma: sadece sahibi; status= pending; createdAt timestamp
+      allow create: if isSignedIn()
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.createdAt is timestamp
+                    && onlyAllowedKeys(request.resource.data);
+
+      // Güncelleme:
+      // - Sahibi: içerik alanlarını düzenleyebilir; ownerId/createdAt/status DOKUNAMAZ
+      // - Admin: status dahil her şeyi düzenleyebilir ama ownerId/createdAt yine değişemez
+      allow update: if (
+                        (
+                          isSignedIn() && resource.data.ownerId == request.auth.uid
+                          // owner -> status, ownerId, createdAt sabit
+                          && request.resource.data.ownerId == resource.data.ownerId
+                          && request.resource.data.createdAt == resource.data.createdAt
+                          && request.resource.data.status == resource.data.status
+                        )
+                        ||
+                        (
+                          isAdmin()
+                          // admin de ownerId/createdAt'i değiştiremez
+                          && request.resource.data.ownerId == resource.data.ownerId
+                          && request.resource.data.createdAt == resource.data.createdAt
+                        )
+                      )
+                      && onlyAllowedKeys(request.resource.data);
+
+      // Silme: sahibi veya admin
+      allow delete: if (isSignedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+  }
+}
