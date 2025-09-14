@@ -179,7 +179,7 @@
   <!-- Alt gezinme menüsü -->
   <nav class="nav">
     <a href="home.html">
-      <div>� </div>
+      <div>� </div>
       <span>Ana Sayfa</span>
     </a>
     <a href="messages.html">
@@ -371,14 +371,54 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     }
 
     /* ======================= Olaylar ======================= */
-    $('#btnSignOut').addEventListener('click', async()=>{ try{ await signOut(auth); location.href = 'auth.html?next=profile.html' }catch(e){ alert('Çıkış hatası') } });
-    $('#btnResetPass').addEventListener('click', async()=>{
-      try{
-        if(!state.user?.email) return alert('E‑posta bulunamadı.');
-        await sendPasswordResetEmail(auth, state.user.email);
-        alert('Sıfırlama e‑postası gönderildi.');
-      }catch(e){ alert(e.message) }
-    });
+    /* ======================= Olaylar ======================= */
+on("btnSignOut","click", async()=>{ 
+  try{ 
+    await signOut(auth); 
+    location.href="auth.html?next=profile.html"; 
+  }catch(e){ 
+    alert("Çıkış hatası: "+(e?.message||e)); 
+  } 
+});
+
+on("btnResetPass","click", async()=>{ 
+  try{ 
+    if(!state.user?.email) return alert("E-posta bulunamadı."); 
+    await sendPasswordResetEmail(auth, state.user.email); 
+    alert("Sıfırlama e-postası gönderildi."); 
+  }catch(e){ 
+    alert(e?.message||e); 
+  } 
+});
+
+on("avatarInput","change", async(e)=>{ 
+  try{ 
+    const f=e.target?.files?.[0]; 
+    if(!f) return; 
+    if(!/^image\//.test(f.type)) return alert("Lütfen bir resim dosyası seçin."); 
+    await uploadAvatar(f); 
+    alert("Profil fotoğrafın güncellendi."); 
+  }catch(err){ 
+    console.error(err); 
+    alert("Yükleme hatası: "+(err?.message||err)); 
+  } 
+});
+
+on("btnUsernameSave","click", async()=>{ 
+  try{ 
+    await saveUsername(); 
+  }catch(err){ 
+    alert((err?.message)||err); 
+  } 
+});
+
+on("displayName","change", async()=>{ 
+  try{ 
+    await saveDisplayName(); 
+  }catch(e){ 
+    alert((e?.message)||e); 
+  } 
+});
 
     /* ======================= Başlat ======================= */
     dbg('onAuthStateChanged bekleniyor…');
