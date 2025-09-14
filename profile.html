@@ -91,7 +91,6 @@
       <div class="title">Profil</div>
       <div class="sp"></div>
       <button id="btnSignOut" class="btn ghost">Çıkış</button>
-      <button id="btnSaveAll" class="btn">Kaydet</button>
     </header>
 
     <div id="dbg" style="white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;background:#0c1019;border:1px solid var(--line);border-radius:12px;padding:8px;margin:8px 0;color:#a3b4d6;display:none"></div>
@@ -330,6 +329,7 @@
       if(!name) return;
       await updateProfile(state.user, { displayName:name });
       await updateDoc(doc(db,'users',state.user.uid),{ displayName:name, updatedAt: serverTimestamp() });
+  document.querySelector('#displayName')?.setAttribute('readonly','readonly');
     }
 
     async function saveUsername(){
