@@ -383,9 +383,8 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     /* ======================= Başlat ======================= */
     dbg('onAuthStateChanged bekleniyor…');
     onAuthStateChanged(auth, async(user)=>{
-  setTimeout(()=>{ const b=document.getElementById('btnUsernameSave'); const u=document.getElementById('username'); console.log('[profil] btnUsernameSave=', # 4) Güvenlik log'u: sayfa yüklenince buton state’ini yazb, 'disabled=', b?b.disabled:null, 'canChangeUsername=', state.canChangeUsername); console.log('[profil] username input exists=', # 4) Güvenlik log'u: sayfa yüklenince buton state’ini yazu, 'disabled=', u?u.disabled:null); }, 500);
-
-      if(!user){
+  setTimeout(()=>{ const b=document.getElementById("btnUsernameSave"); const u=document.getElementById("username"); console.log("[profil] btnUsernameSave disabled=", b?b.disabled:null, "canChangeUsername=", state.canChangeUsername); console.log("[profil] username input exists=", !!u, "disabled=", u?u.disabled:null); }, 500);
+  if(!user){
         dbg('Kullanıcı yok → auth.html sayfasına yönlendirme');
         location.href = 'auth.html?next=profile.html';
         return;
