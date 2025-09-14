@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>İlan Ver • Takas Çemberi</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d12; --card:#10131b; --line:#1f2431; --fg:#e7ebf6;
+      --muted:#8b97b2; --brand:#ff3b3b; --ok:#12d179;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:900px;margin:0 auto;padding:16px 16px 110px}
+    h1{font-size:22px;margin:8px 0 14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:760px){.grid{grid-template-columns:1fr}}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    select, input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
+    textarea{width:100%;min-height:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:#fff;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid var(--line)}
+    .hint{color:var(--muted);font-size:12px}
+    .nav{position:fixed;left:0;right:0;bottom:0;background:#0b0d12;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
+    .nav a{padding:12px 6px;text-align:center;text-decoration:none;color:var(--fg);font-weight:700}
+    .nav a span{display:block;font-size:11px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>İlan Ver</h1>
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>Kategori</label>
+          <select id="cat">
+            <option value="" selected disabled>Seçiniz</option>
+            <option value="araclar">Araçlar</option>
+            <option value="giyim">Giyim</option>
+            <option value="teknoloji">Teknoloji</option>
+            <option value="evhobi">Ev & Hobi</option>
+            <option value="beyazesya">Beyaz Eşya</option>
+            <option value="mobilya">Mobilya</option>
+            <option value="oyuncak">Oyuncak</option>
+            <option value="tasınmaz">Taşınmaz</option>
+          </select>
+        </div>
+        <div>
+          <label>Alt Kategori</label>
+          <select id="subcat" disabled>
+            <option value="" selected>Önce kategori seçin</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marka</label>
+          <select id="brand" disabled>
+            <option value="" selected>Önce alt kategori seçin</option>
+          </select>
+        </div>
+        <div>
+          <label>Model</label>
+          <select id="model" disabled>
+            <option value="" selected>Önce marka seçin</option>
+          </select>
+        </div>
+
+        <div>
+          <label>KM</label>
+          <select id="km">
+            <option value="" selected>Seçiniz</option>
+            <option value="0-10000">0–10.000</option>
+            <option value="10000-50000">10.000–50.000</option>
+            <option value="50000-100000">50.000–100.000</option>
+            <option value="100000-200000">100.000–200.000</option>
+            <option value="200000+">200.000+</option>
+          </select>
+        </div>
+        <div>
+          <label>Durum</label>
+          <select id="cond">
+            <option value="" selected>Seçiniz</option>
+            <option value="kotu">Kötü</option>
+            <option value="orta">Orta</option>
+            <option value="iyi">İyi</option>
+            <option value="cokiyi">Çok İyi</option>
+            <option value="sifir">Sıfır</option>
+          </select>
+        </div>
+
+        <div>
+          <label>İl</label>
+          <select id="il">
+            <option value="" selected>Seçiniz</option>
+            <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
+            <option>Bursa</option><option>Antalya</option><option>Konya</option>
+          </select>
+        </div>
+        <div>
+          <label>İlçe</label>
+          <select id="ilce" disabled>
+            <option value="" selected>Önce il seçin</option>
+          </select>
+        </div>
+
+        <div style="grid-column:1/-1">
+          <label>İlan Başlığı</label>
+          <input id="title" maxlength="80" placeholder="Örn: 2017 model, temiz, hatasız" />
+          <div class="hint">Max 80 karakter • Uygunsuz kelimeler engellenir</div>
+        </div>
+
+        <div style="grid-column:1/-1">
+          <label>Açıklama</label>
+          <textarea id="desc" maxlength="2000" placeholder="Ürününüzü detaylıca anlatın..."></textarea>
+        </div>
+
+        <div style="grid-column:1/-1" class="row">
+          <label class="btn ghost" style="cursor:pointer">
+            Fotoğraf Yükle
+            <input id="photos" type="file" accept="image/*" multiple hidden>
+          </label>
+          <button id="btnPublish" class="btn">İlanı Yayınla</button>
+          <div class="hint">İlan önce <b>admin onayı</b> bekler. Onaylanınca herkes görebilir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alt gezinme (aynı stil) -->
+  <nav class="nav">
+    <a href="home.html"><div>🏠</div><span>Ana Sayfa</span></a>
+    <a href="messages.html"><div>💬</div><span>Mesajlar</span></a>
+    <a href="profile.html"><div>👤</div><span>Profil</span></a>
+  </nav>
+
+  <script>
+    // Basit veri: dropdown’lar (genişletilebilir)
+    const DATA = {
+      araclar: {
+        sub: ["Araba","Motor","Yedek Parça"],
+        brand: {
+          Araba: ["Toyota","Renault","Volkswagen","Hyundai","Fiat"],
+          Motor: ["Yamaha","Honda","Kawasaki","Suzuki"],
+          "Yedek Parça": ["Evrensel","OEM","Yan Sanayi"]
+        },
+        model: {
+          Toyota:["Corolla","Yaris","Auris"],
+          Renault:["Clio","Megane","Symbol"],
+          Volkswagen:["Golf","Polo","Passat"],
+          Hyundai:["i20","i30","Accent"],
+          Fiat:["Egea","Linea","Punto"],
+          Yamaha:["MT-07","R25","NMax"],
+          Honda:["CBR 250R","PCX 125","CBF 150"],
+          Kawasaki:["Ninja 400","Z650"],
+          Suzuki:["GSX-R 600","Burgman"],
+          Evrensel:["Fren Balatası","Yağ Filtresi","Buji"],
+          OEM:["Silecek","Hava Filtresi","Triger Seti"],
+          "Yan Sanayi":["Ayna","Kapı Kolu","Far"]
+        }
+      },
+      giyim: {
+        sub: ["Kadın","Erkek","Çocuk"],
+        brand: { Kadın:["Zara","Mango"], Erkek:["LCW","Koton"], Çocuk:["Civil","Panço"] },
+        model: { Zara:["Elbise","Ceket"], Mango:["Elbise","Gömlek"], LCW:["T-shirt","Pantolon"], Koton:["Sweat","Mont"], Civil:["Tulum","Takım"], "Panço":["Kazak","Mont"] }
+      },
+      teknoloji: {
+        sub: ["Bilgisayar","Telefon","Aksesuar"],
+        brand:{ Bilgisayar:["Lenovo","Asus"], Telefon:["Apple","Samsung"], Aksesuar:["Logitech","Anker"] },
+        model:{ Lenovo:["IdeaPad","ThinkPad"], Asus:["ZenBook","TUF"], Apple:["iPhone 12","iPhone 13"], Samsung:["S21","A52"], Logitech:["Mouse","Klavye"], Anker:["Powerbank","Şarj Cihazı"] }
+      }
+    };
+
+    const ILCE = {
+      "İstanbul":["Kadıköy","Üsküdar","Beşiktaş","Bakırköy","Ataşehir"],
+      "Ankara":["Çankaya","Keçiören","Yenimahalle","Mamak"],
+      "İzmir":["Karşıyaka","Bornova","Buca","Konak"],
+      "Bursa":["Nilüfer","Osmangazi","Yıldırım"],
+      "Antalya":["Kepez","Muratpaşa","Konyaaltı"],
+      "Konya":["Selçuklu","Meram","Karatay"]
+    };
+
+    const $ = s=>document.querySelector(s);
+    const cat=$('#cat'), sub=$('#subcat'), brand=$('#brand'), model=$('#model');
+    const il=$('#il'), ilce=$('#ilce'), title=$('#title'), desc=$('#desc');
+
+    function fill(sel, arr, placeholder="Seçiniz"){
+      sel.innerHTML = `<option value="" selected>${placeholder}</option>` + (arr||[]).map(v=>`<option>${v}</option>`).join('');
+      sel.disabled = !arr || !arr.length;
+    }
+
+    cat.addEventListener('change', ()=>{
+      const d = DATA[cat.value];
+      fill(sub, d ? d.sub : [], "Alt kategori");
+      fill(brand, [], "Önce alt kategori seçin");
+      fill(model, [], "Önce marka seçin");
+    });
+
+    sub.addEventListener('change', ()=>{
+      const d = DATA[cat.value];
+      const brands = d?.brand?.[sub.value] || [];
+      fill(brand, brands, "Marka");
+      fill(model, [], "Önce marka seçin");
+    });
+
+    brand.addEventListener('change', ()=>{
+      const d = DATA[cat.value];
+      const models = d?.model?.[brand.value] || [];
+      fill(model, models, "Model");
+    });
+
+    il.addEventListener('change', ()=>{
+      const arr = ILCE[il.value] || [];
+      fill(ilce, arr, "İlçe");
+    });
+
+    // Basit ön-kontrol (uygunsuz kelime kontrolünü sonra ekleyeceğiz)
+    function validate(){
+      const errs=[];
+      if(!cat.value) errs.push("Kategori");
+      if(!sub.value) errs.push("Alt kategori");
+      if(!brand.value) errs.push("Marka");
+      if(!model.value) errs.push("Model");
+      if(!il.value) errs.push("İl");
+      if(!ilce.value) errs.push("İlçe");
+      if(!title.value.trim() || title.value.trim().length<5) errs.push("Başlık (min 5)");
+      if(!desc.value.trim() || desc.value.trim().length<20) errs.push("Açıklama (min 20)");
+      if(errs.length){ alert("Lütfen eksikleri tamamlayın:\n- "+errs.join("\n- ")); return false; }
+      return true;
+    }
+
+    document.getElementById('btnPublish').addEventListener('click', ()=>{
+      if(!validate()) return;
+      // Şimdilik sadece ön-izleme/uyarı; bir sonraki adımda Firestore'a pending olarak yazacağız.
+      alert("Taslak hazır. Bir sonraki adımda admin onayı için kayda bağlayacağız.");
+      // Yönlendirme: profil sayfasında 'Onay Bekleyenler'de gözükecek şekilde bağlayacağız.
+    });
+  </script>
+</body>
+</html>
