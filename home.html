@@ -411,5 +411,12 @@ footer .wrap{padding:24px}
   if(sh && ca && sh!==ca && ca.parentNode){ ca.parentNode.insertBefore(sh, ca); }
 });</script>
   <script src="/assets/js/sound.js?v=1757853711"></script>
+<script> 
+  // başlangıçta ses açık (true) 
+  window.setSoundEnabled = window.setSoundEnabled || function(v){ localStorage.setItem("sound.enabled", JSON.stringify(!!v)); }; 
+  window.isSoundEnabled = window.isSoundEnabled || function(){ return JSON.parse(localStorage.getItem("sound.enabled") ?? "true"); }; 
+  console.log("[sound] mevcut durum:", window.isSoundEnabled()); 
+  // örnek: kapat -> setSoundEnabled(false); aç -> setSoundEnabled(true) 
+</script>
 </body>
 </html>
