@@ -43,7 +43,19 @@ var q = query(collection(db, "listings"), where("status","==","active"));
 onSnapshot(q, function(ss){
   var arr = [];
   ss.forEach(function(doc){ arr.push(Object.assign({ id: doc.id }, doc.data())); });
-  arr.sort(function(a,b){ return ((b.createdAt && b.createdAt.seconds || 0) - (a.createdAt && a.createdAt.seconds || 0)); });
+  arr = arr.filter(function(x){
+  var ms = x.expiresAt && (x.expiresAt.toMillis ? x.expiresAt.toMillis() : (x.expiresAt.seconds*1000));
+  return !ms || ms > Date.now();
+});
+arr.sort(function(a,b){
+  function ts(o){
+    var u=o.updatedAt, c=o.createdAt;
+    var su = u ? (u.toMillis ? Math.floor(u.toMillis()/1000) : (u.seconds||0)) : 0;
+    var sc = c ? (c.toMillis ? Math.floor(c.toMillis()/1000) : (c.seconds||0)) : 0;
+    return su || sc;
+  }
+  return ts(b) - ts(a);
+});
 
   if(!feed || !empty) return;
 
