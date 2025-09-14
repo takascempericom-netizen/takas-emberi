@@ -8,16 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0d12;
-      --card:#10131b;
-      --muted:#8b97b2;
-      --line:#1f2431;
-      --fg:#e7ebf6;
-      --brand:#ff3b3b;
-      --brand-2:#ff7a00;
-      --green:#12d179;
-      --yellow:#ffd33d;
-      --red:#ff4d4d;
+      --bg:#0b0d12; --card:#10131b; --muted:#8b97b2; --line:#1f2431; --fg:#e7ebf6;
+      --brand:#ff3b3b; --green:#12d179; --yellow:#ffd33d; --red:#ff4d4d;
       --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
     }
     *{box-sizing:border-box}
@@ -28,44 +20,46 @@
         radial-gradient(1200px 1200px at 80% -10%,rgba(255,59,59,.12),transparent 40%),
         radial-gradient(800px 800px at 10% 110%,rgba(255,122,0,.12),transparent 45%),
         var(--bg);
-      color:var(--fg);
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     }
     a{color:inherit}
     .wrap{max-width:1000px;margin:0 auto;padding:16px 16px 110px}
 
-    /* Üst başlık */
-    .hd{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(11,13,18,.92),rgba(11,13,18,.65) 70%,transparent);backdrop-filter:blur(6px);padding:12px 0 10px}
+    .hd{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;
+        background:linear-gradient(180deg,rgba(11,13,18,.92),rgba(11,13,18,.65) 70%,transparent);
+        backdrop-filter:blur(6px);padding:12px 0 10px}
     .logo{height:40px;border-radius:10px;box-shadow:var(--shadow)}
     .title{font-weight:800;letter-spacing:.2px}
     .sp{flex:1}
-    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:white;font-weight:700;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow); position:relative; z-index:1; pointer-events:auto;}
-    .btn:disabled{opacity:.6;cursor:progress; pointer-events:none;}
+    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:white;font-weight:700;
+         padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
     .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Profil kartı */
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 40%),var(--card);border:1px solid var(--line);
-          border-radius:18px;box-shadow:var(--shadow);padding:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 40%),var(--card);
+          border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:860px){.grid{grid-template-columns:1fr}}
 
     .avatar-wrap{display:flex;gap:16px;align-items:center}
-    .avatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #ff5a5a;box-shadow:0 0 0 4px rgba(255,58,58,.15)}
-
-    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0c1019;padding:6px 10px;border-radius:999px;font-weight:600}
+    .avatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #ff5a5a;
+            box-shadow:0 0 0 4px rgba(255,58,58,.15)}
+    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0c1019;
+          padding:6px 10px;border-radius:999px;font-weight:600}
 
     .field{display:flex;flex-direction:column;gap:8px}
     .field label{font-size:12px;letter-spacing:.3px;color:var(--muted)}
     .static{background:#0c1016;border:1px solid var(--line);border-radius:12px;padding:12px 12px;color:var(--fg)}
 
     .split{display:flex;gap:12px;flex-wrap:wrap}
-    .stat{flex:1 1 180px;min-width:180px;background:linear-gradient(180deg,rgba(18,209,121,.06),transparent 50%);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .stat{flex:1 1 180px;min-width:180px;background:linear-gradient(180deg,rgba(18,209,121,.06),transparent 50%);
+          border:1px solid var(--line);border-radius:14px;padding:12px}
     .stat h3{margin:.2rem 0;font-size:24px}
     .stat small{color:var(--muted)}
 
-    /* Sekmeler */
     .tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-top:6px}
-    .tab{padding:14px 18px;border-radius:14px;border:1px solid transparent;border-bottom:0;cursor:pointer;font-weight:800;font-size:16px;line-height:1.2;min-height:52px;letter-spacing:.2px}
+    .tab{padding:14px 18px;border-radius:14px;border:1px solid transparent;border-bottom:0;cursor:pointer;
+         font-weight:800;font-size:16px;line-height:1.2;min-height:52px;letter-spacing:.2px}
     .tab.active{border-color:var(--line);background:#0c1019}
 
     .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
@@ -79,7 +73,6 @@
     .wait{background:rgba(255,211,61,.12);border:1px solid rgba(255,211,61,.35);color:#ffd33d}
     .exp{background:rgba(255,77,77,.12);border:1px solid rgba(255,77,77,.35);color:#ff4d4d}
 
-    /* Alt gezinme */
     .nav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:linear-gradient(180deg,rgba(11,13,18,.2),rgba(11,13,18,.85)),#0b0d12;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);}
     .nav a{padding:12px 6px;text-align:center;text-decoration:none;color:var(--fg);font-weight:700}
     .nav a span{display:block;font-size:11px;color:var(--muted)}
@@ -89,6 +82,22 @@
     .sep{height:1px;background:var(--line);margin:12px 0}
     .right{margin-left:auto}
   </style>
+
+  <!-- Renkli baş-harf avatarı: her kullanıcıya sabit ama farklı renk -->
+  <script>
+    window.letterAvatarColor = function(text){
+      var s = (text || 'U').trim();
+      var ch = (s[0] || 'U').toUpperCase();
+      var colors = ['#ff5a5a','#ff7a00','#ffd33d','#12d179','#1f6feb','#a371f7','#e36209','#e11d48'];
+      var sum = 0; for (var i=0; i<s.length; i++){ sum += s.charCodeAt(i); }
+      var color = colors[sum % colors.length];
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">'
+              + '<rect width="100%" height="100%" fill="'+color+'"/>'
+              + '<text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle"'
+              + ' font-family="Inter,Arial,sans-serif" font-size="96" fill="#fff">'+ch+'</text></svg>';
+      return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+    };
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -136,9 +145,7 @@
             </div>
           </div>
         </div>
-        <div>
-          <div class="hint">Bilgiler sabittir. Gerekirse ileride düzenleme açılacaktır.</div>
-        </div>
+        <div><div class="hint">Bilgiler sabittir. Gerekirse ileride düzenleme açılacaktır.</div></div>
       </div>
     </section>
 
@@ -164,46 +171,16 @@
     </section>
   </div>
 
-  <!-- Alt gezinme menüsü -->
   <nav class="nav">
     <a href="home.html"><div>🏠</div><span>Ana Sayfa</span></a>
     <a href="messages.html"><div>💬</div><span>Mesajlar</span></a>
     <a class="active" href="#"><div>🔔</div><span>Bildirimler</span></a>
   </nav>
 
-<script>
-window.letterAvatarColor = function(text){
-  var s = (text || 'U').trim();
-  var ch = (s[0] || 'U').toUpperCase();
-  var colors = ['#ff5a5a','#ff7a00','#ffd33d','#12d179','#1f6feb','#a371f7','#e36209','#e11d48'];
-  var sum = 0;
-  for (var i=0; i<s.length; i++){ sum += s.charCodeAt(i); }
-  var color = colors[sum % colors.length];
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">'
-          + '<rect width="100%" height="100%" fill="'+color+'"/>'
-          + '<text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle"'
-          + ' font-family="Inter,Arial,sans-serif" font-size="96" fill="#fff">'+ch+'</text></svg>';
-  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-};
-</script>
-<script>
-window.letterAvatarColor = function(text){
-  var s = (text || 'U').trim();
-  var ch = (s[0] || 'U').toUpperCase();
-  var colors = ['#ff5a5a','#ff7a00','#ffd33d','#12d179','#1f6feb','#a371f7','#e36209','#e11d48'];
-  var sum = 0; for (var i=0; i<s.length; i++){ sum += s.charCodeAt(i); }
-  var color = colors[sum % colors.length];
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">'
-          + '<rect width="100%" height="100%" fill="'+color+'"/>'
-          + '<text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle"'
-          + ' font-family="Inter,Arial,sans-serif" font-size="96" fill="#fff">'+ch+'</text></svg>';
-  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-};
-</script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
@@ -218,9 +195,8 @@ window.letterAvatarColor = function(text){
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    getStorage(app); // gelecekte gerekebilir
+    getStorage(app);
 
-    /* Yardımcılar */
     const $ = (sel)=>document.querySelector(sel);
     function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEventListener(evt, fn); } }
 
@@ -233,11 +209,6 @@ window.letterAvatarColor = function(text){
     function slugifyUsername(v){ return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20); }
     function emailLocal(email){ return (email||'').split('@')[0]; }
     function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
-
-    </text>
-      </svg>`;
-      return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-    }
 
     function byStatus(item){
       const now = Date.now();
@@ -261,7 +232,6 @@ window.letterAvatarColor = function(text){
       </div>`;
     }
 
-    /* Durum */
     let state = { user:null, profile:{}, listings:[] };
 
     async function ensureUserDoc(user){
@@ -289,8 +259,7 @@ window.letterAvatarColor = function(text){
       const ss = await getDocs(q);
       const arr = []; ss.forEach(d=>arr.push({id:d.id, ...d.data()}));
       state.listings = arr;
-      updateCounts();
-      renderListings();
+      updateCounts(); renderListings();
     }
 
     function updateCounts(){
@@ -313,21 +282,17 @@ window.letterAvatarColor = function(text){
       $('#uidShort').textContent = shortId(state.user?.uid);
       const photo = p.photoURL || window.letterAvatarColor(p.displayName || (state.user && state.user.email) || "U");
       $('#avatar').src = photo;
-
       const isPasswordProvider = (state.user?.providerData||[]).some(x=>x.providerId==='password');
       $('#passNote').textContent = isPasswordProvider ? '' : 'Google ile giriş — şifre sıfırlama desteklenmeyebilir';
     }
 
-    /* Olaylar */
     on("btnSignOut","click", async()=>{ try{ await signOut(auth); location.href = "auth.html?next=profile.html"; }catch(e){ alert("Çıkış hatası: "+(e?.message||e)); } });
     on("btnResetPass","click", async()=>{ try{ if(!state.user?.email) return alert("E-posta bulunamadı."); await sendPasswordResetEmail(auth, state.user.email); alert("Sıfırlama e-postası gönderildi."); }catch(e){ alert(e?.message||e); } });
 
-    /* Başlat */
     onAuthStateChanged(auth, async(user)=>{
       if(!user){ location.href = 'auth.html?next=profile.html'; return; }
       state.user = user;
-      const prof = await ensureUserDoc(user);
-      state.profile = prof;
+      state.profile = await ensureUserDoc(user);
       paintProfile();
       try{ await loadListings(user.uid); }catch(e){ console.error('İlan çekme hatası', e); }
     });
