@@ -52,12 +52,6 @@
   .hint{font-size:12px; color:var(--muted); margin-top:4px}
   .divider{height:1px; background:var(--line); margin:14px 0}
 
-  /* Categories ribbon */
-  .cats{display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); margin-bottom:12px}
-  .cat{display:flex; gap:10px; align-items:flex-start; background:var(--soft); border:1px solid #e2e8f0; border-radius:14px; padding:10px 12px}
-  .cat b{display:block}
-  .cat .ic{font-size:22px; line-height:1}
-
   /* Upload */
   .upload{border:2px dashed #d2d6e0; border-radius:14px; padding:14px; text-align:center; background:#fafbff}
   .thumbs{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-top:10px}
@@ -82,23 +76,7 @@
         <button class="close" title="Kapat" onclick="(history.length>1?history.back():document.querySelector('.frame').remove())">×</button>
 
         <h1>İlan Ver</h1>
-        <div class="sub">Fotoğraf → Kategori → Başlık → Açıklama → Konum → Önizleme → <b>Yayınla</b></div>
-
-        <!-- Kategori çekmecesi -->
-        <div class="cats" aria-label="Kategoriler">
-          <div class="cat"><div class="ic">🏠</div><div><b>Ev & Hobi</b><div class="hint">Ev eşyaları, hobi ürünleri</div></div></div>
-          <div class="cat"><div class="ic">🏡</div><div><b>Taşınmaz</b><div class="hint">Ev, arsa, tarla</div></div></div>
-          <div class="cat"><div class="ic">🚗</div><div><b>Motorlu Taşıtlar</b><div class="hint">Araba, motosiklet</div></div></div>
-          <div class="cat"><div class="ic">🧸</div><div><b>Oyuncak</b><div class="hint">Her yaşa uygun oyuncaklar</div></div></div>
-          <div class="cat"><div class="ic">👗</div><div><b>Giyim</b><div class="hint">Kadın, erkek, çocuk giyim</div></div></div>
-          <div class="cat"><div class="ic">⚡</div><div><b>Beyaz Eşya</b><div class="hint">Ev aletleri, mutfak ürünleri</div></div></div>
-          <div class="cat"><div class="ic">💻</div><div><b>Teknoloji</b><div class="hint">Bilgisayar, telefon, aksesuar</div></div></div>
-          <div class="cat"><div class="ic">🛋️</div><div><b>Mobilya</b><div class="hint">Koltuk, masa, dolap</div></div></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 1) Foto yükleme -->
+        <div class="sub">Fotoğraf → Kategori → Başlık → Açıklama → Konum → Önizleme → <b>Yayınla</b></div><!-- 1) Foto yükleme -->
         <section>
           <label for="photos">Kapak / Fotoğraflar (en az 1, en çok 10)</label>
           <div class="upload">
