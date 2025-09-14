@@ -191,6 +191,7 @@ footer .wrap{padding:24px}
   margin:20px auto;
   max-width:90%;
 }
+.btn.add{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;font-weight:700;border-radius:12px;text-decoration:none;background:linear-gradient(180deg,#ff3b3b,#d10);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);} .btn.add:hover{opacity:.9;} .btn.add span{font-size:11px;margin-top:2px;} 
 </style>
 </head>
 <body>
@@ -205,7 +206,7 @@ footer .wrap{padding:24px}
       <a class="btn home" href="home.html">🏠 Sayfa</a>
       <a class="btn msg" href="messages.html">💬 Mesajlar</a>
       <a class="btn notif" href="notifications.html">🔔 Bildirimler</a>
-      <a href="ilan-ver.html">➕ İlan Ekle</a>
+      <a href="ilan-ver.html"><a href="ilan-ver.html" class="btn add"><div>➕</div><span>İlan Ekle</span></a></a>
       <a class="btn profile" href="profile.html">👤 Profil</a>
       <a class="btn logout" href="#" data-logout>🚪 Çıkış</a>
     </div>
@@ -217,7 +218,7 @@ footer .wrap{padding:24px}
       <button class="avatar-btn" id="mobMenuBtn" aria-haspopup="menu" aria-expanded="false">👤</button>
       <div class="mobmenu" id="mobMenu" role="menu" aria-label="Hızlı menü">
         <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
-        <a href="ilan-ver.html">➕ İlan Ekle</a>
+        <a href="ilan-ver.html"><a href="ilan-ver.html" class="btn add"><div>➕</div><span>İlan Ekle</span></a></a>
         <a class="item" href="#" role="menuitem" data-logout>🚪 Çıkış</a>
       </div>
     </div>
