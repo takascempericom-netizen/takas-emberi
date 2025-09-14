@@ -153,6 +153,60 @@
       linear-gradient(270deg, #a371f7, #1f6feb, #ff7a00, #ff3b3b);
   }
 }
+/* Taşmasız animasyon: konumu kaydır */
+.card, .avatar { background-size: 100% 100%, 200% 200%; }
+@keyframes borderRotate {
+  0% { background-position: center center, 0% 50%; }
+  100% { background-position: center center, 100% 50%; }
+}
+@keyframes avatarBorderRotate {
+  0% { background-position: center center, 0% 50%; }
+  100% { background-position: center center, 100% 50%; }
+}
+
+/* Mobil düzeltmeler */
+@media (max-width: 420px){
+  .wrap{padding:12px 10px 96px; max-width:100%; overflow-x:hidden;}
+  .hd{padding:10px 0 8px;}
+  .title{font-size:18px;}
+  .avatar{width:64px; height:64px; padding:3px;}
+  .grid{grid-template-columns:1fr;}
+  .cards{grid-template-columns:1fr;}
+  .tab{flex:1; min-height:auto; padding:10px 12px; font-size:14px;}
+  .stat h3{font-size:20px;}
+  .chip{font-size:12px; padding:5px 8px;}
+  .tx strong{font-size:15px;}
+  .card{margin-left:0; margin-right:0; box-sizing:border-box;}
+  .hint, .chip, .tx{word-break:break-word; overflow-wrap:anywhere;}
+}
+
+/* Genel renk döngüsü arka plan */
+@keyframes bgCycle {
+  0% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+  100% { background-position:0% 50%; }
+}
+body, .hd, .nav, .card, .avatar-wrap, .in {
+  background: linear-gradient(270deg,#ff3b3b,#ff7a00,#1f6feb,#a371f7);
+  background-size: 400% 400%;
+  animation: bgCycle 12s ease infinite;
+  color: #fff;
+}
+
+/* Okunurluk için koyu overlay */
+.card, .hd, .nav {
+  position:relative;
+}
+.card::before, .hd::before, .nav::before {
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.55);
+  border-radius:inherit;
+  z-index:0;
+}
+.card > *, .hd > *, .nav > * { position:relative; z-index:1; }
+
   </style>
 
   <!-- Renkli baş-harf avatarı: her kullanıcıya sabit ama farklı renk -->
