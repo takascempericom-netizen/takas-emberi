@@ -22,9 +22,15 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 1200px at 80% -10%,rgba(255,59,59,.12),transparent 40%),
-                         radial-gradient(800px 800px at 10% 110%,rgba(255,122,0,.12),transparent 45%), var(--bg);
-         color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 1200px at 80% -10%,rgba(255,59,59,.12),transparent 40%),
+        radial-gradient(800px 800px at 10% 110%,rgba(255,122,0,.12),transparent 45%),
+        var(--bg);
+      color:var(--fg);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
     a{color:inherit}
     .wrap{max-width:1000px;margin:0 auto;padding:16px 16px 110px}
 
@@ -126,13 +132,13 @@
               <div class="hint">Sadece bir kez değiştirilebilir • 3–20 karakter, harf/rakam ve alt çizgi.</div>
             </div>
             <div class="field">
-              <label>E‑posta</label>
+              <label>E-posta</label>
               <input id="email" class="in" disabled>
             </div>
             <div class="field">
               <label>Şifre İşlemi</label>
               <div class="split">
-                <button id="btnResetPass" class="btn ghost">Şifre Sıfırlama E‑postası</button>
+                <button id="btnResetPass" class="btn ghost">Şifre Sıfırlama E-postası</button>
                 <span id="passNote" class="hint" style="align-self:center"></span>
               </div>
             </div>
@@ -179,7 +185,7 @@
   <!-- Alt gezinme menüsü -->
   <nav class="nav">
     <a href="home.html">
-      <div>� </div>
+      <div>🏠</div>
       <span>Ana Sayfa</span>
     </a>
     <a href="messages.html">
@@ -220,13 +226,18 @@
 
     /* ======================= Yardımcılar ======================= */
     const $ = (sel)=>document.querySelector(sel);
-function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEventListener(evt, fn); } else { console.warn('[profil] eksik eleman:', id); } }
+    function on(id, evt, fn){
+      const el=document.getElementById(id);
+      if(el){ el.addEventListener(evt, fn); }
+      else { console.warn('[profil] eksik eleman:', id); }
+    }
     const listingsEl = $('#listings');
     const tabs = document.querySelectorAll('.tab');
     let currentTab = 'active';
 
     function setTab(t){
-      currentTab = t; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t));
+      currentTab = t;
+      tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t));
       renderListings();
     }
     tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
@@ -234,8 +245,8 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     function slugifyUsername(v){
       return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20);
     }
-    function emailLocal(email){ return (email||'').split('@')[0] }
-    function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—' }
+    function emailLocal(email){ return (email||'').split('@')[0]; }
+    function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
     function byStatus(item){
       const now = Date.now();
       if(item.status==='pending') return 'pending';
@@ -245,7 +256,11 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
 
     function card(item){
       const status = byStatus(item);
-      const badge = status==='active' ? '<span class="badge ok">Yayında</span>' : status==='pending' ? '<span class="badge wait">Onay Bekliyor</span>' : '<span class="badge exp">Süresi Doldu</span>';
+      const badge = status==='active'
+        ? '<span class="badge ok">Yayında</span>'
+        : status==='pending'
+          ? '<span class="badge wait">Onay Bekliyor</span>'
+          : '<span class="badge exp">Süresi Doldu</span>';
       const img = item.coverUrl || 'https://picsum.photos/seed/'+(item.id||Math.random())+'/600/400';
       return `<div class="it">
         <img loading="lazy" src="${img}" alt="${item.title||'İlan'}">
@@ -256,7 +271,7 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
           </div>
           <div class="hint">${item.category||'Kategori'} • ${item.city||'Şehir'}</div>
         </div>
-      </div>`
+      </div>`;
     }
 
     /* ======================= Durum ======================= */
@@ -300,7 +315,9 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
       const a = state.listings.filter(x=>byStatus(x)==='active').length;
       const p = state.listings.filter(x=>byStatus(x)==='pending').length;
       const e = state.listings.filter(x=>byStatus(x)==='expired').length;
-      $('#countActive').textContent=a; $('#countPending').textContent=p; $('#countExpired').textContent=e;
+      $('#countActive').textContent=a;
+      $('#countPending').textContent=p;
+      $('#countExpired').textContent=e;
     }
 
     function renderListings(){
@@ -318,7 +335,7 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
       const photo = p.photoURL || state.user?.photoURL || 'https://i.pravatar.cc/200?img=13';
       $('#avatar').src = photo;
       state.canChangeUsername = !!p.canChangeUsername;
-      $('#btnUsernameSave').disabled = !state.canChangeUsername;
+      document.getElementById('btnUsernameSave')?.toggleAttribute('disabled', !state.canChangeUsername);
       $('#unameHint').textContent = state.canChangeUsername ? '(değiştirilebilir)' : '(kilitli)';
 
       const isPasswordProvider = (state.user?.providerData||[]).some(x=>x.providerId==='password');
@@ -330,7 +347,7 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
       if(!name) return;
       await updateProfile(state.user, { displayName:name });
       await updateDoc(doc(db,'users',state.user.uid),{ displayName:name, updatedAt: serverTimestamp() });
-  document.querySelector('#displayName')?.setAttribute('readonly','readonly');
+      document.querySelector('#displayName')?.setAttribute('readonly','readonly');
     }
 
     async function saveUsername(){
@@ -345,8 +362,8 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
       await setDoc(unameRef, { uid: state.user.uid, at: serverTimestamp() });
       await updateDoc(doc(db,'users',state.user.uid), { username:u, canChangeUsername:false, updatedAt: serverTimestamp() });
       state.profile.username = u; state.canChangeUsername=false;
-  document.querySelector('#username').disabled = true;
-  document.querySelector('#btnUsernameSave').disabled = true;
+      document.querySelector('#username')?.setAttribute('disabled', 'disabled');
+      document.querySelector('#btnUsernameSave')?.setAttribute('disabled', 'disabled');
       paintProfile();
       alert('Kullanıcı adın güncellendi: @'+u);
     }
@@ -365,71 +382,78 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     async function saveAll(){
       try{
         await saveDisplayName();
-  document.querySelector('#displayName').setAttribute('readonly','readonly');
+        document.querySelector('#displayName')?.setAttribute('readonly','readonly');
         alert('Kaydedildi.');
-      }catch(e){ console.error(e); alert('Kaydetme hatası: '+e.message) }
+      }catch(e){ console.error(e); alert('Kaydetme hatası: '+(e?.message||e)); }
     }
 
     /* ======================= Olaylar ======================= */
-    /* ======================= Olaylar ======================= */
-on("btnSignOut","click", async()=>{ 
-  try{ 
-    await signOut(auth); 
-    location.href="auth.html?next=profile.html"; 
-  }catch(e){ 
-    alert("Çıkış hatası: "+(e?.message||e)); 
-  } 
-});
+    on("btnSignOut","click", async()=>{ 
+      try{ 
+        await signOut(auth); 
+        location.href = "auth.html?next=profile.html"; 
+      }catch(e){ 
+        alert("Çıkış hatası: "+(e?.message||e)); 
+      } 
+    });
 
-on("btnResetPass","click", async()=>{ 
-  try{ 
-    if(!state.user?.email) return alert("E-posta bulunamadı."); 
-    await sendPasswordResetEmail(auth, state.user.email); 
-    alert("Sıfırlama e-postası gönderildi."); 
-  }catch(e){ 
-    alert(e?.message||e); 
-  } 
-});
+    on("btnResetPass","click", async()=>{ 
+      try{ 
+        if(!state.user?.email) return alert("E-posta bulunamadı."); 
+        await sendPasswordResetEmail(auth, state.user.email); 
+        alert("Sıfırlama e-postası gönderildi."); 
+      }catch(e){ 
+        alert(e?.message||e); 
+      } 
+    });
 
-on("avatarInput","change", async(e)=>{ 
-  try{ 
-    const f=e.target?.files?.[0]; 
-    if(!f) return; 
-    if(!/^image\//.test(f.type)) return alert("Lütfen bir resim dosyası seçin."); 
-    await uploadAvatar(f); 
-    alert("Profil fotoğrafın güncellendi."); 
-  }catch(err){ 
-    console.error(err); 
-    alert("Yükleme hatası: "+(err?.message||err)); 
-  } 
-});
+    on("avatarInput","change", async(e)=>{ 
+      try{ 
+        const f=e.target?.files?.[0]; 
+        if(!f) return; 
+        if(!/^image\//.test(f.type)) return alert("Lütfen bir resim dosyası seçin."); 
+        await uploadAvatar(f); 
+        alert("Profil fotoğrafın güncellendi."); 
+      }catch(err){ 
+        console.error(err); 
+        alert("Yükleme hatası: "+(err?.message||err)); 
+      } 
+    });
 
-on("btnUsernameSave","click", async()=>{ 
-  try{ 
-    await saveUsername(); 
-  }catch(err){ 
-    alert((err?.message)||err); 
-  } 
-});
+    on("btnUsernameSave","click", async()=>{ 
+      try{ 
+        await saveUsername(); 
+      }catch(err){ 
+        alert((err?.message)||err); 
+      } 
+    });
 
-on("displayName","change", async()=>{ 
-  try{ 
-    await saveDisplayName(); 
-  }catch(e){ 
-    alert((e?.message)||e); 
-  } 
-});
+    on("displayName","change", async()=>{ 
+      try{ 
+        await saveDisplayName(); 
+      }catch(e){ 
+        alert((e?.message)||e); 
+      } 
+    });
 
     /* ======================= Başlat ======================= */
     dbg('onAuthStateChanged bekleniyor…');
     onAuthStateChanged(auth, async(user)=>{
-  setTimeout(()=>{ const b=document.getElementById("btnUsernameSave"); const u=document.getElementById("username"); console.log("[profil] btnUsernameSave disabled=", b?b.disabled:null, "canChangeUsername=", state.canChangeUsername); console.log("[profil] username input exists=", !!u, "disabled=", u?u.disabled:null); }, 500);
-  if(!user){
+      // UI elemanlarının durumunu görsel kontrol için küçük log
+      setTimeout(()=>{
+        const b=document.getElementById("btnUsernameSave");
+        const u=document.getElementById("username");
+        console.log("[profil] btnUsernameSave disabled=", b?b.disabled:null, "canChangeUsername=", state.canChangeUsername);
+        console.log("[profil] username input exists=", !!u, "disabled=", u?u.disabled:null);
+      }, 500);
+
+      if(!user){
         dbg('Kullanıcı yok → auth.html sayfasına yönlendirme');
         location.href = 'auth.html?next=profile.html';
         return;
       }
-      state.user = user; dbg('Kullanıcı oturumda: '+(user.email||user.uid));
+      state.user = user;
+      dbg('Kullanıcı oturumda: '+(user.email||user.uid));
       const prof = await ensureUserDoc(user);
       state.profile = prof;
       paintProfile();
