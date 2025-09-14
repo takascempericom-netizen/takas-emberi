@@ -228,7 +228,7 @@ footer .wrap{padding:24px}
 
 <!-- CATEGORIES -->
 <div class="wrap">
-  <h2>Kategoriler</h2>
+  <h2 id="categories">Kategoriler</h2>
   <div class="cat-grid">
     <a class="cat-card" href="search.html?cat=ev-hobi"><div class="ico">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></a>
     <a class="cat-card" href="search.html?cat=tasinmaz"><div class="ico">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></a>
@@ -242,7 +242,7 @@ footer .wrap{padding:24px}
 
   <!-- FEED (boş ilan ortamı) -->
   <section class="feed">
-    <h2>Paylaşılan İlanlar</h2>
+    <h2 id="sharedListings">Paylaşılan İlanlar</h2>
     <p>Henüz ilan bulunmamaktadır. Yeni ilanlar eklendikçe burada görünecek.</p>
   </section>
 
@@ -497,5 +497,15 @@ document.addEventListener('DOMContentLoaded', function(){
   mo.observe(document.documentElement, {childList:true, subtree:true});
 })();
 </script>
+<script>(function(){
+  function block(el){ return el ? (el.closest("section,div,main,article")||el) : null; }
+  function run(){
+    var sh = block(document.getElementById("sharedListings"));
+    var ca = block(document.getElementById("categories"));
+    if (sh && ca && sh!==ca && ca.parentNode && sh.nextElementSibling!==ca){ ca.parentNode.insertBefore(sh, ca); }
+  }
+  document.addEventListener("DOMContentLoaded", run);
+  new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true});
+})();</script>
 </body>
 </html>
