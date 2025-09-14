@@ -344,6 +344,8 @@
       await setDoc(unameRef, { uid: state.user.uid, at: serverTimestamp() });
       await updateDoc(doc(db,'users',state.user.uid), { username:u, canChangeUsername:false, updatedAt: serverTimestamp() });
       state.profile.username = u; state.canChangeUsername=false;
+  document.querySelector('#username').disabled = true;
+  document.querySelector('#btnUsernameSave').disabled = true;
       paintProfile();
       alert('Kullanıcı adın güncellendi: @'+u);
     }
@@ -363,6 +365,7 @@
       $('#btnSaveAll').disabled = true;
       try{
         await saveDisplayName();
+  document.querySelector('#displayName').setAttribute('readonly','readonly');
         alert('Kaydedildi.');
       }catch(e){ console.error(e); alert('Kaydetme hatası: '+e.message) }
       $('#btnSaveAll').disabled = false;
