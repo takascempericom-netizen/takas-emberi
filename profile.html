@@ -219,7 +219,7 @@
     const storage = getStorage(app);
 
     /* ======================= Yardımcılar ======================= */
-    const 60 (sel)=>document.querySelector(sel);
+    const $ = (sel)=>document.querySelector(sel);
 function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEventListener(evt, fn); } else { console.warn('[profil] eksik eleman:', id); } }
     const listingsEl = $('#listings');
     const tabs = document.querySelectorAll('.tab');
