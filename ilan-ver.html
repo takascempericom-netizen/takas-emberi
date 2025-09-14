@@ -28,7 +28,19 @@
     .nav{position:fixed;left:0;right:0;bottom:0;background:#0b0d12;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
     .nav a{padding:12px 6px;text-align:center;text-decoration:none;color:var(--fg);font-weight:700}
     .nav a span{display:block;font-size:11px;color:var(--muted)}
-  </style>
+    /* thumbnails */
+  .thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+</style>
+  <script type="module" id="fbmods">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const firebaseConfig = { apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg", authDomain:"ureten-eller-v2.firebaseapp.com", projectId:"ureten-eller-v2" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.__fb = {app, auth, db, onAuthStateChanged, serverTimestamp};
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -121,8 +133,8 @@
         <div style="grid-column:1/-1" class="row">
           <label class="btn ghost" style="cursor:pointer">
             Fotoğraf Yükle
-            <input id="photos" type="file" accept="image/*" multiple hidden>
-          </label>
+            <input $1
+          <div id="previews" class="row" style="gap:8px;flex-wrap:wrap"></div>
           <button id="btnPublish" class="btn">İlanı Yayınla</button>
           <div class="hint">İlan önce <b>admin onayı</b> bekler. Onaylanınca herkes görebilir.</div>
         </div>
@@ -138,50 +150,18 @@
   </nav>
 
   <script>
-    // Basit veri: dropdown’lar (genişletilebilir)
-    const DATA = {
-      araclar: {
-        sub: ["Araba","Motor","Yedek Parça"],
-        brand: {
-          Araba: ["Toyota","Renault","Volkswagen","Hyundai","Fiat"],
-          Motor: ["Yamaha","Honda","Kawasaki","Suzuki"],
-          "Yedek Parça": ["Evrensel","OEM","Yan Sanayi"]
-        },
-        model: {
-          Toyota:["Corolla","Yaris","Auris"],
-          Renault:["Clio","Megane","Symbol"],
-          Volkswagen:["Golf","Polo","Passat"],
-          Hyundai:["i20","i30","Accent"],
-          Fiat:["Egea","Linea","Punto"],
-          Yamaha:["MT-07","R25","NMax"],
-          Honda:["CBR 250R","PCX 125","CBF 150"],
-          Kawasaki:["Ninja 400","Z650"],
-          Suzuki:["GSX-R 600","Burgman"],
-          Evrensel:["Fren Balatası","Yağ Filtresi","Buji"],
-          OEM:["Silecek","Hava Filtresi","Triger Seti"],
-          "Yan Sanayi":["Ayna","Kapı Kolu","Far"]
-        }
-      },
-      giyim: {
-        sub: ["Kadın","Erkek","Çocuk"],
-        brand: { Kadın:["Zara","Mango"], Erkek:["LCW","Koton"], Çocuk:["Civil","Panço"] },
-        model: { Zara:["Elbise","Ceket"], Mango:["Elbise","Gömlek"], LCW:["T-shirt","Pantolon"], Koton:["Sweat","Mont"], Civil:["Tulum","Takım"], "Panço":["Kazak","Mont"] }
-      },
-      teknoloji: {
-        sub: ["Bilgisayar","Telefon","Aksesuar"],
-        brand:{ Bilgisayar:["Lenovo","Asus"], Telefon:["Apple","Samsung"], Aksesuar:["Logitech","Anker"] },
-        model:{ Lenovo:["IdeaPad","ThinkPad"], Asus:["ZenBook","TUF"], Apple:["iPhone 12","iPhone 13"], Samsung:["S21","A52"], Logitech:["Mouse","Klavye"], Anker:["Powerbank","Şarj Cihazı"] }
-      }
-    };
+    // Dış JSON'ları yükle
+    let VEH=null, CITIES=null, DISTRICTS=null;
+    async function loadDatasets(){
+      const [v,c,d] = await Promise.all([
+        fetch('/assets/data/cars.json').then(r=>r.json()),
+        fetch('/assets/data/cities.json').then(r=>r.json()),
+        fetch('/assets/data/districts.json').then(r=>r.json())
+      ]);
+      VEH=v; CITIES=c; DISTRICTS=d;
+    }
+    const DATA={};
 
-    const ILCE = {
-      "İstanbul":["Kadıköy","Üsküdar","Beşiktaş","Bakırköy","Ataşehir"],
-      "Ankara":["Çankaya","Keçiören","Yenimahalle","Mamak"],
-      "İzmir":["Karşıyaka","Bornova","Buca","Konak"],
-      "Bursa":["Nilüfer","Osmangazi","Yıldırım"],
-      "Antalya":["Kepez","Muratpaşa","Konyaaltı"],
-      "Konya":["Selçuklu","Meram","Karatay"]
-    };
 
     const $ = s=>document.querySelector(s);
     const cat=$('#cat'), sub=$('#subcat'), brand=$('#brand'), model=$('#model');
@@ -193,23 +173,39 @@
     }
 
     cat.addEventListener('change', ()=>{
-      const d = DATA[cat.value];
-      fill(sub, d ? d.sub : [], "Alt kategori");
+      let subs=[];
+      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
+      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
+      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
+      else { subs=[]; }
+      fill(sub, subs, 'Alt kategori');
+      fill(brand, [], 'Önce alt kategori seçin');
+      fill(model, [], 'Önce marka seçin');
+    });
       fill(brand, [], "Önce alt kategori seçin");
       fill(model, [], "Önce marka seçin");
     });
 
     sub.addEventListener('change', ()=>{
-      const d = DATA[cat.value];
-      const brands = d?.brand?.[sub.value] || [];
-      fill(brand, brands, "Marka");
+      if(cat.value==='araclar' && VEH){
+        const brands = VEH[sub.value] ? Object.keys(VEH[sub.value]) : [];
+        fill(brand, brands, 'Marka');
+      } else {
+        fill(brand, [], 'Marka');
+      }
+      fill(model, [], 'Önce marka seçin');
+    });
       fill(model, [], "Önce marka seçin");
     });
 
     brand.addEventListener('change', ()=>{
-      const d = DATA[cat.value];
-      const models = d?.model?.[brand.value] || [];
-      fill(model, models, "Model");
+      if(cat.value==='araclar' && VEH){
+        const models = (VEH[sub.value] && VEH[sub.value][brand.value]) ? VEH[sub.value][brand.value] : [];
+        fill(model, models, 'Model');
+      } else {
+        fill(model, [], 'Model');
+      }
+    });
     });
 
     il.addEventListener('change', ()=>{
@@ -241,3 +237,159 @@
   </script>
 </body>
 </html>
+<!-- PREVIEWS: seçilen fotoğrafları küçük gör -->
+<script>
+(function(){
+  var input = document.getElementById('photos');
+  if(!input) return;
+
+  function ensurePreviews() {
+    var previews = document.getElementById('previews');
+    if (!previews) {
+      previews = document.createElement('div');
+      previews.id = 'previews';
+      previews.className = 'row';
+      previews.style.gap = '8px';
+      previews.style.flexWrap = 'wrap';
+      var label = input.closest('label') || input.parentElement;
+      (label && label.parentNode ? label.parentNode : document.body).insertBefore(previews, (label ? label.nextSibling : null));
+    }
+    return previews;
+  }
+
+  // küçük stil
+  var css = document.createElement('style');
+  css.textContent = '.thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}';
+  document.head.appendChild(css);
+
+  input.addEventListener('change', function(){
+    var previews = ensurePreviews();
+    previews.innerHTML = '';
+    var files = Array.from(input.files || []).slice(0,5);
+    files.forEach(function(f){
+      var url = URL.createObjectURL(f);
+      var img = new Image();
+      img.src = url; img.className='thumb'; img.alt=f.name; img.title=f.name;
+      previews.appendChild(img);
+    });
+  });
+})();
+</script>
+<!-- DATASETS: il/ilçe + araç marka/model doldurma -->
+<script>
+(function(){
+  var il    = document.getElementById('il');
+  var ilce  = document.getElementById('ilce');
+  var cat   = document.getElementById('cat');
+  var sub   = document.getElementById('sub');
+  var brand = document.getElementById('brand');
+  var model = document.getElementById('model');
+
+  function fill(sel, arr, placeholder){
+    if(!sel) return;
+    sel.innerHTML='';
+    if(placeholder){
+      var p=document.createElement('option'); p.value=''; p.textContent=placeholder; sel.appendChild(p);
+    }
+    (arr||[]).forEach(function(v){
+      var op=document.createElement('option'); op.value=v; op.textContent=v; sel.appendChild(op);
+    });
+  }
+
+  var CITIES=null, DISTRICTS=null, VEH=null;
+
+  Promise.all([
+    fetch('/assets/data/cities.json').then(function(r){return r.json();}),
+    fetch('/assets/data/districts.json').then(function(r){return r.json();}),
+    fetch('/assets/data/cars.json').then(function(r){return r.json();})
+  ]).then(function(res){
+    CITIES=res[0]; DISTRICTS=res[1]; VEH=res[2];
+    if(Array.isArray(CITIES) && il){ fill(il, CITIES, 'İl'); }
+  }).catch(function(e){ console.warn('dataset load error', e); });
+
+  if(il && ilce){
+    il.addEventListener('change', function(){
+      var arr = (DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [];
+      fill(ilce, arr, 'İlçe');
+    });
+  }
+
+  if(cat && sub){
+    cat.addEventListener('change', function(){
+      var subs=[];
+      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
+      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
+      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
+      fill(sub, subs, 'Alt kategori');
+      fill(brand, [], 'Marka');
+      fill(model, [], 'Model');
+    });
+  }
+
+  if(sub && brand){
+    sub.addEventListener('change', function(){
+      var brands=[];
+      if(cat && cat.value==='araclar' && VEH && VEH[sub.value]){
+        brands = Object.keys(VEH[sub.value]);
+      }
+      fill(brand, brands, 'Marka');
+      fill(model, [], 'Model');
+    });
+  }
+
+  if(brand && model){
+    brand.addEventListener('change', function(){
+      var models=[];
+      if(cat && cat.value==='araclar' && VEH && VEH[sub.value] && VEH[sub.value][brand.value]){
+        models = VEH[sub.value][brand.value];
+      }
+      fill(model, models, 'Model');
+    });
+  }
+})();
+</script>
+<!-- PUBLISH: status=pending kaydet ve profile#pending -->
+<script>
+(function(){
+  var btn = document.getElementById('btnPublish');
+  if(!btn){ return; }
+
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+
+    if(!(window.__fb && window.__fb.db)){
+      alert('Sistem hazır değil. Lütfen sayfayı yenileyin.');
+      return;
+    }
+
+    var payload = {
+      title: (document.getElementById('title')||{}).value || '',
+      description: (document.getElementById('desc')||{}).value || '',
+      category: (document.getElementById('cat')||{}).value || '',
+      subcategory: (document.getElementById('sub')||{}).value || '',
+      brand: (document.getElementById('brand')||{}).value || '',
+      model: (document.getElementById('model')||{}).value || '',
+      km: (document.getElementById('km')||{}).value || '',
+      condition: (document.getElementById('cond')||{}).value || '',
+      city: (document.getElementById('il')||{}).value || '',
+      district: (document.getElementById('ilce')||{}).value || '',
+      status: 'pending',
+      createdAt: window.__fb.serverTimestamp(),
+      updatedAt: window.__fb.serverTimestamp()
+    };
+
+    window.__fb.onAuthStateChanged(window.__fb.auth, function(u){
+      if(!u){ alert('Devam etmek için giriş yapın.'); location.href='auth.html?next=ilan-ver.html'; return; }
+      payload.ownerId = u.uid;
+
+      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(function(m){
+        return m.addDoc(m.collection(window.__fb.db,'listings'), payload);
+      }).then(function(){
+        location.href = 'profile.html#pending';
+      }).catch(function(err){
+        alert('Kaydetme hatası: ' + (err && err.message ? err.message : err));
+      });
+    });
+  });
+})();
+</script>

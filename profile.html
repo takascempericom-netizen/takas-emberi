@@ -457,3 +457,14 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 </script>
 </body>
 </html>
+<!-- HASH TAB: #pending / #active / #expired aç -->
+<script>
+(function(){
+  try{
+    var h = (location.hash||'').replace('#','');
+    if(h && ['active','pending','expired'].indexOf(h)>=0 && typeof setTab==='function'){
+      document.addEventListener('DOMContentLoaded', function(){ setTab(h); });
+    }
+  }catch(e){}
+})();
+</script>

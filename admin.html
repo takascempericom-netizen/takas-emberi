@@ -58,7 +58,7 @@ function row(d){
 }
 
 function load(){
-  const q=query(collection(db,'listings'), where('status','==','pending'), orderBy('createdAt','desc'));
+  const q=query(collection(db,'listings'), where('status','==','pending'), );
   onSnapshot(q,(snap)=>{
     rows.innerHTML='';
     if(snap.empty){ rows.innerHTML='<tr><td colspan="4">Bekleyen ilan yok.</td></tr>'; return; }
