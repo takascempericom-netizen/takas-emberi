@@ -33,8 +33,8 @@
     .logo{height:40px;border-radius:10px;box-shadow:var(--shadow)}
     .title{font-weight:800;letter-spacing:.2px}
     .sp{flex:1}
-    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:white;font-weight:700;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
-    .btn:disabled{opacity:.6;cursor:progress}
+    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:white;font-weight:700;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow) position:relative; z-index:1; pointer-events:auto;}
+    .btn:disabled{opacity:.6;cursor:progress pointer-events:none;}
     .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
 
     /* Profil kartı */
@@ -385,6 +385,8 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     /* ======================= Başlat ======================= */
     dbg('onAuthStateChanged bekleniyor…');
     onAuthStateChanged(auth, async(user)=>{
+  setTimeout(()=>{ const b=document.getElementById('btnUsernameSave'); const u=document.getElementById('username'); console.log('[profil] btnUsernameSave=', # 4) Güvenlik log'u: sayfa yüklenince buton state’ini yazb, 'disabled=', b?b.disabled:null, 'canChangeUsername=', state.canChangeUsername); console.log('[profil] username input exists=', # 4) Güvenlik log'u: sayfa yüklenince buton state’ini yazu, 'disabled=', u?u.disabled:null); }, 500);
+
       if(!user){
         dbg('Kullanıcı yok → auth.html sayfasına yönlendirme');
         location.href = 'auth.html?next=profile.html';
