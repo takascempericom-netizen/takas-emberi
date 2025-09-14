@@ -5,7 +5,7 @@ import {
   addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const cfg = {
+var cfg = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
@@ -14,35 +14,36 @@ const cfg = {
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
 
-const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
-const db   = getFirestore(app);
-const auth = getAuth(app);
+var app  = getApps().length ? getApps()[0] : initializeApp(cfg);
+var db   = getFirestore(app);
+var auth = getAuth(app);
 
-const feed  = document.getElementById("feed");
-const empty = document.getElementById("feed-empty");
+var feed  = document.getElementById("feed");
+var empty = document.getElementById("feed-empty");
 
 function card(d, id){
-  const img = d.coverUrl || ("https://picsum.photos/seed/"+id+"/800/600");
-  const title = d.title || "İlan";
-  const sub = `${d.category || ""}${d.city ? " • " + d.city : ""}`;
-  return `
-    <div class="card" data-card-id="\${id}">
-      <img class="thumb" src="\${img}" alt="\${title}">
-      <div class="meta">
-        <div class="title">\${title}</div>
-        <div class="sub">\${sub}</div>
-        <div class="actions">
-          <a class="btn offer" href="#" data-offer-id="\${id}" data-seller="\${d.ownerId}" data-title="\${title}">Teklif ver</a>
-        </div>
-      </div>
-    </div>`;
+  var img = d.coverUrl || ("https://picsum.photos/seed/" + id + "/800/600");
+  var title = d.title || "İlan";
+  var sub = (d.category || "") + (d.city ? " • " + d.city : "");
+  return ''
+    + '<div class="card" data-card-id="'+id+'">'
+    +   '<img class="thumb" src="'+img+'" alt="'+title+'">'
+    +   '<div class="meta">'
+    +     '<div class="title">'+title+'</div>'
+    +     '<div class="sub">'+sub+'</div>'
+    +     '<div class="actions">'
+    +       '<a class="btn offer" href="#" data-offer-id="'+id+'" data-seller="'+(d.ownerId||'')+'" data-title="'+title+'">Teklif ver</a>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
 }
 
-const q = query(collection(db, "listings"), where("status","==","active"));
-onSnapshot(q, (ss)=>{
-  const arr = [];
-  ss.forEach(doc => arr.push({ id: doc.id, ...doc.data() }));
-  arr.sort((a,b)=>((b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)));
+// Aktif ilanlar akışı (mobil 1, masaüstü 4 sütun CSS ile)
+var q = query(collection(db, "listings"), where("status","==","active"));
+onSnapshot(q, function(ss){
+  var arr = [];
+  ss.forEach(function(doc){ arr.push(Object.assign({ id: doc.id }, doc.data())); });
+  arr.sort(function(a,b){ return ((b.createdAt && b.createdAt.seconds || 0) - (a.createdAt && a.createdAt.seconds || 0)); });
 
   if(!feed || !empty) return;
 
@@ -51,34 +52,36 @@ onSnapshot(q, (ss)=>{
     feed.innerHTML = "";
   } else {
     empty.style.display = "none";
-    feed.innerHTML = arr.map(x=>card(x,x.id)).join("");
+    feed.innerHTML = arr.map(function(x){ return card(x, x.id); }).join("");
   }
 });
 
-// Teklif ver
-feed?.addEventListener("click", async (e)=>{
-  const t = e.target.closest(".offer");
+// "Teklif ver" (giriş kontrolü + offers alt koleksiyonuna kayıt)
+feed && feed.addEventListener("click", async function(e){
+  var t = e.target && e.target.closest && e.target.closest(".offer");
   if(!t) return;
   e.preventDefault();
 
-  const listingId = t.getAttribute("data-offer-id");
-  const sellerId  = t.getAttribute("data-seller");
-  const title     = t.getAttribute("data-title") || "İlan";
+  var listingId = t.getAttribute("data-offer-id");
+  var sellerId  = t.getAttribute("data-seller") || "";
+  var title     = t.getAttribute("data-title") || "İlan";
 
-  const u = auth.currentUser;
+  var u = auth.currentUser;
   if(!u){ location.href = "auth.html?next=home.html"; return; }
   if(u.uid === sellerId){ alert("Kendi ilanınıza teklif veremezsiniz."); return; }
 
-  const text = prompt(`“\${title}” için mesajınız (opsiyonel):`, "");
+  var text = window.prompt('"' + title + '" için mesajınız (opsiyonel):', "");
   try{
-    await addDoc(collection(db, \`listings/\${listingId}/offers\`), {
-      listingId, listingTitle: title,
-      sellerId, buyerId: u.uid,
-      text: (text||"").slice(0, 1000),
+    await addDoc(collection(db, 'listings/' + listingId + '/offers'), {
+      listingId: listingId,
+      listingTitle: title,
+      sellerId: sellerId,
+      buyerId: u.uid,
+      text: (text || "").slice(0, 1000),
       createdAt: serverTimestamp()
     });
     alert("Teklif gönderildi!");
   }catch(err){
-    alert("Teklif gönderilemedi: " + (err?.message || err));
+    alert("Teklif gönderilemedi: " + (err && err.message ? err.message : String(err)));
   }
 });
