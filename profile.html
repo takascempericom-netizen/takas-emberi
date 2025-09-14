@@ -207,6 +207,15 @@ body, .hd, .nav, .card, .avatar-wrap, .in {
 }
 .card > *, .hd > *, .nav > * { position:relative; z-index:1; }
 
+/* Mobil uyumlu düzen: alanlar taşmasın */
+@media (max-width:600px){
+  .grid{grid-template-columns:1fr !important;}
+  .split{flex-direction:column; align-items:stretch;}
+  .split > *{flex:1 1 auto; width:100%;}
+  .field{min-width:0;}
+  input.in, button.btn{width:100%; box-sizing:border-box;}
+}
+
   </style>
 
   <!-- Renkli baş-harf avatarı: her kullanıcıya sabit ama farklı renk -->
