@@ -455,6 +455,7 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   console.log("[sound] mevcut durum:", window.isSoundEnabled()); 
   // örnek: kapat -> setSoundEnabled(false); aç -> setSoundEnabled(true) 
 </script>
+<script type="module">import { startUserNotifications } from "/assets/js/bildirimler.js"; startUserNotifications();</script>
 </body>
 </html>
 <!-- HASH TAB: #pending / #active / #expired aç -->
