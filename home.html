@@ -208,6 +208,18 @@ footer .wrap{padding:24px}
 .home-feed .actions{display:flex;gap:8px;margin-top:10px}
 .home-feed .btn{flex:1;text-align:center;padding:10px 12px;border-radius:10px;background:#0f172a;color:#fff;font-weight:700;text-decoration:none}
  /* --- /Home: Büyük Yayın Akışı --- */ 
+/* --- Paylaşılan İlanlar (responsive grid) --- */
+.home-share{max-width:1200px;margin:16px auto;padding:0 12px}
+.home-share h2{margin:12px 0 8px;font-size:22px;font-weight:800}
+.home-share .grid{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr))}
+ (max-width:1024px){.home-share .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ (max-width:600px){.home-share .grid{grid-template-columns:1fr}}
+.home-share .card{display:block;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.home-share .thumb{width:100%;height:160px;object-fit:cover;display:block}
+.home-share .meta{padding:10px}
+.home-share .title{font-weight:800;line-height:1.2}
+.home-share .sub{color:#6b7280;font-size:12px;margin-top:2px}
+/* --- /Paylaşılan İlanlar --- */
 </style>
 </head>
 <body>
@@ -436,5 +448,11 @@ footer .wrap{padding:24px}
   // örnek: kapat -> setSoundEnabled(false); aç -> setSoundEnabled(true) 
 </script>
 <script type="module">import { startUserNotifications } from "/assets/js/bildirimler.js"; startUserNotifications();</script>
+<section class="home-share" id="feed-wrap">
+  <h2>Paylaşılan İlanlar</h2>
+  <div id="feed-empty" class="sub" style="padding:12px">Henüz ilan bulunmamaktadır. Yeni ilanlar eklendikçe burada görünecek.</div>
+  <div id="feed" class="grid"></div>
+</section>
+<script type="module" src="/js/home-feed.js"></script>
 </body>
 </html>
