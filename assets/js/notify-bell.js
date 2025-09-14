@@ -1,0 +1,76 @@
+// assets/js/notify-bell.js
+'use strict';
+
+(function(){
+  // Stil (çakışmayı önlemek için izole sınıflar)
+  const css = `
+  .tc-bell-wrap{position:fixed;top:12px;right:12px;z-index:9999;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .tc-bell-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;border:0;
+    background:linear-gradient(180deg,#0f172a,#0a1222); color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.25); cursor:pointer}
+  .tc-bell-badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:999px;font-size:11px;
+    padding:2px 6px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .tc-dd{position:absolute;top:50px;right:0;width:320px;max-height:60vh;overflow:auto;background:#0f172a;color:#e5e7eb;
+    border:1px solid #1f2937;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.35);display:none}
+  .tc-dd.open{display:block}
+  .tc-dd h4{margin:10px 12px 6px;font-size:13px;letter-spacing:.2px;color:#93a3b8}
+  .tc-dd ul{margin:0;padding:0;list-style:none}
+  .tc-dd li{border-top:1px solid #1f2937;padding:10px 12px}
+  .tc-dd li:first-child{border-top:0}
+  .tc-msg{font-weight:700;color:#e7ebf6}
+  .tc-time{font-size:11px;color:#93a3b8;margin-top:3px}
+  @media (max-width:560px){ .tc-dd{right:6px;left:6px;width:auto} .tc-bell-wrap{right:6px} }
+  `;
+  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+
+  // Kap: buton + badge + dropdown
+  const wrap = document.createElement('div'); wrap.className = 'tc-bell-wrap';
+  const btn  = document.createElement('button'); btn.className='tc-bell-btn'; btn.setAttribute('aria-label','Bildirimler'); btn.innerText='🔔';
+  const badge= document.createElement('span'); badge.className='tc-bell-badge'; badge.textContent='0'; badge.style.display='none';
+  const dd   = document.createElement('div'); dd.className='tc-dd';
+  dd.innerHTML = `<h4>Bildirimler</h4><ul id="tc-dd-list"></ul>`;
+  wrap.appendChild(btn); wrap.appendChild(badge); wrap.appendChild(dd); document.body.appendChild(wrap);
+
+  const listEl = dd.querySelector('#tc-dd-list');
+  let items = []; let unread = 0;
+
+  function fmtTime(ms){
+    try{
+      const d=new Date(ms); const pad=n=>String(n).padStart(2,'0');
+      return `${pad(d.getDate())}.${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }catch(_){ return ''; }
+  }
+  function render(){
+    badge.style.display = unread>0 ? '' : 'none';
+    badge.textContent = String(unread);
+    if(items.length===0){
+      listEl.innerHTML = `<li><div class="tc-msg">Henüz bildirimin yok.</div><div class="tc-time">Yeni gelişmeler burada görünecek.</div></li>`;
+      return;
+    }
+    listEl.innerHTML = items.map(x=>(
+      `<li><div class="tc-msg">${x.message.replace(/</g,'&lt;')}</div><div class="tc-time">${fmtTime(x.at)}</div></li>`
+    )).join('');
+  }
+  function addItem(msg, at){
+    items.unshift({message:msg, at: at || Date.now()});
+    if(items.length>20) items = items.slice(0,20);
+    unread++; render();
+  }
+
+  // Dropdown toggle
+  btn.addEventListener('click', ()=>{
+    const isOpen = dd.classList.toggle('open');
+    if(isOpen){ unread=0; render(); }
+  });
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)) dd.classList.remove('open');
+  });
+
+  // bildirimler.js notify() → tc:notify eventleri
+  window.addEventListener('tc:notify', (ev)=>{
+    const d = ev.detail || {};
+    addItem(d.message || 'Yeni bildirim', d.at);
+  }, {passive:true});
+
+  // Sayfa yüklendiğinde çiz
+  render();
+})();

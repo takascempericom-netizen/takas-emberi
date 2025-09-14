@@ -31,7 +31,9 @@ const db = getFirestore(app);
 
 // Basit uyarı + ses (sound.js varsa onun ayarını respect eder)
 async function notify(msg, soundFile = SOUND_URL) {
-  try { console.log("[notify]", msg); alert(msg); } catch(_) {}
+  try { console.log("[notify]", msg);
+    try{ window.dispatchEvent(new CustomEvent('tc:notify',{detail:{message:msg, at:Date.now()}})); }catch(_){}
+    alert(msg); } catch(_) {}
   try {
     const canPlay = window.isSoundEnabled ? window.isSoundEnabled() : true;
     if (canPlay) {
