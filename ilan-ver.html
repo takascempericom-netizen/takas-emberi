@@ -24,13 +24,11 @@
     background: conic-gradient(from 0deg,
       var(--accent1),var(--accent2),var(--accent5),var(--accent3),var(--accent4),var(--accent1));
     animation:spin 6s linear infinite;
-    z-index:0;
+    z-index:-1; pointer-events:none;
   }
   @keyframes spin{ to{ transform: rotate(1turn); } }
   .card__inner{position:relative; z-index:1; background:var(--card); border-radius:18px; padding:20px;}
   /* Mask the inner to create border effect */
-  .card{ -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-         -webkit-mask-composite: xor; mask-composite: exclude; }
 
   h1{margin:0 0 10px 0; color:#0f172a; font-size:26px}
   .sub{color:var(--muted); margin-bottom:16px; font-size:14px}
