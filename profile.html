@@ -8,16 +8,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0d12;            /* koyu arka plan */
-      --card:#10131b;          /* kart arka planı */
-      --muted:#8b97b2;         /* açıklama rengi */
-      --line:#1f2431;          /* çizgiler */
-      --fg:#e7ebf6;            /* ana metin */
-      --brand:#ff3b3b;         /* şeker kırmızısı */
-      --brand-2:#ff7a00;       /* turuncu vurgu */
-      --green:#12d179;         /* aktif */
-      --yellow:#ffd33d;        /* beklemede */
-      --red:#ff4d4d;           /* süresi doldu */
+      --bg:#0b0d12;
+      --card:#10131b;
+      --muted:#8b97b2;
+      --line:#1f2431;
+      --fg:#e7ebf6;
+      --brand:#ff3b3b;
+      --brand-2:#ff7a00;
+      --green:#12d179;
+      --yellow:#ffd33d;
+      --red:#ff4d4d;
       --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);
     }
     *{box-sizing:border-box}
@@ -51,11 +51,12 @@
 
     .avatar-wrap{display:flex;gap:16px;align-items:center}
     .avatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #ff5a5a;box-shadow:0 0 0 4px rgba(255,58,58,.15)}
+
     .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0c1019;padding:6px 10px;border-radius:999px;font-weight:600}
 
     .field{display:flex;flex-direction:column;gap:8px}
     .field label{font-size:12px;letter-spacing:.3px;color:var(--muted)}
-    .in{background:#0c1016;border:1px solid var(--line);border-radius:12px;padding:12px 12px;color:var(--fg)}
+    .static{background:#0c1016;border:1px solid var(--line);border-radius:12px;padding:12px 12px;color:var(--fg)}
 
     .split{display:flex;gap:12px;flex-wrap:wrap}
     .stat{flex:1 1 180px;min-width:180px;background:linear-gradient(180deg,rgba(18,209,121,.06),transparent 50%);border:1px solid var(--line);border-radius:14px;padding:12px}
@@ -85,7 +86,6 @@
     .nav a.active{color:#fff;background:linear-gradient(180deg,rgba(255,59,59,.12),transparent)}
 
     .hint{color:var(--muted);font-size:13px}
-    .danger{color:#ff8b8b;font-weight:700}
     .sep{height:1px;background:var(--line);margin:12px 0}
     .right{margin-left:auto}
   </style>
@@ -99,7 +99,7 @@
       <button id="btnSignOut" class="btn ghost">Çıkış</button>
     </header>
 
-    <div id="dbg" style="white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;background:#0c1019;border:1px solid var(--line);border-radius:12px;padding:8px;margin:8px 0;color:#a3b4d6;display:none"></div>
+    <div id="dbg" style="display:none"></div>
 
     <section class="card" style="margin-top:12px">
       <div class="grid">
@@ -109,31 +109,23 @@
             <div>
               <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                 <div id="chipUsername" class="chip">@kullanici</div>
-                <label class="btn ghost" style="padding:8px 12px;cursor:pointer">
-                  Profil Foto Yükle
-                  <input id="avatarInput" type="file" accept="image/*" hidden>
-                </label>
               </div>
-              <div class="hint" style="margin-top:6px">PNG/JPG — kare görseller önerilir.</div>
+              <div class="hint" style="margin-top:6px">Profil fotoğrafı otomatik baş harften oluşturulur.</div>
             </div>
           </div>
           <div class="sep"></div>
           <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
             <div class="field">
               <label>Görünen Ad</label>
-              <input id="displayName" class="in" placeholder="Adınız" />
+              <div id="displayName" class="static"></div>
             </div>
             <div class="field">
-              <label>Kullanıcı Adı <span id="unameHint" class="hint"></span></label>
-              <div class="split">
-                <input id="username" class="in" placeholder="kullaniciadi" style="flex:1" />
-                <button id="btnUsernameSave" class="btn" style="white-space:nowrap">Kullanıcı Adını Kaydet</button>
-              </div>
-              <div class="hint">Sadece bir kez değiştirilebilir • 3–20 karakter, harf/rakam ve alt çizgi.</div>
+              <label>Kullanıcı Adı <span class="hint">(kilitli)</span></label>
+              <div id="usernameStatic" class="static"></div>
             </div>
             <div class="field">
               <label>E-posta</label>
-              <input id="email" class="in" disabled>
+              <div id="email" class="static"></div>
             </div>
             <div class="field">
               <label>Şifre İşlemi</label>
@@ -145,26 +137,16 @@
           </div>
         </div>
         <div>
-          <!-- Sağ kolon boşaltıldı (istatistik ve sekmeler alta taşındı) -->
-          <div class="hint">Profil bilgilerinizi güncelleyin, ilanlar aşağıdadır.</div>
+          <div class="hint">Bilgiler sabittir. Gerekirse ileride düzenleme açılacaktır.</div>
         </div>
       </div>
     </section>
 
     <section id="listingsSection" class="card" style="margin-top:14px">
       <div class="split" style="margin-bottom:8px">
-        <div class="stat">
-          <small>Yayında</small>
-          <h3 id="countActive">0</h3>
-        </div>
-        <div class="stat">
-          <small>Onay Bekleyen</small>
-          <h3 id="countPending">0</h3>
-        </div>
-        <div class="stat">
-          <small>Süresi Dolan</small>
-          <h3 id="countExpired">0</h3>
-        </div>
+        <div class="stat"><small>Yayında</small><h3 id="countActive">0</h3></div>
+        <div class="stat"><small>Onay Bekleyen</small><h3 id="countPending">0</h3></div>
+        <div class="stat"><small>Süresi Dolan</small><h3 id="countExpired">0</h3></div>
       </div>
       <div class="tabs">
         <div class="tab active" data-tab="active">Yayındakiler</div>
@@ -176,7 +158,7 @@
 
     <section class="card" style="margin-top:14px">
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div class="hint">Profil ve ilan görselleriniz tüm kullanıcılara açıktır. Lütfen topluluk kurallarına uygun yükleme yapın.</div>
+        <div class="hint">Profil ve ilan görselleriniz kullanıcılar tarafından görülebilir.</div>
         <div class="right hint">ID: <code id="uidShort">—</code></div>
       </div>
     </section>
@@ -184,28 +166,17 @@
 
   <!-- Alt gezinme menüsü -->
   <nav class="nav">
-    <a href="home.html">
-      <div>🏠</div>
-      <span>Ana Sayfa</span>
-    </a>
-    <a href="messages.html">
-      <div>💬</div>
-      <span>Mesajlar</span>
-    </a>
-    <a class="active" href="#">
-      <div>🔔</div>
-      <span>Bildirimler</span>
-    </a>
+    <a href="home.html"><div>🏠</div><span>Ana Sayfa</span></a>
+    <a href="messages.html"><div>💬</div><span>Mesajlar</span></a>
+    <a class="active" href="#"><div>🔔</div><span>Bildirimler</span></a>
   </nav>
 
   <script type="module">
-    /* ======================= Firebase Kurulum ======================= */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // *** Kullanıcının verdiği proje yapılandırması ***
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -216,52 +187,43 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const dbgEl = document.getElementById('dbg');
-    const DBG=false;
-const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.textContent += (dbgEl.textContent ? "\n" : "") + m;} console.log("[profil]",m);};
-    window.addEventListener('error', (e)=>{ dbg('Hata: '+ (e && e.message ? e.message : e)); });
-    dbg('Firebase başlatıldı.');
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+    getStorage(app); // gelecekte gerekebilir
 
-    /* ======================= Yardımcılar ======================= */
+    /* Yardımcılar */
     const $ = (sel)=>document.querySelector(sel);
-    function on(id, evt, fn){
-      const el=document.getElementById(id);
-      if(el){ el.addEventListener(evt, fn); }
-      else { console.warn('[profil] eksik eleman:', id); }
-    }
+    function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEventListener(evt, fn); } }
+
     const listingsEl = $('#listings');
     const tabs = document.querySelectorAll('.tab');
     let currentTab = 'active';
-
-    function setTab(t){
-      currentTab = t;
-      tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t));
-      renderListings();
-    }
+    function setTab(t){ currentTab=t; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t)); renderListings(); }
     tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
 
-    function slugifyUsername(v){
-      return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20);
-    }
+    function slugifyUsername(v){ return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20); }
     function emailLocal(email){ return (email||'').split('@')[0]; }
     function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
+
+    function letterAvatar(text){
+      const ch = ((text||'?').trim()[0]||'?').toUpperCase();
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+        <rect width='100%' height='100%' fill='#0c1019'/>
+        <text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle'
+              font-family='Inter,Arial,sans-serif' font-size='96' fill='#ff5a5a'>${ch}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+    }
+
     function byStatus(item){
       const now = Date.now();
       if(item.status==='pending') return 'pending';
       if(item.status==='active' && (!item.expiresAt || item.expiresAt>now)) return 'active';
       return 'expired';
     }
-
     function card(item){
       const status = byStatus(item);
-      const badge = status==='active'
-        ? '<span class="badge ok">Yayında</span>'
-        : status==='pending'
-          ? '<span class="badge wait">Onay Bekliyor</span>'
-          : '<span class="badge exp">Süresi Doldu</span>';
+      const badge = status==='active' ? '<span class="badge ok">Yayında</span>' : status==='pending' ? '<span class="badge wait">Onay Bekliyor</span>' : '<span class="badge exp">Süresi Doldu</span>';
       const img = item.coverUrl || 'https://picsum.photos/seed/'+(item.id||Math.random())+'/600/400';
       return `<div class="it">
         <img loading="lazy" src="${img}" alt="${item.title||'İlan'}">
@@ -275,13 +237,8 @@ const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.tex
       </div>`;
     }
 
-    /* ======================= Durum ======================= */
-    let state = {
-      user:null,
-      profile:{},
-      listings:[],
-      canChangeUsername:false
-    };
+    /* Durum */
+    let state = { user:null, profile:{}, listings:[] };
 
     async function ensureUserDoc(user){
       const uref = doc(db,'users',user.uid);
@@ -291,10 +248,10 @@ const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.tex
         await setDoc(uref,{
           uid:user.uid,
           email:user.email||null,
-          displayName:user.displayName||'Yeni Üye',
+          displayName:user.displayName||emailLocal(user.email)||'Yeni Üye',
           username: baseUsername || ('u'+user.uid.slice(0,6)),
-          canChangeUsername:true,
-          photoURL:user.photoURL||'',
+          canChangeUsername:false,
+          photoURL:'',
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
@@ -316,11 +273,8 @@ const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.tex
       const a = state.listings.filter(x=>byStatus(x)==='active').length;
       const p = state.listings.filter(x=>byStatus(x)==='pending').length;
       const e = state.listings.filter(x=>byStatus(x)==='expired').length;
-      $('#countActive').textContent=a;
-      $('#countPending').textContent=p;
-      $('#countExpired').textContent=e;
+      $('#countActive').textContent=a; $('#countPending').textContent=p; $('#countExpired').textContent=e;
     }
-
     function renderListings(){
       const list = state.listings.filter(x=>byStatus(x)===currentTab);
       listingsEl.innerHTML = list.length ? list.map(card).join('') : `<div class="hint" style="padding:16px">Bu sekmede ilan yok.</div>`;
@@ -328,153 +282,31 @@ const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.tex
 
     function paintProfile(){
       const p = state.profile;
-      $('#displayName').value = p.displayName||'';
-      $('#email').value = state.user?.email||'';
-      $('#username').value = p.username||'';
+      $('#displayName').textContent = p.displayName || emailLocal(state.user?.email) || '';
+      $('#email').textContent = state.user?.email || '';
+      $('#usernameStatic').textContent = p.username || 'kullanici';
       $('#chipUsername').textContent = '@'+(p.username||'kullanici');
       $('#uidShort').textContent = shortId(state.user?.uid);
-      const photo = p.photoURL || state.user?.photoURL || 'https://i.pravatar.cc/200?img=13';
+      const photo = p.photoURL || letterAvatar(p.displayName || state.user?.email);
       $('#avatar').src = photo;
-      state.canChangeUsername = !!p.canChangeUsername;
-      document.getElementById('btnUsernameSave')?.toggleAttribute('disabled', !state.canChangeUsername);
-      $('#unameHint').textContent = state.canChangeUsername ? '(değiştirilebilir)' : '(kilitli)';
 
       const isPasswordProvider = (state.user?.providerData||[]).some(x=>x.providerId==='password');
       $('#passNote').textContent = isPasswordProvider ? '' : 'Google ile giriş — şifre sıfırlama desteklenmeyebilir';
     }
 
-    async function saveDisplayName(){
-      const name = $('#displayName').value.trim().slice(0,60);
-      if(!name) return;
-      await updateProfile(state.user, { displayName:name });
-      await updateDoc(doc(db,'users',state.user.uid),{ displayName:name, updatedAt: serverTimestamp() });
-      document.querySelector('#displayName')?.setAttribute('readonly','readonly');
-    }
+    /* Olaylar */
+    on("btnSignOut","click", async()=>{ try{ await signOut(auth); location.href = "auth.html?next=profile.html"; }catch(e){ alert("Çıkış hatası: "+(e?.message||e)); } });
+    on("btnResetPass","click", async()=>{ try{ if(!state.user?.email) return alert("E-posta bulunamadı."); await sendPasswordResetEmail(auth, state.user.email); alert("Sıfırlama e-postası gönderildi."); }catch(e){ alert(e?.message||e); } });
 
-    async function saveUsername(){
-      if(!state.canChangeUsername) return alert('Kullanıcı adını yalnızca 1 kez değiştirebilirsiniz.');
-      const raw = $('#username').value.trim();
-      const u = slugifyUsername(raw);
-      if(u.length<3) return alert('Kullanıcı adı en az 3 karakter olmalı.');
-      const unameRef = doc(db,'usernames', u);
-      const taken = await getDoc(unameRef);
-      if(taken.exists()) return alert('Bu kullanıcı adı alınmış.');
-
-      await setDoc(unameRef, { uid: state.user.uid, at: serverTimestamp() });
-      await updateDoc(doc(db,'users',state.user.uid), { username:u, canChangeUsername:false, updatedAt: serverTimestamp() });
-      state.profile.username = u; state.canChangeUsername=false;
-      document.querySelector('#username')?.setAttribute('disabled', 'disabled');
-      document.querySelector('#btnUsernameSave')?.setAttribute('disabled', 'disabled');
-      paintProfile();
-      alert('Kullanıcı adın güncellendi: @'+u);
-    }
-
-    async function uploadAvatar(file){
-      if(!file) return;
-      const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
-      const r = sRef(storage, `users/${state.user.uid}/avatar.${ext}`);
-      await uploadBytes(r, file);
-      const url = await getDownloadURL(r);
-      await updateProfile(state.user,{ photoURL:url });
-      await updateDoc(doc(db,'users',state.user.uid),{ photoURL:url, updatedAt: serverTimestamp() });
-      $('#avatar').src = url;
-    }
-
-    async function saveAll(){
-      try{
-        await saveDisplayName();
-        document.querySelector('#displayName')?.setAttribute('readonly','readonly');
-        alert('Kaydedildi.');
-      }catch(e){ console.error(e); alert('Kaydetme hatası: '+(e?.message||e)); }
-    }
-
-    /* ======================= Olaylar ======================= */
-    on("btnSignOut","click", async()=>{ 
-      try{ 
-        await signOut(auth); 
-        location.href = "auth.html?next=profile.html"; 
-      }catch(e){ 
-        alert("Çıkış hatası: "+(e?.message||e)); 
-      } 
-    });
-
-    on("btnResetPass","click", async()=>{ 
-      try{ 
-        if(!state.user?.email) return alert("E-posta bulunamadı."); 
-        await sendPasswordResetEmail(auth, state.user.email); 
-        alert("Sıfırlama e-postası gönderildi."); 
-      }catch(e){ 
-        alert(e?.message||e); 
-      } 
-    });
-
-    on("avatarInput","change", async(e)=>{ 
-      try{ 
-        const f=e.target?.files?.[0]; 
-        if(!f) return; 
-        if(!/^image\//.test(f.type)) return alert("Lütfen bir resim dosyası seçin."); 
-        await uploadAvatar(f); 
-        alert("Profil fotoğrafın güncellendi."); 
-      }catch(err){ 
-        console.error(err); 
-        alert("Yükleme hatası: "+(err?.message||err)); 
-      } 
-    });
-
-    on("btnUsernameSave","click", async()=>{ 
-      try{ 
-        await saveUsername(); 
-      }catch(err){ 
-        alert((err?.message)||err); 
-      } 
-    });
-
-    on("displayName","change", async()=>{ 
-      try{ 
-        await saveDisplayName(); 
-      }catch(e){ 
-        alert((e?.message)||e); 
-      } 
-    });
-
-    /* ======================= Başlat ======================= */
-    dbg('onAuthStateChanged bekleniyor…');
+    /* Başlat */
     onAuthStateChanged(auth, async(user)=>{
-      // UI elemanlarının durumunu görsel kontrol için küçük log
-      setTimeout(()=>{
-        const b=document.getElementById("btnUsernameSave");
-        const u=document.getElementById("username");
-        console.log("[profil] btnUsernameSave disabled=", b?b.disabled:null, "canChangeUsername=", state.canChangeUsername);
-        console.log("[profil] username input exists=", !!u, "disabled=", u?u.disabled:null);
-      }, 500);
-
-      if(!user){
-        dbg('Kullanıcı yok → auth.html sayfasına yönlendirme');
-        location.href = 'auth.html?next=profile.html';
-        return;
-      }
+      if(!user){ location.href = 'auth.html?next=profile.html'; return; }
       state.user = user;
-      dbg('Kullanıcı oturumda: '+(user.email||user.uid));
       const prof = await ensureUserDoc(user);
       state.profile = prof;
       paintProfile();
       try{ await loadListings(user.uid); }catch(e){ console.error('İlan çekme hatası', e); }
     });
-
-    /* ======================= Mini Testler (çalışma zamanı) ======================= */
-    function assertEq(name, actual, expected){
-      const ok = JSON.stringify(actual)===JSON.stringify(expected);
-      dbg((ok?'✅ ':'❌ ')+ name + ' -> '+ JSON.stringify(actual));
-      if(!ok){ console.error('Test failed:', name, 'expected', expected, 'got', actual); }
-    }
-    // Test 1: kullanıcı adı üretimi
-    assertEq('slugifyUsername', slugifyUsername('Xwyz.!__- 123'), 'xwyz__123');
-    // Test 2: e-posta local
-    assertEq('emailLocal', emailLocal('xwyz@gmail.com'), 'xwyz');
-    // Test 3: durum hesaplama
-    assertEq('byStatus-active', byStatus({status:'active',expiresAt:Date.now()+1_000_000}), 'active');
-    assertEq('byStatus-pending', byStatus({status:'pending'}), 'pending');
-    assertEq('byStatus-expired', byStatus({status:'active',expiresAt:Date.now()-1}), 'expired');
   </script>
 </body>
 </html>
