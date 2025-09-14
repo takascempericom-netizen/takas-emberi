@@ -1,388 +1,388 @@
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>İlan Ver • Takas Çemberi</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b0d12; --card:#10131b; --line:#1f2431; --fg:#e7ebf6;
-      --muted:#8b97b2; --brand:#ff3b3b; --ok:#12d179;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .wrap{max-width:900px;margin:0 auto;padding:16px 16px 110px}
-    h1{font-size:22px;margin:8px 0 14px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:760px){.grid{grid-template-columns:1fr}}
-    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-    select, input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
-    textarea{width:100%;min-height:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:#fff;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer}
-    .btn.ghost{background:transparent;border:1px solid var(--line)}
-    .hint{color:var(--muted);font-size:12px}
-    .nav{position:fixed;left:0;right:0;bottom:0;background:#0b0d12;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
-    .nav a{padding:12px 6px;text-align:center;text-decoration:none;color:var(--fg);font-weight:700}
-    .nav a span{display:block;font-size:11px;color:var(--muted)}
-    /* thumbnails */
-  .thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
-</style>
-  <script type="module" id="fbmods">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    const firebaseConfig = { apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg", authDomain:"ureten-eller-v2.firebaseapp.com", projectId:"ureten-eller-v2" };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    window.__fb = {app, auth, db, onAuthStateChanged, serverTimestamp};
-  </script>
-</head>
-<body>
-  <div class="wrap">
-    <h1>İlan Ver</h1>
-    <div class="card">
-      <div class="grid">
-        <div>
-          <label>Kategori</label>
-          <select id="cat">
-            <option value="" selected disabled>Seçiniz</option>
-            <option value="araclar">Araçlar</option>
-            <option value="giyim">Giyim</option>
-            <option value="teknoloji">Teknoloji</option>
-            <option value="evhobi">Ev & Hobi</option>
-            <option value="beyazesya">Beyaz Eşya</option>
-            <option value="mobilya">Mobilya</option>
-            <option value="oyuncak">Oyuncak</option>
-            <option value="tasınmaz">Taşınmaz</option>
-          </select>
-        </div>
-        <div>
-          <label>Alt Kategori</label>
-          <select id="subcat" disabled>
-            <option value="" selected>Önce kategori seçin</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Marka</label>
-          <select id="brand" disabled>
-            <option value="" selected>Önce alt kategori seçin</option>
-          </select>
-        </div>
-        <div>
-          <label>Model</label>
-          <select id="model" disabled>
-            <option value="" selected>Önce marka seçin</option>
-          </select>
-        </div>
-
-        <div>
-          <label>KM</label>
-          <select id="km">
-            <option value="" selected>Seçiniz</option>
-            <option value="0-10000">0–10.000</option>
-            <option value="10000-50000">10.000–50.000</option>
-            <option value="50000-100000">50.000–100.000</option>
-            <option value="100000-200000">100.000–200.000</option>
-            <option value="200000+">200.000+</option>
-          </select>
-        </div>
-        <div>
-          <label>Durum</label>
-          <select id="cond">
-            <option value="" selected>Seçiniz</option>
-            <option value="kotu">Kötü</option>
-            <option value="orta">Orta</option>
-            <option value="iyi">İyi</option>
-            <option value="cokiyi">Çok İyi</option>
-            <option value="sifir">Sıfır</option>
-          </select>
-        </div>
-
-        <div>
-          <label>İl</label>
-          <select id="il">
-            <option value="" selected>Seçiniz</option>
-            <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
-            <option>Bursa</option><option>Antalya</option><option>Konya</option>
-          </select>
-        </div>
-        <div>
-          <label>İlçe</label>
-          <select id="ilce" disabled>
-            <option value="" selected>Önce il seçin</option>
-          </select>
-        </div>
-
-        <div style="grid-column:1/-1">
-          <label>İlan Başlığı</label>
-          <input id="title" maxlength="80" placeholder="Örn: 2017 model, temiz, hatasız" />
-          <div class="hint">Max 80 karakter • Uygunsuz kelimeler engellenir</div>
-        </div>
-
-        <div style="grid-column:1/-1">
-          <label>Açıklama</label>
-          <textarea id="desc" maxlength="2000" placeholder="Ürününüzü detaylıca anlatın..."></textarea>
-        </div>
-
-        <div style="grid-column:1/-1" class="row">
-          <label class="btn ghost" style="cursor:pointer">
-            Fotoğraf Yükle
-            <input $1
-          <div id="previews" class="row" style="gap:8px;flex-wrap:wrap"></div>
-          <button id="btnPublish" class="btn">İlanı Yayınla</button>
-          <div class="hint">İlan önce <b>admin onayı</b> bekler. Onaylanınca herkes görebilir.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Alt gezinme (aynı stil) -->
-  <nav class="nav">
-    <a href="home.html"><div>🏠</div><span>Ana Sayfa</span></a>
-    <a href="messages.html"><div>💬</div><span>Mesajlar</span></a>
-    <a href="profile.html"><div>👤</div><span>Profil</span></a>
-  </nav>
-
-  <script>
-    // Dış JSON'ları yükle
-    let VEH=null, CITIES=null, DISTRICTS=null;
-    async function loadDatasets(){
-      const [v,c,d] = await Promise.all([
-        fetch('/assets/data/cars.json').then(r=>r.json()),
-        fetch('/assets/data/cities.json').then(r=>r.json()),
-        fetch('/assets/data/districts.json').then(r=>r.json())
-      ]);
-      VEH=v; CITIES=c; DISTRICTS=d;
-    }
-    const DATA={};
-
-
-    const $ = s=>document.querySelector(s);
-    const cat=$('#cat'), sub=$('#subcat'), brand=$('#brand'), model=$('#model');
-    const il=$('#il'), ilce=$('#ilce'), title=$('#title'), desc=$('#desc');
-
-    function fill(sel, arr, placeholder="Seçiniz"){
-      sel.innerHTML = `<option value="" selected>${placeholder}</option>` + (arr||[]).map(v=>`<option>${v}</option>`).join('');
-      sel.disabled = !arr || !arr.length;
-    }
-
-    cat.addEventListener('change', ()=>{
-      let subs=[];
-      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
-      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
-      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
-      else { subs=[]; }
-      fill(sub, subs, 'Alt kategori');
-      fill(brand, [], 'Önce alt kategori seçin');
-      fill(model, [], 'Önce marka seçin');
-    });
-
-    sub.addEventListener('change', ()=>{
-      if(cat.value==='araclar' && VEH){
-        const brands = VEH[sub.value] ? Object.keys(VEH[sub.value]) : [];
-        fill(brand, brands, 'Marka');
-      } else {
-        fill(brand, [], 'Marka');
-      }
-      fill(model, [], 'Önce marka seçin');
-    });
-
-    brand.addEventListener('change', ()=>{
-      if(cat.value==='araclar' && VEH){
-        const models = (VEH[sub.value] && VEH[sub.value][brand.value]) ? VEH[sub.value][brand.value] : [];
-        fill(model, models, 'Model');
-      } else {
-        fill(model, [], 'Model');
-      }
-    });
-
-    il.addEventListener('change', ()=>{
-      const arr = ILCE[il.value] || [];
-      fill(ilce, arr, "İlçe");
-    });
-
-    // Basit ön-kontrol (uygunsuz kelime kontrolünü sonra ekleyeceğiz)
-    function validate(){
-      const errs=[];
-      if(!cat.value) errs.push("Kategori");
-      if(!sub.value) errs.push("Alt kategori");
-      if(!brand.value) errs.push("Marka");
-      if(!model.value) errs.push("Model");
-      if(!il.value) errs.push("İl");
-      if(!ilce.value) errs.push("İlçe");
-      if(!title.value.trim() || title.value.trim().length<5) errs.push("Başlık (min 5)");
-      if(!desc.value.trim() || desc.value.trim().length<20) errs.push("Açıklama (min 20)");
-      if(errs.length){ alert("Lütfen eksikleri tamamlayın:\n- "+errs.join("\n- ")); return false; }
-      return true;
-    }
-
-    document.getElementById('btnPublish').addEventListener('click', ()=>{
-      if(!validate()) return;
-      // Şimdilik sadece ön-izleme/uyarı; bir sonraki adımda Firestore'a pending olarak yazacağız.
-      alert("Taslak hazır. Bir sonraki adımda admin onayı için kayda bağlayacağız.");
-      // Yönlendirme: profil sayfasında 'Onay Bekleyenler'de gözükecek şekilde bağlayacağız.
-    });
-  </script>
-<script>
-(function(){
-  var input = document.getElementById('photos');
-  if(!input) return;
-
-  function ensurePreviews() {
-    var previews = document.getElementById('previews');
-    if (!previews) {
-      previews = document.createElement('div');
-      previews.id = 'previews';
-      previews.className = 'row';
-      previews.style.gap = '8px';
-      previews.style.flexWrap = 'wrap';
-      var label = input.closest('label') || input.parentElement;
-      (label && label.parentNode ? label.parentNode : document.body).insertBefore(previews, (label ? label.nextSibling : null));
-    }
-    return previews;
-  }
-
-  // küçük stil
-  var css = document.createElement('style');
-  css.textContent = '.thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}';
-  document.head.appendChild(css);
-
-  input.addEventListener('change', function(){
-    var previews = ensurePreviews();
-    previews.innerHTML = '';
-    var files = Array.from(input.files || []).slice(0,5);
-    files.forEach(function(f){
-      var url = URL.createObjectURL(f);
-      var img = new Image();
-      img.src = url; img.className='thumb'; img.alt=f.name; img.title=f.name;
-      previews.appendChild(img);
-    });
-  });
-})();
-</script>
-<!-- DATASETS: il/ilçe + araç marka/model doldurma -->
-<script>
-(function(){
-  var il    = document.getElementById('il');
-  var ilce  = document.getElementById('ilce');
-  var cat   = document.getElementById('cat');
-  var sub   = document.getElementById('sub');
-  var brand = document.getElementById('brand');
-  var model = document.getElementById('model');
-
-  function fill(sel, arr, placeholder){
-    if(!sel) return;
-    sel.innerHTML='';
-    if(placeholder){
-      var p=document.createElement('option'); p.value=''; p.textContent=placeholder; sel.appendChild(p);
-    }
-    (arr||[]).forEach(function(v){
-      var op=document.createElement('option'); op.value=v; op.textContent=v; sel.appendChild(op);
-    });
-  }
-
-  var CITIES=null, DISTRICTS=null, VEH=null;
-
-  Promise.all([
-    fetch('/assets/data/cities.json').then(function(r){return r.json();}),
-    fetch('/assets/data/districts.json').then(function(r){return r.json();}),
-    fetch('/assets/data/cars.json').then(function(r){return r.json();})
-  ]).then(function(res){
-    CITIES=res[0]; DISTRICTS=res[1]; VEH=res[2];
-    if(Array.isArray(CITIES) && il){ fill(il, CITIES, 'İl'); }
-  }).catch(function(e){ console.warn('dataset load error', e); });
-
-  if(il && ilce){
-    il.addEventListener('change', function(){
-      var arr = (DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [];
-      fill(ilce, arr, 'İlçe');
-    });
-  }
-
-  if(cat && sub){
-    cat.addEventListener('change', function(){
-      var subs=[];
-      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
-      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
-      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
-      fill(sub, subs, 'Alt kategori');
-      fill(brand, [], 'Marka');
-      fill(model, [], 'Model');
-    });
-  }
-
-  if(sub && brand){
-    sub.addEventListener('change', function(){
-      var brands=[];
-      if(cat && cat.value==='araclar' && VEH && VEH[sub.value]){
-        brands = Object.keys(VEH[sub.value]);
-      }
-      fill(brand, brands, 'Marka');
-      fill(model, [], 'Model');
-    });
-  }
-
-  if(brand && model){
-    brand.addEventListener('change', function(){
-      var models=[];
-      if(cat && cat.value==='araclar' && VEH && VEH[sub.value] && VEH[sub.value][brand.value]){
-        models = VEH[sub.value][brand.value];
-      }
-      fill(model, models, 'Model');
-    });
-  }
-})();
-</script>
-<!-- PUBLISH: status=pending kaydet ve profile#pending -->
-<script>
-(function(){
-  var btn = document.getElementById('btnPublish');
-  if(!btn){ return; }
-
-  btn.addEventListener('click', function(e){
-    e.preventDefault();
-
-    if(!(window.__fb && window.__fb.db)){
-      alert('Sistem hazır değil. Lütfen sayfayı yenileyin.');
-      return;
-    }
-
-    var payload = {
-      title: (document.getElementById('title')||{}).value || '',
-      description: (document.getElementById('desc')||{}).value || '',
-      category: (document.getElementById('cat')||{}).value || '',
-      subcategory: (document.getElementById('sub')||{}).value || '',
-      brand: (document.getElementById('brand')||{}).value || '',
-      model: (document.getElementById('model')||{}).value || '',
-      km: (document.getElementById('km')||{}).value || '',
-      condition: (document.getElementById('cond')||{}).value || '',
-      city: (document.getElementById('il')||{}).value || '',
-      district: (document.getElementById('ilce')||{}).value || '',
-      status: 'pending',
-      createdAt: window.__fb.serverTimestamp(),
-      updatedAt: window.__fb.serverTimestamp()
-    };
-
-    window.__fb.onAuthStateChanged(window.__fb.auth, function(u){
-      if(!u){ alert('Devam etmek için giriş yapın.'); location.href='auth.html?next=ilan-ver.html'; return; }
-      payload.ownerId = u.uid;
-
-      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(function(m){
-        return m.addDoc(m.collection(window.__fb.db,'listings'), payload);
-      }).then(function(){
-        location.href = 'profile.html#pending';
-      }).catch(function(err){
-        alert('Kaydetme hatası: ' + (err && err.message ? err.message : err));
-      });
-    });
-  });
-})();
-</script>
-</body>
-</html>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<!doctype html>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<html lang="tr">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<head>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <meta charset="utf-8" />
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <meta name="viewport" content="width=device-width, initial-scale=1" />
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <title>İlan Ver • Takas Çemberi</title>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <style>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    :root{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      --bg:#0b0d12; --card:#10131b; --line:#1f2431; --fg:#e7ebf6;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      --muted:#8b97b2; --brand:#ff3b3b; --ok:#12d179;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    *{box-sizing:border-box}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .wrap{max-width:900px;margin:0 auto;padding:16px 16px 110px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    h1{font-size:22px;margin:8px 0 14px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    @media (max-width:760px){.grid{grid-template-columns:1fr}}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    select, input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    textarea{width:100%;min-height:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0c1016;color:var(--fg)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .row{display:flex;gap:12px;flex-wrap:wrap}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:#fff;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .btn.ghost{background:transparent;border:1px solid var(--line)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .hint{color:var(--muted);font-size:12px}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .nav{position:fixed;left:0;right:0;bottom:0;background:#0b0d12;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .nav a{padding:12px 6px;text-align:center;text-decoration:none;color:var(--fg);font-weight:700}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    .nav a span{display:block;font-size:11px;color:var(--muted)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    /* thumbnails */
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  .thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</style>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <script type="module" id="fbmods">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const firebaseConfig = { apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg", authDomain:"ureten-eller-v2.firebaseapp.com", projectId:"ureten-eller-v2" };
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const app = initializeApp(firebaseConfig);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const auth = getAuth(app);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const db = getFirestore(app);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    window.__fb = {app, auth, db, onAuthStateChanged, serverTimestamp};
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  </script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</head>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<body>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <div class="wrap">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    <h1>İlan Ver</h1>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    <div class="card">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      <div class="grid">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Kategori</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="cat">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected disabled>Seçiniz</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="araclar">Araçlar</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="giyim">Giyim</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="teknoloji">Teknoloji</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="evhobi">Ev & Hobi</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="beyazesya">Beyaz Eşya</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="mobilya">Mobilya</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="oyuncak">Oyuncak</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="tasınmaz">Taşınmaz</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Alt Kategori</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="subcat" disabled>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Önce kategori seçin</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Marka</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="brand" disabled>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Önce alt kategori seçin</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Model</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="model" disabled>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Önce marka seçin</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>KM</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="km">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Seçiniz</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="0-10000">0–10.000</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="10000-50000">10.000–50.000</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="50000-100000">50.000–100.000</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="100000-200000">100.000–200.000</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="200000+">200.000+</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Durum</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="cond">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Seçiniz</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="kotu">Kötü</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="orta">Orta</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="iyi">İyi</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="cokiyi">Çok İyi</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="sifir">Sıfır</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>İl</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="il">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Seçiniz</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option>Bursa</option><option>Antalya</option><option>Konya</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>İlçe</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <select id="ilce" disabled>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <option value="" selected>Önce il seçin</option>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          </select>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div style="grid-column:1/-1">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>İlan Başlığı</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <input id="title" maxlength="80" placeholder="Örn: 2017 model, temiz, hatasız" />
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <div class="hint">Max 80 karakter • Uygunsuz kelimeler engellenir</div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div style="grid-column:1/-1">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label>Açıklama</label>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <textarea id="desc" maxlength="2000" placeholder="Ürününüzü detaylıca anlatın..."></textarea>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        <div style="grid-column:1/-1" class="row">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <label class="btn ghost" style="cursor:pointer">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            Fotoğraf Yükle
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []            <input id="photos" type="file" accept="image/*" multiple hidden>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <div id="previews" class="row" style="gap:8px;flex-wrap:wrap"></div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <button id="btnPublish" class="btn">İlanı Yayınla</button>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []          <div class="hint">İlan önce <b>admin onayı</b> bekler. Onaylanınca herkes görebilir.</div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  </div>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <!-- Alt gezinme (aynı stil) -->
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <nav class="nav">
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    <a href="home.html"><div>🏠</div><span>Ana Sayfa</span></a>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    <a href="messages.html"><div>💬</div><span>Mesajlar</span></a>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    <a href="profile.html"><div>👤</div><span>Profil</span></a>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  </nav>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  <script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    // Dış JSON'ları yükle
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    let VEH=null, CITIES=null, DISTRICTS=null;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    async function loadDatasets(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      const [v,c,d] = await Promise.all([
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fetch('/assets/data/cars.json').then(r=>r.json()),
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fetch('/assets/data/cities.json').then(r=>r.json()),
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fetch('/assets/data/districts.json').then(r=>r.json())
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      ]);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      VEH=v; CITIES=c; DISTRICTS=d;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const DATA={};
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const $ = s=>document.querySelector(s);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const cat=$('#cat'), sub=$('#subcat'), brand=$('#brand'), model=$('#model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    const il=$('#il'), ilce=$('#ilce'), title=$('#title'), desc=$('#desc');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    function fill(sel, arr, placeholder="Seçiniz"){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      sel.innerHTML = `<option value="" selected>${placeholder}</option>` + (arr||[]).map(v=>`<option>${v}</option>`).join('');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      sel.disabled = !arr || !arr.length;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    cat.addEventListener('change', ()=>{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      let subs=[];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      else { subs=[]; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(sub, subs, 'Alt kategori');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(brand, [], 'Önce alt kategori seçin');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(model, [], 'Önce marka seçin');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    sub.addEventListener('change', ()=>{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat.value==='araclar' && VEH){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        const brands = VEH[sub.value] ? Object.keys(VEH[sub.value]) : [];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fill(brand, brands, 'Marka');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      } else {
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fill(brand, [], 'Marka');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(model, [], 'Önce marka seçin');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    brand.addEventListener('change', ()=>{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat.value==='araclar' && VEH){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        const models = (VEH[sub.value] && VEH[sub.value][brand.value]) ? VEH[sub.value][brand.value] : [];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fill(model, models, 'Model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      } else {
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        fill(model, [], 'Model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    il.addEventListener('change', ()=>{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      const arr = ILCE[il.value] || [];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(ilce, arr, "İlçe");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    // Basit ön-kontrol (uygunsuz kelime kontrolünü sonra ekleyeceğiz)
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    function validate(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      const errs=[];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!cat.value) errs.push("Kategori");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!sub.value) errs.push("Alt kategori");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!brand.value) errs.push("Marka");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!model.value) errs.push("Model");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!il.value) errs.push("İl");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!ilce.value) errs.push("İlçe");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!title.value.trim() || title.value.trim().length<5) errs.push("Başlık (min 5)");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!desc.value.trim() || desc.value.trim().length<20) errs.push("Açıklama (min 20)");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(errs.length){ alert("Lütfen eksikleri tamamlayın:\n- "+errs.join("\n- ")); return false; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      return true;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    document.getElementById('btnPublish').addEventListener('click', ()=>{
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!validate()) return;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      // Şimdilik sadece ön-izleme/uyarı; bir sonraki adımda Firestore'a pending olarak yazacağız.
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      alert("Taslak hazır. Bir sonraki adımda admin onayı için kayda bağlayacağız.");
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      // Yönlendirme: profil sayfasında 'Onay Bekleyenler'de gözükecek şekilde bağlayacağız.
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  </script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [](function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var input = document.getElementById('photos');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(!input) return;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  function ensurePreviews() {
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    var previews = document.getElementById('previews');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    if (!previews) {
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews = document.createElement('div');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews.id = 'previews';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews.className = 'row';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews.style.gap = '8px';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews.style.flexWrap = 'wrap';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var label = input.closest('label') || input.parentElement;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      (label && label.parentNode ? label.parentNode : document.body).insertBefore(previews, (label ? label.nextSibling : null));
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    return previews;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  // küçük stil
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var css = document.createElement('style');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  css.textContent = '.thumb{width:86px;height:86px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  document.head.appendChild(css);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  input.addEventListener('change', function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    var previews = ensurePreviews();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    previews.innerHTML = '';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    var files = Array.from(input.files || []).slice(0,5);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    files.forEach(function(f){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var url = URL.createObjectURL(f);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var img = new Image();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      img.src = url; img.className='thumb'; img.alt=f.name; img.title=f.name;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      previews.appendChild(img);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []})();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<!-- DATASETS: il/ilçe + araç marka/model doldurma -->
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [](function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var il    = document.getElementById('il');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var ilce  = document.getElementById('ilce');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var cat   = document.getElementById('cat');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var sub   = document.getElementById('subcat');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var brand = document.getElementById('brand');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var model = document.getElementById('model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  function fill(sel, arr, placeholder){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    if(!sel) return;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    sel.innerHTML='';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    if(placeholder){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var p=document.createElement('option'); p.value=''; p.textContent=placeholder; sel.appendChild(p);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    (arr||[]).forEach(function(v){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var op=document.createElement('option'); op.value=v; op.textContent=v; sel.appendChild(op);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var CITIES=null, DISTRICTS=null, VEH=null;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  Promise.all([
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    fetch('/assets/data/cities.json').then(function(r){return r.json();}),
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    fetch('/assets/data/districts.json').then(function(r){return r.json();}),
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    fetch('/assets/data/cars.json').then(function(r){return r.json();})
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  ]).then(function(res){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    CITIES=res[0]; DISTRICTS=res[1]; VEH=res[2];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    if(Array.isArray(CITIES) && il){ fill(il, CITIES, 'İl'); }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }).catch(function(e){ console.warn('dataset load error', e); });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(il && ilce){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    il.addEventListener('change', function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var arr = (DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(ilce, arr, 'İlçe');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(cat && sub){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    cat.addEventListener('change', function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var subs=[];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat.value==='araclar'){ subs=['Araba','Motor','Yedek Parça']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      else if(cat.value==='giyim'){ subs=['Kadın','Erkek','Çocuk']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      else if(cat.value==='teknoloji'){ subs=['Bilgisayar','Telefon','Aksesuar']; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(sub, subs, 'Alt kategori');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(brand, [], 'Marka');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(model, [], 'Model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(sub && brand){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    sub.addEventListener('change', function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var brands=[];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat && cat.value==='araclar' && VEH && VEH[sub.value]){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        brands = Object.keys(VEH[sub.value]);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(brand, brands, 'Marka');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(model, [], 'Model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(brand && model){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    brand.addEventListener('change', function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      var models=[];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(cat && cat.value==='araclar' && VEH && VEH[sub.value] && VEH[sub.value][brand.value]){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        models = VEH[sub.value][brand.value];
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      fill(model, models, 'Model');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []})();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<!-- PUBLISH: status=pending kaydet ve profile#pending -->
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []<script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : [](function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  var btn = document.getElementById('btnPublish');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  if(!btn){ return; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  btn.addEventListener('click', function(e){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    e.preventDefault();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    if(!(window.__fb && window.__fb.db)){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      alert('Sistem hazır değil. Lütfen sayfayı yenileyin.');
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      return;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    var payload = {
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      title: (document.getElementById('title')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      description: (document.getElementById('desc')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      category: (document.getElementById('cat')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      subcategory: (document.getElementById('subcat')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      brand: (document.getElementById('brand')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      model: (document.getElementById('model')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      km: (document.getElementById('km')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      condition: (document.getElementById('cond')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      city: (document.getElementById('il')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      district: (document.getElementById('ilce')||{}).value || '',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      status: 'pending',
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      createdAt: window.__fb.serverTimestamp(),
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      updatedAt: window.__fb.serverTimestamp()
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    };
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    window.__fb.onAuthStateChanged(window.__fb.auth, function(u){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      if(!u){ alert('Devam etmek için giriş yapın.'); location.href='auth.html?next=ilan-ver.html'; return; }
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      payload.ownerId = u.uid;
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(function(m){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        return m.addDoc(m.collection(window.__fb.db,'listings'), payload);
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }).then(function(){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        location.href = 'profile.html#pending';
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      }).catch(function(err){
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []        alert('Kaydetme hatası: ' + (err && err.message ? err.message : err));
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []      });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []    });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []  });
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []})();
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</script>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</body>
+(DISTRICTS && DISTRICTS[il.value]) ? DISTRICTS[il.value] : []</html>
