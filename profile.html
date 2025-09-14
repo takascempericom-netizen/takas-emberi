@@ -81,6 +81,78 @@
     .hint{color:var(--muted);font-size:13px}
     .sep{height:1px;background:var(--line);margin:12px 0}
     .right{margin-left:auto}
+/* Profil kartına renkli animasyon */
+.card {
+  position: relative;
+  border-radius: 18px;
+  padding: 16px;
+  overflow: hidden;
+  background: #10131b; /* fallback */
+  border: 2px solid transparent;
+  background-image: linear-gradient(#10131b, #10131b),
+    linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  animation: borderRotate 6s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  }
+  100% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #a371f7, #1f6feb, #ff7a00, #ff3b3b);
+  }
+}
+/* Profil kartına renkli animasyon */
+.card {
+  position: relative;
+  border-radius: 18px;
+  padding: 16px;
+  overflow: hidden;
+  background: #10131b; /* fallback */
+  border: 2px solid transparent;
+  background-image: linear-gradient(#10131b, #10131b),
+    linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  animation: borderRotate 6s linear infinite;
+}
+@keyframes borderRotate {
+  0% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  }
+  100% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #a371f7, #1f6feb, #ff7a00, #ff3b3b);
+  }
+}
+/* Avatar için renkli animasyon */
+.avatar {
+  position: relative;
+  border-radius: 50%;
+  padding: 4px;
+  background: #10131b;
+  border: 2px solid transparent;
+  background-image: linear-gradient(#10131b, #10131b),
+    linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  animation: avatarBorderRotate 6s linear infinite;
+}
+@keyframes avatarBorderRotate {
+  0% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #ff3b3b, #ff7a00, #1f6feb, #a371f7);
+  }
+  100% {
+    background-image: linear-gradient(#10131b, #10131b),
+      linear-gradient(270deg, #a371f7, #1f6feb, #ff7a00, #ff3b3b);
+  }
+}
   </style>
 
   <!-- Renkli baş-harf avatarı: her kullanıcıya sabit ama farklı renk -->
