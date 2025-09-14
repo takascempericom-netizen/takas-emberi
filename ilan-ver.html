@@ -67,6 +67,12 @@
   .btn:disabled{opacity:.6; cursor:not-allowed}
 
   .hidden{display:none !important}
+/* Arka plan: profile.html tarzı renk geçişi */
+ bgCycle {0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+body {background: linear-gradient(270deg,#12d179,#00c4ff,#7c4dff,#ff66b3); background-size:400% 400%; animation:bgCycle 12s ease infinite; margin:0; font-family:Inter,system-ui,sans-serif;}
+
+/* Pano (form kartı): sabit açık renk */
+.card {background:#ffffffee; border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.15);} 
 </style>
 </head>
 <body>
