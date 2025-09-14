@@ -363,13 +363,11 @@ function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEv
     }
 
     async function saveAll(){
-      $('#btnSaveAll').disabled = true;
       try{
         await saveDisplayName();
   document.querySelector('#displayName').setAttribute('readonly','readonly');
         alert('Kaydedildi.');
       }catch(e){ console.error(e); alert('Kaydetme hatası: '+e.message) }
-      $('#btnSaveAll').disabled = false;
     }
 
     /* ======================= Olaylar ======================= */
