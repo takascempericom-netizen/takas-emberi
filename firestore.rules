@@ -25,20 +25,18 @@ service cloud.firestore {
                     && !exists(/databases/$(database)/documents/usernames/$(uname))
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.at is timestamp
-                    // format: 3-20, a-z0-9_ (küçük)
                     && uname.matches('^[a-z0-9_]{3,20}$');
       allow update, delete: if false;
     }
 
     // ---- listings/{id}
-    // Şema kontrolü: beklenen alanlar ve immutable alanlar
     function allowedListingKeys() {
       return [
         'ownerId','status','createdAt',
         'title','desc','category','subcategory',
-        'brand','model','year','km',
+        'brand','model','year','km','price',
         'condition','city','district',
-        'images','updatedAt'
+        'images','coverUrl','updatedAt','expiresAt'
       ];
     }
     function onlyAllowedKeys(newData) {
@@ -46,12 +44,12 @@ service cloud.firestore {
     }
 
     match /listings/{id} {
-      // Görünürlük: aktif olanlar herkese; sahibi veya admin her hâlükârda
+      // Okuma: aktif herkese; sahibi veya admin her halde
       allow read: if resource.data.status == 'active'
                   || (isSignedIn() && resource.data.ownerId == request.auth.uid)
                   || isAdmin();
 
-      // Oluşturma: sadece sahibi; status= pending; createdAt timestamp
+      // Oluşturma: sadece sahibi; status=pending; createdAt timestamp
       allow create: if isSignedIn()
                     && request.resource.data.ownerId == request.auth.uid
                     && request.resource.data.status == 'pending'
@@ -59,12 +57,11 @@ service cloud.firestore {
                     && onlyAllowedKeys(request.resource.data);
 
       // Güncelleme:
-      // - Sahibi: içerik alanlarını düzenleyebilir; ownerId/createdAt/status DOKUNAMAZ
-      // - Admin: status dahil her şeyi düzenleyebilir ama ownerId/createdAt yine değişemez
+      // - Sahibi: status/ownerId/createdAt değiştiremez
+      // - Admin: status dahil düzenleyebilir; ownerId/createdAt yine değişmez
       allow update: if (
                         (
                           isSignedIn() && resource.data.ownerId == request.auth.uid
-                          // owner -> status, ownerId, createdAt sabit
                           && request.resource.data.ownerId == resource.data.ownerId
                           && request.resource.data.createdAt == resource.data.createdAt
                           && request.resource.data.status == resource.data.status
@@ -72,15 +69,39 @@ service cloud.firestore {
                         ||
                         (
                           isAdmin()
-                          // admin de ownerId/createdAt'i değiştiremez
                           && request.resource.data.ownerId == resource.data.ownerId
                           && request.resource.data.createdAt == resource.data.createdAt
                         )
                       )
                       && onlyAllowedKeys(request.resource.data);
 
-      // Silme: sahibi veya admin
+      // Silme
       allow delete: if (isSignedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
+
+      // ---- offers (alt koleksiyon)
+      match /offers/{offerId} {
+        function listingOwner() {
+          return get(/databases/$(database)/documents/listings/$(id)).data.ownerId;
+        }
+
+        // Okuma: sadece satıcı (owner) veya alıcı (buyer) ya da admin
+        allow read: if (isSignedIn() && (
+                          resource.data.sellerId == request.auth.uid ||
+                          resource.data.buyerId == request.auth.uid
+                        )) || isAdmin();
+
+        // Oluşturma: girişli kullanıcı, kendi ilanına değil; alan doğrulamaları
+        allow create: if isSignedIn()
+                      && listingOwner() != request.auth.uid
+                      && request.resource.data.sellerId == listingOwner()
+                      && request.resource.data.buyerId == request.auth.uid
+                      && request.resource.data.buyerId != request.resource.data.sellerId
+                      && request.resource.data.listingId == id
+                      && request.resource.data.createdAt is timestamp;
+
+        // Güncelleme/Silme: şimdilik sadece admin
+        allow update, delete: if isAdmin();
+      }
     }
   }
 }
