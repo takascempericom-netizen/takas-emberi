@@ -217,7 +217,8 @@
 
     const app = initializeApp(firebaseConfig);
     const dbgEl = document.getElementById('dbg');
-    const dbg = (m)=>{ if(dbgEl){ dbgEl.style.display='block'; dbgEl.textContent += (dbgEl.textContent ? "\n" : "") + m; } console.log('[profil]', m); };
+    const DBG=false;
+const dbg=(m)=>{if(!DBG)return; if(dbgEl){dbgEl.style.display="block"; dbgEl.textContent += (dbgEl.textContent ? "\n" : "") + m;} console.log("[profil]",m);};
     window.addEventListener('error', (e)=>{ dbg('Hata: '+ (e && e.message ? e.message : e)); });
     dbg('Firebase başlatıldı.');
     const auth = getAuth(app);
