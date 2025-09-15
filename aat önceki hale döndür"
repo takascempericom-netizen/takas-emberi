@@ -1,0 +1,33 @@
+[33ma0c1739[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix(admin/home): Bildirimler dropdown tetikleyici + notify-bell import
+[33m7f4e5b3[m feat(admin): bildirim zili dropdown (overlay) + nav tetikleyici
+[33me56ece6[m revert(admin): eski admin panel görünümü (from admin.html.bak.1757889128)
+[33m4b29f8f[m dev(rules): signed-in read override (TEMP)
+[33m3a9a657[m fix(notify): notify-bell.js yeniden yazıldı; home yol düzeltildi; rules: chats read=any signed-in + notifications CG read (geçici)
+[33me1cffa2[m revert(admin): canlı sohbet admin overlay kaldırıldı; admin sayfaları eski hâline döndü
+[33med7ae45[m fix(home): 'İlan Ekle' butonu ve mobil kısayol ilan-ver.html panelini açıyor
+[33m477f3dd[m fix(chat): inline override — otomatik karşılama, 1-2. otomatik cevap, kapatınca sıfırla, zil sesi
+[33md84a477[m fix(nav): 'İlan Ekle' tüm referansları profile.html#pending'e yönlendirildi
+[33md4a5e94[m fix(chat): bağımsız bağlayıcı + ping; script yolları göreli
+[33mf9bb4c8[m feat(notifications): nav butonunun altında açılan dropdown (anchor mode) eklendi
+[33m90ffba1[m feat(chat): canlı destek balonu — otomatik karşılama, 2. yanıt ve aktarım mesajı; ses uyarısı; chats kuralları
+[33m14d5e83[m fix(nav): data-logout linklerinden 'nav-bildir' sınıfını kaldır
+[33mfbfc4c6[m fix(nav): kalan notifications.html linklerini dropdown tetikleyiciye çevirdik
+[33m3f3c3ab[m chore: remove notifications.html; feat(ui): yeni bildirim satırı sarı vurgu & okundu mantığı
+[33m175161e[m fix(notifications): Bildirimler linki sayfa yerine dropdown açsın; notify-bell toggle event
+[33m622b4e1[m sec(listings): aktif ilanlar için expiresAt > now koşulu (kamuya görünürlük)
+[33m52a28a5[m feat(ui): 🔔 bildirim zili admin & ilan-ver sayfalarına da eklendi
+[33md99f445[m fix(nav): remove nested anchors around 'İlan Ekle' button
+[33mefd9105[m chore(nav): 'İlan Ekle' -> profile#pending, 'Profil' -> home (home.html içinde)
+[33m62e9f85[m feat(ui): 🔔 bildirim zili + dropdown; bildirimler.js → tc:notify event; home/profile entegrasyonu
+[33mda7c33e[m feat(home): feed updatedAt-first sorting and expiresAt filter
+[33m37ff79c[m feat(admin): onay paneli eklendi (approve/reject → updatedAt; +30gün expiresAt)
+[33mdafbdde[m fix(ilan-ver): createdAt ISO yerine serverTimestamp() — kurallarla uyumlu
+[33mca68903[m fix(ilan-ver): oluşturma sonrası otomatik profile#pending yönlendirme (pending bekleme akışı)
+[33m69da202[m feat(expiry): onayda expiresAt=+30gün; home feed expired ilanları gizler
+[33m8ece29b[m feat(admin+feed): onay paneli eklendi; home akış sıralaması updatedAt>createdAt; rules allowed keys +price
+[33mff994d1[m fix(home-feed): template literal kaynaklı syntax hatası giderildi; offers oluşturma sadeleştirildi
+[33mea00fc8[m feat(notifications): Bildirimler sayfası eklendi + menü linkleri notifications.html'e yönlendirildi
+[33mc36c8ff[m feat(home): Paylaşılan İlanlar — mobil 1 / masaüstü 4 sütun + boş durum + Teklif ver akışı
+[33m522ead4[m chore(firestore): mevcut listings indekslerini ve offers CG indeksini dosyaya ekle
+[33md7c3086[m feat(home): Paylaşılan İlanlar — mobil 1 kolon / masaüstü 4 kolon, boş mesaj otomatik gizleniyor
+[33m4eeea2e[m feat(home): Yayındaki ilanlar ana bölüm — geniş grid ve büyük kartlarla
