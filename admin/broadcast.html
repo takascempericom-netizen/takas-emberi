@@ -1,0 +1,20 @@
+<!doctype html><html lang="tr"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin • Duyuru/Bildiri</title>
+<link rel="stylesheet" href="css/admin.css">
+</head><body>
+<div class="top"><h1>Duyuru & Bildiri</h1><a class="btn" href="home.html">← Admin Ana</a></div>
+<div class="wrap">
+  <div class="card">
+    <h3>Yeni Bildiri / Ticker</h3>
+    <form id="broadcast-form" style="display:flex;gap:8px;flex-wrap:wrap">
+      <input name="icon" placeholder="ikon (örn: 🚨, 🔔, 📣)" style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0f1420;color:var(--fg);width:160px">
+      <input name="message" placeholder="mesaj" style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0f1420;color:var(--fg)">
+      <input name="expires" type="datetime-local" style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0f1420;color:var(--fg)">
+      <button class="btn approve" type="submit">Yayınla</button>
+    </form>
+    <p class="muted" style="margin-top:8px">Yayınla → /announcements ve /public koleksiyonlarına kaydeder. Üstte kayan yazı ve zil sayacı güncellenir.</p>
+  </div>
+</div>
+<script src="js/broadcast.js"></script>
+</body></html>

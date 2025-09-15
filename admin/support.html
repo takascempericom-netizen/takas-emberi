@@ -1,0 +1,20 @@
+<!doctype html><html lang="tr"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin • Canlı Destek</title>
+<link rel="stylesheet" href="css/admin.css">
+</head><body>
+<div class="top"><h1>Canlı Destek (Admin)</h1><a class="btn" href="home.html">← Admin Ana</a></div>
+<div class="wrap">
+  <div class="card">
+    <h3>Sohbet (kullanıcı → admin)</h3>
+    <p class="muted">Bir kullanıcı UID gir; mesaj gönder/al.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <input id="uid" placeholder="kullanıcı UID" style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0f1420;color:var(--fg)">
+      <input id="msg" placeholder="mesaj yaz..." style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#0f1420;color:var(--fg)">
+      <button id="send" class="btn">Gönder</button>
+    </div>
+    <div id="log" style="max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px;background:#0f1420"></div>
+  </div>
+</div>
+<script src="js/support.js"></script>
+</body></html>
