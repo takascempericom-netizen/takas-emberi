@@ -120,6 +120,13 @@ service cloud.firestore {
                         )) || isAdmin();
       }
 
+    // ==== DEV OVERRIDE (TEMPORARY) ====
+    // Giriş yapmış herkes tüm dökümanları okuyabilir.
+    // Yazma/silme sadece admin.
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
   }
 
 // ==== chats (canlı destek)
@@ -135,6 +142,14 @@ match /chats/{uid} {
     allow delete: if isSignedIn() && (isOwner(uid) || isAdmin());
     allow update: if false;
   }
+    // ==== DEV OVERRIDE (TEMP) ====
+    // Giriş yapmış herkes tüm koleksiyonları okuyabilir.
+    // Yazma/silme sadece admin.
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
 }
 
 }
