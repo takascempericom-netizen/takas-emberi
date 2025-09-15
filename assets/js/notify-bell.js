@@ -71,6 +71,8 @@
     addItem(d.message || 'Yeni bildirim', d.at);
   }, {passive:true});
 
+  window.addEventListener("tc:bell:toggle", ()=>btn.click(), {passive:true});
+
   // Sayfa yüklendiğinde çiz
   render();
 })();
