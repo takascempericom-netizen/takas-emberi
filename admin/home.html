@@ -1,488 +1,124 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Takas Çemberi • Admin Panel</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#0b1324; --card:#0f1a33; --ring:#1f2a44; --txt:#e8ecf8; --muted:#9aa4bf;
-  --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --pri:#3b82f6;
-}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;color:var(--txt);background:linear-gradient(135deg,#0b1324,#102048)}
-.wrap{max-width:1220px;margin:0 auto;padding:16px}
-.top{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0}
-.brand{display:flex;gap:10px;align-items:center}
-.logo{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#13244e;border:1px solid #244173;font-weight:900}
-.userbar{display:flex;gap:8px;align-items:center}
-.btn{padding:9px 12px;border-radius:10px;border:1px solid var(--ring);background:#0e1838;color:#fff;font-weight:800;cursor:pointer}
-.btn.ok{background:linear-gradient(90deg,#10b981,#34d399);border:0}
-.btn.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24);border:0;color:#111}
-.btn.err{background:linear-gradient(90deg,#ef4444,#f87171);border:0}
-.btn.pri{background:linear-gradient(90deg,#2563eb,#3b82f6);border:0}
-.grid{display:grid;grid-template-columns:260px 1fr;gap:16px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:rgba(15,26,51,.9);border:1px solid var(--ring);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);overflow:hidden}
-.card .hd{padding:12px 14px;border-bottom:1px solid var(--ring);font-weight:800;background:#101b39}
-.card .bd{padding:12px 14px}
-.nav a{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;color:var(--txt);text-decoration:none;border:1px solid transparent}
-.nav a.active{background:#122048;border-color:#223463}
-.nav a:hover{background:#0e1a36;border-color:#1a2b5a}
-.list{display:grid;gap:10px}
-.item{border:1px solid var(--ring);border-radius:12px;padding:10px;background:#0b152f}
-.item .t{display:flex;justify-content:space-between;gap:10px;font-weight:700}
-.item .m{margin-top:6px;color:var(--muted);font-size:14px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media (max-width:720px){.row,.row3{grid-template-columns:1fr}}
-.kv{display:flex;gap:6px;flex-wrap:wrap;color:#c8d2f1;font-size:12px}
-.kv b{color:#fff}
-.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--ring);background:#0e1838}
-.inp, textarea, select{width:100%;padding:10px;border-radius:10px;border:1px solid #25365f;background:#0b152f;color:var(--txt);outline:none}
-textarea{min-height:90px;resize:vertical}
-.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.right{margin-left:auto}
-.hr{height:1px;background:var(--ring);margin:10px 0}
-.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
-.small{font-size:12px;color:var(--muted)}
-.tabname{font-weight:800}
-.empty{color:var(--muted);font-style:italic}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin • Takas Çemberi</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee;
+      --bg:#fafbff; --card:#ffffff; --red:#e10600; --green:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+    .top h1{margin:0;font-size:18px}
+    .wrap{max-width:1100px;margin:18px auto;padding:0 12px}
+    .tabs{display:flex;gap:8px;margin:12px 0 16px}
+    .tab{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:600}
+    .tab.active{border-color:#cbd5e1;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0 16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+    .card h3{margin:0 0 4px;font-size:14px;color:#374151}
+    .card .val{font-size:24px;font-weight:800}
+    .tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    .tbl th{background:#f8fafc;font-size:12px;color:#475569}
+    .tbl tr:last-child td{border-bottom:0}
+    .row-actions{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:700}
+    .btn.approve{background:#e6f6ff;border-color:#bae6fd}
+    .btn.reject{background:#fff0f0;border-color:#fecaca}
+    .muted{color:var(--muted);font-size:13px}
+    @media(max-width:860px){ .cards{grid-template-columns:1fr} .tab{flex:1;text-align:center} }
+    .footer-note{margin:14px 2px 4px;font-size:12px;color:#64748b}
+  </style>
 </head>
 <body>
-<div class="wrap">
   <div class="top">
-    <div class="brand"><span class="logo">TC</span> <b>Admin Panel</b></div>
-    <div class="userbar">
-      <span id="adminMail" class="small"></span>
-      <button id="btnSignOut" class="btn err">Çıkış</button>
+    <h1>Admin Paneli</h1>
+    <!-- Güvenli bildirim stub (class/import yok) -->
+    <script src="js/notify-bell.js?v=<?=Date.now?>"></script>
+  </div>
+
+  <div class="wrap">
+    <div class="cards">
+      <div class="card"><h3>Toplam İlan</h3><div class="val" id="m_total">—</div></div>
+      <div class="card"><h3>Onay Bekleyen</h3><div class="val" id="m_pending">—</div></div>
+      <div class="card"><h3>Süresi Dolan</h3><div class="val" id="m_expired">—</div></div>
     </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="pending">Onay Bekleyenler</button>
+      <button class="tab" data-tab="active">Yayındakiler</button>
+      <button class="tab" data-tab="expired">Süresi Dolanlar</button>
+    </div>
+
+    <div id="view-pending">
+      <table class="tbl" id="tbl_pending">
+        <thead><tr><th>Başlık</th><th>Sahip</th><th>Detay</th><th>Aksiyon</th></tr></thead>
+        <tbody><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div id="view-active" style="display:none">
+      <table class="tbl" id="tbl_active">
+        <thead><tr><th>Başlık</th><th>Sahip</th><th>Fiyat</th><th>İşlem</th></tr></thead>
+        <tbody><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div id="view-expired" style="display:none">
+      <table class="tbl" id="tbl_expired">
+        <thead><tr><th>Başlık</th><th>Sahip</th><th>Bitiş</th><th>İşlem</th></tr></thead>
+        <tbody><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="footer-note">Bu sayfa sadeleştirildi: çakışan bildirim/mesaj scriptleri kaldırıldı.</div>
   </div>
 
-  <div class="grid">
-    <!-- SOL MENÜ -->
-    <aside class="card">
-      <div class="hd">Menü</div>
-      <nav class="bd nav" id="nav">
-        <a href="#ilanlar" data-tab="ilanlar" class="active">📦 İlanlar</a>
-        <a href="#bildirim" data-tab="bildirim">📣 Bildirim</a>
-        <a href="#kullanicilar" data-tab="kullanicilar">👥 Kullanıcılar</a>
-        <a href="#uyari" data-tab="uyari">⚠️ Uyarı Bandı</a>
-        <a href="#sikayet" data-tab="sikayet">🚩 Şikayetler</a>
-        <a href="#mesaj" data-tab="mesaj">💬 Mesajlar</a>
-      </nav>
-    </aside>
+  <!-- Admin hata sönümleyici -->
+  <script src="js/admin-safe.js"></script>
 
-    <!-- SAĞ İÇERİK -->
-    <main class="card">
-      <div class="hd"><span class="tabname" id="tabTitle">📦 İlanlar</span></div>
-      <div class="bd" id="panes">
-        <!-- İLANLAR -->
-        <section data-pane="ilanlar">
-          <div class="flex">
-            <div class="badge">Durumlar: <b>onay bekleyen</b> / <b>aktif</b></div>
-            <button id="refreshListings" class="btn">Yenile</button>
-          </div>
-          <div class="row">
-            <div>
-              <h3>Onay Bekleyen</h3>
-              <div id="pendingList" class="list"></div>
-              <div id="pendingEmpty" class="empty">Bekleyen ilan yok.</div>
-            </div>
-            <div>
-              <h3>Aktif İlanlar</h3>
-              <div id="activeList" class="list"></div>
-              <div id="activeEmpty" class="empty">Aktif ilan yok.</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- BİLDİRİM -->
-        <section data-pane="bildirim" hidden>
-          <div class="row">
-            <div class="card" style="border:none">
-              <div class="hd">Yeni Bildirim Gönder</div>
-              <div class="bd">
-                <label>Başlık <input id="bc_title" class="inp" placeholder="Duyuru başlığı"></label>
-                <label>Mesaj <textarea id="bc_body" placeholder="Kısa açıklama"></textarea></label>
-                <div class="flex">
-                  <button id="btnBroadcast" class="btn pri">Tüm kullanıcılara gönder</button>
-                  <span class="small">Kullanıcı uygulamasında “bildirim kutucuğu”nda görünür.</span>
-                </div>
-              </div>
-            </div>
-            <div class="card" style="border:none">
-              <div class="hd">Son Gönderiler</div>
-              <div class="bd">
-                <div id="bc_list" class="list"></div>
-                <div id="bc_empty" class="empty">Henüz bildirim yok.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- KULLANICILAR -->
-        <section data-pane="kullanicilar" hidden>
-          <div class="flex">
-            <input id="u_query" class="inp" placeholder="kullanıcı adı ara…">
-            <button id="u_search" class="btn">Ara</button>
-          </div>
-          <div id="u_results" class="list" style="margin-top:10px"></div>
-          <div id="u_empty" class="empty">Aramak için kullanıcı adı yazın.</div>
-        </section>
-
-        <!-- UYARI BANDI -->
-        <section data-pane="uyari" hidden>
-          <div class="row3">
-            <label>Emoji/İkon <input id="al_emoji" class="inp" placeholder="örn: ⚠️"></label>
-            <label>Hız (px/sn) <input id="al_speed" class="inp" type="number" value="80"></label>
-            <label>Aktif mi?
-              <select id="al_enabled" class="inp">
-                <option value="true">Evet</option>
-                <option value="false">Hayır</option>
-              </select>
-            </label>
-          </div>
-          <label>Metin <textarea id="al_text" placeholder="Ekranın üstünden sağdan sola akacak uyarı"></textarea></label>
-          <div class="flex">
-            <button id="al_save" class="btn pri">Kaydet</button>
-            <span class="small">Kullanıcı sitesi bu ayarı dinlediğinde bant otomatik görünür.</span>
-          </div>
-        </section>
-
-        <!-- ŞİKAYETLER -->
-        <section data-pane="sikayet" hidden>
-          <div class="flex">
-            <div class="badge">Yeni gelenler en üstte</div>
-            <button id="rp_refresh" class="btn">Yenile</button>
-          </div>
-          <div id="rp_list" class="list" style="margin-top:10px"></div>
-          <div id="rp_empty" class="empty">Şikayet yok.</div>
-        </section>
-
-        <!-- MESAJLAR -->
-        <section data-pane="mesaj" hidden>
-          <div class="row">
-            <div>
-              <h3>Konular</h3>
-              <div id="th_list" class="list"></div>
-              <div id="th_empty" class="empty">Henüz mesaj yok.</div>
-            </div>
-            <div>
-              <h3 id="chatTitle">Sohbet</h3>
-              <div id="chatBox" class="item" style="min-height:260px;overflow:auto"></div>
-              <div class="flex" style="margin-top:8px">
-                <input id="chatInput" class="inp" placeholder="Yanıt yaz…">
-                <button id="chatSend" class="btn pri">Gönder</button>
-              </div>
-              <div class="small">Yeni mesajlarda kısa “bip” çalar.</div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-</div>
-
-<script type="module">
-  // Firebase
-  import { auth, db } from '../js/firebase-config.js';
-  import {
-    onAuthStateChanged, signOut
-  } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js';
-  import {
-    collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, orderBy, limit, serverTimestamp
-  } from 'https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js';
-
-  // --- Admin guard ---
-  const ADMIN_MAIL = 'takascembericom@gmail.com';
-  const adminMailEl = document.getElementById('adminMail');
-  onAuthStateChanged(auth, async (user) => {
-    if (!user || (user.email||'').toLowerCase() !== ADMIN_MAIL) {
-      location.replace('/admin/index.html'); return;
-    }
-    adminMailEl.textContent = user.email;
-  });
-  document.getElementById('btnSignOut').onclick = async()=>{ try{ await signOut(auth);}catch{} location.replace('/admin/index.html'); };
-
-  // --- Helpers ---
-  const $ = s => document.querySelector(s);
-  const el = s => document.getElementById(s);
-  const fmt = (ts)=>{
-    if(!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : (ts.seconds? new Date(ts.seconds*1000) : new Date());
-    return d.toLocaleString('tr-TR');
-  };
-  // safe text
-  const esc = (s)=> String(s||'').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-
-  // tabs
-  const panes = [...document.querySelectorAll('[data-pane]')];
-  const nav = document.getElementById('nav');
-  const tabTitle = document.getElementById('tabTitle');
-  nav.addEventListener('click', (e)=>{
-    const a = e.target.closest('a[data-tab]'); if(!a) return;
-    e.preventDefault();
-    const k = a.dataset.tab;
-    nav.querySelectorAll('a').forEach(x=>x.classList.toggle('active', x.dataset.tab===k));
-    panes.forEach(p=>p.hidden = p.dataset.pane!==k);
-    tabTitle.textContent = a.textContent;
-  });
-
-  // small bip (Web Audio, mp3 yok)
-  let ac; const bip = ()=>{
-    try{
-      ac = ac || new (window.AudioContext||window.webkitAudioContext)();
-      const o=ac.createOscillator(), g=ac.createGain();
-      o.type='sine'; o.frequency.value=880; g.gain.setValueAtTime(0.001, ac.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.3, ac.currentTime+0.01);
-      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.15);
-      o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime+0.16);
-    }catch{} };
-
-  // ===================== İLANLAR =====================
-  const pendingList = el('pendingList'), activeList = el('activeList');
-  const pendingEmpty = el('pendingEmpty'), activeEmpty = el('activeEmpty');
-
-  function drawListing(container, d, id, showActions){
-    const div = document.createElement('div'); div.className='item';
-    div.innerHTML = `
-      <div class="t">
-        <span>${esc(d.title||'Başlıksız')}</span>
-        <span class="badge">${esc(d.status||'—')}</span>
-      </div>
-      <div class="m">${esc(d.desc||'')}</div>
-      <div class="kv">
-        <span><b>İlan ID:</b> <span class="mono">${id}</span></span>
-        <span><b>Oluşturan:</b> ${esc(d.ownerName||d.owner||'')}</span>
-        <span><b>Tarih:</b> ${fmt(d.createdAt)}</span>
-      </div>
-      ${showActions? `
-      <div class="flex" style="margin-top:8px">
-        <button class="btn ok" data-approve="${id}">Onayla</button>
-        <button class="btn err" data-reject="${id}">Reddet</button>
-      </div>`:``}
-    `;
-    container.appendChild(div);
-  }
-
-  async function loadListings(){
-    pendingList.innerHTML = activeList.innerHTML = '';
-    pendingEmpty.style.display = activeEmpty.style.display = 'block';
-
-    // pending
-    const q1 = query(collection(db,'listings'), where('status','==','pending'), limit(200));
-    const s1 = await getDocs(q1);
-    if(!s1.empty){ pendingEmpty.style.display='none'; }
-    s1.forEach(docu=> drawListing(pendingList, docu.data(), docu.id, true));
-
-    // active
-    const q2 = query(collection(db,'listings'), where('status','==','active'), limit(200));
-    const s2 = await getDocs(q2);
-    if(!s2.empty){ activeEmpty.style.display='none'; }
-    s2.forEach(docu=> drawListing(activeList, docu.data(), docu.id, false));
-  }
-  await loadListings();
-  el('refreshListings').onclick = loadListings;
-
-  // onay/reddet (event delegation)
-  document.addEventListener('click', async (e)=>{
-    const ap = e.target.closest('[data-approve]'); const rj = e.target.closest('[data-reject]');
-    if(ap){
-      const id = ap.dataset.approve;
-      await updateDoc(doc(db,'listings',id), { status:'active', approvedAt: serverTimestamp() });
-      await loadListings();
-    }
-    if(rj){
-      const id = rj.dataset.reject;
-      await updateDoc(doc(db,'listings',id), { status:'rejected', rejectedAt: serverTimestamp() });
-      await loadListings();
-    }
-  });
-
-  // ===================== BİLDİRİM =====================
-  const bc_title = el('bc_title'), bc_body = el('bc_body');
-  el('btnBroadcast').onclick = async ()=>{
-    const title = (bc_title.value||'').trim(), body = (bc_body.value||'').trim();
-    if(!title || !body) return alert('Başlık ve mesaj gerekli.');
-    await addDoc(collection(db,'broadcasts'), {
-      title, body, createdAt: serverTimestamp(), from:'admin'
-    });
-    bc_title.value=''; bc_body.value='';
-  };
-  // son 20 yayın
-  const bc_list = el('bc_list'), bc_empty = el('bc_empty');
-  onSnapshot(query(collection(db,'broadcasts'), orderBy('createdAt','desc'), limit(20)), (snap)=>{
-    bc_list.innerHTML=''; bc_empty.style.display = snap.empty? 'block':'none';
-    snap.forEach(d=>{
-      const v=d.data();
-      const it=document.createElement('div'); it.className='item';
-      it.innerHTML=`<div class="t"><span>${esc(v.title)}</span><span class="small">${fmt(v.createdAt)}</span></div>
-      <div class="m">${esc(v.body)}</div>`;
-      bc_list.appendChild(it);
-    });
-  });
-
-  // ===================== KULLANICILAR =====================
-  const u_query = el('u_query'), u_results = el('u_results'), u_empty = el('u_empty');
-  async function searchUsers(){
-    const q = (u_query.value||'').trim().toLowerCase();
-    if(!q){ u_results.innerHTML=''; u_empty.textContent='Aramak için kullanıcı adı yazın.'; u_empty.style.display='block'; return; }
-    // basit prefix arama (username_lower alanı önerilir)
-    const qs = query(collection(db,'users'), orderBy('username'), limit(50));
-    const ss = await getDocs(qs);
-    u_results.innerHTML='';
-    let found=0;
-    ss.forEach(s=>{
-      const d=s.data(); const uname=(d.username||'').toLowerCase();
-      if(uname.startsWith(q)){
-        found++;
-        const it=document.createElement('div'); it.className='item';
-        it.innerHTML=`
-          <div class="t">
-            <span>@${esc(d.username||'')}</span>
-            <span class="small">${esc(d.city||'')}</span>
-          </div>
-          <div class="m">${esc(d.name||'')} • ${esc(d.email||'')}</div>
-          <div class="flex" style="margin-top:8px">
-            <a class="btn" href="/profile.html?uid=${s.id}&viewAs=1" target="_blank" rel="noopener">Profili kullanıcı gibi aç</a>
-          </div>
-        `;
-        u_results.appendChild(it);
+  <!-- Basit sekme ve placeholder doldurma (kütüphane yok) -->
+  <script>
+    (function(){
+      // Sekmeler
+      var tabs = document.querySelectorAll('.tab');
+      function show(id){
+        document.querySelector('#view-pending').style.display = id==='pending'?'block':'none';
+        document.querySelector('#view-active').style.display  = id==='active'?'block':'none';
+        document.querySelector('#view-expired').style.display = id==='expired'?'block':'none';
+        tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.tab===id); });
       }
-    });
-    u_empty.style.display = found? 'none':'block';
-    if(!found) u_empty.textContent='Sonuç bulunamadı.';
-  }
-  el('u_search').onclick = searchUsers;
+      tabs.forEach(function(t){ t.addEventListener('click', function(){ show(t.dataset.tab); }); });
 
-  // ===================== UYARI BANDI =====================
-  const al_text = el('al_text'), al_emoji = el('al_emoji'), al_speed = el('al_speed'), al_enabled = el('al_enabled');
-  // mevcut ayarı oku
-  onSnapshot(doc(db,'settings','adminAlert'), (sp)=>{
-    if(!sp.exists()) return;
-    const v=sp.data();
-    al_text.value = v.text||''; al_emoji.value=v.emoji||''; al_speed.value=v.speed||80; al_enabled.value=String(!!v.enabled);
-  });
-  el('al_save').onclick = async()=>{
-    await setDoc(doc(db,'settings','adminAlert'), {
-      text:(al_text.value||'').trim(),
-      emoji:(al_emoji.value||'').trim(),
-      speed: Number(al_speed.value||80),
-      enabled: al_enabled.value==='true',
-      updatedAt: serverTimestamp()
-    }, {merge:true});
-    alert('Kaydedildi.');
-  };
+      // Placeholder verileri (Firestore bağlamadan önce boş kalmasın)
+      function fillPlaceholders(){
+        // Metrix
+        document.getElementById('m_total').textContent   = '—';
+        document.getElementById('m_pending').textContent = '—';
+        document.getElementById('m_expired').textContent = '—';
 
-  // ===================== ŞİKAYETLER =====================
-  const rp_list = el('rp_list'), rp_empty = el('rp_empty');
-  async function loadReports(){
-    rp_list.innerHTML=''; rp_empty.style.display='block';
-    // en basit: son 100
-    const qs = query(collection(db,'reports'), orderBy('createdAt','desc'), limit(100));
-    const ss = await getDocs(qs);
-    if(!ss.empty) rp_empty.style.display='none';
-    ss.forEach(s=>{
-      const d=s.data();
-      const it=document.createElement('div'); it.className='item';
-      const imgs = Array.isArray(d.images)? d.images : (d.image?[d.image]:[]);
-      it.innerHTML=`
-        <div class="t"><span>${esc(d.reason||'Şikayet')}</span><span class="small">${fmt(d.createdAt)}</span></div>
-        <div class="m">${esc(d.note||'')}</div>
-        <div class="kv"><span><b>Şikayet Eden:</b> ${esc(d.fromUser||'')}</span><span><b>Hakkında:</b> ${esc(d.targetUser||'')}</span></div>
-        ${imgs.length? `<div class="hr"></div><div class="flex">${imgs.map(u=>`<img src="${esc(u)}" alt="" style="max-height:80px;border-radius:8px;border:1px solid var(--ring)">`).join('')}</div>`:''}
-        <div class="flex" style="margin-top:8px">
-          <button class="btn ok" data-rp-resolve="${s.id}">Çözüldü</button>
-          <button class="btn err" data-rp-delete="${s.id}">Sil</button>
-        </div>
-      `;
-      rp_list.appendChild(it);
-    });
-  }
-  await loadReports();
-  el('rp_refresh').onclick = loadReports;
+        // Pending tablo boş metni
+        var tb1 = document.querySelector('#tbl_pending tbody');
+        tb1.innerHTML = '<tr><td colspan="4" class="muted">Bekleyen ilan yok.</td></tr>';
 
-  document.addEventListener('click', async(e)=>{
-    const r1 = e.target.closest('[data-rp-resolve]'), r2 = e.target.closest('[data-rp-delete]');
-    if(r1){ await updateDoc(doc(db,'reports', r1.dataset.rpResolve), {status:'resolved', resolvedAt: serverTimestamp()}); loadReports(); }
-    if(r2){ if(confirm('Silinsin mi?')){ await deleteDoc(doc(db,'reports', r2.dataset.rpDelete)); loadReports(); } }
-  });
+        // Active/Expired boş metin
+        document.querySelector('#tbl_active tbody').innerHTML  = '<tr><td colspan="4" class="muted">Yayında ilan yok.</td></tr>';
+        document.querySelector('#tbl_expired tbody').innerHTML = '<tr><td colspan="4" class="muted">Süresi dolan ilan yok.</td></tr>';
+      }
 
-  // ===================== MESAJLAR (Canlı Destek) =====================
-  const th_list = el('th_list'), th_empty = el('th_empty');
-  const chatBox = el('chatBox'), chatTitle = el('chatTitle'), chatInput = el('chatInput'), chatSend = el('chatSend');
-  let curThreadId = null, unsubMsgs = null;
+      fillPlaceholders();
 
-  // thread listesi (son güncellenen en üstte)
-  onSnapshot(query(collection(db,'support_threads'), orderBy('updatedAt','desc'), limit(50)), (snap)=>{
-    th_list.innerHTML=''; th_empty.style.display = snap.empty? 'block':'none';
-    snap.forEach(s=>{
-      const v=s.data();
-      const it=document.createElement('div'); it.className='item';
-      it.innerHTML = `
-        <div class="t">
-          <span>${esc(v.username||v.userId||'Kullanıcı')}</span>
-          <span class="small">${fmt(v.updatedAt)}</span>
-        </div>
-        <div class="m">${esc(v.lastMsg||'')}</div>
-        <div class="flex" style="margin-top:6px">
-          <button class="btn" data-open-thread="${s.id}">Aç</button>
-          <a class="btn" href="/profile.html?uid=${s.id}&viewAs=1" target="_blank" rel="noopener">Profil</a>
-        </div>
-      `;
-      th_list.appendChild(it);
-    });
-  });
-
-  // konu aç
-  document.addEventListener('click', (e)=>{
-    const b = e.target.closest('[data-open-thread]'); if(!b) return;
-    openThread(b.dataset.openThread);
-  });
-
-  async function openThread(uid){
-    curThreadId = uid;
-    chatTitle.textContent = 'Sohbet • '+uid;
-    chatBox.innerHTML = '<div class="small">Yükleniyor…</div>';
-    unsubMsgs && unsubMsgs();
-    const tRef = doc(db,'support_threads', uid);
-    unsubMsgs = onSnapshot(query(collection(tRef,'messages'), orderBy('createdAt','asc'), limit(500)), (snap)=>{
-      const wasEmpty = !chatBox.querySelector('.bubble');
-      chatBox.innerHTML='';
-      snap.forEach(m=>{
-        const d=m.data();
-        const div=document.createElement('div');
-        div.className='bubble';
-        const mine = d.from==='admin';
-        div.style.cssText = `margin:6px 0;max-width:80%;padding:8px 10px;border-radius:10px;border:1px solid var(--ring);background:${mine?'#15305f':'#10254a'};${mine?'margin-left:auto':''}`;
-        div.textContent = d.text || '';
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-      if(!wasEmpty) bip(); // yeni mesaj sesi
-    });
-  }
-
-  async function sendAdminReply(){
-    const t = (chatInput.value||'').trim(); if(!t || !curThreadId) return;
-    chatSend.disabled=true;
-    try{
-      const tRef = doc(db,'support_threads', curThreadId);
-      await addDoc(collection(tRef,'messages'), { text:t, from:'admin', createdAt: serverTimestamp() });
-      await updateDoc(tRef, { lastMsg:t, updatedAt: serverTimestamp() });
-      chatInput.value='';
-    } finally { chatSend.disabled=false; chatInput.focus(); }
-  }
-  chatSend.onclick = sendAdminReply;
-  chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAdminReply(); } });
-
-</script>
-<script src="js/admin-safe.js"></script>
-<script src="js/notify-bell.js?v=1757936052"></script>
+      // Notify stub güvenli (görünmez); istersen ileride mount edebilirsin:
+      if (window.NotifyBell && typeof NotifyBell.init === 'function') {
+        try { NotifyBell.init(); } catch(e){}
+      }
+    })();
+  </script>
 </body>
 </html>
