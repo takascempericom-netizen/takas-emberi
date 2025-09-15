@@ -16,7 +16,7 @@
 
   let idToken = null;
   onAuthStateChanged(auth, async (u) => {
-    if (!u) { alert("Admin girişi gerekli"); location.href = "../auth.html?next=/admin/home.html"; return; }
+    if(!u){setTimeout(()=>{if(!auth.currentUser)location.href="../auth.html?next=/admin/home.html";},1200);return;}
     try { idToken = await u.getIdToken(); } catch(_) {}
   });
 
