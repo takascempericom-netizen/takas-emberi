@@ -1,4 +1,3 @@
-// assets/js/notify-bell.js
 'use strict';
 
 (function(){

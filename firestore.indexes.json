@@ -1,38 +1,11 @@
 {
   "indexes": [
     {
-      "collectionGroup": "offers",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "sellerId",  "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "listings",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "city",     "order": "ASCENDING" },
-        { "fieldPath": "district", "order": "ASCENDING" },
-        { "fieldPath": "price",    "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "listings",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "city",     "order": "ASCENDING" },
-        { "fieldPath": "district", "order": "ASCENDING" },
-        { "fieldPath": "price",    "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "listings",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "price",    "order": "ASCENDING" }
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
       ]
     }
   ],
