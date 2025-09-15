@@ -1,7 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
     function isAdmin() {
@@ -10,19 +9,17 @@ service cloud.firestore {
         (request.auth.token.role in ['admin','moderator','support'])
       );
     }
-
-    // Geçici geliştirme penceresi: 20 Eylül 2025'e kadar bazı işlemlere tolerans
+    // Geçici geliştirme penceresi (20 Eylül 2025'e kadar)
     function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
 
-    // İlanlar
+    // İlanlar: herkes okuyabilir; yazma sahibi/admin
     match /listings/{id} {
-      allow read: if true;                         // İlanlar herkese görünsün
-      allow create: if isSignedIn();               // Sadece giriş yapan oluşturur
-      allow update, delete: 
-        if isOwner(resource.data.ownerId) || isAdmin() || devWindow();
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner(resource.data.ownerId) || isAdmin() || devWindow();
     }
 
-    // Sohbet / canlı destek (örnek: /chats/** veya /threads/** kullanıyorsan aynısını çoğalt)
+    // Canlı destek/sohbet örneği (kendi path'ine göre düzenleyebilirsin)
     match /chats/{threadId}/{sub=**} {
       allow read, write:
         if (isSignedIn() && (
@@ -31,9 +28,10 @@ service cloud.firestore {
             )) || isAdmin() || devWindow();
     }
 
-    // Admin’e özel dokümanlar (onay/ret kuyrukları vs.)
+    // Admin alanı: okuma admin veya devWindow; yazma sadece admin
     match /admin/{doc=**} {
-      allow read, write: if isAdmin() || devWindow();
+      allow read: if isAdmin() || devWindow();
+      allow write: if isAdmin();
     }
 
     // Kullanıcı profilleri
@@ -43,7 +41,7 @@ service cloud.firestore {
       allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
     }
 
-    // Diğer her şey: sadece dev penceresinde okunabilir olsun
+    // Diğer her şey: sadece devWindow’da okunabilir
     match /{document=**} {
       allow read: if devWindow();
     }
