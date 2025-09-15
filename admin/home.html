@@ -16,7 +16,7 @@
 
   let idToken = null;
   onAuthStateChanged(auth, async (u) => {
-    if(!u){setTimeout(()=>{if(!auth.currentUser)location.href="../auth.html?next=/admin/home.html";},1200);return;}
+    if(!u){console.warn("[admin] waiting login…");return;}
     try { idToken = await u.getIdToken(); } catch(_) {}
   });
 
@@ -34,4 +34,4 @@
     return ORG_FETCH.apply(this, arguments);
   };
 </script>
-<script type="module">import { initializeApp,getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";const cfg={apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",authDomain:"ureten-eller-v2.firebaseapp.com",projectId:"ureten-eller-v2",storageBucket:"ureten-eller-v2.appspot.com",messagingSenderId:"621494781131",appId:"1:621494781131:web:13cc3b061a5e94b7cf874e"};const app=getApps().length?getApps()[0]:initializeApp(cfg);const auth=getAuth(app);let idToken=null;onAuthStateChanged(auth,async(u)=>{if(!u){alert("Admin girişi gerekli");location.href="../auth.html?next=/admin/home.html";return;}try{idToken=await u.getIdToken();}catch(_){}});const ORG_FETCH=window.fetch;window.fetch=async function(u,opts){try{const url=String(u);if(url.includes("firestore.googleapis.com")){opts=opts||{};const headers=new Headers(opts.headers||{});if(idToken)headers.set("Authorization","Bearer "+idToken);opts.headers=headers;}}catch(_){}return ORG_FETCH.apply(this,arguments);};</script>
+<script type="module">import { initializeApp,getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";const cfg={apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",authDomain:"ureten-eller-v2.firebaseapp.com",projectId:"ureten-eller-v2",storageBucket:"ureten-eller-v2.appspot.com",messagingSenderId:"621494781131",appId:"1:621494781131:web:13cc3b061a5e94b7cf874e"};const app=getApps().length?getApps()[0]:initializeApp(cfg);const auth=getAuth(app);let idToken=null;onAuthStateChanged(auth,async(u)=>{if(!u){console.warn("[admin] waiting login…");return;}try{idToken=await u.getIdToken();}catch(_){}});const ORG_FETCH=window.fetch;window.fetch=async function(u,opts){try{const url=String(u);if(url.includes("firestore.googleapis.com")){opts=opts||{};const headers=new Headers(opts.headers||{});if(idToken)headers.set("Authorization","Bearer "+idToken);opts.headers=headers;}}catch(_){}return ORG_FETCH.apply(this,arguments);};</script>
