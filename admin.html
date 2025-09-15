@@ -32,7 +32,7 @@ th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",authDomain:"ureten-eller-v2.firebaseapp.com",projectId:"ureten-eller-v2"};
 const app=initializeApp(firebaseConfig); const auth=getAuth(app); const db=getFirestore(app);
 const rows=document.getElementById('rows');
@@ -68,90 +68,4 @@ function load(){
 onAuthStateChanged(auth,()=>load());
 </script>
 <script type="module">import { startAdminNotifications } from "/assets/js/bildirimler.js"; startAdminNotifications();</script>
-
-<section id="admin-pending" class="card" style="margin:14px;padding:14px;border:1px solid #e5e7eb;border-radius:14px;background:#fff;color:#0f172a;">
-  <h2 style="margin:0 0 8px;font-weight:800;">Onay Bekleyen İlanlar</h2>
-  <div id="pendingList" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));"></div>
-  <div id="pendingEmpty" style="color:#6b7280;font-size:13px;margin-top:8px;">Şu an bekleyen ilan yok.</div>
-</section>
-<script type="module" id="admin-pending-module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const cfg = { apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg", authDomain:"ureten-eller-v2.firebaseapp.com", projectId:"ureten-eller-v2", storageBucket:"ureten-eller-v2.appspot.com", messagingSenderId:"621494781131", appId:"1:621494781131:web:13cc3b061a5e94b7cf874e" };
-  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
-
-  const listEl = document.getElementById("pendingList");
-  const emptyEl= document.getElementById("pendingEmpty");
-
-  function card(item){
-    const img = item.coverUrl || ("https://picsum.photos/seed/"+item.id+"/600/400");
-    const sub = (item.category||"") + (item.city ? " • " + item.city : "");
-    return (
-      '<div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06)">' +
-        '<img src="'+img+'" alt="'+(item.title||"İlan")+'" style="width:100%;height:160px;object-fit:cover;display:block">' +
-        '<div style="padding:10px">' +
-          '<div style="font-weight:800">'+(item.title||"İlan")+'</div>' +
-          '<div style="color:#6b7280;font-size:12px;margin-top:2px">'+sub+'</div>' +
-          '<div style="display:flex;gap:8px;margin-top:10px">' +
-            '<button class="btn-approve" data-id="'+item.id+'" style="flex:1;padding:8px 10px;border-radius:10px;border:0;background:#0f172a;color:#fff;font-weight:700">Onayla</button>' +
-            '<button class="btn-reject"  data-id="'+item.id+'" style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid #ef4444;color:#ef4444;background:#fff;font-weight:700">Reddet</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>'
-    );
-  }
-
-  async function doApprove(id){
-    try{
-      await updateDoc(doc(db,"listings",id), {
-        status:"active",
-        updatedAt: serverTimestamp(),
-        expiresAt: Timestamp.fromDate(new Date(Date.now()+30*24*60*60*1000))
-      });
-      alert("İlan yayına alındı.");
-    }catch(e){ alert("Onay hatası: " + (e?.message||e)); }
-  }
-  async function doReject(id){
-    try{
-      await updateDoc(doc(db,"listings",id), {
-        status:"rejected",
-        updatedAt: serverTimestamp()
-      });
-      alert("İlan reddedildi.");
-    }catch(e){ alert("Red hatası: " + (e?.message||e)); }
-  }
-
-  listEl?.addEventListener("click", (e)=>{
-    const a = e.target.closest && e.target.closest(".btn-approve");
-    const r = e.target.closest && e.target.closest(".btn-reject");
-    if(a){ e.preventDefault(); doApprove(a.getAttribute("data-id")); }
-    if(r){ e.preventDefault(); doReject(r.getAttribute("data-id")); }
-  });
-
-  onAuthStateChanged(auth, async(u)=>{
-    if(!u){ return; }
-    try{
-      const tok = await u.getIdTokenResult();
-      if(!tok.claims || !tok.claims.admin){
-        console.warn("[admin] admin claim yok (panel yine de listelerse yalnızca read/btn basınca rules engeller).");
-      }
-    }catch(_) {}
-
-    const qPend = query(collection(db,"listings"), where("status","==","pending"));
-    onSnapshot(qPend, (ss)=>{
-      const items = [];
-      ss.forEach(d => items.push(Object.assign({id:d.id}, d.data())));
-      items.sort((a,b)=>((b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));
-      listEl.innerHTML = items.map(card).join("");
-      emptyEl.style.display = items.length ? "none" : "block";
-    }, (e)=>console.warn("[admin pending]", e));
-  });
-</script>
-
-<script type="module" src="/assets/js/notify-bell.js"></script>
-<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
 </body></html>
