@@ -6,41 +6,12 @@
   <title>Admin • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee;
-      --bg:#fafbff; --card:#ffffff; --red:#e10600; --green:#0ea5e9;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-    .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
-    .top h1{margin:0;font-size:18px}
-    .wrap{max-width:1100px;margin:18px auto;padding:0 12px}
-    .tabs{display:flex;gap:8px;margin:12px 0 16px}
-    .tab{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:600}
-    .tab.active{border-color:#cbd5e1;box-shadow:0 1px 0 rgba(0,0,0,.03)}
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0 16px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
-    .card h3{margin:0 0 4px;font-size:14px;color:#374151}
-    .card .val{font-size:24px;font-weight:800}
-    .tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
-    .tbl th{background:#f8fafc;font-size:12px;color:#475569}
-    .tbl tr:last-child td{border-bottom:0}
-    .row-actions{display:flex;gap:8px}
-    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:700}
-    .btn.approve{background:#e6f6ff;border-color:#bae6fd}
-    .btn.reject{background:#fff0f0;border-color:#fecaca}
-    .muted{color:var(--muted);font-size:13px}
-    @media(max-width:860px){ .cards{grid-template-columns:1fr} .tab{flex:1;text-align:center} }
-    .footer-note{margin:14px 2px 4px;font-size:12px;color:#64748b}
-  </style>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
   <div class="top">
     <h1>Admin Paneli</h1>
-    <!-- Güvenli bildirim stub (class/import yok) -->
-    <script src="js/notify-bell.js?v=<?=Date.now?>"></script>
+    <script src="js/notify-bell.js"></script>
   </div>
 
   <div class="wrap">
@@ -77,48 +48,23 @@
       </table>
     </div>
 
-    <div class="footer-note">Bu sayfa sadeleştirildi: çakışan bildirim/mesaj scriptleri kaldırıldı.</div>
+    <div class="footer-note">Sıfırdan kuruldu: çakışma yapan script yok.</div>
   </div>
 
-  <!-- Admin hata sönümleyici -->
-  <script src="js/admin-safe.js"></script>
-
-  <!-- Basit sekme ve placeholder doldurma (kütüphane yok) -->
   <script>
     (function(){
-      // Sekmeler
-      var tabs = document.querySelectorAll('.tab');
+      var tabs=document.querySelectorAll('.tab');
       function show(id){
-        document.querySelector('#view-pending').style.display = id==='pending'?'block':'none';
-        document.querySelector('#view-active').style.display  = id==='active'?'block':'none';
-        document.querySelector('#view-expired').style.display = id==='expired'?'block':'none';
+        document.getElementById('view-pending').style.display=(id==='pending'?'block':'none');
+        document.getElementById('view-active').style.display =(id==='active'?'block':'none');
+        document.getElementById('view-expired').style.display=(id==='expired'?'block':'none');
         tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.tab===id); });
       }
       tabs.forEach(function(t){ t.addEventListener('click', function(){ show(t.dataset.tab); }); });
-
-      // Placeholder verileri (Firestore bağlamadan önce boş kalmasın)
-      function fillPlaceholders(){
-        // Metrix
-        document.getElementById('m_total').textContent   = '—';
-        document.getElementById('m_pending').textContent = '—';
-        document.getElementById('m_expired').textContent = '—';
-
-        // Pending tablo boş metni
-        var tb1 = document.querySelector('#tbl_pending tbody');
-        tb1.innerHTML = '<tr><td colspan="4" class="muted">Bekleyen ilan yok.</td></tr>';
-
-        // Active/Expired boş metin
-        document.querySelector('#tbl_active tbody').innerHTML  = '<tr><td colspan="4" class="muted">Yayında ilan yok.</td></tr>';
-        document.querySelector('#tbl_expired tbody').innerHTML = '<tr><td colspan="4" class="muted">Süresi dolan ilan yok.</td></tr>';
-      }
-
-      fillPlaceholders();
-
-      // Notify stub güvenli (görünmez); istersen ileride mount edebilirsin:
-      if (window.NotifyBell && typeof NotifyBell.init === 'function') {
-        try { NotifyBell.init(); } catch(e){}
-      }
     })();
   </script>
+
+  <script src="js/admin-safe.js"></script>
+  <script src="js/listings-rest.js"></script>
 </body>
 </html>

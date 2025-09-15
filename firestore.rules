@@ -9,17 +9,14 @@ service cloud.firestore {
         (request.auth.token.role in ['admin','moderator','support'])
       );
     }
-    // Geçici geliştirme penceresi (20 Eylül 2025'e kadar)
     function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
 
-    // İlanlar: herkes okuyabilir; yazma sahibi/admin
     match /listings/{id} {
       allow read: if true;
       allow create: if isSignedIn();
       allow update, delete: if isOwner(resource.data.ownerId) || isAdmin() || devWindow();
     }
 
-    // Canlı destek/sohbet örneği (kendi path'ine göre düzenleyebilirsin)
     match /chats/{threadId}/{sub=**} {
       allow read, write:
         if (isSignedIn() && (
@@ -28,20 +25,17 @@ service cloud.firestore {
             )) || isAdmin() || devWindow();
     }
 
-    // Admin alanı: okuma admin veya devWindow; yazma sadece admin
     match /admin/{doc=**} {
       allow read: if isAdmin() || devWindow();
       allow write: if isAdmin();
     }
 
-    // Kullanıcı profilleri
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin() || devWindow());
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
     }
 
-    // Diğer her şey: sadece devWindow’da okunabilir
     match /{document=**} {
       allow read: if devWindow();
     }

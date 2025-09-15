@@ -7,3 +7,4 @@ profile.html.bak.*
 # local bundles / splits
 listings_bundle*
 part*.txt
+admin_backup_*.tar.gz
