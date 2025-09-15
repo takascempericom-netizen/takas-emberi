@@ -456,7 +456,9 @@ footer .wrap{padding:24px}
 <script type="module" src="/js/home-feed.js"></script>
 <script type="module" src="/assets/js/notify-bell.js"></script>
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
-  <script type="module" src="/js/firebase-init.js"></script>
-  <script type="module" src="/assets/js/livechat.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
+  <script type="module" src="assets/js/livechat.js"></script>
+  <script src="assets/js/livechat-bind.js"></script>
+  <script src="assets/js/livechat-ping.js"></script>
 </body>
 </html>
