@@ -68,4 +68,6 @@ function load(){
 onAuthStateChanged(auth,()=>load());
 </script>
 <script type="module">import { startAdminNotifications } from "/assets/js/bildirimler.js"; startAdminNotifications();</script>
+<script type="module" src="/assets/js/notify-bell.js"></script>
+<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
 </body></html>
