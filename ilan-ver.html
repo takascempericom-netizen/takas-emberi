@@ -340,7 +340,7 @@ window.addEventListener("DOMContentLoaded",()=>{
       year:$("yil")?.value||"", km:$("km")?.value||"",
       title:$("baslik").value.trim(), desc:$("aciklama").value.trim(),
       condition:$("durum").value, city:$("il").value, district:$("ilce").value,
-      status:"pending", createdAt: serverTimestamp()
+      status:"pending", createdAt: new Date().toISOString()
     };
   }
 });
