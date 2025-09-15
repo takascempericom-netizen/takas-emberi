@@ -15,9 +15,7 @@
   .tc-dd h4{margin:10px 12px 6px;font-size:13px;letter-spacing:.2px;color:#93a3b8}
   .tc-dd ul{margin:0;padding:0;list-style:none}
   .tc-dd li{border-top:1px solid #1f2937;padding:10px 12px}
-  
-  .tc-dd li.tc-new{background:rgba(255,211,61,.18);} .tc-dd li.tc-new .tc-msg{color:#ffd33d;}
-.tc-dd li:first-child{border-top:0}
+  .tc-dd li:first-child{border-top:0}
   .tc-msg{font-weight:700;color:#e7ebf6}
   .tc-time{font-size:11px;color:#93a3b8;margin-top:3px}
   @media (max-width:560px){ .tc-dd{right:6px;left:6px;width:auto} .tc-bell-wrap{right:6px} }
@@ -49,17 +47,20 @@
       return;
     }
     listEl.innerHTML = items.map(x=>(
-      `<li class="${x.unread ? "tc-new" : ""}">`<div class="tc-msg">${x.message.replace(/</g,'&lt;')}</div><div class="tc-time">${fmtTime(x.at)}</div></li>`
+      `<li><div class="tc-msg">${x.message.replace(/</g,'&lt;')}</div><div class="tc-time">${fmtTime(x.at)}</div></li>`
     )).join('');
   }
   function addItem(msg, at){
-    items.unshift({message:msg, at: at || Date.now(), unread:true});
+    items.unshift({message:msg, at: at || Date.now()});
     if(items.length>20) items = items.slice(0,20);
     unread++; render();
   }
 
   // Dropdown toggle
-  btn.addEventListener(\'click\', ()=>{ const isOpen = dd.classList.toggle(\'open\'); if(isOpen){ unread=0; try{ items = items.map(i=>Object.assign({}, i, {unread:false})); }catch(_){ items.forEach(i=>i.unread=false); } render(); } });
+  btn.addEventListener('click', ()=>{
+    const isOpen = dd.classList.toggle('open');
+    if(isOpen){ unread=0; render(); }
+  });
   document.addEventListener('click', (e)=>{
     if(!wrap.contains(e.target)) dd.classList.remove('open');
   });

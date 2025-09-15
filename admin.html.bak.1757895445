@@ -1,0 +1,156 @@
+<!doctype html><html lang="tr"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Admin • Takas Çemberi</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d12;--fg:#e7ebf6;--card:#10131b;--line:#1f2431;--brand:#ff3b3b;}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 16px 100px}
+h1{font-size:22px;margin:8px 0 14px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 40%),var(--card);border:1px solid var(--line);
+  border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.02);padding:16px;
+  position:relative;border:2px solid transparent;background-image:linear-gradient(#10131b,#10131b),
+  linear-gradient(270deg,#ff3b3b,#ff7a00,#1f6feb,#a371f7);background-origin:border-box;background-clip:content-box,border-box;animation:borderShift 10s linear infinite}
+@keyframes borderShift{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+.btn{border:0;background:linear-gradient(180deg,var(--brand),#d10);color:#fff;font-weight:800;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+@media (max-width:760px){td:nth-child(3),th:nth-child(3){display:none}}
+</style>
+</head><body>
+<div class="wrap">
+  <h1>Onay Bekleyen İlanlar</h1>
+  <div class="card">
+    <table>
+      <thead><tr><th>Başlık</th><th>Sahip</th><th>Detay</th><th>Aksiyon</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="4">Yükleniyor…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",authDomain:"ureten-eller-v2.firebaseapp.com",projectId:"ureten-eller-v2"};
+const app=initializeApp(firebaseConfig); const auth=getAuth(app); const db=getFirestore(app);
+const rows=document.getElementById('rows');
+
+function row(d){
+  const x=d.data();
+  const tr=document.createElement('tr');
+  tr.innerHTML = `
+    <td><b>${x.title||'—'}</b><div style="color:#8b97b2;font-size:12px">${x.category||'—'} / ${x.subcategory||'—'} • ${x.city||'—'}/${x.district||'—'}</div></td>
+    <td><code>${x.ownerId||'—'}</code></td>
+    <td>${(x.description||'').slice(0,160)}</td>
+    <td>
+      <button class="btn" data-act="approve">Onayla</button>
+      <button class="btn ghost" data-act="reject" style="margin-left:6px">Reddet</button>
+    </td>`;
+  tr.querySelector('[data-act="approve"]').onclick=async()=>{
+    await updateDoc(doc(db,'listings',d.id),{status:'active', updatedAt:serverTimestamp(), expiresAt: Date.now()+30*24*3600*1000});
+  };
+  tr.querySelector('[data-act="reject"]').onclick=async()=>{
+    await updateDoc(doc(db,'listings',d.id),{status:'rejected', updatedAt:serverTimestamp()});
+  };
+  return tr;
+}
+
+function load(){
+  const q=query(collection(db,'listings'), where('status','==','pending'), );
+  onSnapshot(q,(snap)=>{
+    rows.innerHTML='';
+    if(snap.empty){ rows.innerHTML='<tr><td colspan="4">Bekleyen ilan yok.</td></tr>'; return; }
+    snap.forEach(d=> rows.appendChild(row(d)));
+  });
+}
+onAuthStateChanged(auth,()=>load());
+</script>
+<script type="module">import { startAdminNotifications } from "/assets/js/bildirimler.js"; startAdminNotifications();</script>
+
+<section id="admin-pending" class="card" style="margin:14px;padding:14px;border:1px solid #e5e7eb;border-radius:14px;background:#fff;color:#0f172a;">
+  <h2 style="margin:0 0 8px;font-weight:800;">Onay Bekleyen İlanlar</h2>
+  <div id="pendingList" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));"></div>
+  <div id="pendingEmpty" style="color:#6b7280;font-size:13px;margin-top:8px;">Şu an bekleyen ilan yok.</div>
+</section>
+<script type="module" id="admin-pending-module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const cfg = { apiKey:"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg", authDomain:"ureten-eller-v2.firebaseapp.com", projectId:"ureten-eller-v2", storageBucket:"ureten-eller-v2.appspot.com", messagingSenderId:"621494781131", appId:"1:621494781131:web:13cc3b061a5e94b7cf874e" };
+  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const listEl = document.getElementById("pendingList");
+  const emptyEl= document.getElementById("pendingEmpty");
+
+  function card(item){
+    const img = item.coverUrl || ("https://picsum.photos/seed/"+item.id+"/600/400");
+    const sub = (item.category||"") + (item.city ? " • " + item.city : "");
+    return (
+      '<div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06)">' +
+        '<img src="'+img+'" alt="'+(item.title||"İlan")+'" style="width:100%;height:160px;object-fit:cover;display:block">' +
+        '<div style="padding:10px">' +
+          '<div style="font-weight:800">'+(item.title||"İlan")+'</div>' +
+          '<div style="color:#6b7280;font-size:12px;margin-top:2px">'+sub+'</div>' +
+          '<div style="display:flex;gap:8px;margin-top:10px">' +
+            '<button class="btn-approve" data-id="'+item.id+'" style="flex:1;padding:8px 10px;border-radius:10px;border:0;background:#0f172a;color:#fff;font-weight:700">Onayla</button>' +
+            '<button class="btn-reject"  data-id="'+item.id+'" style="flex:1;padding:8px 10px;border-radius:10px;border:1px solid #ef4444;color:#ef4444;background:#fff;font-weight:700">Reddet</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  async function doApprove(id){
+    try{
+      await updateDoc(doc(db,"listings",id), {
+        status:"active",
+        updatedAt: serverTimestamp(),
+        expiresAt: Timestamp.fromDate(new Date(Date.now()+30*24*60*60*1000))
+      });
+      alert("İlan yayına alındı.");
+    }catch(e){ alert("Onay hatası: " + (e?.message||e)); }
+  }
+  async function doReject(id){
+    try{
+      await updateDoc(doc(db,"listings",id), {
+        status:"rejected",
+        updatedAt: serverTimestamp()
+      });
+      alert("İlan reddedildi.");
+    }catch(e){ alert("Red hatası: " + (e?.message||e)); }
+  }
+
+  listEl?.addEventListener("click", (e)=>{
+    const a = e.target.closest && e.target.closest(".btn-approve");
+    const r = e.target.closest && e.target.closest(".btn-reject");
+    if(a){ e.preventDefault(); doApprove(a.getAttribute("data-id")); }
+    if(r){ e.preventDefault(); doReject(r.getAttribute("data-id")); }
+  });
+
+  onAuthStateChanged(auth, async(u)=>{
+    if(!u){ return; }
+    try{
+      const tok = await u.getIdTokenResult();
+      if(!tok.claims || !tok.claims.admin){
+        console.warn("[admin] admin claim yok (panel yine de listelerse yalnızca read/btn basınca rules engeller).");
+      }
+    }catch(_) {}
+
+    const qPend = query(collection(db,"listings"), where("status","==","pending"));
+    onSnapshot(qPend, (ss)=>{
+      const items = [];
+      ss.forEach(d => items.push(Object.assign({id:d.id}, d.data())));
+      items.sort((a,b)=>((b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));
+      listEl.innerHTML = items.map(card).join("");
+      emptyEl.style.display = items.length ? "none" : "block";
+    }, (e)=>console.warn("[admin pending]", e));
+  });
+</script>
+
+<script type="module" src="/assets/js/notify-bell.js"></script>
+</body></html>
