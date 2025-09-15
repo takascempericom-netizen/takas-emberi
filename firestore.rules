@@ -115,4 +115,20 @@ service cloud.firestore {
       }
 
   }
+
+// ==== chats (canlı destek)
+match /chats/{uid} {
+  allow read: if isSignedIn() && (isOwner(uid) || isAdmin());
+  allow create: if isSignedIn() && isOwner(uid);
+  allow update: if isSignedIn() && (isOwner(uid) || isAdmin());
+  allow delete: if isSignedIn() && (isOwner(uid) || isAdmin());
+
+  match /messages/{mid} {
+    allow read: if isSignedIn() && (isOwner(uid) || isAdmin());
+    allow create: if isSignedIn() && (isOwner(uid) || isAdmin());
+    allow delete: if isSignedIn() && (isOwner(uid) || isAdmin());
+    allow update: if false;
+  }
+}
+
 }
