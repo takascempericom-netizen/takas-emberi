@@ -11,10 +11,26 @@ service cloud.firestore {
     }
     function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
 
+    // İlanlar
     match /listings/{id} {
+      // Herkes okuyabilir
       allow read: if true;
-      allow create: if isSignedIn() || devWindow();
-      allow update, delete: if isOwner(resource.data.ownerId) || isAdmin() || devWindow();
+
+      // Kullanıcı: sadece kendi uid ile ve status=pending oluşturabilir
+      allow create: if isSignedIn()
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      // Admin her şeyi güncelleyebilir.
+      // Kullanıcı: kendi ilanında, ownerId/status değiştirmeden güncelleyebilir
+      allow update: if isAdmin() || (
+                      isOwner(resource.data.ownerId) &&
+                      request.resource.data.ownerId == resource.data.ownerId &&
+                      request.resource.data.status == resource.data.status
+                    );
+
+      // Silme: Admin ya da ilan sahibi
+      allow delete: if isAdmin() || isOwner(resource.data.ownerId);
     }
 
     // Public notifications (zil)
@@ -38,6 +54,7 @@ service cloud.firestore {
       allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == uid) || devWindow();
     }
 
+    // Diğer her şey (sadece devWindow süresince okunabilir)
     match /{document=**} {
       allow read: if devWindow();
     }

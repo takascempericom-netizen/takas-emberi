@@ -48,3 +48,50 @@
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',run);} else {run();}
 })();
+
+// --- admin actions: approve / reject ---
+function toF(obj){
+  var o={};
+  for(var k in obj){
+    var v=obj[k];
+    if(v && typeof v=="object" && ("timestampValue" in v || "stringValue" in v || "booleanValue" in v || "integerValue" in v || "doubleValue" in v)){
+      o[k]=v;
+    } else if(typeof v=="string"){
+      o[k]={stringValue:v};
+    } else if(typeof v=="boolean"){
+      o[k]={booleanValue:v};
+    } else {
+      o[k]={stringValue:String(v)};
+    }
+  }
+  return o;
+}
+function patchListing(id, fields){
+  var masks = Object.keys(fields).map(encodeURIComponent).join("&updateMask.fieldPaths=");
+  var url = "https://firestore.googleapis.com/v1/projects/"+PROJECT_ID+"/databases/(default)/documents/listings/"+id+"?updateMask.fieldPaths="+masks;
+  return fetch(url,{
+    method:"PATCH",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fields: toF(fields)})
+  }).then(r=>{ if(!r.ok) return r.json().then(e=>Promise.reject(e)); return r.json(); });
+}
+function isoPlusDays(n){ return new Date(Date.now()+n*24*60*60*1000).toISOString(); }
+
+document.addEventListener("click", function(e){
+  var b = e.target.closest && e.target.closest("button.approve");
+  if(b){
+    var id=b.getAttribute("data-id"); b.disabled=true;
+    patchListing(id,{ status:"active", expiresAt:{timestampValue: isoPlusDays(30)} })
+      .then(()=>{ alert("İlan yayına alındı."); run(); })
+      .catch(err=>{ console.warn(err); alert("Onay hatası: "+(err.message||JSON.stringify(err))); })
+      .finally(()=>{ b.disabled=false; });
+  }
+  var r = e.target.closest && e.target.closest("button.reject");
+  if(r){
+    var id2=r.getAttribute("data-id"); r.disabled=true;
+    patchListing(id2,{ status:"rejected" })
+      .then(()=>{ alert("İlan reddedildi."); run(); })
+      .catch(err=>{ console.warn(err); alert("Reddetme hatası: "+(err.message||JSON.stringify(err))); })
+      .finally(()=>{ r.disabled=false; });
+  }
+});
