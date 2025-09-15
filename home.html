@@ -410,28 +410,6 @@ footer .wrap{padding:24px}
   });
 </script>
 
-<script>
-  // Basit chat aç/kapat
-  const chatBtn = document.getElementById('openChat');
-  const chatWin = document.getElementById('chatWin');
-  const chatClose = document.getElementById('chatClose');
-  const chatSend = document.getElementById('chatSend');
-  const chatInput = document.getElementById('chatInput');
-  const chatBody = document.getElementById('chatBody');
-
-  if (chatBtn && chatWin) chatBtn.onclick = () => { chatWin.style.display = 'flex'; };
-  if (chatClose) chatClose.onclick = () => { chatWin.style.display = 'none'; };
-  if (chatSend) chatSend.onclick = () => {
-    const v = (chatInput.value || '').trim();
-    if (!v) return;
-    const div = document.createElement('div');
-    div.className = 'msg me';
-    div.textContent = v;
-    chatBody.appendChild(div);
-    chatInput.value='';
-    chatBody.scrollTop = chatBody.scrollHeight;
-  };
-</script>
 <script>document.addEventListener("DOMContentLoaded",function(){
   function blockOf(h){ return h ? (h.closest("section,article,div,main")||h) : null; }
   var shH = document.getElementById("sharedListings");
@@ -457,8 +435,5 @@ footer .wrap{padding:24px}
 <script type="module" src="/assets/js/notify-bell.js"></script>
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
   <script type="module" src="js/firebase-init.js"></script>
-  <script type="module" src="assets/js/livechat.js"></script>
-  <script src="assets/js/livechat-bind.js"></script>
-  <script src="assets/js/livechat-ping.js"></script>
 </body>
 </html>
