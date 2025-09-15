@@ -347,5 +347,6 @@ window.addEventListener("DOMContentLoaded",()=>{
 </script>
 <script type="module" src="/js/redirect-after-create.js"></script>
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
+<script>(function(){const ORG_FETCH=window.fetch;const MUST=(u)=>/\/databases\/\(default\)\/documents(\/listings)?$/.test(u);window.fetch=async function(u,opts){try{if(opts&&opts.method==="POST"&&MUST(String(u))&&opts.headers&&/application\/json/i.test(String(opts.headers["Content-Type"]||opts.headers.get&&opts.headers.get("Content-Type")||""))){let bodyJSON;try{bodyJSON=JSON.parse(opts.body);}catch(e){};if(bodyJSON&&bodyJSON.fields){bodyJSON.fields.status={stringValue:"pending"};if(!bodyJSON.fields.createdAt){bodyJSON.fields.createdAt={timestampValue:new Date().toISOString()};}opts.body=JSON.stringify(bodyJSON);console.log("[hook] enforced status=pending on listings");}}}catch(e){console.warn("[hook] failed",e)}return ORG_FETCH.apply(this,arguments);};})();</script>
 </body>
 </html>
