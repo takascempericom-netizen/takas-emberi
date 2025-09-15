@@ -2,154 +2,50 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ==== notifications (collection group) — temp read for signed-in
-    match /{path=**}/notifications/{nid} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
-    function isAdmin() { return isSignedIn() && request.auth.token.admin == true; }
-
-    // ---- users/{uid}
-    match /users/{uid} {
-      allow read: if true;
-      allow create: if isOwner(uid);
-      // username bir kere set edildiyse, admin dışında değişemez
-      allow update: if ( isOwner(uid) && (
-                          !('username' in resource.data) ||
-                          request.resource.data.username == resource.data.username
-                        )
-                     ) || isAdmin();
-      allow delete: if isOwner(uid) || isAdmin();
-    }
-
-    // ---- usernames/{uname}  { uid, at }
-    match /usernames/{uname} {
-      allow read: if true;
-      allow create: if isSignedIn()
-                    && !exists(/databases/$(database)/documents/usernames/$(uname))
-                    && request.resource.data.uid == request.auth.uid
-                    && request.resource.data.at is timestamp
-                    && uname.matches('^[a-z0-9_]{3,20}$');
-      allow update, delete: if false;
-    }
-
-    // ---- listings/{id}
-    function allowedListingKeys() {
-      return [
-        'ownerId','status','createdAt',
-        'title','desc','category','subcategory',
-        'brand','model','year','km','price',
-        'condition','city','district',
-        'images','coverUrl','updatedAt','expiresAt'
-      ];
-    }
-    function onlyAllowedKeys(newData) {
-      return newData.keys().hasOnly(allowedListingKeys());
-    }
-
-    match /listings/{id} {
-      // Okuma: aktif herkese; sahibi veya admin her halde
-            allow read: if (
-        (resource.data.status == 'active' &&
-         (!('expiresAt' in resource.data) || resource.data.expiresAt > request.time))
-        || (isSignedIn() && resource.data.ownerId == request.auth.uid)
-        || isAdmin()
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (request.auth.token.role in ['admin','moderator','support'])
       );
-
-      // Oluşturma: sadece sahibi; status=pending; createdAt timestamp
-      allow create: if isSignedIn()
-                    && request.resource.data.ownerId == request.auth.uid
-                    && request.resource.data.status == 'pending'
-                    && request.resource.data.createdAt is timestamp
-                    && onlyAllowedKeys(request.resource.data);
-
-      // Güncelleme:
-      // - Sahibi: status/ownerId/createdAt değiştiremez
-      // - Admin: status dahil düzenleyebilir; ownerId/createdAt yine değişmez
-      allow update: if (
-                        (
-                          isSignedIn() && resource.data.ownerId == request.auth.uid
-                          && request.resource.data.ownerId == resource.data.ownerId
-                          && request.resource.data.createdAt == resource.data.createdAt
-                          && request.resource.data.status == resource.data.status
-                        )
-                        ||
-                        (
-                          isAdmin()
-                          && request.resource.data.ownerId == resource.data.ownerId
-                          && request.resource.data.createdAt == resource.data.createdAt
-                        )
-                      )
-                      && onlyAllowedKeys(request.resource.data);
-
-      // Silme
-      allow delete: if (isSignedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
-
-      // ---- offers (alt koleksiyon)
-      match /offers/{offerId} {
-        function listingOwner() {
-          return get(/databases/$(database)/documents/listings/$(id)).data.ownerId;
-        }
-
-        // Okuma: sadece satıcı (owner) veya alıcı (buyer) ya da admin
-        allow read: if (isSignedIn() && (
-                          resource.data.sellerId == request.auth.uid ||
-                          resource.data.buyerId == request.auth.uid
-                        )) || isAdmin();
-
-        // Oluşturma: girişli kullanıcı, kendi ilanına değil; alan doğrulamaları
-        allow create: if isSignedIn()
-                      && listingOwner() != request.auth.uid
-                      && request.resource.data.sellerId == listingOwner()
-                      && request.resource.data.buyerId == request.auth.uid
-                      && request.resource.data.buyerId != request.resource.data.sellerId
-                      && request.resource.data.listingId == id
-                      && request.resource.data.createdAt is timestamp;
-
-        // Güncelleme/Silme: şimdilik sadece admin
-        allow update, delete: if isAdmin();
-      }
     }
-      // ==== Collection Group: offers (CG read rule)
-      match /{path=**}/offers/{offerId} {
-        allow read: if (isSignedIn() && (
-                          resource.data.sellerId == request.auth.uid ||
-                          resource.data.buyerId  == request.auth.uid
-                        )) || isAdmin();
-      }
 
-    // ==== DEV OVERRIDE (TEMPORARY) ====
-    // Giriş yapmış herkes tüm dökümanları okuyabilir.
-    // Yazma/silme sadece admin.
+    // Geçici geliştirme penceresi: 20 Eylül 2025'e kadar bazı işlemlere tolerans
+    function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
+
+    // İlanlar
+    match /listings/{id} {
+      allow read: if true;                         // İlanlar herkese görünsün
+      allow create: if isSignedIn();               // Sadece giriş yapan oluşturur
+      allow update, delete: 
+        if isOwner(resource.data.ownerId) || isAdmin() || devWindow();
+    }
+
+    // Sohbet / canlı destek (örnek: /chats/** veya /threads/** kullanıyorsan aynısını çoğalt)
+    match /chats/{threadId}/{sub=**} {
+      allow read, write:
+        if (isSignedIn() && (
+              request.auth.uid == resource.data.ownerId ||
+              request.auth.uid == resource.data.buyerId
+            )) || isAdmin() || devWindow();
+    }
+
+    // Admin’e özel dokümanlar (onay/ret kuyrukları vs.)
+    match /admin/{doc=**} {
+      allow read, write: if isAdmin() || devWindow();
+    }
+
+    // Kullanıcı profilleri
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin() || devWindow());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
+    }
+
+    // Diğer her şey: sadece dev penceresinde okunabilir olsun
     match /{document=**} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if isAdmin();
+      allow read: if devWindow();
     }
   }
-
-// ==== chats (canlı destek)
-match /chats/{uid} {
-  allow read: if isSignedIn() && (isOwner(uid) || isAdmin());
-  allow create: if isSignedIn() && isOwner(uid);
-  allow update: if isSignedIn() && (isOwner(uid) || isAdmin());
-  allow delete: if isSignedIn() && (isOwner(uid) || isAdmin());
-
-  match /messages/{mid} {
-    allow read: if isSignedIn() && (isOwner(uid) || isAdmin());
-    allow create: if isSignedIn() && (isOwner(uid) || isAdmin());
-    allow delete: if isSignedIn() && (isOwner(uid) || isAdmin());
-    allow update: if false;
-  }
-    // ==== DEV OVERRIDE (TEMP) ====
-    // Giriş yapmış herkes tüm koleksiyonları okuyabilir.
-    // Yazma/silme sadece admin.
-    match /{document=**} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if isAdmin();
-    }
-
-}
-
 }
