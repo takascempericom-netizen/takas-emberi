@@ -75,3 +75,70 @@
   // Sayfa yüklendiğinde çiz
   render();
 })();
+
+
+/* tc-inline anchor mode */
+(function(){
+  // Basit stil garanti (varsa etkisiz kalır)
+  try{
+    var st = document.createElement('style');
+    st.textContent = '.tc-dd{display:none;position:fixed;z-index:2147483647;} .tc-dd.open{display:block;}';
+    document.head.appendChild(st);
+  }catch(_){}
+
+  let dd = null;
+  function ensureDD(){
+    dd = document.querySelector('.tc-dd');
+    if(!dd){
+      // notify-bell henüz çizilmemiş olabilir; biraz sonra tekrar dene
+      setTimeout(ensureDD, 300);
+    }
+  }
+  ensureDD();
+
+  function clamp(x, min, max){ return Math.max(min, Math.min(max, x)); }
+
+  function toggleAt(anchor){
+    if(!dd){ ensureDD(); return; }
+    // Önce görünür yapıp genişlik ölç
+    dd.style.visibility = 'hidden';
+    dd.classList.add('open');
+    const rect = anchor.getBoundingClientRect();
+    const w = dd.offsetWidth || 280;
+    const left = clamp(rect.left, 8, (window.innerWidth - w - 8));
+    const top  = rect.bottom + 8;
+    dd.style.left = left + 'px';
+    dd.style.top  = top  + 'px';
+    // Toggle
+    const willOpen = !dd.dataset._open || dd.dataset._open === '0';
+    dd.dataset._open = willOpen ? '1' : '0';
+    if(willOpen){
+      dd.classList.add('open');
+    }else{
+      dd.classList.remove('open');
+    }
+    dd.style.visibility = '';
+  }
+
+  // Nav’daki 🔔 Bildirimler linkine tıklandığında, dropdown’ı butonun altında aç
+  document.addEventListener('click', function(ev){
+    var a = ev.target && ev.target.closest && ev.target.closest('a.nav-bildir');
+    if(a){
+      ev.preventDefault();
+      toggleAt(a);
+      return;
+    }
+    // Dışarı tıklarsan kapat
+    var inside = ev.target && ev.target.closest && (ev.target.closest('.tc-dd') || ev.target.closest('.tc-bell'));
+    if(!inside && dd){
+      dd.classList.remove('open');
+      dd.dataset._open = '0';
+    }
+  }, {passive:false});
+
+  // Eski tetikleyici ile de çalış (ilk nav-bildir’i baz al)
+  window.addEventListener('tc:bell:toggle', function(){
+    var a = document.querySelector('a.nav-bildir');
+    if(a) toggleAt(a);
+  });
+})();
