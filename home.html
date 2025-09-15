@@ -236,7 +236,7 @@ footer .wrap{padding:24px}
       <a class="btn notif nav-bildir" href="#">🔔 Bildirimler</a>
       <a href="profile.html#pending" class="btn add"><div>➕</div><span>İlan Ekle</span></a>
       <a class="btn profile" href="profile.html">👤 Profil</a>
-      <a class="btn logout nav-bildir" href="#" data-logout>🚪 Çıkış</a>
+      <a class="btn logout " href="#" data-logout>🚪 Çıkış</a>
     </div>
 
     <!-- MOBILE actions (sağ üst) -->
@@ -247,7 +247,7 @@ footer .wrap{padding:24px}
       <div class="mobmenu" id="mobMenu" role="menu" aria-label="Hızlı menü">
         <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
         <a href="ilan-ver.html" class="btn add"><div>➕</div><span>İlan Ekle</span></a>
-        <a class="item nav-bildir" href="#" role="menuitem" data-logout>🚪 Çıkış</a>
+        <a class="item " href="#" role="menuitem" data-logout>🚪 Çıkış</a>
       </div>
     </div>
   </div>
@@ -456,5 +456,7 @@ footer .wrap{padding:24px}
 <script type="module" src="/js/home-feed.js"></script>
 <script type="module" src="/assets/js/notify-bell.js"></script>
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
+  <script type="module" src="/js/firebase-init.js"></script>
+  <script type="module" src="/assets/js/livechat.js"></script>
 </body>
 </html>
