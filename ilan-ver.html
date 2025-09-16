@@ -391,30 +391,24 @@ const storage = getStorage(app);
 
       // Kaydet
       const ref = await addDoc(collection(db, "listings"), payload);
-      const fileInput = document.getElementById("photos");
-      const files = Array.from(fileInput?.files || []);
-      let photoUrls = [];
+      // --- Fotoğraf yükleme ---
       const fileInput = document.getElementById("photos");
       const files = Array.from(fileInput?.files || []);
       let photoUrls = [];
       try {
         for (const f of files.slice(0,10)) {
-          console.log("[upload] start", {name: f.name, size: f.size, type: f.type});
           const r = sRef(storage, `listings/${ref.id}/${Date.now()}_${encodeURIComponent(f.name)}`);
-          await uploadBytes(r, f, { contentType: f.type || "image/jpeg" });
+          await uploadBytes(r, f, { contentType: f.type || \"image/jpeg\" });
           const url = await getDownloadURL(r);
-          console.log("[upload] done", url);
           photoUrls.push(url);
         }
       } catch(e) {
-        console.error("[upload] hata", e);
-        alert("Fotoğraf yükleme hatası: " + (e?.message || e));
-      if (photoUrls.length) { await updateDoc(doc(db, "listings", ref.id), { coverUrl: photoUrls[0], photos: photoUrls }); }
-      if (photoUrls.length) { await updateDoc(doc(db, "listings", ref.id), { coverUrl: photoUrls[0], photos: photoUrls }); }
+        console.error(\"[upload] hata\", e);
+        alert(\"Fotoğraf yükleme hatası: \" + (e?.message || e));
       }
-        await updateDoc(doc(db, "listings", ref.id), { coverUrl: photoUrls[0], photos: photoUrls });
+      if (photoUrls.length) {
+        await updateDoc(doc(db, \"listings\", ref.id), { coverUrl: photoUrls[0], photos: photoUrls });
       }
-
       // Kullanıcıyı bilgilendir → Onay Bekleyenler’e yönlendir
       console.log("[create] listings/", ref.id);
       alert("İlan admin onayına gönderildi! Onaylanana kadar profilinde 'Onay Bekleyenler'de görebilirsin.");
