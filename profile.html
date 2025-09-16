@@ -327,138 +327,6 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
     <a class="active nav-bildir" href="#"><div>🔔</div><span>Bildirimler</span></a>
   </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, limit, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.appspot.com",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    getStorage(app);
-
-    const $ = (sel)=>document.querySelector(sel);
-    function on(id, evt, fn){ const el=document.getElementById(id); if(el){ el.addEventListener(evt, fn); } }
-
-    const listingsEl = $('#listings');
-    const tabs = document.querySelectorAll('.tab');
-    let currentTab = 'active';
-    function setTab(t){ currentTab=t; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t)); renderListings(); }
-    tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
-
-    function slugifyUsername(v){ return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20); }
-    function emailLocal(email){ return (email||'').split('@')[0]; }
-    function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
-
-    function byStatus(item){
-  const now = Date.now();
-  let exMs = 0;
-  if (item && item.expiresAt) {
-    exMs = item.expiresAt.toMillis ? item.expiresAt.toMillis() : (item.expiresAt.seconds ? item.expiresAt.seconds*1000 : 0);
-  }
-  if (item.status === "pending") return "pending";
-  if (item.status === "active" && (!exMs || exMs > now)) return "active";
-  return "expired";
-}
-  if (item.status === "pending") return "pending";
-  if (item.status === "active" && (!exMs || exMs > now)) return "active";
-  return "expired";
-}
-  if (item.status === 'pending') return 'pending';
-  if (item.status === 'active' && (!exMs || exMs > now)) return 'active';
-  return 'expired';
-}
-    function card(item){
-      const status = byStatus(item);
-      const badge = status==='active' ? '<span class="badge ok">Yayında</span>' : status==='pending' ? '<span class="badge wait">Onay Bekliyor</span>' : '<span class="badge exp">Süresi Doldu</span>';
-      const img = item.coverUrl || 'https://picsum.photos/seed/'+(item.id||Math.random())+'/600/400';
-      return `<div class="it">
-        <img loading="lazy" src="${img}" alt="${item.title||'İlan'}">
-        <div class="tx">
-          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-            <strong>${item.title||'İsimsiz İlan'}</strong>
-            ${badge}
-          </div>
-          <div class="hint">${item.category||'Kategori'} • ${item.city||'Şehir'}</div>
-        </div>
-      </div>`;
-    }
-
-    let state = { user:null, profile:{}, listings:[] };
-
-    async function ensureUserDoc(user){
-      const uref = doc(db,'users',user.uid);
-      const snap = await getDoc(uref);
-      if(!snap.exists()){
-        const baseUsername = slugifyUsername(emailLocal(user.email||user.displayName||'kullanici'));
-        await setDoc(uref,{
-          uid:user.uid,
-          email:user.email||null,
-          displayName:user.displayName||emailLocal(user.email)||'Yeni Üye',
-          username: baseUsername || ('u'+user.uid.slice(0,6)),
-          canChangeUsername:false,
-          photoURL:'',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        return (await getDoc(uref)).data();
-      }
-      return snap.data();
-    }
-
-    async function loadListings(uid){
-      const q = query(collection(db,'listings'), where('ownerId','==',uid), limit(60));
-      const ss = await getDocs(q);
-      const arr = []; ss.forEach(d=>arr.push({id:d.id, ...d.data()}));
-      state.listings = arr;
-      updateCounts(); renderListings();
-    }
-
-    function updateCounts(){
-      const a = state.listings.filter(x=>byStatus(x)==='active').length;
-      const p = state.listings.filter(x=>byStatus(x)==='pending').length;
-      const e = state.listings.filter(x=>byStatus(x)==='expired').length;
-      $('#countActive').textContent=a; $('#countPending').textContent=p; $('#countExpired').textContent=e;
-    }
-    function renderListings(){
-      const list = state.listings.filter(x=>byStatus(x)===currentTab);
-      listingsEl.innerHTML = list.length ? list.map(card).join('') : `<div class="hint" style="padding:16px">Bu sekmede ilan yok.</div>`;
-    }
-
-    function paintProfile(){
-      const p = state.profile;
-      $('#displayName').textContent = p.displayName || emailLocal(state.user?.email) || '';
-      $('#email').textContent = state.user?.email || '';
-      $('#usernameStatic').textContent = p.username || 'kullanici';
-      $('#chipUsername').textContent = '@'+(p.username||'kullanici');
-      $('#uidShort').textContent = shortId(state.user?.uid);
-      const photo = p.photoURL || window.letterAvatarColor(p.displayName || (state.user && state.user.email) || "U");
-      $('#avatar').src = photo;
-      const isPasswordProvider = (state.user?.providerData||[]).some(x=>x.providerId==='password');
-      $('#passNote').textContent = isPasswordProvider ? '' : 'Google ile giriş — şifre sıfırlama desteklenmeyebilir';
-    }
-
-    on("btnSignOut","click", async()=>{ try{ await signOut(auth); location.href = "auth.html?next=profile.html"; }catch(e){ alert("Çıkış hatası: "+(e?.message||e)); } });
-    on("btnResetPass","click", async()=>{ try{ if(!state.user?.email) return alert("E-posta bulunamadı."); await sendPasswordResetEmail(auth, state.user.email); alert("Sıfırlama e-postası gönderildi."); }catch(e){ alert(e?.message||e); } });
-
-    onAuthStateChanged(auth, async(user)=>{
-      if(!user){ location.href = 'auth.html?next=profile.html'; return; }
-      state.user = user;
-      state.profile = await ensureUserDoc(user);
-      paintProfile();
-      try{ await loadListings(user.uid); }catch(e){ console.error('İlan çekme hatası', e); }
-    });
-  </script>
   <script src="/assets/js/sound.js?v=1757853712"></script>
 <script> 
   // başlangıçta ses açık (true) 
@@ -469,6 +337,184 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 </script>
 <script type="module">import { startUserNotifications } from "/assets/js/bildirimler.js"; startUserNotifications();</script>
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, limit, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+    authDomain: "ureten-eller-v2.firebaseapp.com",
+    projectId: "ureten-eller-v2",
+    storageBucket: "ureten-eller-v2.appspot.com",
+    messagingSenderId: "621494781131",
+    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  getStorage(app);
+
+  const $=(s)=>document.querySelector(s);
+  function on(id, evt, fn){ const el=document.getElementById(id); if(el) el.addEventListener(evt, fn); }
+
+  const listingsEl = $('#listings');
+  const tabs = document.querySelectorAll('.tab');
+  let currentTab='active';
+  function setTab(t){ currentTab=t; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===t)); renderListings(); }
+  tabs.forEach(t=>t.addEventListener('click', ()=>setTab(t.dataset.tab)));
+
+  function emailLocal(email){ return (email||'').split('@')[0]; }
+  function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
+  function slugifyUsername(v){ return (v||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20); }
+
+  function byStatus(item){
+    const now = Date.now();
+    let exMs = 0;
+    if (item && item.expiresAt) {
+      exMs = item.expiresAt.toMillis ? item.expiresAt.toMillis() : (item.expiresAt.seconds ? item.expiresAt.seconds*1000 : 0);
+    }
+    if (item.status === "pending") return "pending";
+    if (item.status === "active" && (!exMs || exMs > now)) return "active";
+    return "expired";
+  }
+
+  function badgeFor(item){
+    const s = byStatus(item);
+    if (s==='active') return '<span class="badge ok">Yayında</span>';
+    if (s==='pending') return '<span class="badge wait">Onay Bekliyor</span>';
+    return '<span class="badge exp">Süresi Doldu</span>';
+  }
+
+  function card(item){
+    const img = item.coverUrl || ('https://picsum.photos/seed/'+(item.id||Math.random())+'/600/400');
+    return `<div class="it">
+      <img loading="lazy" src="${img}" alt="${item.title||'İlan'}">
+      <div class="tx">
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <strong>${item.title||'İsimsiz İlan'}</strong>
+          ${badgeFor(item)}
+        </div>
+        <div class="hint">${item.category||'Kategori'} • ${item.city||'Şehir'}</div>
+        <div class="act" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn small edit" data-id="${item.id}">Düzenle</button>
+          <button class="btn small del" data-id="${item.id}">Sil</button>
+          ${byStatus(item)==='active' ? `<button class="btn small extend" data-id="${item.id}">+30g</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let state={ user:null, profile:{}, listings:[] };
+
+  async function ensureUserDoc(user){
+    const uref = doc(db,'users',user.uid);
+    const snap = await getDoc(uref);
+    if(!snap.exists()){
+      const baseUsername = slugifyUsername(emailLocal(user.email||user.displayName||'kullanici'));
+      await setDoc(uref,{
+        uid:user.uid,
+        email:user.email||null,
+        displayName:user.displayName||emailLocal(user.email)||'Yeni Üye',
+        username: baseUsername || ('u'+user.uid.slice(0,6)),
+        canChangeUsername:false,
+        photoURL:'',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return (await getDoc(uref)).data();
+    }
+    return snap.data();
+  }
+
+  async function loadListings(uid){
+    const q = query(collection(db,'listings'), where('ownerId','==',uid), limit(60));
+    const ss = await getDocs(q);
+    const arr=[]; ss.forEach(d=>arr.push({id:d.id, ...d.data()}));
+    state.listings = arr;
+    updateCounts(); renderListings();
+  }
+
+  function updateCounts(){
+    const a = state.listings.filter(x=>byStatus(x)==='active').length;
+    const p = state.listings.filter(x=>byStatus(x)==='pending').length;
+    const e = state.listings.filter(x=>byStatus(x)==='expired').length;
+    document.getElementById('countActive').textContent=a;
+    document.getElementById('countPending').textContent=p;
+    document.getElementById('countExpired').textContent=e;
+  }
+
+  function renderListings(){
+    const list = state.listings.filter(x=>byStatus(x)===currentTab);
+    listingsEl.innerHTML = list.length ? list.map(card).join('') : '<div class="hint" style="padding:16px">Bu sekmede ilan yok.</div>';
+  }
+
+  function paintProfile(){
+    const p = state.profile;
+    document.getElementById('displayName').textContent = p.displayName || emailLocal(state.user?.email) || '';
+    document.getElementById('email').textContent = state.user?.email || '';
+    document.getElementById('usernameStatic').textContent = p.username || 'kullanici';
+    document.getElementById('chipUsername').textContent = '@'+(p.username||'kullanici');
+    document.getElementById('uidShort').textContent = shortId(state.user?.uid);
+    const photo = p.photoURL || window.letterAvatarColor(p.displayName || (state.user && state.user.email) || "U");
+    document.getElementById('avatar').src = photo;
+    const isPasswordProvider = (state.user?.providerData||[]).some(x=>x.providerId==='password');
+    document.getElementById('passNote').textContent = isPasswordProvider ? '' : 'Google ile giriş — şifre sıfırlama desteklenmeyebilir';
+  }
+
+  document.getElementById("btnSignOut")?.addEventListener("click", async()=>{ try{ await signOut(auth); location.href="auth.html?next=profile.html"; }catch(e){ alert("Çıkış hatası: "+(e?.message||e)); } });
+  document.getElementById("btnResetPass")?.addEventListener("click", async()=>{ try{ if(!state.user?.email) return alert("E-posta bulunamadı."); await sendPasswordResetEmail(auth, state.user.email); alert("Sıfırlama e-postası gönderildi."); }catch(e){ alert(e?.message||e); } });
+
+  listingsEl?.addEventListener("click", async (e)=>{
+    const bEdit = e.target.closest && e.target.closest(".edit");
+    const bDel  = e.target.closest && e.target.closest(".del");
+    const bExt  = e.target.closest && e.target.closest(".extend");
+    if(!bEdit && !bDel && !bExt) return;
+    e.preventDefault();
+
+    const id = (bEdit||bDel||bExt).getAttribute("data-id");
+    const item = (state.listings||[]).find(x=>x.id===id);
+    if(!id || !item) return;
+
+    try{
+      if(bDel){
+        if(!confirm("Bu ilanı silmek istiyor musunuz?")) return;
+        await deleteDoc(doc(db, "listings", id));
+        state.listings = state.listings.filter(x=>x.id!==id);
+        updateCounts(); renderListings();
+        alert("İlan silindi."); return;
+      }
+      if(bEdit){
+        const newTitle = prompt("Başlık", item.title||"");
+        if(newTitle===null) return;
+        const newDesc  = prompt("Açıklama", item.desc||"");
+        if(newDesc===null) return;
+        await updateDoc(doc(db, "listings", id), { title: newTitle.trim(), desc: (newDesc||"").trim(), updatedAt: serverTimestamp() });
+        item.title=newTitle.trim(); item.desc=(newDesc||"").trim();
+        renderListings(); alert("İlan güncellendi."); return;
+      }
+      if(bExt){
+        const plus30 = new Date(Date.now() + 30*24*60*60*1000);
+        await updateDoc(doc(db, "listings", id), { expiresAt: Timestamp.fromDate(plus30), updatedAt: serverTimestamp() });
+        item.expiresAt = { toMillis: ()=> plus30.getTime() };
+        updateCounts(); renderListings(); alert("Süre 30 gün uzatıldı."); return;
+      }
+    }catch(err){
+      console.warn("[profile actions] error", err);
+      alert("İşlem hatası: " + (err?.message || err));
+    }
+  });
+
+  onAuthStateChanged(auth, async(user)=>{
+    if(!user){ location.href='auth.html?next=profile.html'; return; }
+    state.user = user;
+    state.profile = await ensureUserDoc(user);
+    paintProfile();
+    try{ await loadListings(user.uid); }catch(e){ console.error('İlan çekme hatası', e); }
+  });
+</script>
 </body>
 </html>
 <!-- HASH TAB: #pending / #active / #expired aç -->
