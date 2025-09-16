@@ -96,3 +96,28 @@ document.addEventListener("click", function(e){
       .finally(()=>{ r.disabled=false; });
   }
 });
+
+/* --- override: patchListing -> Authorization header ekle --- */
+async function patchListing(id, fields){
+  function toF(obj){var o={}; for(var k in obj){var v=obj[k];
+    if(v && typeof v=="object" && ("timestampValue" in v || "stringValue" in v || "booleanValue" in v || "integerValue" in v || "doubleValue" in v)){ o[k]=v; }
+    else if(typeof v=="string"){ o[k]={stringValue:v}; }
+    else if(typeof v=="boolean"){ o[k]={booleanValue:v}; }
+    else { o[k]={stringValue:String(v)}; }
+  } return o;}
+  var masks = Object.keys(fields).map(encodeURIComponent).join("&updateMask.fieldPaths=");
+  var url = "https://firestore.googleapis.com/v1/projects/"+PROJECT_ID+"/databases/(default)/documents/listings/"+id+"?updateMask.fieldPaths="+masks;
+
+  const headers = {"Content-Type":"application/json"};
+  try{
+    if (window.__auth && window.__auth.currentUser) {
+      const tok = await window.__auth.currentUser.getIdToken();
+      if (tok) headers["Authorization"] = "Bearer " + tok;
+    }
+  }catch(_){}
+
+  const body = JSON.stringify({fields: toF(fields)});
+  const r = await fetch(url, {method:"PATCH", headers, body});
+  if(!r.ok){ const e = await r.json().catch(()=>({})); throw e || new Error("patch failed"); }
+  return r.json();
+}
