@@ -397,7 +397,7 @@ const storage = getStorage(app);
       let photoUrls = [];
       try {
         for (const f of files.slice(0,10)) {
-          const r = sRef(storage, `listings/${ref.id}/${Date.now()}_${encodeURIComponent(f.name)}`);
+          const r = sRef(storage, "listings/" + ref.id + "/" + Date.now() + "_" + encodeURIComponent(f.name));
           await uploadBytes(r, f, { contentType: f.type || \"image/jpeg\" });
           const url = await getDownloadURL(r);
           photoUrls.push(url);
