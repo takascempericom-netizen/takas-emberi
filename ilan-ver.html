@@ -353,7 +353,8 @@ window.addEventListener("DOMContentLoaded",()=>{
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
   // Aynı config, çift init'e karşı koruma
   const cfg = {
@@ -367,6 +368,7 @@ window.addEventListener("DOMContentLoaded",()=>{
   const app = getApps().length ? getApps()[0] : initializeApp(cfg);
   const db  = getFirestore(app);
   const auth= getAuth(app);
+const storage = getStorage(app);
 
   // Eski click handler'ı sıfırla ve gerçek handler'ı bağla
   const btn = document.getElementById("yayinaAl");
@@ -389,6 +391,19 @@ window.addEventListener("DOMContentLoaded",()=>{
 
       // Kaydet
       const ref = await addDoc(collection(db, "listings"), payload);
+      // --- FOTOĞRAF YÜKLE ve DOKÜMANA YAZ ---
+      const fileInput = document.getElementById("photos");
+      const files = Array.from(fileInput?.files || []);
+      let photoUrls = [];
+      for (const f of files.slice(0,10)) {
+        const r = sRef(storage, `listings/${ref.id}/${Date.now()}_${encodeURIComponent(f.name)}`);
+        await uploadBytes(r, f, { contentType: f.type || "image/jpeg" });
+        const url = await getDownloadURL(r);
+        photoUrls.push(url);
+      }
+      if (photoUrls.length) {
+        await updateDoc(doc(db, "listings", ref.id), { coverUrl: photoUrls[0], photos: photoUrls });
+      }
 
       // Kullanıcıyı bilgilendir → Onay Bekleyenler’e yönlendir
       console.log("[create] listings/", ref.id);
