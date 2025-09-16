@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const cfg = {
-  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
   storageBucket: "ureten-eller-v2.firebasestorage.app",
