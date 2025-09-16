@@ -394,6 +394,9 @@ const storage = getStorage(app);
       const fileInput = document.getElementById("photos");
       const files = Array.from(fileInput?.files || []);
       let photoUrls = [];
+      const fileInput = document.getElementById("photos");
+      const files = Array.from(fileInput?.files || []);
+      let photoUrls = [];
       try {
         for (const f of files.slice(0,10)) {
           console.log("[upload] start", {name: f.name, size: f.size, type: f.type});
