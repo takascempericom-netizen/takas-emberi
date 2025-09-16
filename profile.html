@@ -330,7 +330,7 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, limit, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
@@ -361,11 +361,19 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
     function shortId(id){ return id ? id.slice(0,6)+'…'+id.slice(-4) : '—'; }
 
     function byStatus(item){
-      const now = Date.now();
-      if(item.status==='pending') return 'pending';
-      if(item.status==='active' && (!item.expiresAt || item.expiresAt>now)) return 'active';
-      return 'expired';
-    }
+  const now = Date.now();
+  let exMs = 0;
+  if (item && item.expiresAt) {
+    exMs = item.expiresAt.toMillis ? item.expiresAt.toMillis() : (item.expiresAt.seconds ? item.expiresAt.seconds*1000 : 0);
+  }
+  if (item.status === "pending") return "pending";
+  if (item.status === "active" && (!exMs || exMs > now)) return "active";
+  return "expired";
+}
+  if (item.status === 'pending') return 'pending';
+  if (item.status === 'active' && (!exMs || exMs > now)) return 'active';
+  return 'expired';
+}
     function card(item){
       const status = byStatus(item);
       const badge = status==='active' ? '<span class="badge ok">Yayında</span>' : status==='pending' ? '<span class="badge wait">Onay Bekliyor</span>' : '<span class="badge exp">Süresi Doldu</span>';
