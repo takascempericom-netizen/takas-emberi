@@ -363,15 +363,6 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
     function byStatus(item){
   const now = Date.now();
   let exMs = 0;
-  if (item function byStatus(item){function byStatus(item){ item.expiresAt) {
-    exMs = item.expiresAt.toMillis ? item.expiresAt.toMillis() : (item.expiresAt.seconds ? item.expiresAt.seconds*1000 : 0);
-  }
-  if (item.status === "pending") return "pending";
-  if (item.status === "active" function byStatus(item){function byStatus(item){ (!exMs || exMs > now)) return "active";
-  return "expired";
-}
-  const now = Date.now();
-  let exMs = 0;
   if (item && item.expiresAt) {
     exMs = item.expiresAt.toMillis ? item.expiresAt.toMillis() : (item.expiresAt.seconds ? item.expiresAt.seconds*1000 : 0);
   }
