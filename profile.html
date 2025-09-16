@@ -370,6 +370,10 @@ body{ padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   if (item.status === "active" && (!exMs || exMs > now)) return "active";
   return "expired";
 }
+  if (item.status === "pending") return "pending";
+  if (item.status === "active" && (!exMs || exMs > now)) return "active";
+  return "expired";
+}
   if (item.status === 'pending') return 'pending';
   if (item.status === 'active' && (!exMs || exMs > now)) return 'active';
   return 'expired';
