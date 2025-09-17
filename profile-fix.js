@@ -12,7 +12,14 @@ const cfg = {
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
 
-const app = getApps().length ? getApp() : initializeApp(cfg);
+const app = (()=>{ try{ const a=getApp(); const o=a.options||{};
+  if(o.projectId!=="ureten-eller-v2" || o.storageBucket!=="ureten-eller-v2.firebasestorage.app"){
+    return initializeApp(cfg,"profileFix");
+  }
+  return a;
+}catch{
+  return initializeApp(cfg,"profileFix");
+}})();
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const st   = getStorage(app);
