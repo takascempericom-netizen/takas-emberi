@@ -4,7 +4,7 @@ import {
   EmailAuthProvider, reauthenticateWithCredential, updatePassword, signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  initializeFirestore, collection, collectionGroup, getDocs, query, where, orderBy, limit,
+  initializeFirestore, collection, collectionGroup, getDocs, getDoc, query, where, orderBy, limit,
   addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -273,7 +273,7 @@ async function renderAkan(){
           <div class="muted">${v.active?'aktif':'pasif'}</div>
           <div class="muted">${fmtDate(v.createdAt)}</div>
           <div style="display:flex;gap:8px;justify-content:flex-end">
-            <button class="btn btn-ok" data-toggle="${d.id}">${v.active?'Pasifleştir':'Aktifleştir'}</button>
+            <button class="btn btn-ok" data-toggle="" data-active=""></button>
             <button class="btn btn-bad" data-del="${d.id}">Sil</button>
           </div>
         </div>`);
