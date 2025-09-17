@@ -394,9 +394,9 @@ const storage = getStorage(app);
   document.getElementById("yayinaAl")?.addEventListener("click", async () => {
     try {
       const u = auth.currentUser;
-      if (!u) { alert("Devam etmek için giriş yapın."); location.href = "auth.html?next=ilan-ver.html"; return; }
+      if (!u) { alert("Devam etmek için giriş yapın."); location.href = "auth.html?next=listing-new.html"; return; }
 
-      // ilan-ver.html içindeki collect() fonksiyonunu kullan
+      // listing-new.html içindeki collect() fonksiyonunu kullan
       const payload = (typeof collect === "function") ? collect() : {};
       // Zorunlu alanlar
         // Küfür/argo kontrolü (başlık + açıklama)
