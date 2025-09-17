@@ -22,7 +22,7 @@ var feed  = document.getElementById("feed");
 var empty = document.getElementById("feed-empty");
 
 function card(d, id){
-  var img = d.coverUrl || ("https://picsum.photos/seed/" + id + "/800/600");
+  var img = ((d.coverUrl||"").trim()) || ((Array.isArray(d.photos) && ( (d.photos[0]||"").trim() ))) || ("https://picsum.photos/seed/" + id + "/800/600");
   var title = d.title || "İlan";
   var sub = (d.category || "") + (d.city ? " • " + d.city : "");
   return ''
@@ -30,6 +30,7 @@ function card(d, id){
     +   '<img class="thumb" src="'+img+'" alt="'+title+'">'
     +   '<div class="meta">'
     +     '<div class="title">'+title+'</div>'
+      + '    <div class="desc">'+(d.description||"")+'</div>' 
     +     '<div class="sub">'+sub+'</div>'
     +     '<div class="actions">'
     +       '<a class="btn offer" href="#" data-offer-id="'+id+'" data-seller="'+(d.ownerId||'')+'" data-title="'+title+'">Teklif ver</a>'
