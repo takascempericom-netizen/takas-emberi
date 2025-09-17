@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { initializeFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const cfg = {
@@ -14,7 +14,7 @@ const cfg = {
 
 const app = getApps().length ? getApp() : initializeApp(cfg);
 const auth = getAuth(app);
-const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+const db   = getFirestore(app);
 const st   = getStorage(app);
 
 const q = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
