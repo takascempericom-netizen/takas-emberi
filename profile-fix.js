@@ -17,64 +17,146 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 const st   = getStorage(app);
 
-const q = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+// URL'ye ?pfdebug=1 eklersen log açılır
+const DEBUG = new URLSearchParams(location.search).has("pfdebug");
+const seen  = new Set(); // işlenen listing id'leri
 
-function parseListingIdFromHref(href){
-  try{ const u=new URL(href, location.origin); return u.searchParams.get('id'); }catch{ return null; }
+const $all = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+const log  = (...a)=>{ if(DEBUG) console.log("[profile-fix]", ...a); };
+
+function pickIdTokensFromPath(path){
+  // /ilan/ABCDEF... , /listing/XYZ..., /detay/<id> gibi; 15+ uzun tokenları aday al
+  return (path||"").split(/[/#?&=]/g).filter(x=>/^[A-Za-z0-9_-]{15,}$/.test(x));
+}
+function parseIdFromHref(href){
+  try{
+    const u = new URL(href, location.origin);
+    // 1) ?id= paramı
+    const byQ = u.searchParams.get("id");
+    if(byQ && /^[\w-]{15,}$/.test(byQ)) return byQ;
+    // 2) hash içinde id= veya uzun token
+    const hash = u.hash || "";
+    const byH  = (hash.match(/id=([\w-]{15,})/)||[])[1];
+    if(byH) return byH;
+    const toks = pickIdTokensFromPath(u.pathname + hash);
+    return toks[0] || null;
+  }catch{ return null; }
+}
+function findCardRoot(el){
+  return el.closest?.(".listing-card, .ilan-card, .ilan, .listing, .card, article, li, .item, .row, .box, div") || el;
 }
 
-async function firstPhotoUrl(d){
-  const arr = d?.photos || d?.images || d?.imageUrls || [];
-  if(!arr || !arr.length) return null;
-  const x = arr[0];
-  if(typeof x === "string"){
-    if(/^https?:\/\//i.test(x)) return x;       // zaten tam URL
-    try{ return await getDownloadURL(ref(st, x)); }catch{ return null; }  // storage path -> URL
+async function firstPhotoUrl(data){
+  // Olası alan adları
+  const lists = [
+    ...(Array.isArray(data?.photos)? data.photos : []),
+    ...(Array.isArray(data?.images)? data.images : []),
+    ...(Array.isArray(data?.imageUrls)? data.imageUrls : []),
+    ...(Array.isArray(data?.gallery)? data.gallery : []),
+    ...(Array.isArray(data?.media)? data.media : []),
+  ];
+  const cover = data?.cover || data?.thumbnail || data?.thumb;
+  if(cover) lists.unshift(cover);
+
+  for(const x of lists){
+    let u = null;
+    if(typeof x === "string") u = x;
+    else if(x && typeof x === "object") u = x.url || x.src || x.path || x.storagePath || null;
+    if(!u) continue;
+
+    // Zaten http(s) ise direkt
+    if(/^https?:\/\//i.test(u)) return u;
+
+    // gs:// veya plain storage path ise downloadURL üret
+    try{
+      const r = ref(st, u.startsWith("gs://") ? u : u);
+      const url = await getDownloadURL(r);
+      if(url) return url;
+    }catch(e){ /* devam */ }
   }
-  // obje ise {url:"..."} vb.
-  const u = x.url || x.src || x.path;
-  if(!u) return null;
-  if(/^https?:\/\//i.test(u)) return u;
-  try{ return await getDownloadURL(ref(st, u)); }catch{ return null; }
-}
-
-function findCardByDocId(id){
-  // 1) data-doc-id / data-id
-  const ds = q(`[data-doc-id="${id}"],[data-id="${id}"]`);
-  if(ds.length) return ds[0];
-  // 2) aynı id'yi taşıyan linkin kartı
-  const a = q('a[href*="id="]').find(el=>parseListingIdFromHref(el.getAttribute('href'))===id);
-  if(a) return a.closest('.card, .item, .listing, .listing-card, li, article, .row, div');
   return null;
 }
 
-function findImgInsideCard(card){
-  if(!card) return null;
-  return card.querySelector('img') || null;
+function applyImageToCard(card, url){
+  if(!card || !url) return false;
+
+  // 1) picture > source + img
+  const picture = card.querySelector("picture");
+  if(picture){
+    const srcs = picture.querySelectorAll("source");
+    srcs.forEach(s=>{ s.srcset = url; });
+  }
+  // 2) <img>
+  const img = card.querySelector("img");
+  if(img){
+    img.src = url;
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.referrerPolicy = "no-referrer";
+    return true;
+  }
+  // 3) background-image (thumb/cover)
+  const bg = card.querySelector(".thumb, .cover, [data-bg], [class*='thumb'], [class*='cover']");
+  if(bg){
+    bg.style.backgroundImage = `url("${url}")`;
+    bg.style.backgroundSize = "cover";
+    bg.style.backgroundPosition = "center";
+    return true;
+  }
+  return false;
 }
 
-async function fixOne(id){
+async function fixCardById(id, card){
+  if(!id || seen.has(id)) return;
+  seen.add(id);
   try{
-    const snap = await getDoc(doc(db,'listings',id));
-    if(!snap.exists()) return;
-    const url = await firstPhotoUrl(snap.data());
-    if(!url) return;
-    const card = findCardByDocId(id);
-    const img  = card ? findImgInsideCard(card) : null;
-    if(img){ img.src = url; img.decoding="async"; img.loading="lazy"; }
-  }catch(e){ /* sessiz geç */ }
+    const s = await getDoc(doc(db, "listings", id));
+    if(!s.exists()){ log("doc yok", id); return; }
+    const url = await firstPhotoUrl(s.data());
+    if(!url){ log("foto bulunamadı", id); return; }
+    const ok = applyImageToCard(card, url);
+    log(ok ? "✓ düzeltildi" : "kart img bulunamadı", id, url);
+  }catch(e){
+    log("hata", id, e?.message||e);
+  }
 }
 
-async function fixAll(){
-  // profil sayfasındaki linklerden ID'leri topla
-  const ids = new Set(
-    q('a[href*="id="]').map(a => parseListingIdFromHref(a.getAttribute('href'))).filter(Boolean)
-  );
-  // Ayrıca veri attribute'larından yakala
-  q('[data-doc-id],[data-id]').forEach(el=>{ ids.add(el.dataset.docId || el.dataset.id); });
-  if(ids.size===0) return;
-  for(const id of ids){ await fixOne(id); }
+function collectAndFix(root=document){
+  const pairs = [];
+
+  // 1) data-* ile
+  $all("[data-doc-id], [data-id], [data-listing-id], [data-open-listing], [data-listing]", root).forEach(el=>{
+    const id = el.dataset.docId || el.dataset.id || el.dataset.listingId || el.dataset.openListing || el.dataset.listing || null;
+    if(id && /^[\w-]{15,}$/.test(id)){
+      pairs.push([id, findCardRoot(el)]);
+    }
+  });
+
+  // 2) linklerden
+  $all("a[href]", root).forEach(a=>{
+    const id = parseIdFromHref(a.getAttribute("href"));
+    if(id) pairs.push([id, findCardRoot(a)]);
+  });
+
+  // 3) benzersizleştir ve çalıştır
+  const done = new Set();
+  for(const [id, card] of pairs){
+    if(done.has(id)) continue;
+    done.add(id);
+    fixCardById(id, card);
+  }
 }
 
-document.addEventListener('DOMContentLoaded', fixAll);
-onAuthStateChanged(auth, ()=>fixAll());
+function observe(){
+  const mo = new MutationObserver(muts=>{
+    for(const m of muts){
+      m.addedNodes?.forEach?.(n=>{
+        if(n.nodeType===1) collectAndFix(n);
+      });
+    }
+  });
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{ collectAndFix(); observe(); });
+onAuthStateChanged(auth, ()=>collectAndFix());
