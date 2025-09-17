@@ -90,6 +90,7 @@ btnCancel?.addEventListener('click', ()=> {
 form?.addEventListener('submit', async (e)=>{
   e.preventDefault();
   const user = auth.currentUser;
+  await user.getIdToken(true); // force refresh idToken
   if(!user){ alert("Önce giriş yapın"); return; }
 
   const title = document.getElementById('title').value.trim();
