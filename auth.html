@@ -355,3 +355,30 @@
 </script>
 </body>
 </html>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // Eğer sayfanda zaten initializeApp varsa, bu bloğu atla.
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+    authDomain: "ureten-eller-v2.firebaseapp.com",
+    projectId: "ureten-eller-v2",
+    storageBucket: "ureten-eller-v2.firebasestorage.app",
+    messagingSenderId: "621494781131",
+    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e",
+  };
+  const app = (()=>{ try{ return firebase?.app?.() }catch(_){ return initializeApp(firebaseConfig) } })();
+
+  const auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence);
+
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next') || 'listing-new.html';
+
+  onAuthStateChanged(auth, (u) => {
+    if (u) {
+      location.replace(next);
+    }
+  });
+</script>
