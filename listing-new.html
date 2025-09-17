@@ -77,10 +77,10 @@
       if(!currentUser){ state.textContent="Oturum bulunamadı."; return; }
 
       const title=$('title').value.trim();
-      const desc =$(`desc`).value.trim();
-      const cat  =$(`cat`).value;
-      const city =$(`city`).value.trim();
-      const want =$(`want`).value.trim()||null;
+      const desc =$('desc').value.trim();
+      const cat  =$('cat').value;
+      const city =$('city').value.trim();
+      const want =$('want').value.trim()||null;
       const price=$('price').value?Number($('price').value):null;
 
       if(!title||!desc||!cat||!city){ state.textContent="Gerekli alanları doldurun."; return; }
