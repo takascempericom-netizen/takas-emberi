@@ -3,7 +3,7 @@ import {
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp
+  initializeFirestore, collection, addDoc, updateDoc, doc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as sref, uploadBytesResumable, getDownloadURL
@@ -20,7 +20,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db   = getFirestore(app);
+const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 const st   = getStorage(app);
 
 // UI elemanları
