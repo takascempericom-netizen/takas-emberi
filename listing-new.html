@@ -110,6 +110,16 @@
           },rej,res));
           urls.push(await getDownloadURL(task.snapshot.ref));
         }
+        await updateDoc(refDoc,{ photos:urls, coverPhoto:urls[0]||null, updatedAt:serverTimestamp() });
+        note.hidden=false;
+        note.innerHTML="<div class=\"ok\"><strong>İlan gönderildi.</strong></div><div>Durum: <span class=\"tag\">onay bekliyor</span></div><div class=\"muted\">Admin onayı sonrası yayında.</div>";
+        state.textContent=""; f.reset(); preview.innerHTML="";
+      }catch(ex){
+        console.error(ex); state.textContent="Hata: "+(ex.message||ex);
+      }finally{
+        submitBtn.disabled=false;
+      }
+    });
   </script>
 </body>
 </html>
