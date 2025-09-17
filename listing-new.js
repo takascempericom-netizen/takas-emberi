@@ -36,6 +36,7 @@ const inputPhotos = document.getElementById('photos');
 // Foto önizleme
 inputPhotos?.addEventListener('change', () => {
   const files = Array.from(inputPhotos.files || []).slice(0,5);
+    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
   [...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
     const img = slot.querySelector('img');
     if(img) img.remove();
@@ -113,6 +114,7 @@ form?.addEventListener('submit', async (e)=>{
 
     // 2. Fotoğrafları yükle
     const files = Array.from(inputPhotos.files || []).slice(0,5);
+    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
     const urls=[];
     for(let i=0;i<files.length;i++){
       const f = files[i];
