@@ -104,6 +104,13 @@ form?.addEventListener('submit', async (e)=>{
     // 1. Firestore doc oluştur
     const docRef = await addDoc(collection(db,"listings"),{
       ownerId: user.uid,
+      // Admin panelleri için geniş uyumluluk alanları
+       
+       
+       
+       
+      pendingAt: serverTimestamp(),
+       
       title, desc, category:cat, city,
       price: price? Number(price): null,
       photos: [],
