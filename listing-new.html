@@ -23,14 +23,8 @@
     <h1>İlan Ver</h1>
     <form id="f" autocomplete="off">
       <label>Başlık</label><input id="title" type="text" required maxlength="80"/>
-      <label>Açıklama</label><
+        <textarea id="desc" required maxlength="3000"></textarea>
 
-cat >> listing-new.html <<'EOF'
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, serverTimestamp, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
