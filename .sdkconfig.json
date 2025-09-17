@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "result": {
+    "fileName": "firebase-js-config.json",
+    "fileContents": "{\n  \"projectId\": \"ureten-eller-v2\",\n  \"appId\": \"1:621494781131:web:13cc3b061a5e94b7cf874e\",\n  \"storageBucket\": \"ureten-eller-v2.firebasestorage.app\",\n  \"apiKey\": \"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg\",\n  \"authDomain\": \"ureten-eller-v2.firebaseapp.com\",\n  \"messagingSenderId\": \"621494781131\"\n}",
+    "sdkConfig": {
+      "projectId": "ureten-eller-v2",
+      "appId": "1:621494781131:web:13cc3b061a5e94b7cf874e",
+      "storageBucket": "ureten-eller-v2.firebasestorage.app",
+      "apiKey": "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      "authDomain": "ureten-eller-v2.firebaseapp.com",
+      "messagingSenderId": "621494781131"
+    }
+  }
+}
