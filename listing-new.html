@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>İlan Ver • Takas Çemberi</title>
+
+cat >> listing-new.html <<'EOF'
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--fg:#0b0b0b;--muted:#6b7280;--line:#e6e8ee;--acc:#0ea5e9;--ok:#16a34a;--bad:#dc2626}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:#fff}
+    .wrap{max-width:960px;margin:24px auto;padding:16px}
+    .card{border:1px solid var(--line);border-radius:16px;padding:20px}
+    h1{margin:0 0 12px;font-size:24px}
+    label{font-weight:600;display:block;margin:14px 0 6px}
+    input[type=text], input[type=number], textarea, select{
+      width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px
+    }
+    textarea{min-height:120px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--acc);color:#fff;
+      padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .danger{color:var(--bad)}
+    .ok{color:var(--ok)}
+    .gals{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:8px}
+    .thumb{border:1px dashed var(--line);border-radius:12px;padding:8px;position:relative}
+    .thumb img{width:100%;height:100px;object-fit:cover;border-radius:8px}
+    .prog{height:6px;background:#f5f7fb;border-radius:999px;overflow:hidden;margin-top:6px}
+    .bar{height:100%;width:0}
+    .note{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:14px;margin-top:12px}
+    .hr{height:1px;background:var(--line);margin:16px 0}
+    .tag{display:inline-block;background:#eef6ff;border:1px solid #dbeafe;color:#1e40af;border-radius:999px;padding:4px 10px;font-size:12px;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>İlan Ver</h1>
+      <p class="muted">Görseller: sadece <strong>JPG/PNG/WebP</strong>, her biri <strong>10MB</strong> altı, en fazla <strong>5 adet</strong>. İlan önce <span class="tag">onay bekliyor</span> durumuna düşer.</p>
+      <form id="f" autocomplete="off">
+        <label>Başlık</label>
+        <input id="title" type="text" required maxlength="80" placeholder="Örn: Akıllı saat takaslı" />
+        <label>Açıklama</label>
+        <textarea id="desc" required maxlength="3000" placeholder="Ürünün durumu, takas isteğin, notlar..."></textarea>
+        <div class="row">
+          <div>
+            <label>Kategori</label>
+            <select id="cat" required>
+              <option value="" disabled selected>Seçiniz</option>
+              <option>Elektronik</option>
+              <option>Ev & Yaşam</option>
+              <option>Giyim & Aksesuar</option>
+              <option>Hobi</option>
+              <option>Diğer</option>
+            </select>
+          </div>
+          <div>
+            <label>Şehir</label>
+            <input id="city" type="text" required placeholder="Örn: İstanbul" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Takas İstediğin (opsiyonel)</label>
+            <input id="want" type="text" placeholder="Örn: Kulaklık ile takas" />
+          </div>
+          <div>
+            <label>Fiyat (opsiyonel)</label>
+            <input id="price" type="number" min="0" step="1" placeholder="₺" />
+          </div>
+        </div>
+        <label>Görseller (en fazla 5)</label>
+        <input id="photos" type="file" accept="image/*" multiple />
+        <div id="preview" class="gals"></div>
+        <div class="hr"></div>
+        <button id="submitBtn" class="btn" type="submit">İlanı Gönder</button>
+        <span id="state" class="muted"></span>
+      </form>
+      <div id="note" class="note" hidden></div>
+    </div>
+  </div>

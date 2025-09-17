@@ -338,13 +338,105 @@ window.addEventListener("DOMContentLoaded",()=>{
       category:$("kategori").value, subcategory:$("altKategori").value,
       brand:$("marka")?.value||"", model:$("model")?.value||"",
       year:$("yil")?.value||"", km:$("km")?.value||"",
-      title:$("baslik").value.trim(), desc:$("aciklama").value.trim(),
+      title:$("baslik").value.trim(), description:$("aciklama").value.trim(),
       condition:$("durum").value, city:$("il").value, district:$("ilce").value,
-      status:"pending", createdAt:new Date().toISOString()
+      status:"pending", createdAt: new Date().toISOString()
     };
   }
 });
 </script>
 <script type="module" src="/js/redirect-after-create.js"></script>
+<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a.nav-bildir");if(a){e.preventDefault();try{window.dispatchEvent(new CustomEvent("tc:bell:toggle"));}catch(_){}}});</script>
+<script>(function(){const ORG_FETCH=window.fetch;const MUST=(u)=>/\/databases\/\(default\)\/documents(\/listings)?$/.test(u);window.fetch=async function(u,opts){try{if(opts&&opts.method==="POST"&&MUST(String(u))&&opts.headers&&/application\/json/i.test(String(opts.headers["Content-Type"]||opts.headers.get&&opts.headers.get("Content-Type")||""))){let bodyJSON;try{bodyJSON=JSON.parse(opts.body);}catch(e){};if(bodyJSON&&bodyJSON.fields){bodyJSON.fields.status={stringValue:"pending"};if(!bodyJSON.fields.createdAt){bodyJSON.fields.createdAt={timestampValue:new Date().toISOString()};}opts.body=JSON.stringify(bodyJSON);console.log("[hook] enforced status=pending on listings");}}}catch(e){console.warn("[hook] failed",e)}return ORG_FETCH.apply(this,arguments);};})();</script>
 </body>
 </html>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  // Aynı config, çift init'e karşı koruma
+  const cfg = {
+    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+    authDomain: "ureten-eller-v2.firebaseapp.com",
+    projectId: "ureten-eller-v2",
+    storageBucket: "ureten-eller-v2.appspot.com",
+    messagingSenderId: "621494781131",
+    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+  };
+  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+  const db  = getFirestore(app);
+  const auth= getAuth(app);
+  // --- Küfür/argo filtre ---
+  const BAD_WORDS_RE = new RegExp(String.raw`\\b(amk|aq|orospu|piç|p[iı]ç|oç|şerefsiz|serefsiz|salak|gerizekal[ıi]|ibne|yavşak|kahpe|aptal|mal|dangalak)\\b`, "gi");
+  function findBadWords(txt){
+    const t = (txt||"").toLowerCase().replace(/[ç]/g,"c").replace(/[ğ]/g,"g").replace(/[ı]/g,"i").replace(/[ö]/g,"o").replace(/[ş]/g,"s").replace(/[ü]/g,"u");
+    const m = t.match(BAD_WORDS_RE) || []; return Array.from(new Set(m));
+  }
+  function ensureCleanOrWarn(title, description){
+    const bad = findBadWords((title||"")+" "+(description||""));
+    if(bad.length){
+      alert("Açıklama/Başlıkta topluluk kurallarına aykırı kelimeler bulundu: \n- " + bad.join(", ") +
+            "\n\nLütfen metni düzeltip tekrar deneyiniz.");
+      return false;
+    }
+    return true;
+  }
+const storage = getStorage(app);
+
+  // Eski click handler'ı sıfırla ve gerçek handler'ı bağla
+  const btn = document.getElementById("yayinaAl");
+  if (btn) {
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+  }
+  document.getElementById("yayinaAl")?.addEventListener("click", async () => {
+    try {
+      const u = auth.currentUser;
+      if (!u) { alert("Devam etmek için giriş yapın."); location.href = "auth.html?next=ilan-ver.html"; return; }
+
+      // ilan-ver.html içindeki collect() fonksiyonunu kullan
+      const payload = (typeof collect === "function") ? collect() : {};
+      // Zorunlu alanlar
+        // Küfür/argo kontrolü (başlık + açıklama)
+        if(!ensureCleanOrWarn(payload.title, payload.description)){ return; }
+      payload.ownerId   = u.uid;
+      payload.status    = "pending";
+      payload.createdAt = serverTimestamp();
+      payload.updatedAt = serverTimestamp();
+        payload.expiresAt = new Date(Date.now()+30*24*60*60*1000).toISOString();
+
+      // Kaydet
+      const ref = await addDoc(collection(db, "listings"), payload);
+      // --- Fotoğraf yükleme ---
+      const fileInput = document.getElementById("photos");
+      const files = Array.from(fileInput?.files || []).slice(0,5);
+      let photoUrls = [];
+      try {
+        for (const f of files) {
+          const r = sRef(storage, "listings/" + ref.id + "/" + Date.now() + "_" + encodeURIComponent(f.name));
+          await uploadBytes(r, f, { contentType: f.type || "image/jpeg" });
+          const url = await getDownloadURL(r);
+          photoUrls.push(url);
+        }
+      } catch(e) {
+        console.error("[upload] hata", e);
+        alert("Fotoğraf yükleme hatası: " + (e?.message || e));
+      }
+      if (photoUrls.length) {
+        await updateDoc(doc(db, "listings", ref.id), { coverUrl: photoUrls[0], photos: photoUrls });
+      }
+      // Kullanıcıyı bilgilendir → Onay Bekleyenler’e yönlendir
+      console.log("[create] listings/", ref.id);
+      alert("İlan admin onayına gönderildi! Onaylanana kadar profilinde 'Onay Bekleyenler'de görebilirsin.");
+      location.href = "profile.html#pending";
+    } catch (err) {
+      console.warn("[create listing] error:", err);
+      alert("Kaydetme hatası: " + (err?.message || err));
+    }
+  });
+
+  // Not: Admin onay verdiğinde, admin panelinden status='active' yapılınca
+  // expiresAt = serverTimestamp() + 30 gün ayarlayacağız (bir sonraki adımda).
+</script>

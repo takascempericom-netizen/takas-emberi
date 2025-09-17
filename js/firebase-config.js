@@ -15,7 +15,7 @@ window.firebaseConfig = {
 };
 
 // Firebase başlat
-export const app = initializeApp(firebaseConfig);
+export const app = initializeApp(window.firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
