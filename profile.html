@@ -55,6 +55,39 @@
     </div>
   </div>
 
+  
+  <!-- bootstrap: profile-boot-uid -->
+  <script>
+  (function(){
+    try{
+      var UID_RE=/^[A-Za-z0-9_-]{15,}$/;
+      var uid=null;
+      // localStorage anahtarları
+      var keys=['tc_uid','uid','userUid','authUid','__uid','current_uid','firebase:uid'];
+      for(var i=0;i<keys.length && !uid;i++){
+        var v=localStorage.getItem(keys[i]);
+        if(v && UID_RE.test(v)) uid=v;
+        else {
+          try{
+            var j=JSON.parse(v||'null');
+            var u=(j&& (j.uid || (j.user&&j.user.uid) || (j.auth&&j.auth.uid) || (j.account&&j.account.uid)));
+            if(u && UID_RE.test(u)) { uid=u; break; }
+          }catch(e){}
+        }
+      }
+      // cookie
+      if(!uid){
+        var m=document.cookie.match(/(?:^|;)\s*uid=([^;]+)/);
+        if(m){ var c=decodeURIComponent(m[1]||''); if(UID_RE.test(c)) uid=c; }
+      }
+      if(uid){
+        var meta=document.createElement('meta');
+        meta.name='profile-uid'; meta.content=uid;
+        document.head.appendChild(meta);
+      }
+    }catch(e){}
+  })();
+  </script>
   <script type="module" src="./profile.page.v2.js?v=1758191659"></script>
 </body>
 </html>
