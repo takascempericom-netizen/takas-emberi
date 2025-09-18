@@ -522,7 +522,9 @@ async function loadUser(uid){
   const s=await getDoc(doc(db,"users",uid)); const d=s.exists()?s.data():{};
   const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil"; const photo=d.photoURL||d.avatar||"https://i.imgur.com/3SgkGmQ.png";
   
-$("#profileAvatar").src = photo;
+$('#profileAvatar').src = photo;
+(function(){ try{ if(window.__AVATAR_PERSIST__){ window.__AVATAR_PERSIST__.setAllAvatars(photo); const uidTxt = (document.getElementById('profileUid')?.textContent||'').trim(); window.__AVATAR_PERSIST__.rememberPhoto(uidTxt, photo); } }catch(e){} })();
+
 (function(){
   const uSpan = document.getElementById("profileUsername");
   const nameBox = document.getElementById("profileName");
@@ -568,7 +570,7 @@ $("#inpAvatar").addEventListener("change", async ()=>{
   const path=`avatars/${user.uid}/avatar_${Date.now()}.jpg`; const task=uploadBytesResumable(ref(st,path),f,{contentType:f.type||"image/jpeg"});
   task.on("state_changed", null, e=>alert(e?.message||e), async ()=>{
     const url=await getDownloadURL(ref(st,path)); await updateProfile(user,{photoURL:url});
-    await setDoc(doc(db,"users",user.uid),{photoURL:url,updatedAt:serverTimestamp()},{merge:true}); $("#profileAvatar").src=url; alert("Profil fotoğrafı güncellendi.");
+    await setDoc(doc(db,"users",user.uid),{photoURL:url,updatedAt:serverTimestamp()},{merge:true}); $("#profileAvatar").src=url; (function(){ try{ if(window.__AVATAR_PERSIST__){ window.__AVATAR_PERSIST__.setAllAvatars(url); window.__AVATAR_PERSIST__.rememberPhoto(user.uid, url); } }catch(e){} })(); alert("Profil fotoğrafı güncellendi.");
   });
 });
 $("#btnSaveProfile").onclick=async()=>{
@@ -936,6 +938,60 @@ meta.appendChild(uidEl);
 })();
   }
 });
+</script>
+
+
+<script id="persist-avatar-helpers">
+(function(){
+  // Tüm avatar img hedefleri
+  function setAllAvatars(url){
+    try{
+      if(!url) return;
+      // cache-buster
+      const u = url + (url.includes('?')?'&':'?') + 'v=' + Date.now();
+      const els = [
+        document.getElementById('profileAvatar'),
+        document.getElementById('avatarImg'),
+        document.getElementById('prof_avatarPreview')
+      ].filter(Boolean);
+      for(const img of els){
+        img.src = u;
+        img.style.display = 'block';
+      }
+      const init = document.getElementById('avatarInitial') || document.querySelector('.avatar-initial');
+      if(init) init.style.display = 'none';
+    }catch(e){}
+  }
+  function rememberPhoto(uid, url){
+    try{ if(uid && url){ localStorage.setItem('userPhoto:'+uid, url); } }catch(e){}
+  }
+  function getRememberedPhoto(uid){
+    try{ return uid ? localStorage.getItem('userPhoto:'+uid) || "" : ""; }catch(e){ return ""; }
+  }
+  // Global küçük köprü
+  window.__AVATAR_PERSIST__ = { setAllAvatars, rememberPhoto, getRememberedPhoto };
+})();
+</script>
+
+
+<script id="persist-avatar-boot">
+(function(){
+  function bootTry(){
+    try{
+      const uidTxt = (document.getElementById('profileUid')?.textContent||'').trim();
+      if(!uidTxt) return;
+      // Eğer img src boşsa, localStorage yedeğini dene
+      const haveImg = !!(document.getElementById('profileAvatar')?.getAttribute('src'));
+      if(!haveImg && window.__AVATAR_PERSIST__){
+        const cached = window.__AVATAR_PERSIST__.getRememberedPhoto(uidTxt);
+        if(cached){ window.__AVATAR_PERSIST__.setAllAvatars(cached); }
+      }
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(bootTry, 200); setTimeout(bootTry, 1000); setTimeout(bootTry, 2500);
+  });
+})();
 </script>
 
 </body>
