@@ -1,0 +1,76 @@
+== GIT DURUMU ==
+ROOT: /workspaces/takas-emberi
+
+>> git remote -v
+origin	https://github.com/takascempericom-netizen/takas-emberi (fetch)
+origin	https://github.com/takascempericom-netizen/takas-emberi (push)
+
+>> aktif dal
+main
+
+>> son 20 commit (kısa)
+f5feeb3 feat(profile): ilan kartlarına Düzenle/Sil; listing-edit akışı; düzenleme admin onayına gider; rules güncellendi
+818fc67 feat(profile): Ayarları profil paneline taşı; 5-renk döngülü accent; kaydet/sıfırla bağlandı
+cd4b43f feat(profile): alt menü (Ana Sayfa / Mesajlar / Bildirimler / Çıkış) — mobil sabit
+f424562 fix(profile): tek dosya inline; girişli kullanıcıyı localStorage'dan da yakala; sekmeler ve görseller stabil
+703c362 chore(profile): bust CDN by renaming to profile.page.v1758197075.js and updating HTML
+ff09b72 fix(profile): DEFAULT app, doğru gate/sekme davranışı, sağlam görsel çözümleme; cache-bust 1758196838
+196f29a feat(profile): kullanıcı ayarları (avatar/isim/username/e-posta), şifre sıfırlama, sekmeli ilanlar (yayında/pending/expired), responsive
+74d3d4a fix(profile): default-uid fallback + hard cache-bust v4 (1758195612)
+5dc08cf fix(profile): early bootstrap with meta profile-uid + ensure v3 include
+0fe9c9a feat(nav): profil linkleri girişte otomatik ?uid=<uid>
+54d989b feat(nav): profil linki girişte otomatik ?uid=<uid>
+b1e942d fix(profile): hard cache-bust -> profile.page.v3.js v=1758194655
+5c6ef64 fix(profile): otomatik UID tespiti (params/meta/dataset/localStorage/cookie/path/username/email) + cache-bust v=1758193041
+e5ef419 chore: add legacy profile-fix.js shim to stop 404s from cached pages
+fecd9ab fix: remove legacy profile-fix.js includes; use new profile.page.js only on profile.html
+adbe6b4 fix(profile): URL'den uid/username/email çöz; public görüntüleme + doğru görseller
+c562ed6 fix(profile): resolveImageURL genişletildi + cache-bust v=1758191861
+7ca2cc8 chore(profile): hard cache-bypass -> profile.page.v2.js
+b09a904 chore(profile): cache-bust profile.page.js v=1758191650
+84a7a75 chore(profile): cache-bust profile.page.js v=1758191395
+
+== DOSYA HARİTASI (profil/profile) ==
+nav-profile-link.js
+profile-actions.js
+profile-bottom-nav.snippet.html
+profile-fix.js
+profile-fix.v4.js
+profile-panel.snippet.html
+profile.html
+profile.legacy.html
+profile.page.js
+profile.page.v1758197075.js
+profile.page.v2.js
+profile.page.v3.js
+profile.page.v4.js
+
+== NAV/LINK REFERANSLARI ==
+./listing-edit.html:39:        <a href="/profile.html" class="muted" style="text-decoration:none">⬅ Profil</a>
+./home.html.bak.1757929487:238:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./home.html.bak.1757929487:248:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+./home.html:239:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./home.html:249:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+./profile_audit_20250918-125801.txt:48:./home.html.bak.1757929487:238:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./profile_audit_20250918-125801.txt:49:./home.html.bak.1757929487:248:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+./profile_audit_20250918-125801.txt:50:./home.html:239:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./profile_audit_20250918-125801.txt:51:./home.html:249:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+./profile_audit_20250918-125801.txt:52:./home.html.bak:201:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./profile_audit_20250918-125801.txt:53:./home.html.bak:211:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+./home.html.bak:201:      <a class="btn profile" href="profile.html">👤 Profil</a>
+./home.html.bak:211:        <a class="item" href="profile.html" role="menuitem">👤 Profil</a>
+
+== JS REFERANSLARI (profil/profile) ==
+
+== CSS REFERANSLARI ==
+
+== AUTH/AVATAR/USER ALANLARI ==
+
+== OLASI SAYFA İSİMLERİ ==
+admin/home.html
+home.html
+
+== ALT BAR / NAV ICON İPUÇLARI ==
+
+== FIREBASE CONFIG KONTROLÜ ==
+

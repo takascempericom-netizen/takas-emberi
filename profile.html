@@ -392,5 +392,74 @@ document.addEventListener("DOMContentLoaded", start);
 </script>
 
   <script type="module" src="./profile-actions.js"></script>
+
+<!-- === BOTTOM NAV (Ana Sayfa / Mesajlar / Bildirimler / Profil) === -->
+<style>
+  :root{ --bn-bg:rgba(9,12,18,.82); --bn-line:#1f2937; --bn-fg:#dbe2ea; --bn-active:#38bdf8; }
+  .bottom-nav{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
+    width:min(980px, calc(100% - 24px)); z-index:50;
+    background:var(--bn-bg); backdrop-filter: blur(10px);
+    border:1px solid var(--bn-line); border-radius:16px; padding:8px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+    box-shadow:0 10px 28px rgba(0,0,0,.35);
+  }
+  .bn-item{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 8px; border-radius:12px; text-decoration:none;
+    color:var(--bn-fg); font-weight:800; border:1px solid transparent;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .bn-item.active{ color:#00111a; background:var(--bn-active); border-color:transparent; }
+  .bn-ico{ font-size:18px; line-height:1; }
+  .bn-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:18px; height:18px; padding:0 6px; border-radius:999px;
+    font-size:11px; font-weight:800; background:#ef4444; color:white;
+  }
+  /* İçerik alt navın altında kalmasın */
+  body { padding-bottom:84px; }
+  /* Masaüstünde de görünür; istersen burada gizleyebilirsin */
+  @media (min-width:1024px){
+    .bottom-nav{ bottom:16px; }
+  }
+</style>
+
+<nav class="bottom-nav" role="navigation" aria-label="Alt Menü">
+  <a class="bn-item" href="/home.html" data-nav="home"><span class="bn-ico">🏠</span><span>Ana Sayfa</span></a>
+  <a class="bn-item" href="/messages.html" data-nav="messages"><span class="bn-ico">💬</span><span>Mesajlar</span></a>
+  <a class="bn-item" href="/notifications.html" data-nav="notifications"><span class="bn-ico">🔔</span><span>Bildiriler</span><span id="bnBadge" class="bn-badge" style="margin-left:6px;display:none">0</span></a>
+  <a class="bn-item" href="/profile.html" data-nav="profile"><span class="bn-ico">👤</span><span>Profil</span></a>
+</nav>
+
+<script>
+  // Aktif sekmeyi URL'e göre boya
+  (function(){
+    const path = (location.pathname || "").toLowerCase();
+    const map = {
+      home: "/home.html",
+      messages: "/messages.html",
+      notifications: "/notifications.html",
+      profile: "/profile.html"
+    };
+    document.querySelectorAll(".bn-item").forEach(a=>{
+      const key = a.getAttribute("data-nav");
+      if(!key) return;
+      const href = map[key] || "";
+      if(href && path.endsWith(href)) a.classList.add("active");
+    });
+
+    // Bildirim sayısı (opsiyonel: 0 ise gizle)
+    // Buraya Firestore/Realtime’dan okunacak gerçek sayı bağlayabilirsin.
+    const badge = document.getElementById("bnBadge");
+    const count = 0; // TODO: gerçek sayı
+    if(badge){
+      if(count>0){ badge.textContent = String(count); badge.style.display="inline-flex"; }
+      else { badge.style.display="none"; }
+    }
+  })();
+</script>
+<!-- === /BOTTOM NAV === -->
 </body>
 </html>
