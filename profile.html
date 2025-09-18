@@ -64,6 +64,16 @@
   </style>
 
 
+
+  <style id="hide-header-meta">
+    .hdr .meta { display:none !important; }
+    /* Panel içi isim/uid yan yana düzen */
+    .side-meta{ display:flex; flex-direction:column; gap:6px; margin-left:14px }
+    .side-meta .name{ font-weight:800; font-size:18px }
+    .side-meta .uid{ font-size:12px; color:#6b7280 }
+    .pavatar-row{ display:flex; align-items:center; gap:14px; }
+    @media (max-width:600px){ .side-meta .name{font-size:16px} }
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -602,6 +612,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const uidEl  = document.getElementById('profileUid');
   if(nameEl && !nameEl.textContent.trim()) nameEl.textContent = 'aliç01';
   if(uidEl  && !uidEl.textContent.trim())  uidEl.textContent  = '2qC0RCSXtibBo6kncoTPHdQo8zV2';
+});
+</script>
+
+
+<script id="move-name-into-panel">
+document.addEventListener('DOMContentLoaded', () => {
+  const panel = document.getElementById('profilePanel');
+  if(!panel) return;
+
+  // Paneldeki avatar alanını bul
+  const avBox = panel.querySelector('.avatar-big');
+  if(!avBox) return;
+
+  // Bir satır kapsayıcı oluştur (avatar + meta)
+  let row = avBox.closest('.pavatar-row');
+  if(!row){
+    row = document.createElement('div');
+    row.className = 'pavatar-row';
+    // avatar-big'in ebeveyninde avatar-big'in yerine row'u koyup avatar-big'i içine al
+    const holder = avBox.parentElement;
+    holder.insertBefore(row, avBox);
+    row.appendChild(avBox);
+  }
+
+  // Panel içine isim/uid bölümü (side-meta) ekle
+  let meta = panel.querySelector('.side-meta');
+  if(!meta){
+    meta = document.createElement('div');
+    meta.className = 'side-meta';
+    row.appendChild(meta);
+
+    // Aynı id'leri kullan ki mevcut JS doldursun/override etsin
+    const nameEl = document.createElement('div');
+    nameEl.className = 'name';
+    nameEl.id = 'profileName';
+    nameEl.textContent = 'aliç01';
+
+    const uidEl = document.createElement('div');
+    uidEl.className = 'uid';
+    uidEl.id = 'profileUid';
+    uidEl.textContent = '2qC0RCSXtibBo6kncoTPHdQo8zV2';
+
+    meta.appendChild(nameEl);
+    meta.appendChild(uidEl);
+  }
 });
 </script>
 
