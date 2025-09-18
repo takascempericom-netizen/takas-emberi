@@ -47,6 +47,22 @@
   <style id="quick-hide-btns">
   #btnRefresh, #btnEdit { display:none !important; }
 </style>
+
+  <style id="avatar-initial-style">
+    .avatar{ position:relative; width:72px; height:72px; border-radius:50%; overflow:hidden; display:grid; place-items:center; border:1px solid #e5e7eb; background:#f3f4f6; }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .avatar-initial{ width:100%; height:100%; display:grid; place-items:center; font-weight:800; font-size:28px; color:#0b1221; letter-spacing:.5px; }
+    /* Pastel gradient paletleri — harfe göre sınıf atanacak */
+    .ai-1{ background:linear-gradient(135deg,#fde68a,#a7f3d0); }
+    .ai-2{ background:linear-gradient(135deg,#a7f3d0,#bfdbfe); }
+    .ai-3{ background:linear-gradient(135deg,#bfdbfe,#e9d5ff); }
+    .ai-4{ background:linear-gradient(135deg,#e9d5ff,#fecaca); }
+    .ai-5{ background:linear-gradient(135deg,#fecaca,#fef3c7); }
+    .ai-6{ background:linear-gradient(135deg,#fef3c7,#bae6fd); }
+    .ai-7{ background:linear-gradient(135deg,#bae6fd,#bbf7d0); }
+    .ai-8{ background:linear-gradient(135deg,#bbf7d0,#e9d5ff); }
+  </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -483,6 +499,66 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tabs && list && list.parentElement) {
     list.parentElement.insertBefore(tabs, list);
   }
+});
+</script>
+
+
+<script id="avatar-initial-logic">
+document.addEventListener('DOMContentLoaded', () => {
+  async function updateAvatarFromUsers(){
+    try{
+      const $ = sel => document.querySelector(sel);
+      const params = new URLSearchParams(location.search);
+      const puid = params.get("uid");
+      const uid  = puid || (window.USER && USER.uid) || null;
+      if(!uid || typeof getDoc!=="function"){ return; } // Firebase modülleri hazır değilse çık
+
+      const snap = await getDoc(doc(db,"users", uid)).catch(()=>null);
+      const d = snap && snap.exists ? (snap.exists()? snap.data() : null) : (snap && snap.data ? snap.data() : null);
+
+      const displayName = (d && (d.displayName || d.username)) || (window.USER && (USER.displayName)) || "";
+      const email       = (d && d.email) || (window.USER && USER.email) || "";
+      const photo       = (d && d.photoURL) || (window.USER && USER.photoURL) || "";
+
+      const avatarEl    = $(".avatar") || $("#profileAvatar") || null;
+      let   imgEl       = $("#avatarImg") || (avatarEl ? avatarEl.querySelector("img") : null);
+      let   initEl      = $("#avatarInitial") || (avatarEl ? avatarEl.querySelector(".avatar-initial") : null);
+
+      // Eğer başlangıçta .avatar içinde initial yoksa oluştur
+      if(avatarEl && !initEl){
+        initEl = document.createElement("div");
+        initEl.className = "avatar-initial";
+        if(avatarEl && !avatarEl.querySelector(".avatar-initial")) avatarEl.appendChild(initEl);
+      }
+      if(avatarEl && !imgEl){
+        imgEl = document.createElement("img");
+        avatarEl.insertBefore(imgEl, avatarEl.firstChild);
+      }
+
+      const textBase = (displayName && displayName.trim()) || (email && email.trim()) || "U";
+      const ch = textBase.charAt(0).toUpperCase();
+      const idx = ((ch.charCodeAt(0) || 65) % 8) + 1;
+
+      if(photo){
+        if(imgEl){ imgEl.src = photo; imgEl.style.display="block"; }
+        if(initEl){ initEl.style.display="none"; }
+      }else{
+        if(initEl){
+          initEl.textContent = ch;
+          initEl.className = "avatar-initial ai-" + idx;
+          initEl.style.display = "grid";
+        }
+        if(imgEl){ imgEl.style.display="none"; }
+      }
+
+      const nameEl = $("#profileName");
+      if(nameEl && displayName){ nameEl.textContent = displayName; }
+    }catch(e){
+      console.warn("avatar-initial update error", e);
+    }
+  }
+  // Firebase auth state ile çakışmasın diye küçük bir gecikme:
+  setTimeout(updateAvatarFromUsers, 300);
 });
 </script>
 
