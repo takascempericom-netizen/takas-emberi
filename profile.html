@@ -132,6 +132,10 @@
         cntPub=$("#cntPub"),cntPend=$("#cntPend"),cntExp=$("#cntExp"),listEl=$("#list"),note=$("#note"),stat=$("#stat"),
         btnLogout=$("#btnLogout"),btnGoogle=$("#btnGoogle"),btnSendReset=$("#btnSendReset");
   const provider=new GoogleAuthProvider();
+function getParamUid(){
+  try{ return new URLSearchParams(location.search).get("uid"); }catch(e){ return null; }
+}
+
   function showAvatar(u){ if(u?.photoURL){avatarImg.src=u.photoURL;avatarImg.style.display="block";avatarInitial.style.display="none";} else {avatarInitial.textContent=(u?.displayName||u?.email||"U")[0].toUpperCase();avatarInitial.style.display="grid";avatarImg.style.display="none";}}
   function classify(d){const now=Date.now();const s=(d?.status||"").toLowerCase();const approved=["approved","active","yayında","yayinda","published"].includes(s)||d?.approved===true;const expired=d?.expiresAt && d.expiresAt.toMillis?d.expiresAt.toMillis()<now:false;const pending=!approved&&!expired;return {approved,pending,expired};}
   function render(items,isOwner){
@@ -184,7 +188,7 @@
   async function load(){note.style.display="block";const items=[];try{const c=collection(db,"listings");const qs=[query(c,where("ownerId","==",UID)),query(c,where("uid","==",UID)),query(c,where("userId","==",UID))];for(const q of qs){const snap=await getDocs(q);snap.forEach(d=>items.push({id:d.id,...d.data()}));}}catch(e){console.warn("listeleme",e)}const map=new Map();for(const it of items){map.set(it.id,it)}const arr=[...map.values()];cntPub.textContent=arr.filter(x=>{const c=classify(x);return c.approved&&!c.expired}).length;cntPend.textContent=arr.filter(x=>{const c=classify(x);return c.pending&&!c.approved&&!c.expired}).length;cntExp.textContent=arr.filter(x=>classify(x).expired).length;note.style.display="none";render(arr,USER&&USER.uid===UID);
   console.log("[profile] UID=",UID," pub=",document.getElementById("cntPub").textContent," pend=",document.getElementById("cntPend").textContent," exp=",document.getElementById("cntExp").textContent);
 }
-  onAuthStateChanged(auth,u=>{USER=u;UID=u?.uid||null;if(u){nameEl.textContent=u.displayName||u.email;uidEl.textContent=u.uid;f_displayName.value=u.displayName||"";f_email.value=u.email||"";showAvatar(u);btnLogout.style.display="inline-block";btnGoogle.style.display="none";}else{btnLogout.style.display="none";btnGoogle.style.display="inline-block";}load();});
+  onAuthStateChanged(auth,u=>{USER=u;const puid=getParamUid();UID=puid||(u&&u.uid)||UID; if(u){nameEl.textContent=u.displayName||u.email;uidEl.textContent=u.uid;f_displayName.value=u.displayName||"";f_email.value=u.email||"";showAvatar(u);btnLogout.style.display="inline-block";btnGoogle.style.display="none";}else{btnLogout.style.display="none";btnGoogle.style.display="inline-block";}load();});
   btnGoogle.onclick=()=>signInWithPopup(auth,provider);btnLogout.onclick=()=>signOut(auth);btnSendReset.onclick=()=>USER?.email&&sendPasswordResetEmail(auth,USER.email);
 </script>
 </body>
