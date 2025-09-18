@@ -257,19 +257,11 @@ async function loadUserMeta(uid, metaHint=null){
     avatar.src = photo;
     nameEl.textContent = display;
     uidEl.textContent  = uid;
-  (function(){ var uEl=(typeof document!="undefined"?document.getElementById("profileUsername"):null); try{
-    var uname = (typeof d!="undefined" && d && (d.username || d.name)) || (typeof display!="undefined"?display:"");
-    if(uEl && !uEl.textContent){ uEl.textContent = uname; }
-  }catch(e){} })();
   }catch(e){
     log("loadUserMeta hata",e?.message||e);
     avatar.src = "https://i.imgur.com/3SgkGmQ.png";
     nameEl.textContent = "Profil";
     uidEl.textContent  = uid;
-  (function(){ var uEl=(typeof document!="undefined"?document.getElementById("profileUsername"):null); try{
-    var uname = (typeof d!="undefined" && d && (d.username || d.name)) || (typeof display!="undefined"?display:"");
-    if(uEl && !uEl.textContent){ uEl.textContent = uname; }
-  }catch(e){} })();
   }
 }
 

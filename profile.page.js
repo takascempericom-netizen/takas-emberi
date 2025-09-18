@@ -165,10 +165,6 @@ async function loadUser(uid){
   const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil";
   const photo   = d.photoURL || d.avatar || "https://i.imgur.com/3SgkGmQ.png";
   avatar.src = photo; nameEl.textContent = display; uidEl.textContent = uid;
-  (function(){ var uEl=(typeof document!="undefined"?document.getElementById("profileUsername"):null); try{
-    var uname = (typeof d!="undefined" && d && (d.username || d.name)) || (typeof display!="undefined"?display:"");
-    if(uEl && !uEl.textContent){ uEl.textContent = uname; }
-  }catch(e){} })();
   inpDisplayName.value = d.displayName || "";
   inpUsername.value    = d.username || "";
   inpEmail.value       = d.email || "";

@@ -301,16 +301,6 @@
   .avatar, .hdr .avatar, .avatar-big { box-shadow:none !important; }
   .avatar-initial { background:none !important; }
 </style>
-
-<style id="list-actions-style">
-  .listing-card .actions{
-    display:none; gap:8px; padding:10px 12px; border-top:1px solid var(--line);
-    background:rgba(0,0,0,.03);
-  }
-  .btn-sm{ padding:6px 10px; font-size:12px; border-radius:8px }
-  .btn-warn{ background:#fee2e2; color:#7f1d1d; border:1px solid #fecaca }
-</style>
-
 </head>
 
 <body>
@@ -440,7 +430,7 @@
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const cfg = {
@@ -494,16 +484,8 @@ function classify(d){
 }
 function cardTpl(it){
   const t=it.title||"-", price=(it.price!=null?`${it.price}₺`:""), loc=[it.city,it.district].filter(Boolean).join(" / ");
-  const actions = `<div class="actions">
-    <button class="btn btn-ghost btn-sm edit" data-id="${it.id}">Düzenle</button>
-    <button class="btn btn-warn  btn-sm delete" data-id="${it.id}">Sil</button>
-  </div>`;
-  return `<div class="listing-card" data-doc-id="${it.id}" data-owner="${(it._raw&&it._raw.ownerId)||''}">`
-       + `<a class="ph"><img alt="${t}" loading="lazy" decoding="async"></a>`
-       + `<div class="body"><h3 class="title">${t}</h3><div class="muted">${loc}</div><div class="muted">${price}</div></div>`
-       + actions + `</div>`;
+  return `<div class="listing-card" data-doc-id="${it.id}"><a class="ph"><img alt="${t}" loading="lazy" decoding="async"></a><div class="body"><h3 class="title">${t}</h3><div class="muted">${loc}</div><div class="muted">${price}</div></div></div>`;
 }
-
 async function resolveImageURL(d){
   const list=[];
   for (const k of ["coverPhoto","coverUrl","cover","thumbnail","thumb","mainImage","primaryImage","image","imageUrl","photo","photoUrl"]) if(d?.[k]) list.push(d[k]);
@@ -525,8 +507,7 @@ async function renderListings(uid, tab="pub"){
     const all=[]; snap.forEach(docu=>{ const d=docu.data(); all.push({ id:docu.id, title:d.title||"", price:d.price??null, city:d.city||"", district:d.district||"", _raw:d }); });
     const buckets={pub:[],pend:[],exp:[]}; for(const it of all) buckets[classify(it._raw)].push(it);
     cntPub.textContent=buckets.pub.length; cntPend.textContent=buckets.pend.length; cntExp.textContent=buckets.exp.length;
-    const show=buckets[tab]||[]; listEl.innerHTML = show.map(cardTpl).join("");
-    if(window.__BIND_LISTING_ACTIONS__) window.__BIND_LISTING_ACTIONS__();
+    const show=buckets[tab]||[]; listEl.innerHTML=show.map(cardTpl).join("");
     let ok=0, fail=0;
     for(const el of $$(".listing-card")){
       const id=el.getAttribute("data-doc-id");
@@ -1010,74 +991,6 @@ meta.appendChild(uidEl);
   document.addEventListener('DOMContentLoaded', function(){
     setTimeout(bootTry, 200); setTimeout(bootTry, 1000); setTimeout(bootTry, 2500);
   });
-})();
-</script>
-
-
-<script id="listing-actions">
-(function(){
-  async function openEdit(listingId){
-    const candidates=["/edit.html","/ilan-duzenle.html","/listing-edit.html","/yeni-ilan.html","/new-listing.html"];
-    for(const p of candidates){
-      try{ const r=await fetch(p,{method:"HEAD"}); if(r.ok){ location.href=p+"?edit="+encodeURIComponent(listingId); return; } }catch(e){}
-    }
-    alert("Düzenleme sayfası bulunamadı. Lütfen bir edit sayfası ekleyin.");
-  }
-  async function deleteListing(listingId){
-    try{
-      if(!confirm("İlan silinsin mi? Bu işlem geri alınamaz.")) return;
-      const user = (window.auth && auth.currentUser) || null;
-      // güvenlik: belge size ait mi?
-      try{
-        const s = await getDoc(doc(db,"listings",listingId));
-        const d = s.exists()? s.data(): null;
-        if(d && d.ownerId && user && user.uid && d.ownerId !== user.uid){
-          alert("Bu ilan size ait değil, silemezsiniz.");
-          return;
-        }
-      }catch(e){}
-      await deleteDoc(doc(db,"listings",listingId));
-      // DOM'dan kaldır ve sayaç/istatistik güncelle
-      const el = document.querySelector(`.listing-card[data-doc-id="${listingId}"]`);
-      if(el) el.remove();
-      const listEl=document.getElementById("list");
-      const left = listEl ? listEl.children.length : 0;
-      const stat = document.getElementById("stat");
-      if(stat) stat.textContent = `${left} ilan • silindi`;
-    }catch(e){
-      console.error(e); alert("Silme yapılamadı: "+(e?.message||e));
-    }
-  }
-  // Her render sonrası butonları aktive et
-  window.__BIND_LISTING_ACTIONS__ = function bindListingActions(){
-    const listEl = document.getElementById("list");
-    if(!listEl) return;
-    // Sadece sahibine göster
-    const curUid = (window.auth && auth.currentUser && auth.currentUser.uid) || (function(){
-      try{
-        for(const k of Object.keys(localStorage)){
-          if(k.startsWith("firebase:authUser:")){
-            const j = JSON.parse(localStorage.getItem(k)||"null");
-            if(j && j.uid) return j.uid;
-          }
-        }
-      }catch(e){}
-      return null;
-    })();
-    listEl.querySelectorAll(".listing-card").forEach(card=>{
-      const owner = card.getAttribute("data-owner")||"";
-      const bar = card.querySelector(".actions");
-      if(bar){
-        bar.style.display = (curUid && owner && curUid===owner) ? "flex" : "none";
-        const eBtn = bar.querySelector(".edit");
-        const dBtn = bar.querySelector(".delete");
-        if(eBtn && !eBtn._wired){ eBtn._wired=true; eBtn.addEventListener("click", ()=>openEdit(eBtn.dataset.id)); }
-        if(dBtn && !dBtn._wired){ dBtn._wired=true; dBtn.addEventListener("click", ()=>deleteListing(dBtn.dataset.id)); }
-      }
-    });
-  };
-  // İlk yüklemede de bir kere dene
-  document.addEventListener("DOMContentLoaded", ()=>{ setTimeout(()=>{ try{ window.__BIND_LISTING_ACTIONS__(); }catch(e){} }, 500); });
 })();
 </script>
 
