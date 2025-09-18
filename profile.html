@@ -64,10 +64,6 @@
   </style>
 
 
-<style id="hide-header-avatar">
-  .hdr .avatar { display: none !important; }
-</style>
-
 </head>
 <body>
 <div class="wrap">
@@ -566,6 +562,46 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.style.marginTop = "8px";
     }
   }
+});
+</script>
+
+
+<script id="fix-avatar-and-fill">
+document.addEventListener('DOMContentLoaded', () => {
+  const hdr = document.querySelector('.hdr');
+  if(!hdr) return;
+
+  // .hdr .avatar yoksa oluştur
+  let av = hdr.querySelector('.avatar');
+  if(!av){
+    av = document.createElement('div');
+    av.className = 'avatar';
+    hdr.insertBefore(av, hdr.firstChild);
+  }
+
+  // #profileAvatar <img> yoksa oluştur
+  let img = document.getElementById('profileAvatar') || av.querySelector('#profileAvatar');
+  if(!img){
+    img = document.createElement('img');
+    img.id = 'profileAvatar';
+    img.alt = 'avatar';
+    av.insertBefore(img, av.firstChild);
+  }
+
+  // #avatarInitial yoksa oluştur
+  let init = document.getElementById('avatarInitial') || av.querySelector('#avatarInitial');
+  if(!init){
+    init = document.createElement('div');
+    init.id = 'avatarInitial';
+    init.className = 'avatar-initial';
+    av.appendChild(init);
+  }
+
+  // Başlangıçta isim/uid doldur (Auth gelince override edebilir)
+  const nameEl = document.getElementById('profileName');
+  const uidEl  = document.getElementById('profileUid');
+  if(nameEl && !nameEl.textContent.trim()) nameEl.textContent = 'aliç01';
+  if(uidEl  && !uidEl.textContent.trim())  uidEl.textContent  = '2qC0RCSXtibBo6kncoTPHdQo8zV2';
 });
 </script>
 
