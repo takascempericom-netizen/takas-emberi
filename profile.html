@@ -76,7 +76,7 @@
   </style>
 
 <style id="hide-header-avatar">
-  .hdr .avatar { display: none !important; }
+  .hdr .avatar { display:block !important; }
 </style>
 
 
@@ -296,7 +296,13 @@
   .hdr .avatar-initial{ background:none !important; }
 </style>
 
+
+<style id="avatar-bg-reset-strong">
+  .avatar, .hdr .avatar, .avatar-big { box-shadow:none !important; }
+  .avatar-initial { background:none !important; }
+</style>
 </head>
+
 <body>
 <div class="wrap">
   <div class="card">
@@ -347,9 +353,9 @@
   .pbtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
   .btn-pri{background:var(--pri);color:#001018}
-  .btn-ghost{background:#0f1216;border:1px solid var(--line);color:var(--fg)}
+  .btn-ghost{background:#ffffff !important;border:1px solid var(--line);color:var(--fg)}
   .hint{font-size:12px;color:var(--muted)}
-  .avatar-big{width:96px;height:96px;border-radius:50%;border:1px solid var(--line);overflow:hidden;background:#111;display:grid;place-items:center}
+  .avatar-big{width:96px;height:96px;border-radius:50%;border:1px solid var(--line);overflow:hidden;background: transparent !important;display:grid;place-items:center}
   .avatar-big img{width:100%;height:100%;object-fit:cover}
   /* Eski Ayarlar sekmesini gizle (varsa) */
   .tab[data-tab="settings"], #panel-settings{ display:none !important; }
