@@ -796,8 +796,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2a) Ad ve UID'yi avatarın yanındaki metaya yaz
   const nameEl = document.getElementById('profileName');
   const uidEl  = document.getElementById('profileUid');
-  if(nameEl) nameEl.textContent = "aliç01";
-  if(uidEl)  uidEl.textContent  = "2qC0RCSXtibBo6kncoTPHdQo8zV2";
+  // no-op: keep name
+  // no-op: keep uid
 
   // 2b) Profil panelini (ayarlar kartı) yukarı, header'ın hemen altına taşı
   const panel = document.getElementById('profilePanel');
@@ -849,8 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Başlangıçta isim/uid doldur (Auth gelince override edebilir)
   const nameEl = document.getElementById('profileName');
   const uidEl  = document.getElementById('profileUid');
-  if(nameEl && !nameEl.textContent.trim()) nameEl.textContent = 'aliç01';
-  if(uidEl  && !uidEl.textContent.trim())  uidEl.textContent  = '2qC0RCSXtibBo6kncoTPHdQo8zV2';
+  // no-op: keep name
+  // no-op: keep uid
 });
 </script>
 
@@ -886,12 +886,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameEl = document.createElement('div');
     nameEl.className = 'name';
     nameEl.id = 'profileName';
-    nameEl.textContent = 'aliç01';
+    nameEl.textContent = \"\";
 
     const uidEl = document.createElement('div');
     uidEl.className = 'uid';
     uidEl.id = 'profileUid';
-    uidEl.textContent = '2qC0RCSXtibBo6kncoTPHdQo8zV2';
+    uidEl.textContent = \"\";
 
     meta.appendChild(nameEl);
     meta.appendChild(uidEl);
