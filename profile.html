@@ -212,6 +212,56 @@
   :root{ --fg:#0f172a; }
 </style>
 
+
+<style id="theme-static-no-anim">
+  /* Her yerde animasyon/transform/filters kapalı */
+  body, .card, #profilePanel, #profilePanel::before, .cardL, .ph, .ph img {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* Arka plan: 4 renk, sabit (hareket yok) */
+  :root{
+    --c1:#ffd7a8; --c2:#a7e8ff; --c3:#c8facc; --c4:#e6d4ff;
+    --fg:#0f172a; --line:#e5e7eb;
+  }
+  html,body{ background:#ffffff; color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  body{
+    background:
+      radial-gradient(40% 60% at 15% 20%, var(--c2), transparent 70%),
+      radial-gradient(35% 55% at 85% 15%, var(--c4), transparent 70%),
+      radial-gradient(45% 65% at 20% 85%, var(--c3), transparent 70%),
+      linear-gradient(120deg, var(--c1), var(--c2), var(--c3), var(--c4));
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  /* Profil paneli: sabit gradient iç zemin + sabit kenar şeridi */
+  #profilePanel{
+    position:relative;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92)) padding-box,
+      linear-gradient(135deg, var(--c2), var(--c3)) border-box !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+  }
+  #profilePanel::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:22px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+    z-index:-1;
+    /* animasyon YOK */
+  }
+
+  /* İlan kartları: dokunma; görseller doğal renk */
+  .cardL{ background:#fff !important; border:1px solid var(--line) !important; }
+  .ph{ background:#f8fafc !important; }
+  .ph img{ mix-blend-mode:normal !important; }
+</style>
+
 </head>
 <body>
 <div class="wrap">
