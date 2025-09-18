@@ -529,7 +529,21 @@ $("#profileAvatar").src = photo;
   const uidBox = document.getElementById("profileUid");
   if(uidBox) uidBox.textContent = uid;
 })();
-  $("#inpDisplayName").value=d.displayName||""; $("#inpUsername").value=d.username||""; $("#inpEmail").value=d.email||"";
+  $("#inpDisplayName").value = d.displayName || "";
+$("#inpUsername").value   = d.username     || "";
+$("#inpEmail").value      = d.email        || "";
+
+/* --- Yeni panel inputlarını da doldur --- */
+(function(){
+  const pd = document.getElementById("prof_displayName");
+  const pu = document.getElementById("prof_username");
+  const pe = document.getElementById("prof_email");
+  const authEmail = (typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "";
+
+  if (pd) pd.value = (d.displayName || d.name || "").toString();
+  if (pu) pu.value = (d.username || "").toString();
+  if (pe) pe.value = (d.email || authEmail || "").toString();
+})();
 }
 function tabsWire(uid){
   $$(".tab").forEach(t=>{ t.setAttribute("role","button"); t.style.cursor="pointer";
