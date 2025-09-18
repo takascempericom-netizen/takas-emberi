@@ -430,8 +430,8 @@
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, uploadBytesResumable, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const cfg = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
@@ -482,9 +482,20 @@ function classify(d){
   const expired = (expTs && expTs<now) || ["expired","passive","suresi-dolan"].includes(s);
   if (expired) return "exp"; if (pending) return "pend"; if (approved) return "pub"; return "pub";
 }
-function cardTpl(it){
+function cardTpl(it, canEdit){
   const t=it.title||"-", price=(it.price!=null?`${it.price}₺`:""), loc=[it.city,it.district].filter(Boolean).join(" / ");
-  return `<div class="listing-card" data-doc-id="${it.id}"><a class="ph"><img alt="${t}" loading="lazy" decoding="async"></a><div class="body"><h3 class="title">${t}</h3><div class="muted">${loc}</div><div class="muted">${price}</div></div></div>`;
+  return `<div class="listing-card" data-doc-id="${it.id}">
+  <a class="ph"><img alt="${t}" loading="lazy" decoding="async"></a>
+  <div class="body">
+    <h3 class="title">${t}</h3>
+    <div class="muted">${loc}</div>
+    <div class="muted">${price}</div>
+  </div>
+  ${canEdit ? `<div class="actions">
+      <button class="btn btn-ghost btn-sm edit" data-id="${it.id}">Düzenle</button>
+      <button class="btn btn-warn  btn-sm delete" data-id="${it.id}">Sil</button>
+    </div>` : ``}
+</div>`;
 }
 async function resolveImageURL(d){
   const list=[];
