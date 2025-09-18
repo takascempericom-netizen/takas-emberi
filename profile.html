@@ -1,94 +1,139 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta name="default-uid" content="PCL2oyvU2jYBwidRuRUhL8BMNbM2">
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Profil • Takas Çemberi</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{ --bg:#0a0a0a; --panel:#101214; --line:#1f2429; --fg:#e8edf3; --muted:#9aa7b5; --pri:#38bdf8; }
+    :root{
+      --bg:#0a0a0a; --panel:#101214; --panel2:#15181b; --line:#1f2429;
+      --fg:#e8edf3; --muted:#9aa7b5; --pri:#38bdf8; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+    }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+
     .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-    .hdr{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line)}
-    .hdr .avatar{width:52px;height:52px;border-radius:50%;background:#111;border:1px solid var(--line);overflow:hidden}
-    .hdr .avatar img{width:100%;height:100%;object-fit:cover}
-    .hdr .meta{display:flex;flex-direction:column}
-    .hdr .name{font-weight:800}
-    .hdr .uid{font-size:12px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:16px}
+    .row{display:grid;grid-template-columns:1fr 2fr;gap:16px}
+    @media (max-width:960px){ .row{grid-template-columns:1fr}}
+    .hdr{display:flex;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .avatar{width:72px;height:72px;border-radius:50%;border:1px solid var(--line);overflow:hidden;background:#0d0f12}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .meta .name{font-weight:800;font-size:18px}
+    .meta .uid{font-size:12px;color:var(--muted);word-break:break-all}
+    .actions{margin-left:auto;display:flex;gap:8px}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn-pri{background:var(--pri);color:#fff} .btn-ok{background:var(--ok);color:#fff}
+    .btn-bad{background:var(--bad);color:#fff} .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
     @media (max-width:980px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media (max-width:680px){ .grid{grid-template-columns:1fr}}
+    @media (max-width:640px){ .grid{grid-template-columns:1fr}}
+
     .listing-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d0f12}
-    .ph{aspect-ratio:4/3;background:#0b0d10;border-bottom:1px solid var(--line)}
-    .ph img{width:100%;height:100%;object-fit:cover;display:block}
-    .body{padding:10px 12px}
-    .title{font-weight:700;margin:0 0 6px;font-size:14px}
+    .ph{background:#0b0f14}
+    .ph img{display:block;width:100%;height:180px;object-fit:cover}
+    .body{padding:12px}
+    .title{font-weight:700;margin:0 0 6px}
     .muted{color:var(--muted);font-size:12px}
-    .note{padding:10px 14px;color:#fff;background:#222;border-radius:10px;margin:12px}
-    .actions{display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
-    .btn{appearance:none;border:1px solid var(--line);background:#0f1216;color:#dfe6ee;padding:8px 10px;border-radius:10px;font-weight:700;cursor:pointer}
-    .btn:hover{border-color:#2a3138}
+
+    .tabs{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+    .tab{padding:8px 12px;border-radius:20px;border:1px solid var(--line);cursor:pointer;font-weight:700}
+    .tab.active{background:var(--pri);color:#001018;border-color:transparent}
+    .tab .count{opacity:.85;margin-left:6px;font-weight:800}
+
+    .panel{padding:12px 14px}
+    .note{padding:10px 12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
+    .stat{padding:10px 12px;color:var(--muted);font-size:12px}
+
+    .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:680px){ .formgrid{grid-template-columns:1fr}}
+    label{display:block;font-weight:600;margin:8px 0 6px}
+    input[type="text"],input[type="email"],input[type="password"]{
+      width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0c0f12;color:#fff
+    }
+    input[type="file"]{display:block}
+    .sep{height:1px;background:var(--line);margin:12px 0}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <div class="hdr">
-        <div class="avatar"><img id="profileAvatar" alt="avatar"/></div>
+        <div class="avatar"><img id="profileAvatar" alt="avatar" src="https://i.imgur.com/3SgkGmQ.png"/></div>
         <div class="meta">
           <div class="name" id="profileName">Profil</div>
           <div class="uid" id="profileUid">—</div>
         </div>
+        <div class="actions">
+          <button class="btn btn-ghost" id="btnRefresh">Yenile</button>
+          <button class="btn btn-pri" id="btnEdit">Ayarlar</button>
+          <button class="btn btn-bad" id="btnLogout" style="display:none">Çıkış</button>
+        </div>
       </div>
 
-      <div id="note" class="note" style="display:none"></div>
+      <!-- Ayarlar -->
+      <div class="panel" id="settings" style="display:none">
+        <div class="formgrid">
+          <div>
+            <label>Görünen İsim</label>
+            <input id="inpDisplayName" type="text" placeholder="Ad Soyad">
+          </div>
+          <div>
+            <label>Kullanıcı Adı</label>
+            <input id="inpUsername" type="text" placeholder="ornek_kullanici">
+          </div>
+          <div>
+            <label>E-posta</label>
+            <input id="inpEmail" type="email" placeholder="mail@ornek.com" disabled>
+          </div>
+          <div>
+            <label>Profil Fotoğrafı</label>
+            <input id="inpAvatar" type="file" accept="image/*">
+          </div>
+        </div>
 
-      <div class="grid" id="list"></div>
+        <div class="sep"></div>
+        <div class="formgrid">
+          <div>
+            <label>Şifre</label>
+            <input id="inpPass" type="password" placeholder="Yeni şifre (opsiyonel)">
+            <small class="muted">Google ile giriş yaptıysan şifre yerine “Sıfırlama E-postası” gönder.</small>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn btn-ok" id="btnSaveProfile">Profili Kaydet</button>
+            <button class="btn btn-ghost" id="btnSendReset">Şifre Sıfırlama E-postası</button>
+          </div>
+        </div>
+      </div>
 
-      <div class="actions">
-        <button id="btnRefresh" class="btn">Yenile</button>
-        <span class="muted" id="stat">—</span>
+      <!-- Sekmeler -->
+      <div class="tabs">
+        <div class="tab active" data-tab="pub">Yayında <span class="count" id="cntPub">0</span></div>
+        <div class="tab" data-tab="pend">Onay bekleyen <span class="count" id="cntPend">0</span></div>
+        <div class="tab" data-tab="exp">Süresi dolan <span class="count" id="cntExp">0</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="note" id="note">İlanlar yükleniyor…</div>
+        <div class="grid" id="list"></div>
+        <div class="stat" id="stat">—</div>
+      </div>
+    </div>
+
+    <!-- Oturum yoksa -->
+    <div class="card" id="gate" style="margin-top:14px;display:none">
+      <div class="panel">
+        <div class="note">Giriş yapın veya URL'ye <b>?uid=&lt;kullanıcıUid&gt;</b> ekleyin.</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-pri" id="btnGoogle">Google ile Giriş</button>
+        </div>
       </div>
     </div>
   </div>
 
-  
-  <!-- bootstrap: profile-boot-uid -->
-  <script>
-  (function(){
-    try{
-      var UID_RE=/^[A-Za-z0-9_-]{15,}$/;
-      var uid=null;
-      // localStorage anahtarları
-      var keys=['tc_uid','uid','userUid','authUid','__uid','current_uid','firebase:uid'];
-      for(var i=0;i<keys.length && !uid;i++){
-        var v=localStorage.getItem(keys[i]);
-        if(v && UID_RE.test(v)) uid=v;
-        else {
-          try{
-            var j=JSON.parse(v||'null');
-            var u=(j&& (j.uid || (j.user&&j.user.uid) || (j.auth&&j.auth.uid) || (j.account&&j.account.uid)));
-            if(u && UID_RE.test(u)) { uid=u; break; }
-          }catch(e){}
-        }
-      }
-      // cookie
-      if(!uid){
-        var m=document.cookie.match(/(?:^|;)\s*uid=([^;]+)/);
-        if(m){ var c=decodeURIComponent(m[1]||''); if(UID_RE.test(c)) uid=c; }
-      }
-      if(uid){
-        var meta=document.createElement('meta');
-        meta.name='profile-uid'; meta.content=uid;
-        document.head.appendChild(meta);
-      }
-    }catch(e){}
-  })();
-  </script>
-  <script type="module" src="./profile.page.v4.js?v=1758195612"></script>
+  <script type="module" src="./profile.page.js?v=1"></script>
 </body>
 </html>
