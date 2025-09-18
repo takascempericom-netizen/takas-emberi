@@ -481,28 +481,6 @@ document.addEventListener("DOMContentLoaded", start);
 </script>
 <!-- === /BOTTOM NAV === -->
 
-<script id="move-profile-panel">
-document.addEventListener('DOMContentLoaded', () => {
-  const tabs = document.querySelector('.tabs');
-  const panel = document.getElementById('profilePanel');
-  if (tabs && panel && tabs.nextElementSibling !== panel) {
-    tabs.insertAdjacentElement('afterend', panel);
-  }
-});
-</script>
-
-
-<script id="move-tabs-down">
-document.addEventListener('DOMContentLoaded', () => {
-  const tabs = document.querySelector('.tabs');
-  const list = document.getElementById('list');
-  if (tabs && list && list.parentElement) {
-    list.parentElement.insertBefore(tabs, list);
-  }
-});
-</script>
-
-
 <script id="avatar-initial-logic">
 document.addEventListener('DOMContentLoaded', () => {
   async function updateAvatarFromUsers(){
@@ -559,6 +537,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // Firebase auth state ile çakışmasın diye küçük bir gecikme:
   setTimeout(updateAvatarFromUsers, 300);
+});
+</script>
+
+
+<script id="profile-place-and-fill">
+document.addEventListener('DOMContentLoaded', () => {
+  // 2a) Ad ve UID'yi avatarın yanındaki metaya yaz
+  const nameEl = document.getElementById('profileName');
+  const uidEl  = document.getElementById('profileUid');
+  if(nameEl) nameEl.textContent = "aliç01";
+  if(uidEl)  uidEl.textContent  = "2qC0RCSXtibBo6kncoTPHdQo8zV2";
+
+  // 2b) Profil panelini (ayarlar kartı) yukarı, header'ın hemen altına taşı
+  const panel = document.getElementById('profilePanel');
+  const hdr   = document.querySelector('.hdr');
+  if(panel && hdr){
+    const parentCard = hdr.closest('.card');
+    if(parentCard){
+      // header'dan hemen sonra yerleştir
+      hdr.insertAdjacentElement('afterend', panel);
+      // küçük bir boşluk verelim
+      panel.style.marginTop = "8px";
+    }
+  }
 });
 </script>
 
