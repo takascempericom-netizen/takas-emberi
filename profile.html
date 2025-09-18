@@ -134,10 +134,56 @@
   const provider=new GoogleAuthProvider();
   function showAvatar(u){ if(u?.photoURL){avatarImg.src=u.photoURL;avatarImg.style.display="block";avatarInitial.style.display="none";} else {avatarInitial.textContent=(u?.displayName||u?.email||"U")[0].toUpperCase();avatarInitial.style.display="grid";avatarImg.style.display="none";}}
   function classify(d){const now=Date.now();const s=(d?.status||"").toLowerCase();const approved=["approved","active","yayında","yayinda","published"].includes(s)||d?.approved===true;const expired=d?.expiresAt && d.expiresAt.toMillis?d.expiresAt.toMillis()<now:false;const pending=!approved&&!expired;return {approved,pending,expired};}
-  function render(items,isOwner){listEl.innerHTML="";items.forEach(it=>{const c=classify(it);if((ACTIVE==="pub"&&c.approved&&!c.expired)||(ACTIVE==="pend"&&c.pending)||(ACTIVE==="exp"&&c.expired)){const el=document.createElement("div");el.className="cardL";el.innerHTML=\`<div class="ph">\${it.imageURL?`<img src="\${it.imageURL}">`:"<span class=muted>Görsel yok</span>"}</div><div class="body"><div class="title">\${it.title||"İlan"}</div><div class="muted">\${it.category||""}</div>\${isOwner?'<div class=ops><button class=btn data-edit='+it.id+'>Düzenle</button><button class="btn btn-warn" data-del='+it.id+'>Sil</button></div>':""}</div>\`;if(isOwner){el.querySelector("[data-edit]").onclick=()=>location.href="/listing-edit.html?id="+it.id;el.querySelector("[data-del]").onclick=async()=>{if(confirm("Silinsin mi?"))await deleteDoc(doc(db,"listings",it.id));};}listEl.appendChild(el);}});stat.textContent=items.length+" kayıt.";}
+  function render(items,isOwner){
+  listEl.innerHTML = "";
+  items.forEach(it=>{
+    const c = classify(it);
+    const show = (ACTIVE==="pub"  && c.approved && !c.expired) ||
+                 (ACTIVE==="pend" && c.pending) ||
+                 (ACTIVE==="exp"  && c.expired);
+    if(!show) return;
+
+    const el = document.createElement("div");
+    el.className = "cardL";
+
+    const imgHTML = it.imageURL
+      ? ('<img src="'+ String(it.imageURL) +'" alt="">')
+      : '<span class="muted">Görsel yok</span>';
+
+    el.innerHTML = `
+      <div class="ph">${imgHTML}</div>
+      <div class="body">
+        <div class="title">${it.title || "İlan"}</div>
+        <div class="muted">${it.category || ""}</div>
+        ${isOwner ? `
+        <div class="ops">
+          <button class="btn" data-edit="${it.id}">Düzenle</button>
+          <button class="btn btn-warn" data-del="${it.id}">Sil</button>
+        </div>` : ``}
+      </div>
+    `;
+
+    if(isOwner){
+      const eBtn = el.querySelector('[data-edit]');
+      const dBtn = el.querySelector('[data-del]');
+      if(eBtn) eBtn.onclick = ()=> location.href = "/listing-edit.html?id=" + encodeURIComponent(it.id);
+      if(dBtn) dBtn.onclick = async ()=>{
+        if(confirm("Bu ilan silinsin mi?")){
+          try{ await deleteDoc(doc(db,"listings", String(it.id))); }catch(e){ alert("Silme hatası: "+(e?.message||e)); }
+        }
+      };
+    }
+
+    listEl.appendChild(el);
+  });
+
+  stat.textContent = items.length + " kayıt.";
+}
   let ACTIVE="pub";$$(".tab").forEach(t=>t.onclick=()=>{$$(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");ACTIVE=t.dataset.tab;load();});
   let USER=null;let UID=null;
-  async function load(){note.style.display="block";const items=[];try{const c=collection(db,"listings");const qs=[query(c,where("ownerId","==",UID)),query(c,where("uid","==",UID)),query(c,where("userId","==",UID))];for(const q of qs){const snap=await getDocs(q);snap.forEach(d=>items.push({id:d.id,...d.data()}));}}catch(e){console.warn("listeleme",e)}const map=new Map();for(const it of items){map.set(it.id,it)}const arr=[...map.values()];cntPub.textContent=arr.filter(x=>{const c=classify(x);return c.approved&&!c.expired}).length;cntPend.textContent=arr.filter(x=>{const c=classify(x);return c.pending&&!c.approved&&!c.expired}).length;cntExp.textContent=arr.filter(x=>classify(x).expired).length;note.style.display="none";render(arr,USER&&USER.uid===UID);}
+  async function load(){note.style.display="block";const items=[];try{const c=collection(db,"listings");const qs=[query(c,where("ownerId","==",UID)),query(c,where("uid","==",UID)),query(c,where("userId","==",UID))];for(const q of qs){const snap=await getDocs(q);snap.forEach(d=>items.push({id:d.id,...d.data()}));}}catch(e){console.warn("listeleme",e)}const map=new Map();for(const it of items){map.set(it.id,it)}const arr=[...map.values()];cntPub.textContent=arr.filter(x=>{const c=classify(x);return c.approved&&!c.expired}).length;cntPend.textContent=arr.filter(x=>{const c=classify(x);return c.pending&&!c.approved&&!c.expired}).length;cntExp.textContent=arr.filter(x=>classify(x).expired).length;note.style.display="none";render(arr,USER&&USER.uid===UID);
+  console.log("[profile] UID=",UID," pub=",document.getElementById("cntPub").textContent," pend=",document.getElementById("cntPend").textContent," exp=",document.getElementById("cntExp").textContent);
+}
   onAuthStateChanged(auth,u=>{USER=u;UID=u?.uid||null;if(u){nameEl.textContent=u.displayName||u.email;uidEl.textContent=u.uid;f_displayName.value=u.displayName||"";f_email.value=u.email||"";showAvatar(u);btnLogout.style.display="inline-block";btnGoogle.style.display="none";}else{btnLogout.style.display="none";btnGoogle.style.display="inline-block";}load();});
   btnGoogle.onclick=()=>signInWithPopup(auth,provider);btnLogout.onclick=()=>signOut(auth);btnSendReset.onclick=()=>USER?.email&&sendPasswordResetEmail(auth,USER.email);
 </script>
