@@ -44,6 +44,9 @@
     .set input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0d0f12;color:#fff}
     .full{grid-column:1/-1}
   </style>
+  <style id="quick-hide-btns">
+  #btnRefresh, #btnEdit { display:none !important; }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -461,5 +464,16 @@ document.addEventListener("DOMContentLoaded", start);
   })();
 </script>
 <!-- === /BOTTOM NAV === -->
+
+<script id="move-profile-panel">
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.querySelector('.tabs');
+  const panel = document.getElementById('profilePanel');
+  if (tabs && panel && tabs.nextElementSibling !== panel) {
+    tabs.insertAdjacentElement('afterend', panel);
+  }
+});
+</script>
+
 </body>
 </html>
