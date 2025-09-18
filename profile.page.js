@@ -262,3 +262,98 @@ function start(){
   });
 }
 document.addEventListener("DOMContentLoaded", start);
+
+// ==== Profil Paneli Bağlama + Renk Döngüsü ====
+import { updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { setDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+(function wireProfilePanel(){
+  const panel = document.getElementById("profilePanel");
+  if(!panel) return;
+
+  // Renk döngüsü (5 renk)
+  const COLORS = ["#b9e6ff","#c8f7c5","#ffeaa3","#ffc7d6","#d9c7ff"];
+  let ci = 0;
+  setInterval(()=>{ document.documentElement.style.setProperty("--panel-accent", COLORS[ci=(ci+1)%COLORS.length]); }, 2500);
+
+  const el = sel => document.getElementById(sel);
+  const note = el("profNote");
+  const avatarPreview = el("prof_avatarPreview");
+  const fPhoto = el("prof_photo");
+  const fName  = el("prof_displayName");
+  const fUser  = el("prof_username");
+  const fMail  = el("prof_email");
+  const btnSave = el("btnSaveProfile");
+  const btnReset= el("btnSendReset");
+
+  // Mevcut auth durumuna göre doldur
+  import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js").then(async ({ getAuth })=>{
+    const auth = getAuth();
+    const st   = getStorage();
+
+    auth.onAuthStateChanged(async (user)=>{
+      if(!user){ note.textContent="Giriş yapmamışsın."; return; }
+
+      // users/{uid} oku
+      const uref = doc((await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')).getFirestore(), "users", user.uid);
+      let udoc;
+      try{ const s=await getDoc(uref); udoc = s.exists()? s.data(): {}; }catch{}
+
+      // formu doldur
+      fName.value = udoc.displayName || user.displayName || "";
+      fUser.value = udoc.username    || "";
+      fMail.value = user.email || "";
+
+      const photoURL = udoc.photoURL || user.photoURL || "";
+      avatarPreview.src = photoURL || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect width='100%' height='100%' fill='%23111'/><text x='50%' y='54%' font-size='22' fill='%23aaa' text-anchor='middle' font-family='Inter,Arial'>Avatar</text></svg>";
+
+      // Şifre sıfırlama
+      btnReset.onclick = async ()=>{
+        try{
+          await sendPasswordResetEmail(auth, user.email);
+          note.textContent = "Sıfırlama e-postası gönderildi.";
+        }catch(e){ note.textContent = "Şifre sıfırlama hata: "+e.message; }
+      };
+
+      // Foto yükleme
+      fPhoto.onchange = async ()=>{
+        const file = fPhoto.files?.[0]; if(!file) return;
+        note.textContent = "Yükleniyor…";
+        try{
+          const key = `users/${user.uid}/avatar-${Date.now()}-${file.name.replace(/[^a-z0-9_.-]/gi,'_')}`;
+          const r   = ref(st, key);
+          const up  = uploadBytesResumable(r, file, { contentType:file.type||"image/jpeg" });
+          await new Promise((res,rej)=>{ up.on("state_changed",()=>{},rej,res); });
+          const url = await getDownloadURL(r);
+          avatarPreview.src = url;
+          await updateProfile(user, { photoURL:url });
+          await setDoc(uref, { photoURL:url, updatedAt:serverTimestamp() }, { merge:true });
+          note.textContent = "Profil fotoğrafı güncellendi.";
+        }catch(e){
+          note.textContent = "Foto yükleme hata: " + (e.message||e);
+        }
+      };
+
+      // Profil kaydet
+      btnSave.onclick = async ()=>{
+        note.textContent = "Kaydediliyor…";
+        try{
+          const patch = {
+            displayName: fName.value.trim(),
+            username:    fUser.value.trim(),
+            email:       user.email,
+            updatedAt:   serverTimestamp()
+          };
+          if(patch.displayName && patch.displayName !== (user.displayName||"")){
+            await updateProfile(user, { displayName: patch.displayName });
+          }
+          await setDoc(uref, patch, { merge:true });
+          note.textContent = "Kaydedildi.";
+        }catch(e){
+          note.textContent = "Kaydetme hata: " + (e.message||e);
+        }
+      };
+    });
+  });
+})();
