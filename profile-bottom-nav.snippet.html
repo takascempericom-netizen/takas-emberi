@@ -1,0 +1,69 @@
+<style>
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0;
+    background:var(--panel2); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; gap:6px;
+    padding:8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    z-index:9999;
+  }
+  .bottom-nav .item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted); text-decoration:none; font-size:11px; min-width:68px
+  }
+  .bottom-nav .item svg{ width:22px; height:22px }
+  /* masaüstünde gizle (istersen kaldır) */
+  @media (min-width: 900px){ .bottom-nav{ display:none; } }
+</style>
+
+<nav class="bottom-nav" id="bottomNav">
+  <a href="/" class="item" id="nav-home" title="Ana Sayfa" aria-label="Ana Sayfa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+    <span>Ana Sayfa</span>
+  </a>
+  <button class="item" id="nav-messages" title="Mesajlar" aria-label="Mesajlar" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4.5A4 4 0 0 1 4 15V7a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4z"/></svg>
+    <span>Mesajlar</span>
+  </button>
+  <button class="item" id="nav-notif" title="Bildirimler" aria-label="Bildirimler" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span>Bildirimler</span>
+  </button>
+  <button class="item" id="nav-logout" title="Çıkış" aria-label="Çıkış" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+    <span>Çıkış</span>
+  </button>
+</nav>
+
+<script type="module">
+  import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  const app = (getApps().length ? getApp() : null);
+  const auth = app ? getAuth(app) : null;
+
+  const P_MESSAGES = ["/messages.html","/mesajlar.html","/support.html","/chat.html","/destek.html"];
+  const P_NOTIF    = ["/notifications.html","/bildiriler.html","/bildirimler.html","/bildiri.html"];
+
+  async function goFirst(paths){
+    for(const p of paths){
+      try{ const r = await fetch(p,{method:"HEAD"}); if(r.ok){ location.href=p; return; } }catch(e){}
+    }
+    // bulunamazsa ana sayfaya dön
+    location.href="/";
+  }
+
+  document.getElementById("nav-messages")?.addEventListener("click", ()=>goFirst(P_MESSAGES));
+  document.getElementById("nav-notif")?.addEventListener("click",   ()=>goFirst(P_NOTIF));
+  document.getElementById("nav-logout")?.addEventListener("click",  async ()=>{
+    try{ if(auth) await signOut(auth); }catch(e){}
+    location.href="/";
+  });
+
+  // Giriş durumu: auth varsa Logout göster; yoksa gizle
+  try{
+    if(auth){
+      auth.onAuthStateChanged(u=>{
+        document.getElementById("nav-logout").style.display = u ? "flex" : "none";
+      });
+    }
+  }catch{}
+</script>
