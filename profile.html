@@ -79,6 +79,98 @@
   .hdr .avatar { display: none !important; }
 </style>
 
+
+<style id="theme-four-gradient">
+  /* Pastel 4'lü palet */
+  :root{
+    --c1:#ffd7a8;  /* şeftali */
+    --c2:#a7e8ff;  /* buz mavi */
+    --c3:#c8facc;  /* yumuşak yeşil */
+    --c4:#e6d4ff;  /* lavanta */
+    --fg:#0f172a;  /* koyu lacivert gri (siyah değil) */
+    --line:#e5e7eb;
+  }
+
+  html,body{ background:#ffffff; color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+
+  /* Sayfa arka planı: 4 renk + hareket */
+  body{
+    background:
+      radial-gradient(40% 60% at 15% 20%, var(--c2), transparent 70%),
+      radial-gradient(35% 55% at 85% 15%, var(--c4), transparent 70%),
+      radial-gradient(45% 65% at 20% 85%, var(--c3), transparent 70%),
+      linear-gradient(120deg, var(--c1), var(--c2), var(--c3), var(--c4));
+    background-size: 120% 120%, 120% 120%, 120% 120%, 200% 200%;
+    animation: bgShift 18s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift{
+    0%   { background-position: 0% 0%, 100% 0%, 0% 100%, 0% 50%; }
+    100% { background-position: 100% 100%, 0% 100%, 100% 0%, 100% 50%; }
+  }
+
+  /* Kart/panel: açık cam efekt + animasyonlu renkli çerçeve (abartısız) */
+  .card{
+    position:relative;
+    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88)) !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+    backdrop-filter: blur(10px);
+    /* Gradient-border tekniği: padding-box + border-box */
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88)) padding-box,
+      conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1)) border-box;
+    animation: borderSpin 14s linear infinite;
+  }
+  @keyframes borderSpin{
+    to { filter: hue-rotate(360deg); }
+  }
+
+  /* Sekmeler: açık, aktifte pastel vurgu */
+  .tabs{ border-bottom:1px solid var(--line) !important; padding:12px 16px }
+  .tab{
+    padding:10px 16px; font-weight:800; border-radius:12px;
+    background:#fff; border:1px solid var(--line); color:var(--fg);
+  }
+  .tab.active{
+    background: linear-gradient(135deg, var(--c2), var(--c3));
+    border-color: transparent; color:#083344;
+  }
+
+  /* İlan kartları */
+  .grid{ gap:16px !important; padding:16px !important; }
+  .cardL{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    box-shadow: 0 6px 18px rgba(15,23,42,.08);
+  }
+  .ph{
+    background: linear-gradient(135deg, #fff7eb, #eff6ff);
+    height: 220px;
+    display:grid; place-items:center;
+  }
+  .title{ font-size:16px; font-weight:800; }
+  .muted{ color:#64748b; }
+
+  /* Formlar */
+  label{ color:#64748b }
+  input[type="text"],input[type="email"],input[type="password"]{
+    background:#fff; color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:12px;
+  }
+
+  /* Butonlar */
+  .btn{ background:#ffffff; border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 14px; font-weight:700 }
+  .btn-pri{ background: linear-gradient(135deg, var(--c2), var(--c3)); color:#083344; border-color:transparent }
+  .btn-warn{ background:#fee2e2; color:#7f1d1d; border-color:#fecaca }
+
+  /* Alt bar */
+  .bottom-nav{
+    background: rgba(255,255,255,.92); border:1px solid var(--line); border-radius:16px;
+    backdrop-filter: blur(8px);
+  }
+  .bn-item{ background:#fff; border:1px solid var(--line); color:var(--fg) }
+  .bn-item.active{ background: linear-gradient(135deg, var(--c1), var(--c4)); border-color:transparent; color:#3f1d3e }
+</style>
+
 </head>
 <body>
 <div class="wrap">
