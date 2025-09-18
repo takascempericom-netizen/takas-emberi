@@ -162,7 +162,7 @@ async function renderListings(uid, activeTab="pub"){
 async function loadUser(uid){
   const s = await getDoc(doc(db,"users",uid));
   const d = s.exists()? s.data(): {};
-  const display = d.displayName || d.username || d.email || "Profil";
+  const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil";
   const photo   = d.photoURL || d.avatar || "https://i.imgur.com/3SgkGmQ.png";
   avatar.src = photo; nameEl.textContent = display; uidEl.textContent = uid;
   inpDisplayName.value = d.displayName || "";

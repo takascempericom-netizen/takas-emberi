@@ -248,7 +248,7 @@ async function loadUserMeta(uid, metaHint=null){
   try{
     const snap = await getDoc(doc(db,"users",uid));
     const data = snap.exists()? snap.data() : (metaHint||{});
-    const display = data.displayName || data.username || data.email || "Profil";
+    const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil";
     const photo   = data.photoURL || data.avatar || auth.currentUser?.photoURL || "https://i.imgur.com/3SgkGmQ.png";
     avatar.src = photo;
     nameEl.textContent = display;
