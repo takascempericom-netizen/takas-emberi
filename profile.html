@@ -171,6 +171,47 @@
   .bn-item.active{ background: linear-gradient(135deg, var(--c1), var(--c4)); border-color:transparent; color:#3f1d3e }
 </style>
 
+
+<style id="theme-fix-no-hue">
+  /* --- 1) Global: kart içeriğini boyayan hue-rotate'ü kapat --- */
+  .card{ filter:none !important; }
+  @keyframes borderSpin{ to { transform: rotate(360deg); } } /* filtre yerine dönüş */
+
+  /* Önceki temada .card'ın kendisine gradient-border verilmişti.
+     İçeriği boyamamak için border efektini sadece profil paneline taşıyoruz. */
+
+  /* --- 2) İlan kartları (dokunma) --- */
+  .cardL{ filter:none !important; background:#fff !important; }
+  .cardL .ph img{ mix-blend-mode:normal !important; filter:none !important; }
+
+  /* --- 3) Profil paneli: iç kısım pastel gradient + animasyonlu kenar şeridi --- */
+  #profilePanel{
+    position:relative;
+    /* İç gradient (panelin zemini) */
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92)) padding-box,
+      linear-gradient(135deg, var(--c2), var(--c3)) border-box !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+  }
+  /* Kenar şeridini ::before ile içerikten bağımsız döndürüyoruz */
+  #profilePanel::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:22px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+    z-index:-1;
+    animation: borderSpin 12s linear infinite;
+  }
+
+  /* --- 4) Foto alanı nötr kalsın, yalnız arkaplan dolgu olarak açık gri kullan --- */
+  .ph{ background:#f8fafc !important; }
+
+  /* Yazı rengi aydınlık palete uygun kalsın */
+  :root{ --fg:#0f172a; }
+</style>
+
 </head>
 <body>
 <div class="wrap">
