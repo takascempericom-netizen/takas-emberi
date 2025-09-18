@@ -35,40 +35,42 @@ const log = (...a)=>{ if(DEBUG) console.log("[profile.page]",...a); };
 // Her türlü alanı çöz: coverPhoto/coverUrl/thumbnail/photos/... -> mutlak URL
 async function resolveImageURL(d){
   const cand = [];
-
-  // Öncelikler: cover alanları
-  if (d?.coverPhoto) cand.push(d.coverPhoto);
-  if (d?.coverUrl)   cand.push(d.coverUrl);
-  if (d?.cover)      cand.push(d.cover);
-  if (d?.thumbnail)  cand.push(d.thumbnail);
-  if (d?.thumb)      cand.push(d.thumb);
-
+  // Kapak öncelikli
+  for (const k of ["coverPhoto","coverUrl","cover","thumbnail","thumb","mainImage","primaryImage","image","imageUrl","photo","photoUrl"]) {
+    if (d?.[k]) cand.push(d[k]);
+  }
   // Galeri dizileri
-  if (Array.isArray(d?.photos))    cand.push(...d.photos);
-  if (Array.isArray(d?.images))    cand.push(...d.images);
-  if (Array.isArray(d?.imageUrls)) cand.push(...d.imageUrls);
-  if (Array.isArray(d?.gallery))   cand.push(...d.gallery);
-  if (Array.isArray(d?.media))     cand.push(...d.media);
+  for (const k of ["photos","images","imageUrls","gallery","media","files","attachments"]) {
+    if (Array.isArray(d?.[k])) cand.push(...d[k]);
+  }
 
+  // Her bir aday için hem string hem obje url/path kontrolü
   for (let x of cand){
-    let u = null;
+    let u=null;
     if (typeof x === "string") u = x;
-    else if (x && typeof x === "object") u = x.url || x.src || x.path || x.storagePath || null;
+    else if (x && typeof x === "object") {
+      u = x.url || x.src || x.path || x.storagePath || x.downloadURL || x.downloadUrl || x.fullPath || null;
+    }
     if (!u) continue;
 
-    // HTTP ise direkt kullan
-    if (/^https?:\/\//i.test(u)) return u;
+    // http(s) ise direkt
+    if (/^https?:\/\//i.test(u)) {
+      // gs linklerini normalize et (firebasestorage.googleapis.com) -> olduğu gibi kullan
+      return u;
+    }
 
-    // gs://bucket/path -> sadece path kısmını al, kendi bucket'tan indir
+    // gs://bucket/path -> path'e indir
     if (/^gs:\/\//i.test(u)) {
       const pathOnly = u.replace(/^gs:\/\/[^/]+\//i, "");
       try { return await getDownloadURL(ref(st, pathOnly)); } catch {}
     }
 
-    // çıplak storage path ise doğrudan indir
+    // "listings/..." ya da herhangi bir storage path
     try { return await getDownloadURL(ref(st, u)); } catch {}
+
+    // Bazı backend'ler sadece dosya adını yazar (id bilinmiyorsa atla)
   }
-  return null; // hiçbirini çözemedi
+  return null;
 }
 
 function cardTpl(item){
