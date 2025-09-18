@@ -518,7 +518,17 @@ async function renderListings(uid, tab="pub"){
 async function loadUser(uid){
   const s=await getDoc(doc(db,"users",uid)); const d=s.exists()?s.data():{};
   const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil"; const photo=d.photoURL||d.avatar||"https://i.imgur.com/3SgkGmQ.png";
-  $("#profileAvatar").src=photo; $("#profileName").textContent=display; $("#profileUid").textContent=uid;
+  
+$("#profileAvatar").src = photo;
+(function(){
+  const uSpan = document.getElementById("profileUsername");
+  const nameBox = document.getElementById("profileName");
+  const toUser = (d.username||"").trim() || (d.name||"").trim() || "";
+  if(uSpan){ uSpan.textContent = toUser || display; }
+  else if(nameBox){ nameBox.textContent = display; }
+  const uidBox = document.getElementById("profileUid");
+  if(uidBox) uidBox.textContent = uid;
+})();
   $("#inpDisplayName").value=d.displayName||""; $("#inpUsername").value=d.username||""; $("#inpEmail").value=d.email||"";
 }
 function tabsWire(uid){
