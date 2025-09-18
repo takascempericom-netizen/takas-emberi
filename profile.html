@@ -262,6 +262,31 @@
   .ph img{ mix-blend-mode:normal !important; }
 </style>
 
+
+<style id="inputs-light-override">
+  /* Profil panelindeki tüm inputları aydınlık yap */
+  #profilePanel input[type="text"],
+  #profilePanel input[type="email"],
+  #profilePanel input[type="password"],
+  #profilePanel input[type="file"]{
+    background:#ffffff !important;
+    color:var(--fg, #0f172a) !important;
+    border:1px solid var(--line, #e5e7eb) !important;
+    border-radius:12px !important;
+    padding:12px 14px !important;
+    box-shadow:none !important;
+  }
+  #profilePanel input::placeholder{ color:#94a3b8 !important; }
+  /* Etiketleri de aydınlık palete uydur */
+  #profilePanel .pgrp label{ color:#475569 !important; }
+  /* Odak halinde net mavi vurgu */
+  #profilePanel input:focus{
+    outline:none !important;
+    border-color:#93c5fd !important;
+    box-shadow:0 0 0 3px rgba(147,197,253,.35) !important;
+  }
+</style>
+
 </head>
 <body>
 <div class="wrap">
