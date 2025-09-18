@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Avatar Test</title>
+  <style>
+    .avatar{
+      width:72px;height:72px;border-radius:50%;
+      border:1px solid #ddd;display:grid;place-items:center;
+      font-weight:800;font-size:28px;color:#0b1221;
+    }
+    .avatar-initial{letter-spacing:.5px;}
+  </style>
+</head>
+<body>
+  <h2>Avatar Test Sayfası</h2>
+  <div class="avatar"><div id="avatarInitial" class="avatar-initial"></div></div>
+
+  <script>
+  (function(){
+    function trInitial(s){
+      if(!s || typeof s!=="string") return "?";
+      const firstWord=(s.trim().split(/\s+/)[0]||s.trim());
+      return firstWord.charAt(0).toLocaleUpperCase('tr-TR');
+    }
+    function tryUpdate(){
+      const avatarEl=document.querySelector('.avatar');
+      if(!avatarEl) return;
+      let initEl=document.getElementById('avatarInitial')||avatarEl.querySelector('.avatar-initial');
+      if(!initEl){
+        initEl=document.createElement('div');
+        initEl.id='avatarInitial';
+        initEl.className='avatar-initial';
+        avatarEl.appendChild(initEl);
+      }
+      const fallback="samısam34"; // şimdilik sabit deneme
+      initEl.textContent=trInitial(fallback);
+    }
+    document.addEventListener('DOMContentLoaded', tryUpdate);
+  })();
+  </script>
+</body>
+</html>
