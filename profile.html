@@ -185,10 +185,70 @@ function getParamUid(){
 }
   let ACTIVE="pub";$$(".tab").forEach(t=>t.onclick=()=>{$$(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");ACTIVE=t.dataset.tab;load();});
   let USER=null;let UID=null;
-  async function load(){note.style.display="block";const items=[];try{const c=collection(db,"listings");const qs=[query(c,where("ownerId","==",UID)),query(c,where("uid","==",UID)),query(c,where("userId","==",UID))];for(const q of qs){const snap=await getDocs(q);snap.forEach(d=>items.push({id:d.id,...d.data()}));}}catch(e){console.warn("listeleme",e)}const map=new Map();for(const it of items){map.set(it.id,it)}const arr=[...map.values()];cntPub.textContent=arr.filter(x=>{const c=classify(x);return c.approved&&!c.expired}).length;cntPend.textContent=arr.filter(x=>{const c=classify(x);return c.pending&&!c.approved&&!c.expired}).length;cntExp.textContent=arr.filter(x=>classify(x).expired).length;note.style.display="none";render(arr,USER&&USER.uid===UID);
-  console.log("[profile] UID=",UID," pub=",document.getElementById("cntPub").textContent," pend=",document.getElementById("cntPend").textContent," exp=",document.getElementById("cntExp").textContent);
+  async function load(){
+  try{
+    note.style.display = "block";
+    listEl.innerHTML = "";
+
+    const isOwner = !!(USER && UID && USER.uid === UID);
+    const c = collection(db, "listings");
+    const items = [];
+
+    if(isOwner){
+      // Sahibine tüm ilanlar
+      const q1 = query(c, where("ownerId","==", UID));
+      const snap1 = await getDocs(q1);
+      snap1.forEach(d=> items.push({ id:d.id, ...d.data() }));
+    }else{
+      // Public görünüm: sadece approved ilanlar
+      const qPub = query(c, where("ownerId","==", UID), where("approved","==", true));
+      const snapP = await getDocs(qPub);
+      snapP.forEach(d=> items.push({ id:d.id, ...d.data() }));
+    }
+
+    // Tekille ve sayaçları hesapla
+    const map = new Map(); for(const it of items){ map.set(it.id, it); }
+    const arr = [...map.values()];
+
+    let pub=0, pend=0, exp=0;
+    const now = Date.now();
+    for(const it of arr){
+      const s = (it?.status||it?.state||"").toString().toLowerCase();
+      const approved = it?.approved===true || it?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(s);
+      const expTs = it?.expiresAt?.toMillis ? it.expiresAt.toMillis() : (typeof it?.expiresAt==="number" ? it.expiresAt : null);
+      const expired = expTs ? expTs < now : false;
+      if(approved && !expired) pub++;
+      else if(expired) exp++;
+      else pend++;
+    }
+    cntPub.textContent = pub; cntPend.textContent = pend; cntExp.textContent = exp;
+
+    note.style.display = "none";
+    render(arr, isOwner);
+  }catch(e){
+    note.style.display = "none";
+    console.warn("load() hata:", e);
+    stat.textContent = (e && e.message) ? e.message : "Yüklenemedi.";
+  }
 }
-  onAuthStateChanged(auth,u=>{USER=u;const puid=getParamUid();UID=puid||(u&&u.uid)||UID; if(u){nameEl.textContent=u.displayName||u.email;uidEl.textContent=u.uid;f_displayName.value=u.displayName||"";f_email.value=u.email||"";showAvatar(u);btnLogout.style.display="inline-block";btnGoogle.style.display="none";}else{btnLogout.style.display="none";btnGoogle.style.display="inline-block";}load();});
+  onAuthStateChanged(auth, u => {
+  USER = u;
+  const puid = (function(){try{return new URLSearchParams(location.search).get("uid")}catch(_){return null}})();
+  UID = puid || (u && u.uid) || UID || null;
+
+  if(u){
+    nameEl.textContent = u.displayName || u.email || "Profil";
+    uidEl.textContent  = UID || (u.uid||"—");
+    f_displayName.value = u.displayName || "";
+    f_email.value = u.email || "";
+    (function(){ if(u.photoURL){ avatarImg.src=u.photoURL; avatarImg.style.display="block"; avatarInitial.style.display="none"; } else { avatarInitial.textContent=(u.displayName||u.email||"U").charAt(0).toUpperCase(); avatarInitial.style.display="grid"; avatarImg.style.display="none"; } })();
+    btnLogout.style.display="inline-block"; btnGoogle.style.display="none";
+  }else{
+    btnLogout.style.display="none"; btnGoogle.style.display="inline-block";
+    uidEl.textContent = UID || "—";
+  }
+  load();
+});
   btnGoogle.onclick=()=>signInWithPopup(auth,provider);btnLogout.onclick=()=>signOut(auth);btnSendReset.onclick=()=>USER?.email&&sendPasswordResetEmail(auth,USER.email);
 </script>
 </body>
