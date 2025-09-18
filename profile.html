@@ -884,17 +884,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Aynı id'leri kullan ki mevcut JS doldursun/override etsin
     const nameEl = document.createElement('div');
-    nameEl.className = 'name';
-    nameEl.id = 'profileName';
-    nameEl.textContent = "";
+nameEl.className = 'name';
+nameEl.id = 'profileName';
 
-    const uidEl = document.createElement('div');
-    uidEl.className = 'uid';
-    uidEl.id = 'profileUid';
-    uidEl.textContent = "";
+/* VAR OLAN #profileUsername SPAN'INI TAŞI (YOKSA OLUŞTUR) */
+(function(){
+  let span = document.getElementById('profileUsername');
+  if (span) {
+    nameEl.appendChild(span); // mevcut span'ı yeni nameEl içine taşı
+  } else {
+    span = document.createElement('span');
+    span.id = 'profileUsername';
+    nameEl.appendChild(span);
+  }
+})();
 
-    meta.appendChild(nameEl);
-    meta.appendChild(uidEl);
+const uidEl = document.createElement('div');
+uidEl.className = 'uid';
+uidEl.id = 'profileUid';
+/* uid text buraya daha sonra loadUser/diğer kodlarca yazılıyor */
+
+meta.appendChild(nameEl);
+meta.appendChild(uidEl);
+
+/* PANEL META'DA GÖRÜNÜR E-POSTA İÇİN YER VAR MI? YOKSA EKLE */
+(function(){
+  if (!document.getElementById('profileEmail') && !document.getElementById('user-email')) {
+    const mail = document.createElement('div');
+    mail.className = 'uid';         // küçük ve gri stil
+    mail.id = 'profileEmail';
+    mail.textContent = '';          // doldurmayı var olan kodlar yapacak
+    meta.appendChild(mail);
+  }
+})();
   }
 });
 </script>
