@@ -552,8 +552,9 @@ async function start(){
   else { showGate(true); $("#btnGoogle").style.display="inline-block"; $("#btnLogout").style.display="none"; }
 
   onAuthStateChanged(auth, async (user)=>{ window.USER = user;
-    const u2 = getTargetUid() || user?.uid || boot?.uid || null;
-    showGate(!u2);
+    const boot = getAuthUserFromLocalStorage();
+const u2 = getTargetUid() || (user && user.uid) || (boot && boot.uid) || null;
+showGate(!u2);
     $("#btnGoogle").style.display = u2 ? "none" : "inline-block";
     $("#btnLogout").style.display = user ? "inline-block" : "none";
     if(!u2) return;
