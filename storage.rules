@@ -1,20 +1,23 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /users/{userId}/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null
-                   && request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/(jpeg|png|webp|heic)');
+
+    function isOwner(listingId) {
+      return request.auth != null &&
+             firestore.get(/databases/(default)/documents/listings/$(listingId)).data.ownerId == request.auth.uid;
     }
-    match /listings/{listingId}/{allPaths=**} {
+
+    // İlan görselleri
+    match /listings/{listingId}/{filePath=**} {
       allow read: if true;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/(jpeg|png|webp|heic)')
-                   && exists(/databases/$(database)/documents/listings/$(listingId))
-                   && get(/databases/$(database)/documents/listings/$(listingId)).data.ownerId == request.auth.uid;
+      allow write: if isOwner(listingId)
+                   && request.resource.contentType.matches('image/.*')
+                   && request.resource.size < 10 * 1024 * 1024; // 10MB
+    }
+
+    // Diğer her şey kapalı
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
