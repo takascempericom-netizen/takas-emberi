@@ -548,14 +548,14 @@ $("#btnSendReset").onclick=async()=>{
 async function start(){
   const boot = getAuthUserFromLocalStorage(); // {uid,email,...} olabilir
   let usingUid = getTargetUid() || boot?.uid || null;
-  if(usingUid){ showGate(false); $("#btnGoogle").style.display="none"; $("#btnLogout").style.display="inline-block"; await loadUser(usingUid); tabsWire(usingUid); await renderListings(usingUid,"pub"); }
+  if(usingUid){ showGate(false); await loadUser(usingUid); tabsWire(usingUid); await renderListings(usingUid,"pub"); }
   else { showGate(true); $("#btnGoogle").style.display="inline-block"; $("#btnLogout").style.display="none"; }
 
   onAuthStateChanged(auth, async (user)=>{ window.USER = user;
     const boot = getAuthUserFromLocalStorage();
 const u2 = getTargetUid() || (user && user.uid) || (boot && boot.uid) || null;
 showGate(!u2);
-    $("#btnGoogle").style.display = u2 ? "none" : "inline-block";
+    $("#btnGoogle").style.display = user ? "none" : "inline-block";
     $("#btnLogout").style.display = user ? "inline-block" : "none";
     if(!u2) return;
     await loadUser(u2);
