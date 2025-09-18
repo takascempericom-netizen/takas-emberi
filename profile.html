@@ -518,7 +518,7 @@ async function renderListings(uid, tab="pub"){
     const all=[]; snap.forEach(docu=>{ const d=docu.data(); all.push({ id:docu.id, title:d.title||"", price:d.price??null, city:d.city||"", district:d.district||"", _raw:d }); });
     const buckets={pub:[],pend:[],exp:[]}; for(const it of all) buckets[classify(it._raw)].push(it);
     cntPub.textContent=buckets.pub.length; cntPend.textContent=buckets.pend.length; cntExp.textContent=buckets.exp.length;
-    const show=buckets[tab]||[]; listEl.innerHTML=show.map(cardTpl).join("");
+    const show=buckets[tab]||[]; listEl.innerHTML = show.map(it => cardTpl(it, (function(){ try{ const u=(typeof auth!=="undefined"&&auth.currentUser)?auth.currentUser.uid:null; return !!u && (it?._raw?.ownerId===u); }catch(e){ return false; } })())).join("");
     let ok=0, fail=0;
     for(const el of $$(".listing-card")){
       const id=el.getAttribute("data-doc-id");
