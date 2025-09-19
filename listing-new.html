@@ -113,78 +113,82 @@
     </div>
   </div>
 
-  <script>
-  (function(){
-    const catEl = document.getElementById('cat');
-    const subEl = document.getElementById('subcat');
-    const metaRoot = document.getElementById('metaFields');
-    const form = document.getElementById('listingForm');
-    const overlay = document.getElementById('overlay');
-    const overlayOk = document.getElementById('overlayOk');
-    const btnCancel = document.getElementById('btnCancel');
+<script>
+// Cleaned inline script for listing-new (UI-only)
+// - kategori -> alt kategori -> dinamik meta alanlar
+// - overlay davranışı düzgün: Tamam ile sadece overlay kapanır (redirect yok)
+(function(){
+  const catEl = document.getElementById('cat');
+  const subEl = document.getElementById('subcat');
+  const metaRoot = document.getElementById('metaFields');
+  const form = document.getElementById('listingForm');
+  const overlay = document.getElementById('overlay');
+  const overlayOk = document.getElementById('overlayOk');
+  const btnCancel = document.getElementById('btnCancel');
 
-    const SUBS = {
-      motorlu: [{v:'araba',t:'Araba'},{v:'motosiklet',t:'Motosiklet'},{v:'yedek_parca',t:'Yedek Parça'}],
-      tasinmaz: [{v:'ev',t:'Ev'},{v:'arsa',t:'Arsa'},{v:'tarla',t:'Tarla'}],
-      ev_hobi: [{v:'mobilya',t:'Mobilya'},{v:'beyazesya',t:'Beyaz Eşya'},{v:'hobi',t:'Hobi'}],
-      oyuncak: [{v:'oyuncak_genel',t:'Genel'}],
-      giyim: [{v:'giyim_genel',t:'Genel'}],
-      beyazesya: [{v:'beyazesya_genel',t:'Genel'}],
-      teknoloji: [{v:'pc_tel',t:'Bilgisayar & Telefon'}],
-      mobilya: [{v:'mobilya_genel',t:'Genel'}]
-    };
+  const SUBS = {
+    motorlu:[{v:'araba',t:'Araba'},{v:'motosiklet',t:'Motosiklet'},{v:'yedek_parca',t:'Yedek Parça'}],
+    tasinmaz:[{v:'ev',t:'Ev'},{v:'arsa',t:'Arsa'},{v:'tarla',t:'Tarla'}],
+    ev_hobi:[{v:'mobilya',t:'Mobilya'},{v:'beyazesya',t:'Beyaz Eşya'},{v:'hobi',t:'Hobi'}],
+    oyuncak:[{v:'oyuncak_genel',t:'Genel'}],
+    giyim:[{v:'giyim_genel',t:'Genel'}],
+    beyazesya:[{v:'beyazesya_genel',t:'Genel'}],
+    teknoloji:[{v:'pc_tel',t:'Bilgisayar & Telefon'}],
+    mobilya:[{v:'mobilya_genel',t:'Genel'}]
+  };
 
-    const FIELDS = {
-      araba: [{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
-      motosiklet: [{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
-      yedek_parca: [{id:'part_name',label:'Parça adı',type:'text'},{id:'compatible',label:'Uyumlu modeller',type:'text'}],
-      ev: [{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'year_built',label:'Yapım yılı',type:'number'},{id:'rooms',label:'Oda sayısı',type:'number'}],
-      arsa: [{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
-      tarla: [{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
-      mobilya_genel: [{id:'size',label:'Boyut / Ölçüler',type:'text'}],
-      beyazesya_genel: [{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'condition',label:'Durum',type:'text'}],
-      pc_tel: [{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'specs',label:'Özellikler',type:'text'}],
-      oyuncak_genel: [{id:'age',label:'Kaç yaş için',type:'text'}],
-      giyim_genel: [{id:'size',label:'Beden',type:'text'}]
-    };
+  const FIELDS = {
+    araba:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
+    motosiklet:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
+    yedek_parca:[{id:'part_name',label:'Parça adı',type:'text'},{id:'compatible',label:'Uyumlu modeller',type:'text'}],
+    ev:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'year_built',label:'Yapım yılı',type:'number'},{id:'rooms',label:'Oda sayısı',type:'number'}],
+    arsa:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
+    tarla:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
+    mobilya_genel:[{id:'size',label:'Boyut / Ölçüler',type:'text'}],
+    beyazesya_genel:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'condition',label:'Durum',type:'text'}],
+    pc_tel:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'specs',label:'Özellikler',type:'text'}],
+    oyuncak_genel:[{id:'age',label:'Kaç yaş için',type:'text'}],
+    giyim_genel:[{id:'size',label:'Beden',type:'text'}]
+  };
 
-    function populateSubcats(cat){
-      subEl.innerHTML = '';
-      if(!cat || !SUBS[cat]) { subEl.disabled = true; subEl.innerHTML = '<option value="">(Önce ana kategori seçin)</option>'; return; }
-      subEl.appendChild(new Option('-- Alt kategori seçin --',''));
-      for(const o of SUBS[cat]) subEl.appendChild(new Option(o.t, o.v));
-      subEl.disabled = false;
-    }
+  function populateSubcats(cat){
+    if(!subEl) return;
+    subEl.innerHTML = '';
+    if(!cat || !SUBS[cat]) { subEl.disabled = true; subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; return; }
+    subEl.appendChild(new Option('-- Alt kategori seçin --',''));
+    SUBS[cat].forEach(o => subEl.appendChild(new Option(o.t, o.v)));
+    subEl.disabled = false;
+  }
 
-    function renderFields(sub){
-      metaRoot.innerHTML = '';
-      if(!sub || !FIELDS[sub]) return;
-      for(const f of FIELDS[sub]){
-        const wrap = document.createElement('div'); wrap.className='meta-field';
-        const label = document.createElement('label'); label.htmlFor = f.id; label.textContent = f.label;
-        let input;
-        if(f.type === 'textarea') { input = document.createElement('textarea'); } else { input = document.createElement('input'); input.type = f.type || 'text'; }
-        input.id = f.id; input.name = 'meta.'+f.id; input.placeholder = f.label;
-        wrap.appendChild(label); wrap.appendChild(input); metaRoot.appendChild(wrap);
-      }
-    }
-
-    catEl.addEventListener('change', (e)=>{ populateSubcats(e.target.value); metaRoot.innerHTML = ''; });
-    subEl.addEventListener('change', (e)=>{ renderFields(e.target.value); });
-
-    form.addEventListener('submit', (ev)=>{
-      ev.preventDefault();
-      if(!catEl.value){ alert('Lütfen ana kategori seçin.'); catEl.focus(); return; }
-      if(!subEl.value){ alert('Lütfen alt kategori seçin.'); subEl.focus(); return; }
-      overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
-      // Not: gerçek Firebase gönderimi ayrı JS dosyası ile entegre edilecek.
+  function renderFields(sub){
+    if(!metaRoot) return;
+    metaRoot.innerHTML = '';
+    if(!sub || !FIELDS[sub]) return;
+    FIELDS[sub].forEach(f=>{
+      const wrap = document.createElement('div'); wrap.className='meta-field';
+      const label = document.createElement('label'); label.htmlFor = f.id; label.textContent = f.label;
+      const input = (f.type==='textarea')? document.createElement('textarea') : document.createElement('input');
+      if(f.type!=='textarea') input.type = f.type || 'text';
+      input.id = f.id; input.name = 'meta.'+f.id; input.placeholder = f.label; input.style.padding='8px';
+      wrap.appendChild(label); wrap.appendChild(input); metaRoot.appendChild(wrap);
     });
+  }
 
-    overlayOk.addEventListener('click', ()=>{\n  // AUTO-CLOSE SUPPRESSED: do NOT redirect or auto-close the panel here.\n  console.debug('overlayOk clicked — auto-close suppressed');\n});
-    btnCancel.addEventListener('click', ()=>{ if(confirm('İptal edilsin mi?')){ form.reset(); metaRoot.innerHTML=''; subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; subEl.disabled = true; }});
+  if(catEl) catEl.addEventListener('change', e => { populateSubcats(e.target.value); if(metaRoot) metaRoot.innerHTML=''; });
+  if(subEl) subEl.addEventListener('change', e => renderFields(e.target.value));
+  if(form) form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    if(catEl && !catEl.value){ alert('Lütfen ana kategori seçin.'); catEl.focus(); return; }
+    if(subEl && !subEl.value){ alert('Lütfen alt kategori seçin.'); subEl.focus(); return; }
+    if(overlay){ overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); }
+    // -> Gerçek backend write burada değil; listing-new.js ile entegre edilecektir.
+  });
 
-    populateSubcats(catEl.value);
-  })();
-  </script>
+  if(overlayOk) overlayOk.addEventListener('click', ()=>{ if(overlay){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); } });
+  if(btnCancel) btnCancel.addEventListener('click', ()=>{ if(confirm('İlan verme işlemini iptal etmek istiyor musunuz?')){ if(form) form.reset(); if(metaRoot) metaRoot.innerHTML=''; if(subEl){ subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; subEl.disabled = true; } } });
+
+  populateSubcats(catEl ? catEl.value : '');
+})();
+</script>
 </body>
 </html>
