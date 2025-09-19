@@ -180,7 +180,15 @@
       // Not: gerçek Firebase gönderimi ayrı JS dosyası ile entegre edilecek.
     });
 
-    overlayOk.addEventListener('click', ()=>{ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); try{ location.href = '/profile.html#pending'; }catch(e){} });
+    overlayOk.addEventListener('click', ()=>{
+  // Değişiklik: otomatik redirect/panel kapatma kaldırıldı.
+  // Sadece overlay'i kapatıyoruz; gerçek redirect/yenileme, backend işlemi
+  // başarılı olduğunda ayrı bir callback ile yapılmalı.
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  // Eğer sonra otomatik yönlendirme isterseniz, burada çağırmayın —
+  // backend onayı tamamlandığında redirectProfile() gibi bir fonksiyonla yönlendirin.
+});
     btnCancel.addEventListener('click', ()=>{ if(confirm('İptal edilsin mi?')){ form.reset(); metaRoot.innerHTML=''; subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; subEl.disabled = true; }});
 
     populateSubcats(catEl.value);
