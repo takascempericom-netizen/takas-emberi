@@ -140,6 +140,15 @@
   });
   </script>
       </form>
+<script id="close-panel-logic">
+  document.addEventListener("DOMContentLoaded",()=>{
+    const btn=document.getElementById("panelCloseBtn");
+    if(btn){ btn.addEventListener("click",()=>{
+      document.getElementById("profilePanel")?.remove();
+      window.location.href="home.html";
+    }); }
+  });
+</script>
     </div>
   </div>
   <script type="module" src="./listing-new.js"></script>
