@@ -1,0 +1,93 @@
+/* listing-new.css
+   Basit, temiz stil: form, preview slot, progress bar, butonlar, durum etiketleri
+*/
+
+/* Genel form düzeni */
+.listing-form {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 18px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #222;
+}
+
+/* Alan grupları */
+.form-row { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+.form-row.column { flex-direction:column; }
+.form-row .field { flex:1; min-width:0; }
+
+/* Etiketler ve inputlar */
+label { display:block; font-size:13px; color:#555; margin-bottom:6px; }
+input[type="text"], input[type="number"], select, textarea {
+  width:100%;
+  box-sizing:border-box;
+  padding:10px 12px;
+  border:1px solid #e3e6ea;
+  border-radius:8px;
+  font-size:14px;
+  background:#fbfdff;
+  transition:box-shadow .12s, border-color .12s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #6aa6ff;
+  box-shadow: 0 6px 18px rgba(106,166,255,0.12);
+}
+textarea { min-height:120px; resize:vertical; }
+
+/* Butonlar */
+.btn { display:inline-block; padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; border:1px solid transparent; background:#f3f6f9; color:#222; }
+.btn:active{ transform:translateY(1px); }
+.btn-ghost { background:transparent; border:1px solid #ddd; }
+.btn-ok { background:#2ea44f; color:#fff; border-color:rgba(0,0,0,0.08); }
+.btn-bad { background:#d73a49; color:#fff; border-color:rgba(0,0,0,0.08); }
+
+/* Durum notları */
+.note { font-size:14px; margin-bottom:12px; }
+.ok { color: #116d37; }
+.danger { color:#b91c1c; }
+
+/* Önizleme bölümü */
+.preview { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; }
+.preview .slot {
+  width:120px; height:90px;
+  border-radius:8px; overflow:hidden;
+  background:#f6f8fb; position:relative;
+  border:1px dashed #e6e9ee; display:flex; align-items:center; justify-content:center;
+  flex: 0 0 120px;
+}
+.preview .slot img { width:100%; height:100%; object-fit:cover; display:block; }
+.preview .slot span { font-size:12px; color:#7b8590; position:absolute; bottom:6px; left:6px; right:6px; text-align:center; }
+
+/* Progress bar (küçük bar) */
+.slot .bar {
+  position:absolute; left:0; bottom:0; height:4px; width:0%;
+  background:linear-gradient(90deg,#4aa3ff,#2ea44f);
+  transition:width .12s linear;
+}
+
+/* Foto thumbnail liste (edit sayfası) */
+.photos-list { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.photos-list .ph { width:120px; border-radius:8px; overflow:hidden; background:#fff; border:1px solid #eee; box-shadow:0 4px 12px rgba(0,0,0,0.03); position:relative; }
+.photos-list .ph img { width:100%; height:90px; object-fit:cover; display:block; }
+.photos-list .ph button { display:block; width:100%; padding:6px 8px; border:none; background:#fff; font-size:13px; cursor:pointer; border-top:1px solid #f1f3f5; }
+.photos-list .ph button.cv { color:#116d37; }
+.photos-list .ph button.rm { color:#b91c1c; }
+
+/* Tags */
+.tags { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.tag { background:#f1f5f9; color:#374151; font-size:12px; padding:4px 8px; border-radius:999px; }
+
+/* Küçük ekranlar */
+@media (max-width:640px){
+  .form-row { flex-direction:column; }
+  .preview .slot { width:46%; flex-basis:46%; height:120px; }
+  .photos-list .ph { width:46%; }
+}
+
+/* Utility */
+.hidden { display:none !important; }
+.muted { color:#6b7280; font-size:13px; }
