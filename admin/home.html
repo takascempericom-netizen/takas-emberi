@@ -4,179 +4,19 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin Panel • Takas Çemberi</title>
+  <!-- buraya kadar CSS aynı -->
   <style>
-    :root{
-      --bg:#0b0b0b; --panel:#121212; --muted:#9ca3af; --line:#1f2937;
-      --blue:#3b82f6; --green:#10b981; --red:#ef4444; --amber:#f59e0b; --fg:#f9fafb;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    a{color:inherit}
-    header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.2));backdrop-filter:saturate(140%) blur(4px);z-index:10}
-    header .flag{width:64px;height:40px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.6)}
-    /* Türk bayrağı (CSS) + dalga animasyonu */
-    .flag::before{content:"";position:absolute;inset:0;background:#e10600}
-    .flag::after{
-      content:"";position:absolute;left:18px;top:7px;width:20px;height:20px;border-radius:50%;
-      box-shadow: -8px 0 0 5px #fff inset, -8px 0 0 5px #fff; /* hilal efekti */
-      background:#e10600;
-    }
-    .star{position:absolute;left:40px;top:12px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:12px solid #fff;transform:rotate(35deg)}
-    .star:before,.star:after{
-      content:"";position:absolute;left:-6px;top:8px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:12px solid #fff;
-    }
-    .star:before{transform:rotate(-70deg)}
-    .star:after{top:4px;transform:rotate(70deg)}
-    .flag{transform-origin:left center;animation:wave 2.4s ease-in-out infinite}
-    @keyframes wave{0%{transform:skewY(0deg)}50%{transform:skewY(3deg)}100%{transform:skewY(0deg)}}
-
-    header img.logo{height:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}
-    header .sp{flex:1}
-    header .user{font-size:13px;color:var(--muted)}
-    header .btn{border:1px solid var(--line);padding:8px 10px;border-radius:10px;background:#181818;cursor:pointer}
-
-    .layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 62px)}
-    aside{border-right:1px solid var(--line);background:#0f0f0f}
-    .brand{padding:14px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px;color:#d1d5db}
-    .menu{list-style:none;margin:0;padding:8px}
-    .menu li{margin:4px 0}
-    .menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#d1d5db;text-decoration:none;border:1px solid transparent}
-    .menu a.active,.menu a:hover{background:#141414;border-color:#1f2937}
-    main{padding:18px}
-
-    .section{display:none}
-    .section.active{display:block}
-    .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:200px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
-    .card h3{margin:0 0 6px;font-size:13px;color:var(--muted);font-weight:600}
-    .card p{margin:0;font-size:22px;font-weight:800}
-
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.3)}
-    .panel h2{margin:0 0 10px;font-size:16px}
-    .muted{color:var(--muted);font-size:13px}
-
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid var(--line);font-size:14px}
-    th{color:#cbd5e1;text-align:left;background:#121212}
-    tr:hover td{background:#111213}
-
-    .btn{padding:7px 10px;border-radius:8px;border:1px solid #1f2937;background:#161616;color:#e5e7eb;cursor:pointer}
-    .btn.ok{background:var(--green);border-color:#065f46}
-    .btn.no{background:var(--red);border-color:#7f1d1d}
-    .btn.info{background:var(--blue);border-color:#1e3a8a}
-    .btn.warn{background:var(--amber);border-color:#7c4a03}
-
-    /* Modal */
-    #modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50}
-    #modal .inner{background:#0f0f0f;border:1px solid var(--line);border-radius:14px;max-width:720px;width:96%;max-height:85vh;overflow:auto;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-    #modal h3{margin:0 0 8px}
-    .images img{max-width:100%;border-radius:10px;margin:6px 0;border:1px solid var(--line)}
-
-    /* Header sağ */
-    .hdr-right{display:flex;align-items:center;gap:10px}
-    .notif-dot{display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0b0b0b;color:#f9fafb}
+    /* ... önceki CSS kodların burada ... */
   </style>
 </head>
 <body>
-  <header>
-    <div class="flag"><span class="star"></span></div>
-    <img class="logo" src="/assets/img/seffaf.png" alt="logo">
-    <div class="sp"></div>
-    <div class="hdr-right">
-      <span class="user" id="hdrUser">—</span>
-      <button class="btn" id="logoutBtn">Çıkış</button>
-    </div>
-  </header>
+  <!-- header + sidebar kodların burada kalıyor -->
 
-  <div class="layout">
-    <aside>
-      <div class="brand">Yönetim Menüsü</div>
-      <ul class="menu" id="menu">
-        <li><a href="#messages" data-section="messages" class="active">📨 Kullanıcı Mesajları <span id="msgDot" class="notif-dot" style="display:none"></span></a></li>
-        <li><a href="#complaints" data-section="complaints">🚩 Şikayetler</a></li>
-        <li><a href="#pending" data-section="pending">⏳ Onay Bekleyen İlanlar</a></li>
-        <li><a href="#broadcast" data-section="broadcast">📣 Bildirim Gönder</a></li>
-        <li><a href="#users" data-section="users">👥 Kullanıcılar</a></li>
-      </ul>
-    </aside>
+  <!-- Ses dosyası preload -->
+  <audio id="notifySound" src="/assets/sounds/notify.wav" preload="auto"></audio>
 
-    <main>
-      <!-- Üst kartlar -->
-      <div class="cards" id="statsRow">
-        <div class="card"><h3>Yayında Olan</h3><p id="countPublished">0</p></div>
-        <div class="card"><h3>Onay Bekleyen</h3><p id="countPending">0</p></div>
-        <div class="card"><h3>Süresi Dolan</h3><p id="countExpired">0</p></div>
-      </div>
-
-      <!-- Mesajlar -->
-      <section id="sec-messages" class="section active">
-        <div class="panel">
-          <h2>📨 Kullanıcıların Admin’e Gönderdiği Mesajlar</h2>
-          <div class="muted">Koleksiyon: <code>adminMessages</code> (fromUid, text, createdAt)</div>
-          <table id="tblMessages">
-            <thead><tr><th>Gönderen</th><th>Mesaj</th><th>Tarih</th><th>İşlem</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Şikayetler -->
-      <section id="sec-complaints" class="section">
-        <div class="panel">
-          <h2>🚩 Şikayetler</h2>
-          <div class="muted">Koleksiyon: <code>complaints</code> (reporterUid, targetUid?, listingId?, text, createdAt, status)</div>
-          <table id="tblComplaints">
-            <thead><tr><th>Raporlayan</th><th>Hedef</th><th>İçerik</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Pending İlanlar -->
-      <section id="sec-pending" class="section">
-        <div class="panel">
-          <h2>⏳ Onay Bekleyen İlanlar</h2>
-          <table id="pendingTable">
-            <thead><tr><th>Başlık</th><th>Sahip</th><th>Durum</th><th>İşlem</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Bildirim Gönder -->
-      <section id="sec-broadcast" class="section">
-        <div class="panel">
-          <h2>📣 Tüm Kullanıcılara Bildirim</h2>
-          <div class="muted">Koleksiyon: <code>notifications</code> (title, message, createdAt)</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <input id="notifTitle" placeholder="Başlık" style="flex:1;min-width:220px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e0e0e;color:#e5e7eb">
-            <input id="notifMsg" placeholder="Mesaj" style="flex:2;min-width:260px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e0e0e;color:#e5e7eb">
-            <button id="btnBroadcast" class="btn info">Gönder</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Kullanıcılar -->
-      <section id="sec-users" class="section">
-        <div class="panel">
-          <h2>👥 Kullanıcılar</h2>
-          <div class="muted">Liste Firestore’daki <code>users</code> koleksiyonundan gelir. Arama kutusuna kullanıcı adı/e-posta yazıp filtreleyin.</div>
-          <div style="display:flex;gap:8px;margin:8px 0 12px">
-            <input id="userSearch" placeholder="Kullanıcı ara…" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e0e0e;color:#e5e7eb">
-            <button id="btnClearSearch" class="btn">Temizle</button>
-          </div>
-          <table id="tblUsers">
-            <thead><tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Detay Modal -->
-  <div id="modal"><div class="inner" id="modalInner"></div></div>
+  <!-- sayfanın geri kalanı burada kalıyor -->
 
   <script type="module">
     import { app } from "../js/firebase-config.js";
@@ -187,205 +27,43 @@
 
     const auth = getAuth(app);
     const db   = getFirestore(app);
+    const sound = document.getElementById("notifySound");
 
-    // Header actions
-    document.getElementById('logoutBtn').onclick=()=>signOut(auth);
+    // Son snapshot sayacı -> yenisi gelirse ses çal
+    let lastCounts = { pending:0, messages:0, complaints:0 };
 
-    // Sol menü gezinme
-    const map = {
-      messages: document.getElementById('sec-messages'),
-      complaints: document.getElementById('sec-complaints'),
-      pending: document.getElementById('sec-pending'),
-      broadcast: document.getElementById('sec-broadcast'),
-      users: document.getElementById('sec-users'),
-    };
-    document.getElementById('menu').addEventListener('click', (e)=>{
-      const a = e.target.closest('a[data-section]');
-      if(!a) return;
-      e.preventDefault();
-      [...document.querySelectorAll('.menu a')].forEach(x=>x.classList.remove('active'));
-      a.classList.add('active');
-      const key = a.dataset.section;
-      Object.values(map).forEach(sec=>sec.classList.remove('active'));
-      map[key].classList.add('active');
-    });
-
-    // Auth & role guard
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ location.href="/admin/login.html"; return; }
-      document.getElementById('hdrUser').textContent = user.email || user.uid;
-      const uref = doc(db,'users',user.uid);
-      const us = await getDoc(uref);
-      const role = us.exists() ? (us.data().role||'user') : 'user';
-      if(role!=='admin'){ alert('Admin yetkisi yok'); await signOut(auth); return; }
-      initData();
+      const roleSnap = await getDoc(doc(db,"users",user.uid));
+      if(!roleSnap.exists() || roleSnap.data().role!=="admin"){ await signOut(auth); return; }
+
+      // Pending ilanlar
+      onSnapshot(query(collection(db,"listings"), where("status","==","pending")),(s)=>{
+        if(s.size>lastCounts.pending){ playNotify(); }
+        lastCounts.pending = s.size;
+        renderPending(s);
+      });
+
+      // Admin mesajları
+      onSnapshot(query(collection(db,"adminMessages"), orderBy("createdAt","desc"), limit(200)),(s)=>{
+        if(s.size>lastCounts.messages){ playNotify(); }
+        lastCounts.messages = s.size;
+        renderMessages(s);
+      });
+
+      // Şikayetler
+      onSnapshot(query(collection(db,"complaints"), orderBy("createdAt","desc"), limit(200)),(s)=>{
+        if(s.size>lastCounts.complaints){ playNotify(); }
+        lastCounts.complaints = s.size;
+        renderComplaints(s);
+      });
     });
 
-    function initData(){
-      // Counters
-      onSnapshot(query(collection(db,'listings'), where('status','==','published')),(s)=>{ qs('#countPublished').textContent=s.size; });
-      onSnapshot(query(collection(db,'listings'), where('status','==','pending')),(s)=>{ qs('#countPending').textContent=s.size; renderPending(s); });
-      onSnapshot(query(collection(db,'listings'), where('status','==','expired')),(s)=>{ qs('#countExpired').textContent=s.size; });
-
-      // Messages (son 200)
-      onSnapshot(query(collection(db,'adminMessages'), orderBy('createdAt','desc'), limit(200)),(s)=>{
-        const tb = qs('#tblMessages tbody'); tb.innerHTML='';
-        qs('#msgDot').style.display = s.size ? 'inline-block' : 'none';
-        s.forEach(d=>{
-          const v=d.data();
-          const tr = el('tr');
-          tr.innerHTML = \`
-            <td>\${esc(v.fromUid||'-')}</td>
-            <td>\${esc(v.text||'')}</td>
-            <td>\${fmt(v.createdAt)}</td>
-            <td><button class="btn info" onclick="viewUser('\${v.fromUid||''}')">Profili Aç</button></td>\`;
-          tb.appendChild(tr);
-        });
-      });
-
-      // Complaints
-      onSnapshot(query(collection(db,'complaints'), orderBy('createdAt','desc'), limit(200)),(s)=>{
-        const tb = qs('#tblComplaints tbody'); tb.innerHTML='';
-        s.forEach(d=>{
-          const v=d.data();
-          const tr = el('tr');
-          tr.innerHTML = \`
-            <td>\${esc(v.reporterUid||'-')}</td>
-            <td>\${esc(v.targetUid||v.listingId||'-')}</td>
-            <td>\${esc(v.text||'')}</td>
-            <td>\${fmt(v.createdAt)}</td>
-            <td>\${esc(v.status||'open')}</td>
-            <td>
-              <button class="btn info" onclick="viewUser('\${v.reporterUid||''}')">Raporlayan</button>
-              \${v.targetUid? \`<button class="btn warn" onclick="banUser('\${v.targetUid}')">Engelle</button>\` : ''}
-            </td>\`;
-          tb.appendChild(tr);
-        });
-      });
-
-      // Users
-      onSnapshot(collection(db,'users'),(s)=>{
-        window.__users = s.docs.map(d=>({id:d.id, ...d.data()}));
-        renderUsers();
-      });
+    function playNotify(){
+      try{ sound.currentTime=0; sound.play(); }catch(e){ console.warn("Ses çalınamadı:",e); }
     }
 
-    // Pending listings table
-    function renderPending(snapshot){
-      const tb = qs('#pendingTable tbody'); tb.innerHTML='';
-      snapshot.forEach(docSnap=>{
-        const v=docSnap.data();
-        const tr=el('tr');
-        tr.innerHTML=\`
-          <td>\${esc(v.title||'-')}</td>
-          <td>\${esc(v.ownerId||'-')}</td>
-          <td>\${esc(v.status||'-')}</td>
-          <td>
-            <button class="btn info" onclick="viewListing('\${docSnap.id}')">Detay</button>
-            <button class="btn ok" onclick="approveListing('\${docSnap.id}')">Onayla</button>
-            <button class="btn no" onclick="rejectListing('\${docSnap.id}')">Reddet</button>
-          </td>\`;
-        tb.appendChild(tr);
-      });
-    }
-
-    // Broadcast notifications
-    qs('#btnBroadcast').onclick = async ()=>{
-      const title = qs('#notifTitle').value.trim();
-      const msg   = qs('#notifMsg').value.trim();
-      if(!title || !msg){ alert('Başlık ve mesaj zorunlu.'); return; }
-      await addDoc(collection(db,'notifications'),{ title, message: msg, createdAt: serverTimestamp() });
-      qs('#notifTitle').value=''; qs('#notifMsg').value='';
-      alert('Bildirim kaydedildi.');
-    };
-
-    // Users render + search
-    qs('#btnClearSearch').onclick=()=>{ qs('#userSearch').value=''; renderUsers(); }
-    qs('#userSearch').addEventListener('input', renderUsers);
-    function renderUsers(){
-      const q = (qs('#userSearch').value||'').toLowerCase();
-      const tb = qs('#tblUsers tbody'); tb.innerHTML='';
-      (window.__users||[]).filter(u=>{
-        const hay = (u.displayName||'')+' '+(u.email||'')+' '+(u.username||'');
-        return hay.toLowerCase().includes(q);
-      }).forEach(u=>{
-        const tr=el('tr');
-        tr.innerHTML=\`
-          <td>\${esc(u.displayName||u.username||u.id)}</td>
-          <td>\${esc(u.email||'-')}</td>
-          <td>\${esc(u.role||'user')}</td>
-          <td>\${esc(u.status||'active')}</td>
-          <td>
-            <button class="btn info" onclick="viewUser('\${u.id}')">İncele</button>
-            <button class="btn no" onclick="banUser('\${u.id}')">Engelle</button>
-          </td>\`;
-        tb.appendChild(tr);
-      });
-    }
-
-    // Global actions
-    window.viewUser = async (uid)=>{
-      if(!uid) return;
-      const s = await getDoc(doc(db,'users',uid));
-      if(!s.exists()){ alert('Kullanıcı bulunamadı'); return; }
-      const u = s.data();
-      showModal(\`
-        <h3>Kullanıcı Profili</h3>
-        <div class="muted">\${uid}</div>
-        <p><b>Ad:</b> \${esc(u.displayName||u.username||'-')}</p>
-        <p><b>E-posta:</b> \${esc(u.email||'-')}</p>
-        <p><b>Rol:</b> \${esc(u.role||'user')}</p>
-        <p><b>Durum:</b> \${esc(u.status||'active')}</p>
-        \${u.photoURL? '<div class="images"><img src="'+esc(u.photoURL)+'" alt="avatar"></div>':''}
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn warn" onclick="banUser('\${uid}')">Engelle</button>
-          <button class="btn" onclick="closeModal()">Kapat</button>
-        </div>
-      \`);
-    };
-
-    window.banUser = async (uid)=>{
-      if(!confirm('Bu kullanıcıyı engellemek istiyor musunuz?')) return;
-      await updateDoc(doc(db,'users',uid),{ status:'banned' });
-      alert('Kullanıcı engellendi.');
-    };
-
-    window.viewListing = async (id)=>{
-      const s= await getDoc(doc(db,'listings',id));
-      if(!s.exists()) { alert('İlan bulunamadı'); return; }
-      const d = s.data();
-      showModal(\`
-        <h3>\${esc(d.title||'-')}</h3>
-        <div class="muted">Sahip: \${esc(d.ownerId||'-')} • Durum: \${esc(d.status||'-')}</div>
-        <p>\${esc(d.description||'')}</p>
-        <div class="images">\${(d.images||[]).map(u=>'<img src="'+esc(u)+'">').join('')}</div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn ok" onclick="approveListing('\${id}')">Onayla</button>
-          <button class="btn no" onclick="rejectListing('\${id}')">Reddet</button>
-          <button class="btn" onclick="closeModal()">Kapat</button>
-        </div>
-      \`);
-    };
-
-    window.approveListing = async (id)=>{
-      await updateDoc(doc(db,'listings',id),{ status:'published', publishedAt: serverTimestamp() });
-      closeModal(); alert('İlan yayına alındı.');
-    };
-    window.rejectListing = async (id)=>{
-      await updateDoc(doc(db,'listings',id),{ status:'rejected', rejectedAt: serverTimestamp() });
-      closeModal(); alert('İlan reddedildi.');
-    };
-
-    // Utils
-    function qs(s){return document.querySelector(s)}
-    function el(t){return document.createElement(t)}
-    function esc(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
-    function fmt(ts){
-      if(!ts) return '-';
-      try{ const d=ts.toDate(); return d.toLocaleString('tr-TR'); }catch{ return '-' }
-    }
-    function showModal(html){ const m=qs('#modal'); qs('#modalInner').innerHTML=html; m.style.display='flex'; }
-    window.closeModal = ()=>{ qs('#modal').style.display='none' };
+    // --- render fonksiyonların buraya kalacak (renderPending, renderMessages, renderComplaints) ---
   </script>
 </body>
 </html>
