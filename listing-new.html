@@ -50,7 +50,17 @@
         <button id="btnGoogle" class="btn btn-pri">Google ile giriş yap</button>
       </div>
       <form id="form" class="bd hidden" autocomplete="off">
-          <input id="photos" type="file" accept="image/*" multiple/>
+          <div class="photo-block">
+            <label for="photos">Fotoğraflar (max 5)</label>
+            <div class="photo-previews">
+              <div class="ph-slot">1</div>
+              <div class="ph-slot">2</div>
+              <div class="ph-slot">3</div>
+              <div class="ph-slot">4</div>
+              <div class="ph-slot">5</div>
+              <input id="photos" type="file" accept="image/*" multiple/>
+            </div>
+          </div>
         <div class="full">
           <label for="title">Başlık</label>
           <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
@@ -154,3 +164,10 @@
   <script type="module" src="./listing-new.js"></script>
 </body>
 </html>
+
+<style id="photo-block-style">
+.photo-block{margin-bottom:16px}
+.photo-previews{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ph-slot{width:48px;height:48px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;border-radius:6px}
+</style>
+
