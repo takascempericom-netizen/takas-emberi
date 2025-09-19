@@ -129,9 +129,13 @@ async function renderOnay(){
       if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
       try{
         await updateDoc(doc(db,'listings',a.dataset.approve), {
-          status:'active', state:'approved', moderation:'approved',
-          approved:true, isApproved:true, approvedAt:serverTimestamp(), updatedAt:serverTimestamp()
-        });
+  status: 'active',
+  state: 'approved',
+  moderation: 'approved',
+  approved: true, isApproved: true,
+  approvedAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+});
         a.closest('.item').remove();
       }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
     }
@@ -139,9 +143,13 @@ async function renderOnay(){
       if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
       try{
         await updateDoc(doc(db,'listings',r.dataset.reject), {
-          status:'rejected', state:'rejected', moderation:'rejected',
-          approved:false, isApproved:false, rejectedAt:serverTimestamp(), updatedAt:serverTimestamp()
-        });
+  status: 'rejected',
+  state: 'rejected',
+  moderation: 'rejected',
+  approved: false, isApproved: false,
+  rejectedAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+});
         r.closest('.item').remove();
       }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
     }

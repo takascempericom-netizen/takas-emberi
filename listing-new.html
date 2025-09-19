@@ -51,11 +51,7 @@
       </div>
       <form id="form" class="bd hidden" autocomplete="off">
           
-          <div class="photo-block">
-            <label for="photos">Fotoğraflar (max 5)</label>
-            <div class="photo-previews">
-              <div class="ph-slot">1</div>
-              <div class="ph-slot">2</div>
+          <div class="ph-slot">2</div>
               <div class="ph-slot">3</div>
               <div class="ph-slot">4</div>
               <div class="ph-slot">5</div>
@@ -90,13 +86,11 @@
         </div>
         <div>
           <label for="price">Fiyat / Değer (TL)</label>
-          <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/>
-          <input id="photos" type="file" accept="image/*" multiple />
-
-        </div>
+          <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/></div>
         <div class="full">
           <label for="photos">Fotoğraflar (max 5)</label>
-          <div class="photos" id="preview">
+          <input id="photos" type="file" accept="image/*" multiple />
+<div class="photos" id="preview">
             <div class="slot"><span>1</span><div class="prog"><div class="bar"></div></div></div>
             <div class="slot"><span>2</span><div class="prog"><div class="bar"></div></div></div>
             <div class="slot"><span>3</span><div class="prog"><div class="bar"></div></div></div>
@@ -164,6 +158,7 @@
     </div>
   </div>
   <script type="module" src="./listing-new.js"></script>
+<script type="module" src="js/redirect-after-create.js"></script>
 </body>
 <script id="panel-close-wire">
   document.addEventListener("DOMContentLoaded",function(){

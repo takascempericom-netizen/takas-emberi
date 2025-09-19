@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
+console.debug('[TC] Firebase:', getApp().options?.projectId, (getApp().options?.apiKey||'').slice(0,6)+'…');
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
@@ -35,9 +36,16 @@ const inputPhotos = document.getElementById('photos');
 
 // Foto önizleme
 inputPhotos?.addEventListener('change', () => {
-  const files = Array.from(inputPhotos.files || []).slice(0,5);
-    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
-  [...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
+  let files = Array.from(inputPhotos.files || []);
+// sadece görsel tiplerini kabul et
+files = files.filter(f => (f.type || '').startsWith('image/'));
+// en az 1 foto zorunlu
+if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
+// en fazla 5 foto
+if (files.length > 5) { alert('En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak.'); files = files.slice(0,5); }
+// boyut limiti: 10MB
+for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
+[...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
     const img = slot.querySelector('img');
     if(img) img.remove();
     slot.querySelector('span')?.classList.remove('hidden');
@@ -121,9 +129,16 @@ form?.addEventListener('submit', async (e)=>{
     });
 
     // 2. Fotoğrafları yükle
-    const files = Array.from(inputPhotos.files || []).slice(0,5);
-    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
-    const urls=[];
+    let files = Array.from(inputPhotos.files || []);
+// sadece görsel tiplerini kabul et
+files = files.filter(f => (f.type || '').startsWith('image/'));
+// en az 1 foto zorunlu
+if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
+// en fazla 5 foto
+if (files.length > 5) { alert('En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak.'); files = files.slice(0,5); }
+// boyut limiti: 10MB
+for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
+const urls=[];
     for(let i=0;i<files.length;i++){
       const f = files[i];
       const path = `listings/${docRef.id}/${Date.now()}_${f.name}`;
