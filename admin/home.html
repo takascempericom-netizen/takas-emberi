@@ -28,7 +28,8 @@
     .menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#d1d5db;text-decoration:none;border:1px solid transparent}
     .menu a.active,.menu a:hover{background:#141414;border-color:#1f2937}
     main{padding:18px}
-    .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .cards{display:none;gap:12px;flex-wrap:wrap;margin-bottom:16px} /* başlangıçta gizli */
+    .cards.show{display:flex}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:200px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
     .card h3{margin:0 0 6px;font-size:13px;color:var(--muted);font-weight:600} .card p{margin:0;font-size:22px;font-weight:800}
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.3)}
@@ -42,6 +43,8 @@
     #modal .inner{background:#0f0f0f;border:1px solid var(--line);border-radius:14px;max-width:720px;width:96%;max-height:85vh;overflow:auto;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
     #modal h3{margin:0 0 8px} .images img{max-width:100%;border-radius:10px;margin:6px 0;border:1px solid var(--line)}
     .hdr-right{display:flex;align-items:center;gap:10px} .notif-dot{display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:50%;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+    /* Başlangıç boş ekran placeholder (istersen görünür bırakabilirsin) */
+    .placeholder{display:flex;align-items:center;justify-content:center;height:50vh;color:#9ca3af}
   </style>
 </head>
 <body>
@@ -59,22 +62,27 @@
     <aside>
       <div class="brand">Yönetim Menüsü</div>
       <ul class="menu" id="menu">
-        <li><a href="#messages" data-section="messages" class="active">📨 Kullanıcı Mesajları <span id="msgDot" class="notif-dot" style="display:none"></span></a></li>
+        <li><a href="#messages"   data-section="messages">📨 Kullanıcı Mesajları <span id="msgDot" class="notif-dot" style="display:none"></span></a></li>
         <li><a href="#complaints" data-section="complaints">🚩 Şikayetler</a></li>
-        <li><a href="#pending" data-section="pending">⏳ Onay Bekleyen İlanlar</a></li>
-        <li><a href="#broadcast" data-section="broadcast">📣 Bildirim Gönder</a></li>
-        <li><a href="#users" data-section="users">👥 Kullanıcılar</a></li>
+        <li><a href="#pending"    data-section="pending">⏳ Onay Bekleyen İlanlar</a></li>
+        <li><a href="#broadcast"  data-section="broadcast">📣 Bildirim Gönder</a></li>
+        <li><a href="#users"      data-section="users">👥 Kullanıcılar</a></li>
       </ul>
     </aside>
 
     <main>
+      <!-- Üst sayaçlar: ancak bir sekme seçildiğinde görünür -->
       <div class="cards" id="statsRow">
         <div class="card"><h3>Yayında Olan</h3><p id="countPublished">0</p></div>
         <div class="card"><h3>Onay Bekleyen</h3><p id="countPending">0</p></div>
         <div class="card"><h3>Süresi Dolan</h3><p id="countExpired">0</p></div>
       </div>
 
-      <section id="sec-messages" class="section active">
+      <!-- Başlangıçta boş -->
+      <div id="emptyPlaceholder" class="placeholder">Soldaki menüden bir bölüm seçin</div>
+
+      <!-- MESAJLAR -->
+      <section id="sec-messages" class="section">
         <div class="panel">
           <h2>📨 Kullanıcıların Admin’e Gönderdiği Mesajlar</h2>
           <div class="muted">Koleksiyon: <code>adminMessages</code></div>
@@ -82,6 +90,7 @@
         </div>
       </section>
 
+      <!-- ŞİKAYETLER -->
       <section id="sec-complaints" class="section">
         <div class="panel">
           <h2>🚩 Şikayetler</h2>
@@ -90,13 +99,15 @@
         </div>
       </section>
 
+      <!-- ONAY BEKLEYEN -->
       <section id="sec-pending" class="section">
         <div class="panel">
           <h2>⏳ Onay Bekleyen İlanlar</h2>
-        <table id="pendingTable"><thead><tr><th>Başlık</th><th>Sahip</th><th>Durum</th><th>İşlem</th></tr></thead><tbody></tbody></table>
+          <table id="pendingTable"><thead><tr><th>Başlık</th><th>Sahip</th><th>Durum</th><th>İşlem</th></tr></thead><tbody></tbody></table>
         </div>
       </section>
 
+      <!-- BİLDİRİM GÖNDER -->
       <section id="sec-broadcast" class="section">
         <div class="panel">
           <h2>📣 Tüm Kullanıcılara Bildirim</h2>
@@ -109,6 +120,7 @@
         </div>
       </section>
 
+      <!-- KULLANICILAR -->
       <section id="sec-users" class="section">
         <div class="panel">
           <h2>👥 Kullanıcılar</h2>
@@ -138,25 +150,34 @@
     const db   = getFirestore(app);
     const sound = document.getElementById("notifySound");
 
-    // Sol menü
-    const map = {
-      messages: document.getElementById('sec-messages'),
-      complaints: document.getElementById('sec-complaints'),
-      pending: document.getElementById('sec-pending'),
+    const sections = {
+      messages:  document.getElementById('sec-messages'),
+      complaints:document.getElementById('sec-complaints'),
+      pending:   document.getElementById('sec-pending'),
       broadcast: document.getElementById('sec-broadcast'),
-      users: document.getElementById('sec-users'),
+      users:     document.getElementById('sec-users'),
     };
-    document.getElementById('menu').addEventListener('click',(e)=>{
-      const a=e.target.closest('a[data-section]'); if(!a) return; e.preventDefault();
+
+    // NAV: başlangıç boş, bir sekme seçilince sadece o + sayaçlar görünür
+    const stats = document.getElementById('statsRow');
+    const empty = document.getElementById('emptyPlaceholder');
+    document.getElementById('menu').addEventListener('click', (e)=>{
+      const a = e.target.closest('a[data-section]'); if(!a) return; e.preventDefault();
+      // menü aktiflik
       [...document.querySelectorAll('.menu a')].forEach(x=>x.classList.remove('active'));
-      a.classList.add('active'); const key=a.dataset.section;
-      Object.values(map).forEach(sec=>sec.classList.remove('active')); map[key].classList.add('active');
+      a.classList.add('active');
+      // tüm bölümleri gizle
+      Object.values(sections).forEach(sec=>sec.classList.remove('active'));
+      // seçileni göster
+      sections[a.dataset.section].classList.add('active');
+      // sayaçları aç, placeholder'ı gizle
+      stats.classList.add('show'); empty.style.display='none';
+      // en üste kaydır
+      window.scrollTo({top:0, behavior:'smooth'});
     });
 
-    // Çıkış
-    document.getElementById('logoutBtn').onclick=()=>signOut(auth);
+    document.getElementById('logoutBtn').onclick = ()=>signOut(auth);
 
-    // İlk yükleme sırasında ses çalmasın
     let init = {pending:true, messages:true, complaints:true};
 
     onAuthStateChanged(auth, async (user)=>{
@@ -177,7 +198,7 @@
       onSnapshot(query(collection(db,'complaints'), orderBy('createdAt','desc'), limit(200)),(s)=>{ renderComplaints(s); if(!init.complaints) play(); init.complaints=false; });
     });
 
-    // ==== RENDER FONKSİYONLARI (EKSİK OLANLAR) ====
+    // RENDER
     function renderPending(snapshot){
       const tb = qs('#pendingTable tbody'); tb.innerHTML='';
       snapshot.forEach(docSnap=>{
@@ -229,7 +250,6 @@
         tb.appendChild(tr);
       });
     }
-    // ==== /RENDER FONKSİYONLARI ====
 
     // Broadcast
     qs('#btnBroadcast').onclick = async ()=>{
@@ -241,7 +261,7 @@
       alert('Bildirim kaydedildi.');
     };
 
-    // Kullanıcı listesi (canlı + arama)
+    // Users
     let allUsers = [];
     onSnapshot(collection(db,'users'),(s)=>{ allUsers = s.docs.map(d=>({id:d.id, ...d.data()})); renderUsers(); });
     qs('#btnClearSearch').onclick=()=>{ qs('#userSearch').value=''; renderUsers(); }
@@ -267,7 +287,7 @@
       });
     }
 
-    // Modal & aksiyonlar
+    // Modal & actions
     window.viewUser = async (uid)=>{
       if(!uid) return; const s=await getDoc(doc(db,'users',uid)); if(!s.exists()) return alert('Kullanıcı bulunamadı');
       const u=s.data();
@@ -286,6 +306,7 @@
       `);
     };
     window.banUser = async (uid)=>{ if(!confirm('Bu kullanıcıyı engellemek istiyor musunuz?')) return; await updateDoc(doc(db,'users',uid),{status:'banned'}); alert('Kullanıcı engellendi.'); };
+
     window.viewListing = async (id)=>{
       const s= await getDoc(doc(db,'listings',id)); if(!s.exists()) return alert('İlan bulunamadı');
       const d = s.data();
@@ -304,14 +325,14 @@
     window.approveListing = async (id)=>{ await updateDoc(doc(db,'listings',id),{status:'published',publishedAt:serverTimestamp()}); closeModal(); alert('İlan yayına alındı.'); };
     window.rejectListing  = async (id)=>{ await updateDoc(doc(db,'listings',id),{status:'rejected',rejectedAt:serverTimestamp()});  closeModal(); alert('İlan reddedildi.');  };
 
-    // Yardımcılar
+    // Utils
     function qs(s){ return document.querySelector(s); }
     function esc(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
     function fmt(ts){ if(!ts) return '-'; try{ const d=ts.toDate(); return d.toLocaleString('tr-TR'); }catch{ return '-'; } }
     function showModal(html){ qs('#modalInner').innerHTML=html; qs('#modal').style.display='flex'; }
     window.closeModal = ()=>{ qs('#modal').style.display='none'; };
 
-    function play(){ try{ sound.currentTime=0; sound.play(); }catch(e){ /* sessiz */ } }
+    function play(){ try{ sound.currentTime=0; sound.play(); }catch(e){} }
   </script>
 </body>
 </html>
