@@ -50,6 +50,7 @@
         <button id="btnGoogle" class="btn btn-pri">Google ile giriş yap</button>
       </div>
       <form id="form" class="bd hidden" autocomplete="off">
+          <input id="photos" type="file" accept="image/*" multiple/>
         <div class="full">
           <label for="title">Başlık</label>
           <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
@@ -83,7 +84,6 @@
         </div>
         <div class="full">
           <label for="photos">Fotoğraflar (max 5)</label>
-          <input id="photos" type="file" accept="image/*" multiple />
           <div class="photos" id="preview">
             <div class="slot"><span>1</span><div class="prog"><div class="bar"></div></div></div>
             <div class="slot"><span>2</span><div class="prog"><div class="bar"></div></div></div>
