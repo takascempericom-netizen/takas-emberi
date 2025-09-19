@@ -53,16 +53,6 @@
           <label for="photos">Fotoğraflar (max 5)</label>
           <input id="photos" type="file" accept="image/*" multiple />
           <div class="photo-block">
-            <label for="photos">Fotoğraflar (max 5)</label>
-            <div class="photo-previews">
-              <div class="ph-slot">1</div>
-              <div class="ph-slot">2</div>
-              <div class="ph-slot">3</div>
-              <div class="ph-slot">4</div>
-              <div class="ph-slot">5</div>
-            </div>
-          </div>
-        <div class="full">
           <label for="title">Başlık</label>
           <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
         </div>
@@ -94,81 +84,3 @@
           <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/>
         </div>
         <div class="full">
-          <label for="photos">Fotoğraflar (max 5)</label>
-          <div class="photos" id="preview">
-            <div class="slot"><span>1</span><div class="prog"><div class="bar"></div></div></div>
-            <div class="slot"><span>2</span><div class="prog"><div class="bar"></div></div></div>
-            <div class="slot"><span>3</span><div class="prog"><div class="bar"></div></div></div>
-            <div class="slot"><span>4</span><div class="prog"><div class="bar"></div></div></div>
-            <div class="slot"><span>5</span><div class="prog"><div class="bar"></div></div></div>
-          </div>
-        </div>
-        <div id="note" class="full muted"></div>
-        <div class="ft full">
-          <button type="button" id="btnCancel" class="btn btn-ghost">Vazgeç</button>
-          <button type="submit" id="btnSend" class="btn btn-pri">İlanı Gönder</button>
-<script id="send-confirm-redirect">
-  document.addEventListener("DOMContentLoaded",()=>{
-    const btn=document.getElementById("btnSend");
-    if(btn){
-      btn.addEventListener("click",(e)=>{
-        e.preventDefault();
-        alert("İlanınız onay sürecindedir.");
-        document.getElementById("profilePanel")?.remove();
-        window.location.href="home.html";
-      });
-    }
-  });
-</script>
-        </div>
-  <script id="badwords-filter">
-  document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("btnSend");
-    if (!btn) return;
-    const badWords = [
-      // Küfür / hakaret
-      "yavşak","orospu","sik","amk","piç","göt","yarak","orospu çocuğu","oç","pezevenk","ibne","ibne","salak","aptal","gerizekalı","mal","dangalak","kahpe",
-      // Irkçılık / nefret
-      "gerici","yobaz","zenci","çingene","kafir","gavur",
-      // Terör / şiddet
-      "daeş","işid","isil","el kaide","pkk","ypg","dhkp-c","fetö","terör","bombalı","silah","tabanca","bomba",
-      // Pedofili / istismar
-      "çocuk istismarı","pedofil","çocuk pornosu","çocuk tacizi","underage",
-      // Uyuşturucu
-      "eroin","kokain","esrar","metamfetamin","uyuşturucu"
-    ];
-    btn.addEventListener("click", (e) => {
-      const title = document.getElementById("title")?.value.toLowerCase() || "";
-      const desc  = document.getElementById("desc")?.value.toLowerCase() || "";
-      for (const w of badWords) {
-        if (title.includes(w) || desc.includes(w)) {
-          e.preventDefault();
-          alert(`\"${w}\" kelimesi topluluk kurallarına uygun değildir. Lütfen düzeltip tekrar deneyin.`);
-          return;
-        }
-      }
-    });
-  });
-  </script>
-      </form>
-<script id="close-panel-logic">
-  document.addEventListener("DOMContentLoaded",()=>{
-    const btn=document.getElementById("panelCloseBtn");
-    if(btn){ btn.addEventListener("click",()=>{
-      document.getElementById("profilePanel")?.remove();
-      window.location.href="home.html";
-    }); }
-  });
-</script>
-    </div>
-  </div>
-  <script type="module" src="./listing-new.js"></script>
-</body>
-</html>
-
-<style id="photo-block-style">
-.photo-block{margin-bottom:16px}
-.photo-previews{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ph-slot{width:48px;height:48px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;border-radius:6px}
-</style>
-
