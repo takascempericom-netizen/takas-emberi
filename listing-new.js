@@ -1,13 +1,13 @@
-import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  initializeFirestore, collection, addDoc, updateDoc, doc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getStorage, ref as sref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+/*
+  listing-new.js
+  - Handles auth-check, form submit, create listing doc, upload photos, update doc.
+  - Designed to work with listing-new.html (ids: listingForm, photos, note, overlay, overlayOk).
+  - Uses Firebase Web SDK v10 modules.
+*/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as sref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
@@ -19,189 +19,179 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth ? getAuth(app) : null;
-const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
-const st   = getStorage(app);
+const auth = getAuth(app);
+const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+const st = getStorage(app);
 
-// Debug helper
-function D(...args){ try{ console.debug('[listing-new]', ...args); }catch(_){} }
-function E(...args){ try{ console.error('[listing-new]', ...args); }catch(_){} }
+// small logger
+function D(...a){ try{ console.debug('[listing-new]', ...a); }catch(_){} }
+function E(...a){ try{ console.error('[listing-new]', ...a); }catch(_){} }
 
-D('Firebase app options:', { projectId: app.options?.projectId, apiKey: (app.options?.apiKey||'').slice(0,8)+'…', storageBucket: app.options?.storageBucket });
+// DOM
+const form = document.getElementById('listingForm');
+const photosInput = document.getElementById('photos');
+const note = document.getElementById('note');
+const overlay = document.getElementById('overlay');
+const overlayOk = document.getElementById('overlayOk');
+const submitBtn = document.getElementById('btnSubmit');
+const catEl = document.getElementById('cat');
+const subEl = document.getElementById('subcat');
 
-// UI elemanları
-const userBox = document.getElementById('userBox');
-const login   = document.getElementById('login');
-const form    = document.getElementById('form');
-const note    = document.getElementById('note');
-const btnGoogle = document.getElementById('btnGoogle');
-const btnCancel = document.getElementById('btnCancel');
-const preview   = document.getElementById('preview');
-const inputPhotos = document.getElementById('photos');
+// small UX helpers
+function showNote(txt){ if(note) note.textContent = txt; D('note:', txt); }
+function showOverlay(){ overlay?.classList.add('show'); overlay?.setAttribute('aria-hidden','false'); }
+function hideOverlay(){ overlay?.classList.remove('show'); overlay?.setAttribute('aria-hidden','true'); }
 
-D('DOM elements', { userBox: !!userBox, login: !!login, form: !!form, photos: !!inputPhotos });
-
-// Foto önizleme
-inputPhotos?.addEventListener('change', () => {
-  let files = Array.from(inputPhotos.files || []);
-  files = files.filter(f => (f.type || '').startsWith('image/'));
-  if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
-  if (files.length > 5) { alert("En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak."); files = files.slice(0,5); }
-  for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
-  [...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
-    const img = slot.querySelector('img'); if(img) img.remove();
-    slot.querySelector('span')?.classList.remove('hidden');
-    if(files[i]){
-      const url = URL.createObjectURL(files[i]);
-      const im = new Image();
-      im.src = url;
-      slot.appendChild(im);
-      slot.querySelector('span')?.classList.add('hidden');
-    }
-    slot.querySelector('.bar').style.width = '0%';
-  });
-});
-
-// Auth durumu
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    D('onAuthStateChanged: not signed in');
-    try{ if(userBox) userBox.textContent = "Giriş yapmadınız"; }catch(_){}
-    login?.classList.remove('hidden');
-    form?.classList.add('hidden');
-    return;
-  }
-  D('onAuthStateChanged: user=', { uid: user.uid, email: user.email, name: user.displayName });
-  try{ userBox.innerHTML = `👤 ${user.displayName || user.email} • <a href="#" id="lnkOut">Çıkış</a>`; }catch(_){}
-  login?.classList.add('hidden');
-  form?.classList.remove('hidden');
-  document.getElementById('lnkOut')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    D('signOut requested');
-    try{ await signOut(auth); D('signOut ok'); }catch(err){ E('signOut error', err); alert('Çıkış hata: '+(err?.message||err)); }
-  });
-});
-
-// Google ile giriş
-btnGoogle?.addEventListener('click', async ()=> {
+// require logged in user — if not, try Google popup (best-effort)
+async function ensureSignedIn(){
+  if(auth.currentUser) return auth.currentUser;
   try{
-    D('signInWithPopup start');
+    D('No user, trying signInWithPopup');
     const res = await signInWithPopup(auth, new GoogleAuthProvider());
-    D('signInWithPopup result', res?.user?.uid);
-  }catch(e){ E('signInWithPopup error', e); alert("Giriş başarısız: " + (e?.message||e)); }
-});
-
-// Vazgeç
-btnCancel?.addEventListener('click', ()=> {
-  if (confirm("Formu temizlemek istiyor musunuz?")) {
-    form.reset();
-    note.textContent = "";
-    [...preview.querySelectorAll('.bar')].forEach(b=>b.style.width="0%");
-    [...preview.querySelectorAll('img')].forEach(im=>im.remove());
-    D('form reset');
-  }
-});
-
-// Form gönder
-form?.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const user = auth.currentUser;
-  D('form submit by user', user ? user.uid : null);
-  if(!user){ alert("Önce giriş yapın"); return; }
-  try{
-    // attempt to refresh token if possible (best-effort)
-    try{ if(user.getIdToken) { await user.getIdToken(true); D('idToken refreshed'); } }catch(tkE){ D('idToken refresh failed', tkE?.message||tkE); }
-
-    const title = document.getElementById('title').value.trim();
-    const desc  = document.getElementById('desc').value.trim();
-    const cat   = document.getElementById('cat').value;
-    const city  = document.getElementById('city').value.trim();
-    const price = document.getElementById('price').value;
-
-    note.innerHTML = "⏳ İlan kaydediliyor...";
-    D('creating listing doc...', { ownerId: user.uid, title, cat, city });
-
-    // 1. Firestore doc oluştur
-    let docRef = null;
-    try{
-      docRef = await addDoc(collection(db,"listings"),{
-        ownerId: user.uid,
-        // Admin panelleri için geniş uyumluluk alanları (boş bırakıldı)
-        pendingAt: serverTimestamp(),
-        title, desc, category:cat, city,
-        price: price? Number(price): null,
-        photos: [],
-        coverPhoto: null,
-        status: "pending",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      D('addDoc success, id=', docRef.id);
-    }catch(addErr){
-      E('addDoc failed', addErr);
-      note.innerHTML = "<span class='danger'>❌ Firestore addDoc hata: "+(addErr?.message||addErr)+"</span>";
-      alert('Firestore addDoc hata: '+(addErr?.message||addErr));
-      return;
-    }
-
-    // 2. Fotoğrafları yükle
-    let files = Array.from(inputPhotos.files || []);
-    files = files.filter(f => (f.type || '').startsWith('image/'));
-    if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
-    if (files.length > 5) { alert("En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak."); files = files.slice(0,5); }
-    for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
-
-    const urls=[];
-    for(let i=0;i<files.length;i++){
-      const f = files[i];
-      const path = `listings/${docRef.id}/${Date.now()}_${f.name.replace(/[^a-z0-9_.-]/gi,'_')}`;
-      const ref = sref(st, path);
-      D('upload start', { file: f.name, path });
-      const task = uploadBytesResumable(ref, f);
-      const bar=preview.querySelectorAll('.bar')[i];
-      try{
-        await new Promise((res,rej)=>task.on('state_changed',(s)=>{
-          const p=Math.round((s.bytesTransferred/s.totalBytes)*100);
-          if(bar) bar.style.width=p+'%';
-          D('upload progress', { file: f.name, percent: p });
-        },(err)=>{ rej(err); }, ()=>{ res(); }));
-      }catch(uErr){
-        E('upload error for', f.name, uErr);
-        note.innerHTML = "<span class='danger'>❌ Foto yükleme hatası: "+(uErr?.message||uErr)+"</span>";
-        alert('Foto yükleme hatası: '+(uErr?.message||uErr));
-        return;
-      }
-      try{
-        const url = await getDownloadURL(task.snapshot.ref);
-        D('upload success', { file: f.name, url });
-        urls.push(url);
-      }catch(urlErr){
-        E('getDownloadURL error', urlErr);
-        note.innerHTML = "<span class='danger'>❌ URL alma hatası: "+(urlErr?.message||urlErr)+"</span>";
-        alert('URL alma hatası: '+(urlErr?.message||urlErr));
-        return;
-      }
-    }
-
-    // 3. Firestore doc güncelle
-    try{
-      await updateDoc(doc(db,"listings",docRef.id),{
-        photos:urls, coverPhoto:urls[0]||null, updatedAt:serverTimestamp()
-      });
-      D('updateDoc success', { id: docRef.id, photos: urls.length });
-    }catch(upErr){
-      E('updateDoc failed', upErr);
-      note.innerHTML = "<span class='danger'>❌ Firestore updateDoc hata: "+(upErr?.message||upErr)+"</span>";
-      alert('Firestore updateDoc hata: '+(upErr?.message||upErr));
-      return;
-    }
-
-    note.innerHTML = "<span class='ok'><b>✅ İlan gönderildi.</b></span> Onay sonrası yayına alınacak.";
-    form.reset();
-    D('form submit finished for doc', docRef.id);
+    D('Signed in', res?.user?.uid);
+    return res.user;
   }catch(err){
-    E('unexpected error on submit', err);
-    note.innerHTML = "<span class='danger'>❌ Hata: "+(err?.message||err)+"</span>";
-    alert('Beklenmeyen hata: '+(err?.message||err));
+    E('signIn failed', err);
+    throw new Error('Giriş gerekli. Lütfen giriş yapıp tekrar deneyin.');
+  }
+}
+
+// simple file validations
+function validateFiles(files){
+  const arr = Array.from(files || []).filter(f => (f.type||'').startsWith('image/'));
+  if(arr.length === 0) throw new Error('En az 1 fotoğraf seçmelisiniz.');
+  if(arr.length > 5) return arr.slice(0,5);
+  return arr;
+}
+
+// create listing doc and upload photos, update doc with URLs
+async function createListingAndUpload({ user, title, desc, category, subcategory, city, meta }) {
+  showNote('⏳ İlan kaydediliyor (Firestore)...');
+  // create doc
+  const base = {
+    ownerId: user.uid,
+    title: title || '',
+    desc: desc || '',
+    category: category || '',
+    subcategory: subcategory || '',
+    city: city || '',
+    photos: [],
+    coverPhoto: null,
+    status: "pending",
+    pendingAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+  // include meta fields (flat under meta.*)
+  for(const k in meta) {
+    if(!Object.prototype.hasOwnProperty.call(base, k)) base[k] = meta[k];
+  }
+
+  let docRef;
+  try{
+    docRef = await addDoc(collection(db, "listings"), base);
+    D('addDoc success', docRef.id);
+  }catch(err){
+    E('addDoc failed', err);
+    throw new Error('Firestore addDoc hatası: ' + (err?.message||err));
+  }
+
+  // upload files
+  const files = validateFiles(photosInput.files);
+  showNote('⏳ Fotoğraflar yükleniyor (0/' + files.length + ')...');
+  const urls = [];
+  for(let i=0;i<files.length;i++){
+    const f = files[i];
+    const safeName = f.name.replace(/[^a-z0-9_.-]/gi,'_');
+    const path = `listings/${docRef.id}/${Date.now()}_${safeName}`;
+    const ref = sref(st, path);
+    D('upload start', path);
+    const task = uploadBytesResumable(ref, f);
+    await new Promise((res, rej) => {
+      task.on('state_changed', (s) => {
+        try{
+          const p = Math.round( (s.bytesTransferred / (s.totalBytes||1)) * 100 );
+          showNote(`⏳ Fotoğraflar yükleniyor (${i+1}/${files.length}) — ${p}%`);
+          D('upload progress', {file:f.name, percent:p});
+        }catch(_){}
+      }, (err) => { E('upload error', err); rej(err); }, () => { res(); });
+    });
+    try{
+      const url = await getDownloadURL(task.snapshot.ref);
+      urls.push(url);
+      D('uploaded url', url);
+    }catch(err){
+      E('getDownloadURL failed', err);
+      // continue but surface error
+      throw new Error('Fotoğraf URL alma hatası: '+(err?.message||err));
+    }
+  }
+
+  // update doc with photos & coverPhoto
+  try{
+    await updateDoc(doc(db, "listings", docRef.id), {
+      photos: urls,
+      coverPhoto: urls[0] || null,
+      updatedAt: serverTimestamp()
+    });
+    D('updateDoc success', docRef.id);
+  }catch(err){
+    E('updateDoc failed', err);
+    throw new Error('Firestore updateDoc hatası: '+(err?.message||err));
+  }
+
+  return docRef.id;
+}
+
+// form submit handler
+form?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  submitBtn?.setAttribute('disabled','true');
+  try{
+    const user = await ensureSignedIn();
+    // collect values
+    const title = (document.getElementById('title')?.value || '').trim();
+    const desc = (document.getElementById('desc')?.value || '').trim();
+    const category = (catEl?.value || '').trim();
+    const subcategory = (subEl?.value || '').trim();
+    const city = (document.getElementById('city')?.value || '').trim();
+
+    // collect meta fields
+    const meta = {};
+    Array.from(document.querySelectorAll('#metaFields [name]')).forEach(inp=>{
+      const name = inp.name.replace(/^meta\./,'');
+      meta[name] = inp.value;
+    });
+
+    if(!category){ alert('Lütfen ana kategori seçin'); catEl.focus(); submitBtn?.removeAttribute('disabled'); return; }
+    if(!subcategory){ alert('Lütfen alt kategori seçin'); subEl.focus(); submitBtn?.removeAttribute('disabled'); return; }
+
+    // main action
+    showNote('⏳ İlan oluşturuluyor, lütfen bekleyin...');
+    const id = await createListingAndUpload({ user, title, desc, category, subcategory, city, meta });
+    showNote('✅ İlan oluşturuldu (id: ' + id + '). Moderatöre gönderildi.');
+
+    // show overlay confirmation (HTML also shows overlay)
+    showOverlay();
+  }catch(err){
+    E('submit error', err);
+    alert(err?.message || String(err));
+    showNote('❌ Hata: ' + (err?.message || String(err)));
+  }finally{
+    submitBtn?.removeAttribute('disabled');
   }
 });
+
+// overlay ok: close and navigate to profile pending
+overlayOk?.addEventListener('click', () => {
+  hideOverlay();
+  try{ location.href = '/profile.html#pending'; }catch(_){}
+});
+
+// simple auth state logging (optional)
+onAuthStateChanged(auth, (u) => {
+  D('auth state changed:', !!u ? u.uid : null);
+});
+
+// quick helper: if user isn't signed when form loads, don't force popup — leave it to submit flow
+D('listing-new.js loaded');
