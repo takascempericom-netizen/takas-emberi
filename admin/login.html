@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Giriş • Takas Çemberi</title>
+  <style>
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f0f9ff;display:flex;align-items:center;justify-content:center;height:100vh}
+    .box{background:#fff;padding:32px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.08);max-width:360px;width:100%}
+    h1{font-size:20px;margin:0 0 20px;text-align:center}
+    label{font-size:14px;color:#374151;margin-bottom:6px;display:block}
+    input{width:100%;padding:10px 12px;margin-bottom:14px;border:1px solid #d1d5db;border-radius:10px;font-size:15px}
+    button{width:100%;padding:12px;background:#0ea5e9;border:none;border-radius:10px;color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .err{color:#dc2626;font-size:14px;margin:8px 0;display:none}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Admin Giriş</h1>
+    <form id="loginForm">
+      <label for="email">E-posta</label>
+      <input type="email" id="email" placeholder="admin@example.com" required/>
+      <label for="password">Şifre</label>
+      <input type="password" id="password" placeholder="Şifre" required/>
+      <button type="submit" id="btnLogin">Giriş Yap</button>
+      <div class="err" id="err"></div>
+    </form>
+  </div>
+
+  <script type="module">
+    import { app } from "../js/firebase-config.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    const form = document.getElementById("loginForm");
+    const err  = document.getElementById("err");
+    const btn  = document.getElementById("btnLogin");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btn.disabled = true; err.style.display="none";
+      const email = document.getElementById("email").value.trim();
+      const pass  = document.getElementById("password").value;
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        const user = cred.user;
+        // Rol kontrolü
+        const snap = await getDoc(doc(db,"users",user.uid));
+        const role = snap.exists() ? (snap.data().role||"user") : "user";
+        if(role!=="admin"){
+          err.innerText = "Admin yetkisi bulunmuyor."; err.style.display="block";
+          btn.disabled = false;
+          return;
+        }
+        // Başarılı giriş
+        location.href = "/admin/home.html";
+      } catch(e){
+        console.error(e);
+        err.innerText = e.message || "Giriş başarısız.";
+        err.style.display="block";
+        btn.disabled=false;
+      }
+    });
+  </script>
+</body>
+</html>
