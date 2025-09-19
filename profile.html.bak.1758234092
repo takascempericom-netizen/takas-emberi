@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Profil • Takas Çemberi</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0a0a;--panel:#101214;--panel2:#15181b;--line:#1f2429;--fg:#e8edf3;--muted:#9aa7b5;--pri:#38bdf8;--ok:#22c55e;--bad:#ef4444}
+    *{box-sizing:border-box}html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    .hdr{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .hdr .avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;border:1px solid var(--line)}
+    .hdr .avatar img{width:100%;height:100%;object-fit:cover}
+    .hdr .meta{display:flex;flex-direction:column}
+    .hdr .name{font-weight:800}
+    .hdr .uid{font-size:12px;color:var(--muted)}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);padding:10px 16px}
+    .tab{padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;color:#cbd5e1}
+    .tab.active{background:var(--panel2);color:#fff}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:16px}
+    @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:680px){.grid{grid-template-columns:1fr}}
+    .listing-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d0f12}
+    .ph{background:#0b0d10;height:180px;display:block}
+    .ph img{width:100%;height:180px;object-fit:cover;display:block}
+    .body{padding:12px}
+    .title{font-size:15px;font-weight:800;margin:0 0 6px}
+    .muted{color:var(--muted);font-size:12px}
+    .note{display:none;margin:6px 16px 0;color:#cbd5e1}
+    .stat{padding:10px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .row{display:flex;gap:14px;padding:16px}
+    @media (max-width:980px){.row{flex-direction:column}}
+    .col{flex:1}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .btn-pri{background:var(--pri);color:#00111a}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:#e5e7eb}
+    .set{margin-top:14px}
+    .set form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .set label{font-size:12px;color:var(--muted)}
+    .set input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0d0f12;color:#fff}
+    .full{grid-column:1/-1}
+  </style>
+  <style id="quick-hide-btns">
+  #btnRefresh, #btnEdit { display:none !important; }
+</style>
+
+  <style id="avatar-initial-style">
+    .avatar{ position:relative; width:72px; height:72px; border-radius:50%; overflow:hidden; display:grid; place-items:center; border:1px solid #e5e7eb; background:#f3f4f6; }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .avatar-initial{ width:100%; height:100%; display:grid; place-items:center; font-weight:800; font-size:28px; color:#0b1221; letter-spacing:.5px; }
+    /* Pastel gradient paletleri — harfe göre sınıf atanacak */
+    .ai-1{ background:linear-gradient(135deg,#fde68a,#a7f3d0); }
+    .ai-2{ background:linear-gradient(135deg,#a7f3d0,#bfdbfe); }
+    .ai-3{ background:linear-gradient(135deg,#bfdbfe,#e9d5ff); }
+    .ai-4{ background:linear-gradient(135deg,#e9d5ff,#fecaca); }
+    .ai-5{ background:linear-gradient(135deg,#fecaca,#fef3c7); }
+    .ai-6{ background:linear-gradient(135deg,#fef3c7,#bae6fd); }
+    .ai-7{ background:linear-gradient(135deg,#bae6fd,#bbf7d0); }
+    .ai-8{ background:linear-gradient(135deg,#bbf7d0,#e9d5ff); }
+  </style>
+
+
+
+  <style id="hide-header-meta">
+    .hdr .meta { display:none !important; }
+    /* Panel içi isim/uid yan yana düzen */
+    .side-meta{ display:flex; flex-direction:column; gap:6px; margin-left:14px }
+    .side-meta .name{ font-weight:800; font-size:18px }
+    .side-meta .uid{ font-size:12px; color:#6b7280 }
+    .pavatar-row{ display:flex; align-items:center; gap:14px; }
+    @media (max-width:600px){ .side-meta .name{font-size:16px} }
+  </style>
+
+<style id="hide-header-avatar">
+  .hdr .avatar { display:block !important; }
+</style>
+
+
+<style id="theme-four-gradient">
+  /* Pastel 4'lü palet */
+  :root{
+    --c1:#ffd7a8;  /* şeftali */
+    --c2:#a7e8ff;  /* buz mavi */
+    --c3:#c8facc;  /* yumuşak yeşil */
+    --c4:#e6d4ff;  /* lavanta */
+    --fg:#0f172a;  /* koyu lacivert gri (siyah değil) */
+    --line:#e5e7eb;
+  }
+
+  html,body{ background:#ffffff; color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+
+  /* Sayfa arka planı: 4 renk + hareket */
+  body{
+    background:
+      radial-gradient(40% 60% at 15% 20%, var(--c2), transparent 70%),
+      radial-gradient(35% 55% at 85% 15%, var(--c4), transparent 70%),
+      radial-gradient(45% 65% at 20% 85%, var(--c3), transparent 70%),
+      linear-gradient(120deg, var(--c1), var(--c2), var(--c3), var(--c4));
+    background-size: 120% 120%, 120% 120%, 120% 120%, 200% 200%;
+    animation: bgShift 18s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift{
+    0%   { background-position: 0% 0%, 100% 0%, 0% 100%, 0% 50%; }
+    100% { background-position: 100% 100%, 0% 100%, 100% 0%, 100% 50%; }
+  }
+
+  /* Kart/panel: açık cam efekt + animasyonlu renkli çerçeve (abartısız) */
+  .card{
+    position:relative;
+    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88)) !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+    backdrop-filter: blur(10px);
+    /* Gradient-border tekniği: padding-box + border-box */
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88)) padding-box,
+      conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1)) border-box;
+    animation: borderSpin 14s linear infinite;
+  }
+  @keyframes borderSpin{
+    to { filter: hue-rotate(360deg); }
+  }
+
+  /* Sekmeler: açık, aktifte pastel vurgu */
+  .tabs{ border-bottom:1px solid var(--line) !important; padding:12px 16px }
+  .tab{
+    padding:10px 16px; font-weight:800; border-radius:12px;
+    background:#fff; border:1px solid var(--line); color:var(--fg);
+  }
+  .tab.active{
+    background: linear-gradient(135deg, var(--c2), var(--c3));
+    border-color: transparent; color:#083344;
+  }
+
+  /* İlan kartları */
+  .grid{ gap:16px !important; padding:16px !important; }
+  .cardL{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    box-shadow: 0 6px 18px rgba(15,23,42,.08);
+  }
+  .ph{
+    background: linear-gradient(135deg, #fff7eb, #eff6ff);
+    height: 220px;
+    display:grid; place-items:center;
+  }
+  .title{ font-size:16px; font-weight:800; }
+  .muted{ color:#64748b; }
+
+  /* Formlar */
+  label{ color:#64748b }
+  input[type="text"],input[type="email"],input[type="password"]{
+    background:#fff; color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:12px;
+  }
+
+  /* Butonlar */
+  .btn{ background:#ffffff; border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 14px; font-weight:700 }
+  .btn-pri{ background: linear-gradient(135deg, var(--c2), var(--c3)); color:#083344; border-color:transparent }
+  .btn-warn{ background:#fee2e2; color:#7f1d1d; border-color:#fecaca }
+
+  /* Alt bar */
+  .bottom-nav{
+    background: rgba(255,255,255,.92); border:1px solid var(--line); border-radius:16px;
+    backdrop-filter: blur(8px);
+  }
+  .bn-item{ background:#fff; border:1px solid var(--line); color:var(--fg) }
+  .bn-item.active{ background: linear-gradient(135deg, var(--c1), var(--c4)); border-color:transparent; color:#3f1d3e }
+</style>
+
+
+<style id="theme-fix-no-hue">
+  /* --- 1) Global: kart içeriğini boyayan hue-rotate'ü kapat --- */
+  .card{ filter:none !important; }
+  @keyframes borderSpin{ to { transform: rotate(360deg); } } /* filtre yerine dönüş */
+
+  /* Önceki temada .card'ın kendisine gradient-border verilmişti.
+     İçeriği boyamamak için border efektini sadece profil paneline taşıyoruz. */
+
+  /* --- 2) İlan kartları (dokunma) --- */
+  .cardL{ filter:none !important; background:#fff !important; }
+  .cardL .ph img{ mix-blend-mode:normal !important; filter:none !important; }
+
+  /* --- 3) Profil paneli: iç kısım pastel gradient + animasyonlu kenar şeridi --- */
+  #profilePanel{
+    position:relative;
+    /* İç gradient (panelin zemini) */
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92)) padding-box,
+      linear-gradient(135deg, var(--c2), var(--c3)) border-box !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+  }
+  /* Kenar şeridini ::before ile içerikten bağımsız döndürüyoruz */
+  #profilePanel::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:22px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+    z-index:-1;
+    animation: borderSpin 12s linear infinite;
+  }
+
+  /* --- 4) Foto alanı nötr kalsın, yalnız arkaplan dolgu olarak açık gri kullan --- */
+  .ph{ background:#f8fafc !important; }
+
+  /* Yazı rengi aydınlık palete uygun kalsın */
+  :root{ --fg:#0f172a; }
+</style>
+
+
+<style id="theme-static-no-anim">
+  /* Her yerde animasyon/transform/filters kapalı */
+  body, .card, #profilePanel, #profilePanel::before, .cardL, .ph, .ph img {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* Arka plan: 4 renk, sabit (hareket yok) */
+  :root{
+    --c1:#ffd7a8; --c2:#a7e8ff; --c3:#c8facc; --c4:#e6d4ff;
+    --fg:#0f172a; --line:#e5e7eb;
+  }
+  html,body{ background:#ffffff; color:var(--fg); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  body{
+    background:
+      radial-gradient(40% 60% at 15% 20%, var(--c2), transparent 70%),
+      radial-gradient(35% 55% at 85% 15%, var(--c4), transparent 70%),
+      radial-gradient(45% 65% at 20% 85%, var(--c3), transparent 70%),
+      linear-gradient(120deg, var(--c1), var(--c2), var(--c3), var(--c4));
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  /* Profil paneli: sabit gradient iç zemin + sabit kenar şeridi */
+  #profilePanel{
+    position:relative;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92)) padding-box,
+      linear-gradient(135deg, var(--c2), var(--c3)) border-box !important;
+    border:2px solid transparent !important;
+    border-radius:20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+  }
+  #profilePanel::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:22px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+    z-index:-1;
+    /* animasyon YOK */
+  }
+
+  /* İlan kartları: dokunma; görseller doğal renk */
+  .cardL{ background:#fff !important; border:1px solid var(--line) !important; }
+  .ph{ background:#f8fafc !important; }
+  .ph img{ mix-blend-mode:normal !important; }
+</style>
+
+
+<style id="inputs-light-override">
+  /* Profil panelindeki tüm inputları aydınlık yap */
+  #profilePanel input[type="text"],
+  #profilePanel input[type="email"],
+  #profilePanel input[type="password"],
+  #profilePanel input[type="file"]{
+    background:#ffffff !important;
+    color:var(--fg, #0f172a) !important;
+    border:1px solid var(--line, #e5e7eb) !important;
+    border-radius:12px !important;
+    padding:12px 14px !important;
+    box-shadow:none !important;
+  }
+  #profilePanel input::placeholder{ color:#94a3b8 !important; }
+  /* Etiketleri de aydınlık palete uydur */
+  #profilePanel .pgrp label{ color:#475569 !important; }
+  /* Odak halinde net mavi vurgu */
+  #profilePanel input:focus{
+    outline:none !important;
+    border-color:#93c5fd !important;
+    box-shadow:0 0 0 3px rgba(147,197,253,.35) !important;
+  }
+</style>
+
+
+<style id="avatar-bg-reset">
+  /* Avatar arkaplanını tamamen kaldır */
+  .hdr .avatar{ background:transparent !important; box-shadow:none !important; }
+  .hdr .avatar img{ display:block; width:100%; height:100%; object-fit:cover; }
+  /* Harfli avatar kullanılsa bile zemin olmasın */
+  .hdr .avatar-initial{ background:none !important; }
+</style>
+
+
+<style id="avatar-bg-reset-strong">
+  .avatar, .hdr .avatar, .avatar-big { box-shadow:none !important; }
+  .avatar-initial { background:none !important; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="hdr">
+        <div class="avatar"><img id="avatarImg" alt=""><div id="avatarInitial" class="avatar-initial"></div></div>
+        <div class="meta">
+          <div class="name" id="profileName"><span id="profileUsername"></span></div>
+          <div class="uid" id="profileUid">2qC0RCSXtibBo6kncoTPHdQo8zV2</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost" id="btnRefresh">Yenile</button>
+        <button class="btn btn-ghost" id="btnLogout" style="display:none">Çıkış</button>
+        <button class="btn btn-pri" id="btnGoogle" style="display:none">Google ile Giriş</button>
+        <button class="btn btn-ghost" id="btnEdit">Ayarlar</button>
+      </div>
+    </div>
+
+    <div id="gate" style="padding:12px 16px;color:#f59e0b;display:none">Giriş yapın veya URL'ye <code>?uid=&lt;kullanıcıUid&gt;</code> ekleyin.</div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="pub">Yayında <span id="cntPub">0</span></div>
+      <div class="tab" data-tab="pend">Onay bekleyen <span id="cntPend">0</span></div>
+      <div class="tab" data-tab="exp">Süresi dolan <span id="cntExp">0</span></div>
+    </div>
+
+    <div class="note" id="note">İlanlar yükleniyor…</div>
+<style>
+  :root{ --panel-accent:#b9e6ff; }
+  .profile-panel{
+    border:1.5px solid var(--panel-accent);
+    box-shadow:
+      0 0 0 2px color-mix(in oklab, var(--panel-accent) 25%, transparent),
+      inset 0 0 0 1px rgba(255,255,255,.03);
+    background:
+      linear-gradient(to bottom right,
+        color-mix(in oklab, var(--panel-accent) 12%, transparent),
+        color-mix(in oklab, var(--panel-accent) 6%, transparent)
+      );
+    margin:14px 0; padding:14px;
+  }
+  .pflex{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .pcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:280px}
+  @media (max-width:720px){ .pcols{grid-template-columns:1fr} }
+  .pgrp label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
+  .pgrp input[type="text"], .pgrp input[type="email"]{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#0f1216;color:var(--fg)
+  }
+  .pbtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn-pri{background:var(--pri);color:#001018}
+  .btn-ghost{background:#ffffff !important;border:1px solid var(--line);color:var(--fg)}
+  .hint{font-size:12px;color:var(--muted)}
+  .avatar-big{width:96px;height:96px;border-radius:50%;border:1px solid var(--line);overflow:hidden;background: transparent !important;display:grid;place-items:center}
+  .avatar-big img{width:100%;height:100%;object-fit:cover}
+  /* Eski Ayarlar sekmesini gizle (varsa) */
+  .tab[data-tab="settings"], #panel-settings{ display:none !important; }
+</style>
+
+<div class="card profile-panel" id="profilePanel">
+  <div class="pflex">
+    <div>
+      <div class="avatar-big"><img id="prof_avatarPreview" alt="avatar"/></div>
+      <div style="margin-top:8px">
+        <input type="file" id="prof_photo" accept="image/*"/>
+      </div>
+    </div>
+
+    <div class="pcols">
+      <div class="pgrp">
+        <label>Görünen İsim</label>
+        <input id="prof_displayName" type="text" placeholder="Ad Soyad">
+      </div>
+      <div class="pgrp">
+        <label>Kullanıcı Adı</label>
+        <input id="prof_username" type="text" placeholder="kullanici_adi">
+      </div>
+      <div class="pgrp">
+        <label>E-posta</label>
+        <input id="prof_email" type="email" disabled>
+      </div>
+      <div class="pgrp">
+        <label>Şifre</label>
+        <div class="pbtns">
+          <button class="btn btn-ghost" id="btnSendReset">Sıfırlama E-postası</button>
+          <span class="hint">Google ile giriş yaptıysan bu butonu kullan.</span>
+        </div>
+      </div>
+      <div class="pgrp" style="grid-column:1 / -1">
+        <div class="pbtns">
+          <button class="btn btn-pri" id="btnSaveProfile">Profili Kaydet</button>
+          <span id="profNote" class="hint"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="grid" id="list"></div>
+    <div class="stat" id="stat">—</div>
+  </div>
+
+  <div class="card set" id="settings" style="display:none">
+    <div class="hdr"><div style="font-weight:800">Ayarlar</div></div>
+    <div class="row">
+      <div class="col">
+        <form onsubmit="return false">
+          <div class="full"><label>Görünen İsim</label><input id="inpDisplayName" type="text" placeholder="Ad Soyad"></div>
+          <div><label>Kullanıcı Adı</label><input id="inpUsername" type="text" placeholder="ornek_kullanici"></div>
+          <div><label>E-posta</label><input id="inpEmail" type="email" placeholder="mail@ornek.com"></div>
+          <div class="full"><label>Profil Fotoğrafı</label><input id="inpAvatar" type="file" accept="image/*"></div>
+          <div><label>Şifre (opsiyonel)</label><input id="inpPass" type="password" placeholder="Yeni şifre (min 6)"></div>
+          <div class="full" style="display:flex;gap:8px">
+            <button class="btn btn-pri" id="btnSaveProfile">Profili Kaydet</button>
+            <button class="btn btn-ghost" id="btnSendReset">Şifre Sıfırlama E-postası</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const cfg = {
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+  authDomain: "ureten-eller-v2.firebaseapp.com",
+  projectId: "ureten-eller-v2",
+  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  messagingSenderId: "621494781131",
+  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+};
+
+// DEFAULT app
+const app = (getApps().length ? getApp() : initializeApp(cfg));
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const st   = getStorage(app);
+
+// UI refs
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const avatar=$("#profileAvatar"), nameEl=$("#profileName"), uidEl=$("#profileUid"),
+      listEl=$("#list"), note=$("#note"), stat=$("#stat"), gate=$("#gate"),
+      btnGoogle=$("#btnGoogle"), btnLogout=$("#btnLogout"), btnEdit=$("#btnEdit"), btnRefresh=$("#btnRefresh"),
+      settings=$("#settings"), cntPub=$("#cntPub"), cntPend=$("#cntPend"), cntExp=$("#cntExp"),
+      inpDisplayName=$("#inpDisplayName"), inpUsername=$("#inpUsername"), inpEmail=$("#inpEmail"),
+      inpAvatar=$("#inpAvatar"), inpPass=$("#inpPass"), btnSaveProfile=$("#btnSaveProfile"), btnSendReset=$("#btnSendReset");
+
+// --- Heuristik: oturum yoksa bile localStorage'daki son kullanıcıyı çek ---
+function getAuthUserFromLocalStorage(){
+  try{
+    for(const k of Object.keys(localStorage)){
+      if(k.startsWith("firebase:authUser:")){
+        const j=JSON.parse(localStorage.getItem(k)||"null");
+        if(j && j.uid) return j; // {uid, email, displayName, photoURL, ...}
+      }
+    }
+  }catch{}
+  return null;
+}
+function getTargetUid(){
+  const p = new URLSearchParams(location.search);
+  return p.get("uid") || p.get("id") || null;
+}
+function classify(d){
+  const now=Date.now();
+  const s=(d?.status||d?.state||"").toString().toLowerCase();
+  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(s);
+  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(s) || d?.moderation==="pending" || (d?.approved===false||d?.isApproved===false);
+  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number"?d.expiresAt:null);
+  const expired = (expTs && expTs<now) || ["expired","passive","suresi-dolan"].includes(s);
+  if (expired) return "exp"; if (pending) return "pend"; if (approved) return "pub"; return "pub";
+}
+function cardTpl(it){
+  const t=it.title||"-", price=(it.price!=null?`${it.price}₺`:""), loc=[it.city,it.district].filter(Boolean).join(" / ");
+  return `<div class="listing-card" data-doc-id="${it.id}"><a class="ph"><img alt="${t}" loading="lazy" decoding="async"></a><div class="body"><h3 class="title">${t}</h3><div class="muted">${loc}</div><div class="muted">${price}</div></div></div>`;
+}
+async function resolveImageURL(d){
+  const list=[];
+  for (const k of ["coverPhoto","coverUrl","cover","thumbnail","thumb","mainImage","primaryImage","image","imageUrl","photo","photoUrl"]) if(d?.[k]) list.push(d[k]);
+  for (const k of ["photos","images","imageUrls","gallery","media","files","attachments"]) if(Array.isArray(d?.[k])) list.push(...d[k]);
+  for (let x of list){
+    let u=null; if(typeof x==="string") u=x; else if (x&&typeof x==="object") u=x.url||x.src||x.path||x.storagePath||x.fullPath||x.downloadURL||x.downloadUrl||null;
+    if(!u) continue;
+    if(/^https?:\/\//i.test(u)) return u;
+    if(/^gs:\/\//i.test(u)){ const p=u.replace(/^gs:\/\/[^/]+\//i,""); try{return await getDownloadURL(ref(st,p));}catch{} }
+    try{ return await getDownloadURL(ref(st,u)); }catch{}
+  }
+  return null;
+}
+async function renderListings(uid, tab="pub"){
+  try{
+    listEl.innerHTML=""; note.style.display="block"; note.textContent="İlanlar yükleniyor…"; stat.textContent="—";
+    const snap = await getDocs(query(collection(db,"listings"), where("ownerId","==",uid), limit(300)));
+    if(snap.empty){ cntPub.textContent="0"; cntPend.textContent="0"; cntExp.textContent="0"; listEl.innerHTML=""; note.textContent="Bu kullanıcıya ait ilan bulunamadı."; stat.textContent="0 ilan"; return; }
+    const all=[]; snap.forEach(docu=>{ const d=docu.data(); all.push({ id:docu.id, title:d.title||"", price:d.price??null, city:d.city||"", district:d.district||"", _raw:d }); });
+    const buckets={pub:[],pend:[],exp:[]}; for(const it of all) buckets[classify(it._raw)].push(it);
+    cntPub.textContent=buckets.pub.length; cntPend.textContent=buckets.pend.length; cntExp.textContent=buckets.exp.length;
+    const show=buckets[tab]||[]; listEl.innerHTML=show.map(cardTpl).join("");
+    let ok=0, fail=0;
+    for(const el of $$(".listing-card")){
+      const id=el.getAttribute("data-doc-id");
+      const it=show.find(x=>x.id===id);
+      const url=await resolveImageURL(it?._raw); const img=el.querySelector("img");
+      if(url){ img.src=url; img.srcset=url; img.referrerPolicy="no-referrer"; ok++; } else { img.src="https://i.imgur.com/3SgkGmQ.png"; fail++; }
+    }
+    note.style.display="none"; stat.textContent=`${show.length} ilan • ${ok} görsel yüklendi${fail?`, ${fail} eksik görsel`:``}`;
+  }catch(e){ console.error(e); note.style.display="block"; note.textContent="Hata: "+(e?.message||e); }
+}
+async function loadUser(uid){
+  const s=await getDoc(doc(db,"users",uid)); const d=s.exists()?s.data():{};
+  const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil"; const photo=d.photoURL||d.avatar||"https://i.imgur.com/3SgkGmQ.png";
+  
+$("#profileAvatar").src = photo;
+(function(){
+  const uSpan = document.getElementById("profileUsername");
+  const nameBox = document.getElementById("profileName");
+  const toUser = (d.username||"").trim() || (d.name||"").trim() || "";
+  if(uSpan){ uSpan.textContent = toUser || display; }
+  else if(nameBox){ nameBox.textContent = display; }
+  const uidBox = document.getElementById("profileUid");
+  if(uidBox) uidBox.textContent = uid;
+})();
+  $("#inpDisplayName").value = d.displayName || "";
+$("#inpUsername").value   = d.username     || "";
+$("#inpEmail").value      = d.email        || "";
+
+/* --- Yeni panel inputlarını da doldur --- */
+(function(){
+  const pd = document.getElementById("prof_displayName");
+  const pu = document.getElementById("prof_username");
+  const pe = document.getElementById("prof_email");
+  const authEmail = (typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "";
+
+  if (pd) pd.value = (d.displayName || d.name || "").toString();
+  if (pu) pu.value = (d.username || "").toString();
+  if (pe) pe.value = (d.email || authEmail || "").toString();
+})();
+}
+function tabsWire(uid){
+  $$(".tab").forEach(t=>{ t.setAttribute("role","button"); t.style.cursor="pointer";
+    t.onclick=()=>{ $$(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active"); renderListings(uid,t.dataset.tab||"pub"); };
+  });
+}
+function showGate(v){ $("#gate").style.display=v?"block":"none"; }
+function showSettings(v){ $("#settings").style.display=v?"block":"none"; }
+$("#btnEdit").onclick=()=>showSettings($("#settings").style.display==="none");
+$("#btnRefresh").onclick=()=>location.reload();
+
+// Giriş/Çıkış butonları
+$("#btnGoogle").onclick=async()=>{ try{ await signInWithPopup(auth,new GoogleAuthProvider()); }catch(e){ alert(e?.message||e); } };
+$("#btnLogout").onclick=async()=>{ try{ await signOut(auth); location.reload(); }catch(e){ alert(e?.message||e);} };
+
+// Avatar yükleme
+$("#inpAvatar").addEventListener("change", async ()=>{
+  const f=$("#inpAvatar").files?.[0]; if(!f) return; const user=auth.currentUser; if(!user) return alert("Giriş gerekli");
+  const path=`avatars/${user.uid}/avatar_${Date.now()}.jpg`; const task=uploadBytesResumable(ref(st,path),f,{contentType:f.type||"image/jpeg"});
+  task.on("state_changed", null, e=>alert(e?.message||e), async ()=>{
+    const url=await getDownloadURL(ref(st,path)); await updateProfile(user,{photoURL:url});
+    await setDoc(doc(db,"users",user.uid),{photoURL:url,updatedAt:serverTimestamp()},{merge:true}); $("#profileAvatar").src=url; alert("Profil fotoğrafı güncellendi.");
+  });
+});
+$("#btnSaveProfile").onclick=async()=>{
+  const user=auth.currentUser; if(!user) return alert("Giriş gerekli");
+  const data={ displayName:($("#inpDisplayName").value||"").trim()||null, username:($("#inpUsername").value||"").trim()||null, email:user.email||( $("#inpEmail").value||"").trim()||null, updatedAt:serverTimestamp() };
+  try{
+    if(data.displayName) await updateProfile(user,{displayName:data.displayName});
+    await setDoc(doc(db,"users",user.uid),data,{merge:true});
+    const pw=($("#inpPass").value||"").trim(); if(pw.length>=6){ try{ await updatePassword(user,pw); alert("Şifre güncellendi"); }catch(e){ alert("Şifre güncellenemedi: "+(e?.message||e)); } }
+    alert("Profil kaydedildi.");
+  }catch(e){ alert(e?.message||e); }
+};
+$("#btnSendReset").onclick=async()=>{
+  const user=auth.currentUser; const email=user?.email || ($("#inpEmail").value||"").trim(); if(!email) return alert("E-posta bulunamadı.");
+  try{ await sendPasswordResetEmail(auth,email); alert("Şifre sıfırlama e-postası gönderildi."); }catch(e){ alert(e?.message||e); }
+};
+
+// Başlatma: önce localStorage oturumunu dener, sonra auth state gelir
+async function start(){
+  const boot = getAuthUserFromLocalStorage(); // {uid,email,...} olabilir
+  let usingUid = getTargetUid() || boot?.uid || null;
+  if(usingUid){ showGate(false); await loadUser(usingUid); tabsWire(usingUid); await renderListings(usingUid,"pub"); }
+  else { showGate(true); $("#btnGoogle").style.display="inline-block"; $("#btnLogout").style.display="none"; }
+
+  onAuthStateChanged(auth, async (user)=>{ window.USER = user;
+    const boot = getAuthUserFromLocalStorage();
+const u2 = getTargetUid() || (user && user.uid) || (boot && boot.uid) || null;
+showGate(!u2);
+    $("#btnGoogle").style.display = user ? "none" : "inline-block";
+    $("#btnLogout").style.display = user ? "inline-block" : "none";
+    if(!u2) return;
+    await loadUser(u2);
+    $$(".tab").forEach(x=>x.classList.remove("active")); const fst=document.querySelector('.tab[data-tab="pub"]'); if(fst) fst.classList.add("active");
+    tabsWire(u2); await renderListings(u2,"pub");
+  });
+}
+document.addEventListener("DOMContentLoaded", start);
+</script>
+<style>
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0;
+    background:var(--panel2); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; gap:6px;
+    padding:8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    z-index:9999;
+  }
+  .bottom-nav .item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted); text-decoration:none; font-size:11px; min-width:68px
+  }
+  .bottom-nav .item svg{ width:22px; height:22px }
+  /* masaüstünde gizle (istersen kaldır) */
+  @media (min-width: 900px){ .bottom-nav{ display:none; } }
+</style>
+
+<nav class="bottom-nav" id="bottomNav">
+  <a href="/" class="item" id="nav-home" title="Ana Sayfa" aria-label="Ana Sayfa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+    <span>Ana Sayfa</span>
+  </a>
+  <button class="item" id="nav-messages" title="Mesajlar" aria-label="Mesajlar" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4.5A4 4 0 0 1 4 15V7a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4z"/></svg>
+    <span>Mesajlar</span>
+  </button>
+  <button class="item" id="nav-notif" title="Bildirimler" aria-label="Bildirimler" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span>Bildirimler</span>
+  </button>
+  <button class="item" id="nav-logout" title="Çıkış" aria-label="Çıkış" style="background:none;border:0;cursor:pointer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+    <span>Çıkış</span>
+  </button>
+</nav>
+
+<script type="module">
+  import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  const app = (getApps().length ? getApp() : null);
+  const auth = app ? getAuth(app) : null;
+
+  const P_MESSAGES = ["/messages.html","/mesajlar.html","/support.html","/chat.html","/destek.html"];
+  const P_NOTIF    = ["/notifications.html","/bildiriler.html","/bildirimler.html","/bildiri.html"];
+
+  async function goFirst(paths){
+    for(const p of paths){
+      try{ const r = await fetch(p,{method:"HEAD"}); if(r.ok){ location.href=p; return; } }catch(e){}
+    }
+    // bulunamazsa ana sayfaya dön
+    location.href="/";
+  }
+
+  document.getElementById("nav-messages")?.addEventListener("click", ()=>goFirst(P_MESSAGES));
+  document.getElementById("nav-notif")?.addEventListener("click",   ()=>goFirst(P_NOTIF));
+  document.getElementById("nav-logout")?.addEventListener("click",  async ()=>{
+    try{ if(auth) await signOut(auth); }catch(e){}
+    location.href="/";
+  });
+
+  // Giriş durumu: auth varsa Logout göster; yoksa gizle
+  try{
+    if(auth){
+      auth.onAuthStateChanged(u=>{
+        document.getElementById("nav-logout").style.display = u ? "flex" : "none";
+      });
+    }
+  }catch{}
+</script>
+
+  <script type="module" src="./profile-actions.js"></script>
+
+<!-- === BOTTOM NAV (Ana Sayfa / Mesajlar / Bildirimler / Profil) === -->
+<style>
+  :root{ --bn-bg:rgba(9,12,18,.82); --bn-line:#1f2937; --bn-fg:#dbe2ea; --bn-active:#38bdf8; }
+  .bottom-nav{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:12px;
+    width:min(980px, calc(100% - 24px)); z-index:50;
+    background:var(--bn-bg); backdrop-filter: blur(10px);
+    border:1px solid var(--bn-line); border-radius:16px; padding:8px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+    box-shadow:0 10px 28px rgba(0,0,0,.35);
+  }
+  .bn-item{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 8px; border-radius:12px; text-decoration:none;
+    color:var(--bn-fg); font-weight:800; border:1px solid transparent;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .bn-item.active{ color:#00111a; background:var(--bn-active); border-color:transparent; }
+  .bn-ico{ font-size:18px; line-height:1; }
+  .bn-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:18px; height:18px; padding:0 6px; border-radius:999px;
+    font-size:11px; font-weight:800; background:#ef4444; color:white;
+  }
+  /* İçerik alt navın altında kalmasın */
+  body { padding-bottom:84px; }
+  /* Masaüstünde de görünür; istersen burada gizleyebilirsin */
+  @media (min-width:1024px){
+    .bottom-nav{ bottom:16px; }
+  }
+</style>
+
+<nav class="bottom-nav" role="navigation" aria-label="Alt Menü">
+  <a class="bn-item" href="/home.html" data-nav="home"><span class="bn-ico">🏠</span><span>Ana Sayfa</span></a>
+  <a class="bn-item" href="/messages.html" data-nav="messages"><span class="bn-ico">💬</span><span>Mesajlar</span></a>
+  <a class="bn-item" href="/notifications.html" data-nav="notifications"><span class="bn-ico">🔔</span><span>Bildiriler</span><span id="bnBadge" class="bn-badge" style="margin-left:6px;display:none">0</span></a>
+  <a class="bn-item" href="/profile.html" data-nav="profile"><span class="bn-ico">👤</span><span>Profil</span></a>
+</nav>
+
+<script>
+  // Aktif sekmeyi URL'e göre boya
+  (function(){
+    const path = (location.pathname || "").toLowerCase();
+    const map = {
+      home: "/home.html",
+      messages: "/messages.html",
+      notifications: "/notifications.html",
+      profile: "/profile.html"
+    };
+    document.querySelectorAll(".bn-item").forEach(a=>{
+      const key = a.getAttribute("data-nav");
+      if(!key) return;
+      const href = map[key] || "";
+      if(href && path.endsWith(href)) a.classList.add("active");
+    });
+
+    // Bildirim sayısı (opsiyonel: 0 ise gizle)
+    // Buraya Firestore/Realtime’dan okunacak gerçek sayı bağlayabilirsin.
+    const badge = document.getElementById("bnBadge");
+    const count = 0; // TODO: gerçek sayı
+    if(badge){
+      if(count>0){ badge.textContent = String(count); badge.style.display="inline-flex"; }
+      else { badge.style.display="none"; }
+    }
+  })();
+</script>
+<!-- === /BOTTOM NAV === -->
+
+<script id="avatar-initial-logic">
+document.addEventListener('DOMContentLoaded', () => {
+  async function updateAvatarFromUsers(){
+    try{
+      const $ = sel => document.querySelector(sel);
+      const params = new URLSearchParams(location.search);
+      const puid = params.get("uid");
+      const uid  = puid || (window.USER && USER.uid) || null;
+      if(!uid || typeof getDoc!=="function"){ return; } // Firebase modülleri hazır değilse çık
+
+      const snap = await getDoc(doc(db,"users", uid)).catch(()=>null);
+      const d = snap && snap.exists ? (snap.exists()? snap.data() : null) : (snap && snap.data ? snap.data() : null);
+
+      const displayName = (d && (d.displayName || d.username)) || (window.USER && (USER.displayName)) || "";
+      const email       = (d && d.email) || (window.USER && USER.email) || "";
+      const photo       = (d && d.photoURL) || (window.USER && USER.photoURL) || "";
+
+      const avatarEl    = $(".avatar") || $("#profileAvatar") || null;
+      let   imgEl       = $("#avatarImg") || (avatarEl ? avatarEl.querySelector("img") : null);
+      let   initEl      = $("#avatarInitial") || (avatarEl ? avatarEl.querySelector(".avatar-initial") : null);
+
+      // Eğer başlangıçta .avatar içinde initial yoksa oluştur
+      if(avatarEl && !initEl){
+        initEl = document.createElement("div");
+        initEl.className = "avatar-initial";
+        if(avatarEl && !avatarEl.querySelector(".avatar-initial")) avatarEl.appendChild(initEl);
+      }
+      if(avatarEl && !imgEl){
+        imgEl = document.createElement("img");
+        avatarEl.insertBefore(imgEl, avatarEl.firstChild);
+      }
+
+      const textBase = (displayName && displayName.trim()) || (email && email.trim()) || "U";
+      const ch = textBase.charAt(0).toUpperCase();
+      const idx = ((ch.charCodeAt(0) || 65) % 8) + 1;
+
+      if(photo){
+        if(imgEl){ imgEl.src = photo; imgEl.style.display="block"; }
+        if(initEl){ initEl.style.display="none"; }
+      }else{
+        if(initEl){
+          initEl.textContent = ch;
+          initEl.className = "avatar-initial ai-" + idx;
+          initEl.style.display = "grid";
+        }
+        if(imgEl){ imgEl.style.display="none"; }
+      }
+
+      const nameEl = $("#profileName");
+      if(nameEl && displayName){ nameEl.textContent = displayName; }
+    }catch(e){
+      console.warn("avatar-initial update error", e);
+    }
+  }
+  // Firebase auth state ile çakışmasın diye küçük bir gecikme:
+  setTimeout(updateAvatarFromUsers, 300);
+});
+</script>
+
+
+<script id="profile-place-and-fill">
+document.addEventListener('DOMContentLoaded', () => {
+  // 2a) Ad ve UID'yi avatarın yanındaki metaya yaz
+  const nameEl = document.getElementById('profileName');
+  const uidEl  = document.getElementById('profileUid');
+  // no-op: keep name
+  // no-op: keep uid
+
+  // 2b) Profil panelini (ayarlar kartı) yukarı, header'ın hemen altına taşı
+  const panel = document.getElementById('profilePanel');
+  const hdr   = document.querySelector('.hdr');
+  if(panel && hdr){
+    const parentCard = hdr.closest('.card');
+    if(parentCard){
+      // header'dan hemen sonra yerleştir
+      hdr.insertAdjacentElement('afterend', panel);
+      // küçük bir boşluk verelim
+      panel.style.marginTop = "8px";
+    }
+  }
+});
+</script>
+
+
+<script id="fix-avatar-and-fill">
+document.addEventListener('DOMContentLoaded', () => {
+  const hdr = document.querySelector('.hdr');
+  if(!hdr) return;
+
+  // .hdr .avatar yoksa oluştur
+  let av = hdr.querySelector('.avatar');
+  if(!av){
+    av = document.createElement('div');
+    av.className = 'avatar';
+    hdr.insertBefore(av, hdr.firstChild);
+  }
+
+  // #profileAvatar <img> yoksa oluştur
+  let img = document.getElementById('profileAvatar') || av.querySelector('#profileAvatar');
+  if(!img){
+    img = document.createElement('img');
+    img.id = 'profileAvatar';
+    img.alt = 'avatar';
+    av.insertBefore(img, av.firstChild);
+  }
+
+  // #avatarInitial yoksa oluştur
+  let init = document.getElementById('avatarInitial') || av.querySelector('#avatarInitial');
+  if(!init){
+    init = document.createElement('div');
+    init.id = 'avatarInitial';
+    init.className = 'avatar-initial';
+    av.appendChild(init);
+  }
+
+  // Başlangıçta isim/uid doldur (Auth gelince override edebilir)
+  const nameEl = document.getElementById('profileName');
+  const uidEl  = document.getElementById('profileUid');
+  // no-op: keep name
+  // no-op: keep uid
+});
+</script>
+
+
+<script id="move-name-into-panel">
+document.addEventListener('DOMContentLoaded', () => {
+  const panel = document.getElementById('profilePanel');
+  if(!panel) return;
+
+  // Paneldeki avatar alanını bul
+  const avBox = panel.querySelector('.avatar-big');
+  if(!avBox) return;
+
+  // Bir satır kapsayıcı oluştur (avatar + meta)
+  let row = avBox.closest('.pavatar-row');
+  if(!row){
+    row = document.createElement('div');
+    row.className = 'pavatar-row';
+    // avatar-big'in ebeveyninde avatar-big'in yerine row'u koyup avatar-big'i içine al
+    const holder = avBox.parentElement;
+    holder.insertBefore(row, avBox);
+    row.appendChild(avBox);
+  }
+
+  // Panel içine isim/uid bölümü (side-meta) ekle
+  let meta = panel.querySelector('.side-meta');
+  if(!meta){
+    meta = document.createElement('div');
+    meta.className = 'side-meta';
+    row.appendChild(meta);
+
+    // Aynı id'leri kullan ki mevcut JS doldursun/override etsin
+    const nameEl = document.createElement('div');
+nameEl.className = 'name';
+nameEl.id = 'profileName';
+
+/* VAR OLAN #profileUsername SPAN'INI TAŞI (YOKSA OLUŞTUR) */
+(function(){
+  let span = document.getElementById('profileUsername');
+  if (span) {
+    nameEl.appendChild(span); // mevcut span'ı yeni nameEl içine taşı
+  } else {
+    span = document.createElement('span');
+    span.id = 'profileUsername';
+    nameEl.appendChild(span);
+  }
+})();
+
+const uidEl = document.createElement('div');
+uidEl.className = 'uid';
+uidEl.id = 'profileUid';
+/* uid text buraya daha sonra loadUser/diğer kodlarca yazılıyor */
+
+meta.appendChild(nameEl);
+meta.appendChild(uidEl);
+
+/* PANEL META'DA GÖRÜNÜR E-POSTA İÇİN YER VAR MI? YOKSA EKLE */
+(function(){
+  if (!document.getElementById('profileEmail') && !document.getElementById('user-email')) {
+    const mail = document.createElement('div');
+    mail.className = 'uid';         // küçük ve gri stil
+    mail.id = 'profileEmail';
+    mail.textContent = '';          // doldurmayı var olan kodlar yapacak
+    meta.appendChild(mail);
+  }
+})();
+  }
+});
+</script>
+
+</body>
+<script type="module" id="username-mini-fix3">import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";function trInitial(s){ if(!s||typeof s!=="string") return "?"; const w=(s.trim().split(/\s+/)[0]||s.trim()); return w.charAt(0).toLocaleUpperCase("tr-TR"); }async function run(){  try{    const app = getApp();    const auth = getAuth(app);    const db   = getFirestore(app);    let uid = (document.getElementById("profileUid")?.textContent||"").trim();    if(!uid){ uid = auth.currentUser?.uid || ""; }    if(!uid) return; /* uid yoksa dokunma */    const snap = await getDoc(doc(db, "users", uid));    if(!snap.exists()) return;    const d = snap.data();    const uEl   = document.getElementById("profileUsername");    const aInit = document.getElementById("avatarInitial") || document.querySelector(".avatar-initial");    const mailV = document.getElementById("profileEmail")  || document.getElementById("user-email");    const uname = (d.username||"").trim();    const name  = (d.name||"").trim();    const email = (d.email||"").trim();    if(uEl && !uEl.textContent){ uEl.textContent = uname || name || ""; }    if(aInit && !aInit.textContent){ aInit.textContent = trInitial(uname || name || email || "?"); }    if(mailV){ mailV.textContent = email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : ""); }  }catch(e){ /* sessiz geç */ }}document.addEventListener("DOMContentLoaded", ()=>{ run(); setTimeout(run, 800); setTimeout(run, 2000); });</script>
+<script id="username-mini-fix2">(function(){  function getUID(){    var t = (document.getElementById("profileUid") && document.getElementById("profileUid").textContent || "").trim();    if(t) return t;    try{ var cu=(window.auth&&window.auth.currentUser)?window.auth.currentUser:(window.firebase&&window.firebase.auth?window.firebase.auth().currentUser:null); if(cu&&cu.uid) return cu.uid; }catch(e){}    try{ if(typeof uid!=="undefined" && uid) return uid; }catch(e){}    return "";  }  function trInitial(s){ if(!s||typeof s!=="string") return "?"; var w=(s.trim().split(/\s+/)[0]||s.trim()); return w.charAt(0).toLocaleUpperCase("tr-TR"); }  async function readUser(uid){    try{      var db = (window.db?window.db:null);      if(!db && window.getFirestore) db = window.getFirestore();      if(!db && window.firebase && window.firebase.firestore) db = window.firebase.firestore();      if(!db) return null;      if(window.getDoc && window.doc){        var s = await window.getDoc(window.doc(db, "users", uid));        return (s && s.exists && s.exists() && s.data) ? s.data() : (s && s.data ? s.data() : null);      }      if(db.collection){        var snap = await db.collection("users").doc(uid).get();        return (snap && snap.exists && snap.data && snap.data()) ? snap.data() : null;      }      return null;    }catch(e){ return null; }  }  async function apply(){    var uEl = document.getElementById("profileUsername");    var aInit = document.getElementById("avatarInitial") || document.querySelector(".avatar-initial");    var mailView = document.getElementById("profileEmail") || document.getElementById("user-email");    var uid = getUID();    if(!uid) return; /* UID yoksa dokunma */    var d = await readUser(uid); if(!d) return;    var uname = (d.username||"").trim();    var name  = (d.name||"").trim();    var email = (d.email||"").trim();    if(uEl && !uEl.textContent){ uEl.textContent = uname || name || ""; }    if(aInit && !aInit.textContent){ aInit.textContent = trInitial(uname || name || email || "?"); }    if(mailView){ mailView.textContent = email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : ""); }  }  document.addEventListener("DOMContentLoaded", function(){    apply();    var mo = new MutationObserver(function(){ apply(); });    mo.observe(document.documentElement, {childList:true, subtree:true, characterData:true});    setTimeout(function(){ try{mo.disconnect();}catch(e){} }, 6000);  });})();</script>
+<script id="username-mini-fix">(function(){  function pickLocalUsername(){    var el = document.getElementById("prof_username");    var v  = (el && (el.value||el.textContent||"")) || "";    return (v||"").trim();  }  async function pickFirestoreUsername(){    try{      var cu = (window.auth && window.auth.currentUser) ? window.auth.currentUser : (window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null);      if(!cu || !cu.uid) return "";      var db  = (window.db ? window.db : null);      if(!db && window.firebase && window.firebase.firestore){ db = window.firebase.firestore(); }      if(!db) return "";      var docFn = (window.doc || (window.firebase && window.firebase.firestore && window.firebase.firestore.DocumentReference ? null : null));      /* modern sdk kullanılıyor olabilir: profile.html içinde zaten getDoc/doc import edilmiş olmalı */      var g = window.getDoc && window.doc && window.collection && window.getFirestore ? window.getDoc : null;      if(g){        /* modular */        var s = await window.getDoc(window.doc(db, "users", cu.uid));        return (s && s.exists() && (s.data().username || s.data().name || "")) || "";      } else {        /* compat API varsa */        if(db.collection){          var snap = await db.collection("users").doc(cu.uid).get();          return (snap && snap.exists && (snap.data().username || snap.data().name || "")) || "";        }      }      return "";    }catch(e){ return ""; }  }  async function applyUsername(){    var uEl = document.getElementById("profileUsername");    if(!uEl) return; /* sayfada hedef yoksa dokunma */    if(uEl.textContent && uEl.textContent.trim()) return; /* zaten dolu */    var fromGlobal = (window.d && (window.d.username || window.d.name)) || "";    var fromLocal  = pickLocalUsername();    var uname = (fromGlobal || fromLocal || "").trim();    if(!uname){ uname = await pickFirestoreUsername(); }    if(uname){ uEl.textContent = uname; }  }  document.addEventListener("DOMContentLoaded", function(){    applyUsername();    var mo = new MutationObserver(function(){ applyUsername(); });    mo.observe(document.documentElement, {childList:true, subtree:true, characterData:true});    setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, 6000);  });})();</script>
+<script id="avatar-email-mini-fix">(function(){  function trInitial(s){    if(!s||typeof s!=="string") return "?";    const w=(s.trim().split(/\s+/)[0]||s.trim());    return w.charAt(0).toLocaleUpperCase("tr-TR");  }  function pickDisplay(){    const nameStrong=document.getElementById("profileName")||document.getElementById("user-name");    const usernameInput=document.getElementById("prof_username");    let txt=(nameStrong&&nameStrong.textContent||"").trim();    if(!txt && usernameInput) txt=(usernameInput.value||"").trim();    return txt;  }  function pickEmail(){    const mailView=document.getElementById("profileEmail")||document.getElementById("user-email");    let v=(mailView&&mailView.textContent||"").trim();    if(!v){      const mailInput=document.querySelector("input[type=\"email\"]");      if(mailInput) v=(mailInput.value||"").trim();    }    try{      const cu=(window.firebase&&window.firebase.auth)?window.firebase.auth().currentUser:(window.auth&&window.auth.currentUser?window.auth.currentUser:null);      if(!v && cu && cu.email) v=cu.email;    }catch(e){}    return v;  }  function applyOnce(){    const avatarEl=document.querySelector(".avatar");    if(!avatarEl) return;    let initEl=document.getElementById("avatarInitial")||avatarEl.querySelector(".avatar-initial");    if(!initEl){ initEl=document.createElement("div"); initEl.id="avatarInitial"; initEl.className="avatar-initial"; avatarEl.appendChild(initEl);}    const display=pickDisplay();    const email=pickEmail();    if(!initEl.textContent){      const src=(display||email||"?");      initEl.textContent=trInitial(src);      const img=avatarEl.querySelector("img");      if(img && (!img.getAttribute("src")||img.getAttribute("src")==="")){ img.style.display="none"; }    }    const mailView=document.getElementById("profileEmail")||document.getElementById("user-email");    if(mailView && !mailView.textContent && email){ mailView.textContent=email; }  }  document.addEventListener("DOMContentLoaded", function(){    applyOnce();    const mo=new MutationObserver(function(){ applyOnce(); });    mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});    setTimeout(function(){ try{mo.disconnect();}catch(e){} }, 6000);  });})();</script>
+</html>
+<script id="avatar-qmark-fix">(function(){    function trUp(s){return (s&&s.charAt(0)?s.charAt(0).toLocaleUpperCase("tr-TR"):"U");}    function run(){      var a=document.getElementById("avatarInitial")||document.querySelector(".avatar-initial");      if(!a) return;      if((a.textContent||"").trim()==="?"){        var u=document.getElementById("profileUsername");        var m=document.getElementById("profileEmail")||document.getElementById("user-email");        var base=(u&&u.textContent||"").trim()||(m&&m.textContent||"").trim()||"U";        a.textContent=trUp(base);      }    }    document.addEventListener("DOMContentLoaded",function(){ setTimeout(run,300); setTimeout(run,1200); });  })();</script>
+<style id="lock-profile-readonly">/* Yalnızca avatar yükleme alanı kalsın */#profilePanel .pcols, #profilePanel .pgrp, #profilePanel .pbtns, #profilePanel label, #btnSaveProfile, #btnSendReset { display: none !important; }/* Yine de panel düzeni bozulmasın */#profilePanel .avatar-big { display: grid !important; }/* Başka yerlerde görünen ayarlar/alt formlar olursa gizle */.tab[data-tab="settings"], #panel-settings { display:none !important; }</style>
+<script id="lock-profile-js">(function(){  /* 1) Kaydet & Sifre butonlarını tamamen etkisizleştir */  try{ var b=document.getElementById("btnSaveProfile"); if(b){ b.style.display="none"; b.onclick=function(e){ e?.preventDefault?.(); return false; }; } }catch(e){}  try{ var r=document.getElementById("btnSendReset"); if(r){ r.style.display="none"; r.onclick=function(e){ e?.preventDefault?.(); return false; }; } }catch(e){}  /* 2) Paneldeki inputlar kalmış olsa bile readonly/disabled yap (ileride görünür olursa dahi düzenlenemesin) */  ["prof_displayName","prof_username","prof_email"].forEach(function(id){    var el=document.getElementById(id); if(el){ el.setAttribute("readonly","readonly"); el.setAttribute("disabled","disabled"); }  });  /* 3) Eski ayar formu varsa tüm inputlarını kilitle */  ["inpDisplayName","inpUsername","inpEmail","inpPass"].forEach(function(id){    var el=document.getElementById(id); if(el){ el.setAttribute("readonly","readonly"); el.setAttribute("disabled","disabled"); }  });  /* 4) Görünür e-posta span’ı varsa yine Firestore’dan doldurulmuş değeri gösterir; kullanıcı değiştiremez */  var mailV=document.getElementById("profileEmail")||document.getElementById("user-email");  if(mailV){ mailV.style.userSelect="text"; }  /* 5) Sadece avatar yükleme (prof_photo) görünür kalsın */  var file=document.getElementById("prof_photo"); if(file){ file.removeAttribute("disabled"); file.style.display="block"; }})();</script>
+<style id="only-hide-save-btn">/* Önceki kilitleme blokları etkisiz kalsın */#profilePanel .pcols, #profilePanel .pgrp, #profilePanel .pbtns, #profilePanel label { display: revert !important; }/* SADECE kaydet butonunu gizle */#btnSaveProfile { display: none !important; }</style>
+<script id="readonly-but-visible">/* Alanlar görünsün; kullanıcı düzenleyemesin istiyorsan readonly bırakıyoruz */(function(){  ["prof_displayName","prof_username","prof_email"].forEach(function(id){    var el=document.getElementById(id); if(el){      el.removeAttribute("style");      el.removeAttribute("hidden");      el.setAttribute("readonly","readonly");      el.setAttribute("disabled","disabled");    }  });  /* Şifre reset butonu görünmeye devam etsin */  var r=document.getElementById("btnSendReset"); if(r){ r.style.display="inline-block"; }})();</script>

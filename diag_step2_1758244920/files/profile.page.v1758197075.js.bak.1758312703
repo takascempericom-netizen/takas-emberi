@@ -1,0 +1,264 @@
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const cfg = {
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+  authDomain: "ureten-eller-v2.firebaseapp.com",
+  projectId: "ureten-eller-v2",
+  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  messagingSenderId: "621494781131",
+  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+};
+
+// SADECE DEFAULT APP — named app YOK
+const app = (getApps().length ? getApp() : initializeApp(cfg));
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const st   = getStorage(app);
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+const avatar = $("#profileAvatar");
+const nameEl = $("#profileName");
+const uidEl  = $("#profileUid");
+const listEl = $("#list");
+const note   = $("#note");
+const stat   = $("#stat");
+const gate   = $("#gate");
+const btnGoogle = $("#btnGoogle");
+const btnLogout = $("#btnLogout");
+const btnEdit = $("#btnEdit");
+const settings = $("#settings");
+const btnRefresh = $("#btnRefresh");
+const cntPub = $("#cntPub"), cntPend = $("#cntPend"), cntExp = $("#cntExp");
+
+const inpDisplayName = $("#inpDisplayName");
+const inpUsername    = $("#inpUsername");
+const inpEmail       = $("#inpEmail");
+const inpAvatar      = $("#inpAvatar");
+const inpPass        = $("#inpPass");
+const btnSaveProfile = $("#btnSaveProfile");
+const btnSendReset   = $("#btnSendReset");
+
+const DEBUG = new URLSearchParams(location.search).has("pfdebug");
+const log = (...a)=>{ if(DEBUG) console.log("[profile.page]",...a); };
+
+function getTargetUid(){
+  const p = new URLSearchParams(location.search);
+  const uid = p.get("uid") || p.get("id");
+  if (uid) return uid;
+  const meta = document.querySelector('meta[name="profile-uid"]')?.content
+            || document.querySelector('meta[name="default-uid"]')?.content
+            || null;
+  return meta || null;
+}
+
+function classify(d){
+  const now = Date.now();
+  const status = (d?.status || d?.state || "").toString().toLowerCase();
+  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(status);
+  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(status) || d?.moderation==="pending" || (d?.approved===false || d?.isApproved===false);
+  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number" ? d.expiresAt : null);
+  const expired = (expTs && expTs < now) || ["expired","passive","suresi-dolan"].includes(status);
+  if (expired) return "exp";
+  if (pending) return "pend";
+  if (approved) return "pub";
+  return "pub";
+}
+
+function cardTpl(it){
+  const t = it.title || "-";
+  const price = it.price != null ? `${it.price}₺` : "";
+  const loc = [it.city, it.district].filter(Boolean).join(" / ");
+  return `
+    <div class="listing-card" data-doc-id="${it.id}">
+      <div class="ph"><img alt="${t}" loading="lazy" decoding="async"></div>
+      <div class="body">
+        <h3 class="title">${t}</h3>
+        <div class="muted">${loc}</div>
+        <div class="muted">${price}</div>
+      </div>
+    </div>`;
+}
+
+async function resolveImageURL(d){
+  const list = [];
+  for (const k of ["coverPhoto","coverUrl","cover","thumbnail","thumb","mainImage","primaryImage","image","imageUrl","photo","photoUrl"]) {
+    if (d?.[k]) list.push(d[k]);
+  }
+  for (const k of ["photos","images","imageUrls","gallery","media","files","attachments"]) {
+    if (Array.isArray(d?.[k])) list.push(...d[k]);
+  }
+  for (let x of list){
+    let u=null;
+    if (typeof x === "string") u = x;
+    else if (x && typeof x === "object") u = x.url || x.src || x.path || x.storagePath || x.fullPath || x.downloadURL || x.downloadUrl || null;
+    if (!u) continue;
+    if (/^https?:\/\//i.test(u)) return u;
+    if (/^gs:\/\//i.test(u)) {
+      const pathOnly = u.replace(/^gs:\/\/[^/]+\//i,"");
+      try { return await getDownloadURL(ref(st, pathOnly)); } catch {}
+    }
+    try { return await getDownloadURL(ref(st, u)); } catch {}
+  }
+  return null;
+}
+
+async function renderListings(uid, activeTab="pub"){
+  try{
+    listEl.innerHTML = "";
+    note.style.display = "block";
+    note.textContent = "İlanlar yükleniyor…";
+    stat.textContent = "—";
+
+    const q = query(collection(db,"listings"), where("ownerId","==",uid), limit(300));
+    const snap = await getDocs(q);
+
+    if (snap.empty){
+      cntPub.textContent="0"; cntPend.textContent="0"; cntExp.textContent="0";
+      listEl.innerHTML = "";
+      note.textContent = "Bu kullanıcıya ait ilan bulunamadı.";
+      stat.textContent = "0 ilan";
+      return;
+    }
+
+    const all = [];
+    snap.forEach(docu=>{
+      const d=docu.data();
+      all.push({ id:docu.id, title:d.title||"", price:d.price??null, city:d.city||"", district:d.district||"", _raw:d });
+    });
+
+    const buckets = { pub:[], pend:[], exp:[] };
+    for (const it of all) buckets[classify(it._raw)].push(it);
+    cntPub.textContent  = buckets.pub.length;
+    cntPend.textContent = buckets.pend.length;
+    cntExp.textContent  = buckets.exp.length;
+
+    const show = buckets[activeTab] || [];
+    listEl.innerHTML = show.map(cardTpl).join("");
+
+    let ok=0, fail=0;
+    for (const el of $$(".listing-card")){
+      const id = el.getAttribute("data-doc-id");
+      const it = show.find(x=>x.id===id);
+      const url = await resolveImageURL(it?._raw);
+      const img = el.querySelector("img");
+      if (url){ img.src=url; img.srcset=url; img.referrerPolicy="no-referrer"; ok++; }
+      else { img.src="https://i.imgur.com/3SgkGmQ.png"; fail++; }
+    }
+    note.style.display="none";
+    stat.textContent = `${show.length} ilan • ${ok} görsel yüklendi${fail?`, ${fail} eksik görsel`:``}`;
+    log("loaded",{all:all.length,show:show.length,ok,fail});
+  }catch(e){
+    console.error("[profile.page] renderListings", e);
+    note.style.display="block";
+    note.textContent = "Hata: " + (e?.message || e);
+  }
+}
+
+async function loadUser(uid){
+  const s = await getDoc(doc(db,"users",uid));
+  const d = s.exists()? s.data(): {};
+  const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil";
+  const photo   = d.photoURL || d.avatar || "https://i.imgur.com/3SgkGmQ.png";
+  avatar.src = photo; nameEl.textContent = display; uidEl.textContent = uid;
+  inpDisplayName.value = d.displayName || "";
+  inpUsername.value    = d.username || "";
+  inpEmail.value       = d.email || "";
+}
+
+function tabsWire(uid){
+  $$(".tab").forEach(t=>{
+    t.setAttribute("role","button");
+    t.style.cursor="pointer";
+    t.onclick = ()=>{
+      $$(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      renderListings(uid, t.dataset.tab || "pub");
+    };
+  });
+}
+
+function showGate(v){ gate.style.display = v? "block":"none"; }
+function showSettings(v){ settings.style.display = v? "block":"none"; }
+
+btnEdit.onclick = ()=> showSettings(settings.style.display==="none");
+btnRefresh.onclick = ()=> location.reload();
+
+btnGoogle?.addEventListener("click", async ()=>{
+  try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch(e){ alert(e?.message||e); }
+});
+btnLogout?.addEventListener("click", async ()=>{
+  try{ await signOut(auth); location.reload(); }
+  catch(e){ alert(e?.message||e); }
+});
+
+inpAvatar?.addEventListener("change", async ()=>{
+  const f = inpAvatar.files?.[0]; if(!f) return;
+  const user = auth.currentUser; if(!user) return alert("Giriş gerekli");
+  const path = `avatars/${user.uid}/avatar_${Date.now()}.jpg`;
+  const task = uploadBytesResumable(ref(st, path), f, { contentType: f.type || "image/jpeg" });
+  task.on("state_changed", null, e=>alert(e?.message||e), async ()=>{
+    const url = await getDownloadURL(ref(st, path));
+    await updateProfile(user, { photoURL:url });
+    await setDoc(doc(db,"users",user.uid), { photoURL:url, updatedAt:serverTimestamp() }, { merge:true });
+    avatar.src = url;
+    alert("Profil fotoğrafı güncellendi.");
+  });
+});
+
+btnSaveProfile?.addEventListener("click", async ()=>{
+  const user = auth.currentUser; if(!user) return alert("Giriş gerekli");
+  const data = {
+    displayName: (inpDisplayName.value||"").trim() || null,
+    username: (inpUsername.value||"").trim() || null,
+    email: user.email || (inpEmail.value||"").trim() || null,
+    updatedAt: serverTimestamp()
+  };
+  try{
+    if(data.displayName) await updateProfile(user, { displayName:data.displayName });
+    await setDoc(doc(db,"users",user.uid), data, { merge:true });
+    if((inpPass.value||"").trim().length >= 6){
+      try{ await updatePassword(user, inpPass.value.trim()); alert("Şifre güncellendi"); }
+      catch(e){ alert("Şifre güncellenemedi: " + (e?.message||e)); }
+    }
+    alert("Profil kaydedildi.");
+  }catch(e){ alert(e?.message||e); }
+});
+
+btnSendReset?.addEventListener("click", async ()=>{
+  const user = auth.currentUser;
+  const email = user?.email || (inpEmail.value||"").trim();
+  if(!email) return alert("E-posta bulunamadı.");
+  try{ await sendPasswordResetEmail(auth, email); alert("Şifre sıfırlama e-postası gönderildi."); }
+  catch(e){ alert(e?.message||e); }
+});
+
+function start(){
+  onAuthStateChanged(auth, async (user)=>{
+    const usingUid = getTargetUid() || user?.uid || null;
+
+    // Gate sadece UID yoksa görünür
+    showGate(!usingUid);
+    btnLogout.style.display = user ? "inline-block" : "none";
+
+    if(!usingUid){
+      nameEl.textContent="Profil"; uidEl.textContent="—";
+      avatar.src="https://i.imgur.com/3SgkGmQ.png";
+      note.style.display="block"; note.textContent="Giriş yapın veya URL'ye ?uid ekleyin.";
+      listEl.innerHTML=""; stat.textContent="—";
+      return;
+    }
+
+    await loadUser(usingUid);
+    $$(".tab").forEach(x=>x.classList.remove("active"));
+    const fst=$('.tab[data-tab="pub"]'); if(fst) fst.classList.add("active");
+    tabsWire(usingUid);
+    await renderListings(usingUid,"pub");
+  });
+}
+document.addEventListener("DOMContentLoaded", start);
