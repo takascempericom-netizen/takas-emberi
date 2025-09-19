@@ -374,7 +374,7 @@
   await setPersistence(auth, browserLocalPersistence);
 
   const params = new URLSearchParams(location.search);
-  const next = params.get('next') || 'listing-new.html';
+  const next = params.get('next') || 'profile.html';
 
   onAuthStateChanged(auth, (u) => {
     if (u) {

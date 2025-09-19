@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>İlan Ver — Takas</title>
+
+  <!-- Harici CSS (ayrı dosyalar) -->
+  <link rel="stylesheet" href="/css/listing-new.css" />
+  <link rel="stylesheet" href="/css/categories.css" />
+<script type="module" src="/js/firebase-init.js"></script>
+
+  <style>
+    :root{--card-radius:14px;--muted:#6b7280;--accent1:#ff9a9e;--accent2:#fad0c4;--accent3:#fbc2eb;--accent4:#a6c1ee}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+    body{
+      background: linear-gradient(135deg,var(--accent1) 0%,var(--accent2) 25%,var(--accent3) 50%,var(--accent4) 100%);
+      padding:28px;-webkit-font-smoothing:antialiased;
+    }
+    .card{max-width:980px;margin:0 auto;padding:20px;border-radius:var(--card-radius);background:linear-gradient(180deg,rgba(255,255,255,0.98),#fff);box-shadow:0 12px 40px rgba(2,6,23,0.12)}
+    h1{margin:0 0 6px;font-size:22px}
+    .muted{color:var(--muted);font-size:14px;margin-bottom:10px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .field{flex:1;min-width:180px}
+    label{display:block;font-size:13px;color:#374151;margin-bottom:6px}
+    select,input[type="text"],textarea,input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ee;background:#fbfdff;box-sizing:border-box}
+    textarea{min-height:120px;resize:vertical}
+    .actions{display:flex;gap:10px;align-items:center;margin-top:14px}
+    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;background:linear-gradient(90deg,#7f5af0,#8ec5ff);color:#fff;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid #ddd;color:#111}
+    .note{margin-top:8px;color:#0f172a}
+    .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
+    .meta-field label{font-size:12px;margin-bottom:6px}
+    .meta-field input,.meta-field textarea{padding:8px;width:100%;box-sizing:border-box}
+    .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);z-index:9999;opacity:0;pointer-events:none;transition:opacity .18s}
+    .overlay.show{opacity:1;pointer-events:auto}
+    .overlay .box{background:#fff;padding:22px;border-radius:12px;max-width:520px;text-align:center;box-shadow:0 20px 50px rgba(2,6,23,0.3)}
+    .overlay .title{font-weight:700;margin-bottom:8px}
+    .overlay .desc{color:#475569;margin-bottom:12px}
+    .hidden{display:none!important}
+    @media (max-width:640px){ .row{flex-direction:column} }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">İlan Ver</h1>
+    <p class="muted">Formu doldurun. İlanınız moderatörler tarafından incelenecek; onaylandığında yayınlanacaktır.</p>
+
+    <form id="listingForm" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="title">Başlık</label>
+          <input id="title" name="title" type="text" required placeholder="İlan başlığı" />
+        </div>
+
+        <div class="field">
+          <label for="city">Şehir</label>
+          <input id="city" name="city" type="text" placeholder="Örn: İstanbul" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label for="desc">Açıklama</label>
+        <textarea id="desc" name="desc" placeholder="Detaylı açıklama..." rows="5"></textarea>
+      </div>
+
+      <div style="margin-top:12px" class="row">
+        <div class="field">
+          <label for="cat">Ana Kategori</label>
+          <select id="cat" name="category" required>
+            <option value="">-- Kategori seçin --</option>
+            <option value="ev_hobi">Ev & Hobi</option>
+            <option value="tasinmaz">Taşınmaz</option>
+            <option value="motorlu">Motorlu Taşıtlar</option>
+            <option value="oyuncak">Oyuncak</option>
+            <option value="giyim">Giyim</option>
+            <option value="beyazesya">Beyaz Eşya</option>
+            <option value="teknoloji">Teknoloji</option>
+            <option value="mobilya">Mobilya</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="subcat">Alt Kategori</label>
+          <select id="subcat" name="subcategory" disabled>
+            <option value="">(Önce ana kategori seçin)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="metaFields" class="meta-grid" aria-live="polite" style="margin-top:12px"></div>
+
+      <div style="margin-top:12px">
+        <label for="photos">Fotoğraflar</label>
+        <input id="photos" name="photos" type="file" accept="image/*" multiple />
+        <small class="muted">En fazla 5 fotoğraf, her biri ≤10MB</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btnSubmit" type="submit">İlanı Gönder</button>
+        <button class="btn ghost" id="btnCancel" type="button">İptal</button>
+      </div>
+
+      <div id="note" class="note muted">İlan gönderildiğinde moderatör onayı sonrası yayına alınacaktır.</div>
+    </form>
+  </main>
+
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="box">
+      <div class="title">✅ İlanınız gönderildi</div>
+      <div class="desc">İlanınız moderatörler tarafından incelenecek. Onaylandığında yayınlanacaktır.</div>
+      <button class="btn" id="overlayOk">Tamam</button>
+    </div>
+  </div>
+
+<script>
+// Cleaned inline script for listing-new (UI-only)
+// - kategori -> alt kategori -> dinamik meta alanlar
+// - overlay davranışı düzgün: Tamam ile sadece overlay kapanır (redirect yok)
+(function(){
+  const catEl = document.getElementById('cat');
+  const subEl = document.getElementById('subcat');
+  const metaRoot = document.getElementById('metaFields');
+  const form = document.getElementById('listingForm');
+  const overlay = document.getElementById('overlay');
+  const overlayOk = document.getElementById('overlayOk');
+  const btnCancel = document.getElementById('btnCancel');
+
+  const SUBS = {
+    motorlu:[{v:'araba',t:'Araba'},{v:'motosiklet',t:'Motosiklet'},{v:'yedek_parca',t:'Yedek Parça'}],
+    tasinmaz:[{v:'ev',t:'Ev'},{v:'arsa',t:'Arsa'},{v:'tarla',t:'Tarla'}],
+    ev_hobi:[{v:'mobilya',t:'Mobilya'},{v:'beyazesya',t:'Beyaz Eşya'},{v:'hobi',t:'Hobi'}],
+    oyuncak:[{v:'oyuncak_genel',t:'Genel'}],
+    giyim:[{v:'giyim_genel',t:'Genel'}],
+    beyazesya:[{v:'beyazesya_genel',t:'Genel'}],
+    teknoloji:[{v:'pc_tel',t:'Bilgisayar & Telefon'}],
+    mobilya:[{v:'mobilya_genel',t:'Genel'}]
+  };
+
+  const FIELDS = {
+    araba:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
+    motosiklet:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'km',label:'Kilometre',type:'text'},{id:'year',label:'Yıl',type:'number'}],
+    yedek_parca:[{id:'part_name',label:'Parça adı',type:'text'},{id:'compatible',label:'Uyumlu modeller',type:'text'}],
+    ev:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'year_built',label:'Yapım yılı',type:'number'},{id:'rooms',label:'Oda sayısı',type:'number'}],
+    arsa:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
+    tarla:[{id:'m2',label:'Metrekare (m²)',type:'text'},{id:'imar',label:'İmar durumu',type:'text'}],
+    mobilya_genel:[{id:'size',label:'Boyut / Ölçüler',type:'text'}],
+    beyazesya_genel:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'condition',label:'Durum',type:'text'}],
+    pc_tel:[{id:'brand',label:'Marka',type:'text'},{id:'model',label:'Model',type:'text'},{id:'specs',label:'Özellikler',type:'text'}],
+    oyuncak_genel:[{id:'age',label:'Kaç yaş için',type:'text'}],
+    giyim_genel:[{id:'size',label:'Beden',type:'text'}]
+  };
+
+  function populateSubcats(cat){
+    if(!subEl) return;
+    subEl.innerHTML = '';
+    if(!cat || !SUBS[cat]) { subEl.disabled = true; subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; return; }
+    subEl.appendChild(new Option('-- Alt kategori seçin --',''));
+    SUBS[cat].forEach(o => subEl.appendChild(new Option(o.t, o.v)));
+    subEl.disabled = false;
+  }
+
+  function renderFields(sub){
+    if(!metaRoot) return;
+    metaRoot.innerHTML = '';
+    if(!sub || !FIELDS[sub]) return;
+    FIELDS[sub].forEach(f=>{
+      const wrap = document.createElement('div'); wrap.className='meta-field';
+      const label = document.createElement('label'); label.htmlFor = f.id; label.textContent = f.label;
+      const input = (f.type==='textarea')? document.createElement('textarea') : document.createElement('input');
+      if(f.type!=='textarea') input.type = f.type || 'text';
+      input.id = f.id; input.name = 'meta.'+f.id; input.placeholder = f.label; input.style.padding='8px';
+      wrap.appendChild(label); wrap.appendChild(input); metaRoot.appendChild(wrap);
+    });
+  }
+
+  if(catEl) catEl.addEventListener('change', e => { populateSubcats(e.target.value); if(metaRoot) metaRoot.innerHTML=''; });
+  if(subEl) subEl.addEventListener('change', e => renderFields(e.target.value));
+  if(form) form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    if(catEl && !catEl.value){ alert('Lütfen ana kategori seçin.'); catEl.focus(); return; }
+    if(subEl && !subEl.value){ alert('Lütfen alt kategori seçin.'); subEl.focus(); return; }
+    if(overlay){ overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); }
+    // -> Gerçek backend write burada değil; listing-new.js ile entegre edilecektir.
+  });
+
+  if(overlayOk) overlayOk.addEventListener('click', ()=>{ if(overlay){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); } });
+  if(btnCancel) btnCancel.addEventListener('click', ()=>{ if(confirm('İlan verme işlemini iptal etmek istiyor musunuz?')){ if(form) form.reset(); if(metaRoot) metaRoot.innerHTML=''; if(subEl){ subEl.innerHTML = '<option value=\"\">(Önce ana kategori seçin)</option>'; subEl.disabled = true; } } });
+
+  populateSubcats(catEl ? catEl.value : '');
+})();
+</script>
+</body>
+</html>
