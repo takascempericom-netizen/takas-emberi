@@ -1,0 +1,92 @@
+== firestore.rules | listings bölümleri (ham grep) ==
+4:    function isSignedIn() { return request.auth != null; }
+5:    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+8:        request.auth.token.admin == true ||
+9:        (request.auth.token.role in ['admin','moderator','support']) ||
+10:        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+11:          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+14:    function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
+17:    match /listings/{id} {
+18:      allow read: if true;
+20:      // Oluşturma: sadece kendi uid ve status=pending
+21:      allow create: if isSignedIn()
+22:                    && request.resource.data.ownerId == request.auth.uid
+23:                    && request.resource.data.status == 'pending';
+27:      // - Kullanıcı (sahibi): ownerId değişmeden ve status YA aynı kalır YA DA 'pending' olabilir
+28:      allow update: if isAdmin() || (
+29:        isOwner(resource.data.ownerId) &&
+30:        request.resource.data.ownerId == resource.data.ownerId &&
+31:        (request.resource.data.status == resource.data.status || request.resource.data.status == 'pending')
+35:      allow delete: if isAdmin() || isOwner(resource.data.ownerId);
+39:    match /public/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
+42:    match /announcements/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
+46:      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin() || devWindow());
+47:      allow create: if isSignedIn() && request.auth.uid == uid;
+48:      allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
+52:    match /bans/{uid} { allow read: if isAdmin() || devWindow(); allow create,update,delete: if isAdmin() || devWindow(); }
+56:      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == uid) || devWindow();
+60:    match /{document=**} { allow read: if devWindow(); }
+
+== firestore.rules | tamamı ==
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (request.auth.token.role in ['admin','moderator','support']) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
+
+    // İlanlar
+    match /listings/{id} {
+      allow read: if true;
+
+      // Oluşturma: sadece kendi uid ve status=pending
+      allow create: if isSignedIn()
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      // Güncelleme:
+      // - Admin: her şeyi
+      // - Kullanıcı (sahibi): ownerId değişmeden ve status YA aynı kalır YA DA 'pending' olabilir
+      allow update: if isAdmin() || (
+        isOwner(resource.data.ownerId) &&
+        request.resource.data.ownerId == resource.data.ownerId &&
+        (request.resource.data.status == resource.data.status || request.resource.data.status == 'pending')
+      );
+
+      // Silme: Admin ya da ilan sahibi
+      allow delete: if isAdmin() || isOwner(resource.data.ownerId);
+    }
+
+    // Public notifications
+    match /public/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
+
+    // Announcements (kayan yazı)
+    match /announcements/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
+
+    // Kullanıcı dokümanları
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin() || devWindow());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
+    }
+
+    // Ban kayıtları
+    match /bans/{uid} { allow read: if isAdmin() || devWindow(); allow create,update,delete: if isAdmin() || devWindow(); }
+
+    // Support
+    match /support/{uid}/messages/{msgId} {
+      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == uid) || devWindow();
+    }
+
+    // Diğer her şey (geçici dev pencere)
+    match /{document=**} { allow read: if devWindow(); }
+  }
+}

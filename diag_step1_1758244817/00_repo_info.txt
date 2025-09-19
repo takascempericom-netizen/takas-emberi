@@ -1,0 +1,4 @@
+== Proje kökü ==
+/workspaces/takas-emberi
+## main...origin/main
+?? diag_step1_1758244817/

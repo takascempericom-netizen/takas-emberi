@@ -1,0 +1,11 @@
+{
+  "storage": [
+    {
+      "target": "default",
+      "rules": "storage.rules"
+    }
+  ],
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  }
+}

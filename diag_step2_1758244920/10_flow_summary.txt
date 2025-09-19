@@ -1,0 +1,269 @@
+== listing-new.js | create & upload akışı ==
+6-  initializeFirestore, collection, addDoc, updateDoc, doc, serverTimestamp
+7-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+8-import {
+9:  getStorage, ref as sref, uploadBytesResumable, getDownloadURL
+10-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+11-
+12-const firebaseConfig = {
+--
+31-const btnGoogle = document.getElementById('btnGoogle');
+32-const btnCancel = document.getElementById('btnCancel');
+33-const preview   = document.getElementById('preview');
+34:const inputPhotos = document.getElementById('photos');
+35-
+36-// Foto önizleme
+37-inputPhotos?.addEventListener('change', () => {
+--
+102-  try{
+103-    note.innerHTML = "⏳ İlan kaydediliyor...";
+104-    // 1. Firestore doc oluştur
+105:    const docRef = await addDoc(collection(db,"listings"),{
+106:      ownerId: user.uid,
+107-      // Admin panelleri için geniş uyumluluk alanları
+108-       
+109-       
+110-       
+111-       
+112:      pendingAt: serverTimestamp(),
+113-       
+114-      title, desc, category:cat, city,
+115-      price: price? Number(price): null,
+116:      photos: [],
+117-      coverPhoto: null,
+118:      status: "pending",
+119:      createdAt: serverTimestamp(),
+120-      updatedAt: serverTimestamp()
+121-    });
+122-
+123-    // 2. Fotoğrafları yükle
+124-    const files = Array.from(inputPhotos.files || []).slice(0,5);
+125-    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
+126:    const urls=[];
+127-    for(let i=0;i<files.length;i++){
+128-      const f = files[i];
+129-      const path = `listings/${docRef.id}/${Date.now()}_${f.name}`;
+130-      const ref = sref(st, path);
+131:      const task = uploadBytesResumable(ref, f);
+132-
+133-      const bar=preview.querySelectorAll('.bar')[i];
+134-      await new Promise((res,rej)=>task.on('state_changed',(s)=>{
+135-        const p=Math.round((s.bytesTransferred/s.totalBytes)*100);
+136-        if(bar) bar.style.width=p+'%';
+137-      },rej,res));
+138:      urls.push(await getDownloadURL(task.snapshot.ref));
+139-    }
+140-
+141-    // 3. Firestore doc güncelle
+142:    await updateDoc(doc(db,"listings",docRef.id),{
+143:      photos:urls, coverPhoto:urls[0]||null, updatedAt:serverTimestamp()
+144-    });
+145-
+146-    note.innerHTML = "<span class='ok'><b>✅ İlan gönderildi.</b></span> Onay sonrası yayına alınacak.";
+
+== listing-edit.js | düzenlemede tekrar onaya düşürme ==
+91-    const r = ref(st, path);
+92-    await new Promise((res,rej)=>{
+93-      const up = uploadBytesResumable(r, f, { contentType: (f.type && f.type.startsWith("image")) ? f.type : "image/jpeg" });
+94:      up.on("state_changed",()=>{}, rej, res);
+95-    });
+96-    urls.push(await getDownloadURL(r));
+97-  }
+--
+113-      photos: all,
+114-      coverPhoto: coverPhoto || all[0] || null,
+115-      // MODERATION: her düzenleme tekrar onaya düşsün
+116:      status: "pending",
+117:      state: "pending",
+118:      moderation: "pending",
+119:      approved: false,
+120-      isApproved: false,
+121:      pendingAt: serverTimestamp(),
+122-      updatedAt: serverTimestamp()
+123-    };
+124:    await updateDoc(doc(db,"listings",id), patch);
+125-    note.textContent = "Değişiklikler gönderildi. Admin onayına alındı.";
+126-    setTimeout(()=> location.href="/profile.html", 800);
+127-  }catch(e){
+
+== admin/app.js | admin onay/red akışı ==
+5-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+6-import {
+7-  initializeFirestore, collection, collectionGroup, getDocs, getDoc, query, where, orderBy, limit,
+8:  addDoc, updateDoc, deleteDoc, doc, serverTimestamp
+9-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+10-
+11-const cfg = {
+--
+93-  box.innerHTML = 'Yükleniyor…';
+94-  const coll = collection(db,'listings');
+95-  const variants = [
+96:    query(coll, where('status','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+97-    query(coll, where('state','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+98:    query(coll, where('moderation','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+99-  ];
+100-  const seen = new Set(); const items=[];
+101-  for(const qy of variants){
+--
+111-        <div class="tags">
+112-          <span class="tag">status: ${d.status||'-'}</span>
+113-          ${d.state?`<span class="tag">state: ${d.state}</span>`:''}
+114:          ${d.moderation?`<span class="tag">moderation: ${d.moderation}</span>`:''}
+115-        </div>
+116-      </div>
+117-      <div class="muted">${(d.price ?? '—')} ₺</div>
+--
+128-    if(a){
+129-      if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
+130-      try{
+131:        await updateDoc(doc(db,'listings',a.dataset.approve), {
+132:          status:'active', state:'approved', moderation:'approved',
+133:          approved:true, isApproved:true, approvedAt:serverTimestamp(), updatedAt:serverTimestamp()
+134-        });
+135-        a.closest('.item').remove();
+136-      }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
+--
+138-    if(r){
+139-      if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
+140-      try{
+141:        await updateDoc(doc(db,'listings',r.dataset.reject), {
+142:          status:'rejected', state:'rejected', moderation:'rejected',
+143:          approved:false, isApproved:false, rejectedAt:serverTimestamp(), updatedAt:serverTimestamp()
+144-        });
+145-        r.closest('.item').remove();
+146-      }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
+--
+284-        if(t){
+285-          try{
+286-            // read active state not fetched again; optimistic toggle:
+287:            await updateDoc(doc(db,'announcements',t.dataset.toggle), { active:true, updatedAt:serverTimestamp() });
+288-            // not reading state; just reload
+289-            load();
+290-          }catch(err){ info.textContent='Hata: '+(err?.message||err); }
+
+== redirect-after-create.js | pending→profil yönlendirme ==
+22-onAuthStateChanged(auth, (u)=>{
+23-  if(!u) return;
+24-
+25:  // ownerId=ben ve status=pending olanları canlı dinle
+26:  const q = query(collection(db,"listings"),
+27-                  where("ownerId","==",u.uid),
+28:                  where("status","==","pending"));
+29-
+30-  let baseline = Date.now(); // sayfa açıldığı an (ms)
+31-
+--
+47-          }
+48-        }catch(_){}
+49-        alert("İlan alındı. Onay bekleyenler sekmesine gidiliyor...");
+50:        location.href = "profile.html#pending";
+51-      }
+52-    });
+53-  }, (e)=>console.warn("[redirect-after-create]", e));
+
+== home-feed.js | yayındaki ilanların feed koşulu ==
+40-}
+41-
+42-// Aktif ilanlar akışı (mobil 1, masaüstü 4 sütun CSS ile)
+43:var q = query(collection(db, "listings"), where("status","==","active"));
+44-onSnapshot(q, function(ss){
+45-  var arr = [];
+46-  ss.forEach(function(doc){ arr.push(Object.assign({ id: doc.id }, doc.data())); });
+47-  arr = arr.filter(function(x){
+48:  var ms = x.expiresAt && (x.expiresAt.toMillis ? x.expiresAt.toMillis() : (x.expiresAt.seconds*1000));
+49-  return !ms || ms > Date.now();
+50-});
+51-arr.sort(function(a,b){
+
+== bildirimler.js | pending→active/rejected bildirimleri ==
+1-// assets/js/bildirimler.js
+2:// Kullanıcı ve admin için anlık bildirimler (onay/ret/teklif/pending).
+3:// Ses: /assets/sounds/notify.wav (repo'da mevcut)
+4-
+5-'use strict';
+6-
+--
+8-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+9-import { getFirestore, collection, collectionGroup, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+10-
+11:const SOUND_URL = "/assets/sounds/notify.wav";
+12-
+13-// App init (varsa yeniden kullan)
+14-let app;
+--
+30-const db = getFirestore(app);
+31-
+32-// Basit uyarı + ses (sound.js varsa onun ayarını respect eder)
+33:async function notify(msg, soundFile = SOUND_URL) {
+34:  try { console.log("[notify]", msg);
+35:    try{ window.dispatchEvent(new CustomEvent('tc:notify',{detail:{message:msg, at:Date.now()}})); }catch(_){}
+36-    alert(msg); } catch(_) {}
+37-  try {
+38-    const canPlay = window.isSoundEnabled ? window.isSoundEnabled() : true;
+--
+44-}
+45-
+46-/* -------------------- Kullanıcı bildirimleri --------------------
+47:   - pending -> active : "İlan onaylandı"
+48:   - pending -> rejected : "İlan reddedildi"
+49-   - offers (opsiyonel) : ilan sahibine teklif geldi
+50------------------------------------------------------------------- */
+51-let unsubUser = [];
+--
+67-          // ilk yüklemede sadece mevcut durumu kayda al
+68-          lastStatus.set(id, curr);
+69-        } else if (ch.type === "modified") {
+70:          if (prev === "pending" && curr === "active") notify(`İlan onaylandı: ${d.title || id}`);
+71:          if (prev === "pending" && curr === "rejected") notify(`İlan reddedildi: ${d.title || id}`);
+72-          lastStatus.set(id, curr);
+73-        } else if (ch.type === "removed") {
+74-          lastStatus.delete(id);
+75-        }
+76-      });
+77:    }, (e)=>console.warn("[notify:listings]", e));
+78-    unsubUser.push(un1);
+79-
+80-    // Teklifler (opsiyonel şema): offers collectionGroup (sellerId == uid)
+--
+86-          if (ch.type === "added") {
+87-            const d = ch.doc.data(); const id = ch.doc.id;
+88-            if (seen.has(id)) return; seen.add(id);
+89:            notify(`İlanınıza teklif geldi: ${d.title || d.listingTitle || "Teklif"}`);
+90-          }
+91-        });
+92:      }, (e)=>console.warn("[notify:offers]", e));
+93-      unsubUser.push(un2);
+94-    } catch(e) {
+95:      console.warn("[notify:offers] collectionGroup yok ya da index gerekir", e);
+96-    }
+97-  });
+98-}
+--
+101-}
+102-
+103-/* ---------------------- Admin bildirimleri ----------------------
+104:   - Yeni pending ilan eklendiğinde uyar
+105------------------------------------------------------------------- */
+106-let unsubAdmin = [];
+107-export function startAdminNotifications() {
+--
+111-    if (!user) return;
+112-    // Admin claim kontrolünü sayfa tarafında yapın (opsiyonel)
+113-    try {
+114:      const qPend = query(collection(db, "listings"), where("status", "==", "pending"));
+115-      const seen = new Set();
+116-      const un = onSnapshot(qPend, (ss) => {
+117-        ss.docChanges().forEach((ch) => {
+118-          if (ch.type === "added") {
+119-            const d = ch.doc.data(); const id = ch.doc.id;
+120-            if (seen.has(id)) return; seen.add(id);
+121:            notify(`Yeni onay bekleyen ilan: ${d.title || id}`);
+122-          }
+123-        });
+124:      }, (e)=>console.warn("[notify:pending]", e));
+125-      unsubAdmin.push(un);
+126-    } catch(e) {
+127:      console.warn("[notify:pending] query hata", e);
+128-    }
+129-  });
+130-}

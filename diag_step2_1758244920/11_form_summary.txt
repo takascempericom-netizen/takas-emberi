@@ -1,0 +1,117 @@
+== listing-new.html | form alanları ve limit ipuçları ==
+11-    *{box-sizing:border-box} html,body{height:100%}
+12-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f8fb;color:var(--fg)}
+13:    .wrap{max-width:940px;margin:24px auto;padding:16px}
+14-    .card{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(10,20,40,.06)}
+15-    .hd{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between}
+--
+18-    .ft{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}
+19-    .full{grid-column:1 / -1}
+20:    label{display:block;font-weight:600;margin:6px 0 6px}
+21:    input[type="text"],input[type="number"],textarea,select{
+22-      width:100%;padding:12px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;
+23-      font-size:14px
+24-    }
+25:    textarea{min-height:120px;resize:vertical}
+26-    .muted{color:var(--muted);font-size:12px}
+27-    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+--
+53-          
+54-          <div class="photo-block">
+55:            <label for="photos">Fotoğraflar (max 5)</label>
+56-            <div class="photo-previews">
+57-              <div class="ph-slot">1</div>
+--
+63-          </div>
+64-        <div class="full">
+65:          <label for="title">Başlık</label>
+66:          <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
+67-        </div>
+68-        <div class="full">
+69:          <label for="desc">Açıklama</label>
+70:          <textarea id="desc" placeholder="Durum, aksesuarlar, takas tercihi… (en az 20 karakter)" required minlength="20"></textarea>
+71-          <div class="muted">Spam/iletisim bilgisi, küfür vs. otomatik reddedilir.</div>
+72-        </div>
+73-        <div>
+74:          <label for="cat">Kategori</label>
+75:          <select id="cat" required>
+76-            <option value="">Kategori seçin…</option>
+77-            <option value="ev">🏡 Ev & Hobi</option>
+--
+83-            <option value="teknoloji">💻 Teknoloji</option>
+84-            <option value="mobilya">🛋️ Mobilya</option>
+85:          </select>
+86-        </div>
+87-        <div>
+88:          <label for="city">Şehir</label>
+89:          <input id="city" type="text" placeholder="Örn: İstanbul" required maxlength="40"/>
+90-        </div>
+91-        <div>
+92:          <label for="price">Fiyat / Değer (TL)</label>
+93:          <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/>
+94:          <input id="photos" type="file" accept="image/*" multiple />
+95-
+96-        </div>
+97-        <div class="full">
+98:          <label for="photos">Fotoğraflar (max 5)</label>
+99-          <div class="photos" id="preview">
+100-            <div class="slot"><span>1</span><div class="prog"><div class="bar"></div></div></div>
+
+== listing-edit.html | form alanları ==
+10-    :root{ --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee; --pri:#0ea5e9; --ok:#16a34a; --bad:#dc2626; --bg:#ffffff; }
+11-    *{box-sizing:border-box} body{margin:0;background:#f7f8fb;color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+12:    .wrap{max-width:940px;margin:24px auto;padding:16px}
+13-    .card{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(10,20,40,.06)}
+14-    .hd{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+15-    .bd{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+16-    .full{grid-column:1/-1}
+17:    label{display:block;font-weight:600;margin:6px 0}
+18:    input[type="text"],input[type="number"],textarea,select{
+19-      width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;outline:none
+20-    }
+21:    textarea{min-height:120px;resize:vertical}
+22-    .muted{color:var(--muted);font-size:12px}
+23-    .ft{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}
+--
+43-
+44-        <div class="full">
+45:          <label for="title">Başlık</label>
+46:          <input id="title" type="text" required maxlength="120"/>
+47-        </div>
+48-
+49-        <div class="full">
+50:          <label for="description">Açıklama</label>
+51:          <textarea id="description" required minlength="20"></textarea>
+52-        </div>
+53-
+54-        <div>
+55:          <label for="category">Kategori</label>
+56:          <input id="category" type="text" placeholder="Elektronik, Kitap…"/>
+57-        </div>
+58-
+59-        <div>
+60:          <label for="price">Fiyat (₺)</label>
+61:          <input id="price" type="number" min="0" step="1"/>
+62-        </div>
+63-
+64-        <div>
+65:          <label for="city">İl</label>
+66:          <input id="city" type="text"/>
+67-        </div>
+68-
+69-        <div>
+70:          <label for="district">İlçe</label>
+71:          <input id="district" type="text"/>
+72-        </div>
+73-
+74-        <div class="full">
+75:          <label>Mevcut Fotoğraflar</label>
+76-          <div id="photosList" class="grid-photos"></div>
+77-          <div class="muted">“Kaldır” ile listeden çıkar; “Kapak Yap” ile kapak seç.</div>
+--
+79-
+80-        <div class="full">
+81:          <label for="photos">Yeni Fotoğraf Ekle</label>
+82:          <input id="photos" type="file" accept="image/*" multiple/>
+83-          <div class="muted">Yeni yüklediklerin eskilere eklenir.</div>
+84-        </div>

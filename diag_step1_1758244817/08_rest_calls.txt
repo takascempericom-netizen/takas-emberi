@@ -1,0 +1,2 @@
+profile-bottom-nav.snippet.html:48:      try{ const r = await fetch(p,{method:"HEAD"}); if(r.ok){ location.href=p; return; } }catch(e){}
+profile.html:670:      try{ const r = await fetch(p,{method:"HEAD"}); if(r.ok){ location.href=p; return; } }catch(e){}

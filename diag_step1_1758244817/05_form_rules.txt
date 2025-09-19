@@ -1,0 +1,25 @@
+== Form alanları ve kurallar (HTML içi) ==
+listing-edit.html:46:          <input id="title" type="text" required maxlength="120"/>
+listing-edit.html:51:          <textarea id="description" required minlength="20"></textarea>
+listing-edit.html:61:          <input id="price" type="number" min="0" step="1"/>
+_backup/recover-1758138340/listing-new.html:46:        <input id="title" type="text" required maxlength="80" placeholder="Örn: Akıllı saat takaslı" />
+_backup/recover-1758138340/listing-new.html:48:        <textarea id="desc" required maxlength="3000" placeholder="Ürünün durumu, takas isteğin, notlar..."></textarea>
+_backup/recover-1758138340/listing-new.html:52:            <select id="cat" required>
+_backup/recover-1758138340/listing-new.html:63:            <input id="city" type="text" required placeholder="Örn: İstanbul" />
+_backup/recover-1758138340/listing-new.html:73:            <input id="price" type="number" min="0" step="1" placeholder="₺" />
+_backup/ilan-1758135086/ilan-ver.html:131:            <input id="yil" type="number" min="1950" max="2100" placeholder="Örn: 2017">
+_backup/ilan-1758135086/ilan-ver.html:160:              <input id="baslik" type="text" maxlength="80" placeholder="Örn: 2017 model, temiz, hatasız">
+auth.html:78:        <input type="text" id="li_email" placeholder="eposta@ornek.com veya kullanici_adi" required>
+auth.html:83:        <input type="password" id="li_pass" placeholder="••••••••" required>
+auth.html:104:        <input type="text" id="su_name" placeholder="Adınız Soyadınız" required>
+auth.html:107:        <input type="text" id="su_uname" placeholder="kullanici_adi" required>
+auth.html:112:        <input type="text" id="su_city" placeholder="Şehir" required>
+auth.html:115:        <input type="tel" id="su_phone" placeholder="05xx xxx xx xx" required>
+auth.html:119:      <input type="email" id="su_email" placeholder="ornek@eposta.com" required>
+auth.html:124:          <input type="password" id="su_pass" placeholder="En az 6 karakter" required>
+auth.html:130:          <input type="password" id="su_pass2" placeholder="Tekrar" required>
+listing-new.html:66:          <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
+listing-new.html:70:          <textarea id="desc" placeholder="Durum, aksesuarlar, takas tercihi… (en az 20 karakter)" required minlength="20"></textarea>
+listing-new.html:75:          <select id="cat" required>
+listing-new.html:89:          <input id="city" type="text" placeholder="Örn: İstanbul" required maxlength="40"/>
+listing-new.html:93:          <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/>

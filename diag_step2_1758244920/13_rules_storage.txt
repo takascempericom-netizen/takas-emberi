@@ -1,0 +1,49 @@
+== storage.rules | images ile ilgili bölümler (ham grep) ==
+3:  match /b/{bucket}/o {
+7:             firestore.get(/databases/(default)/documents/listings/$(listingId)).data.ownerId == request.auth.uid;
+11:    match /listings/{listingId}/{filePath=**} {
+12:      allow read: if true;
+13:      allow write: if isOwner(listingId)
+14:                   && request.resource.contentType.matches('image/.*')
+15:                   && request.resource.size < 10 * 1024 * 1024; // 10MB
+19:    match /{allPaths=**} {
+20:      allow read, write: if false;
+26:    match /avatars/{uid}/{filePath=**} {
+27:      allow read: if true;
+28:      allow write: if request.auth != null
+30:                   && request.resource.contentType.matches('image/.*')
+31:                   && request.resource.size < 5 * 1024 * 1024; // 5MB
+
+== storage.rules | tamamı ==
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(listingId) {
+      return request.auth != null &&
+             firestore.get(/databases/(default)/documents/listings/$(listingId)).data.ownerId == request.auth.uid;
+    }
+
+    // İlan görselleri
+    match /listings/{listingId}/{filePath=**} {
+      allow read: if true;
+      allow write: if isOwner(listingId)
+                   && request.resource.contentType.matches('image/.*')
+                   && request.resource.size < 10 * 1024 * 1024; // 10MB
+    }
+
+    // Diğer her şey kapalı
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+    // Kullanıcı avatarları
+    match /avatars/{uid}/{filePath=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.contentType.matches('image/.*')
+                   && request.resource.size < 5 * 1024 * 1024; // 5MB
+    }

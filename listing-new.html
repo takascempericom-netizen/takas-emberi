@@ -7,6 +7,7 @@
 
   <!-- CSS: daha önce oluşturduğumuz css/listing-new.css'i kullanır -->
   <link rel="stylesheet" href="/css/listing-new.css" />
+<link rel="stylesheet" href="/css/categories.css" />
   <style>
     /* küçük ek stiller, gerekirse burada override edilebilir */
     body { background:#f4f6f8; margin:0; padding:20px; }
@@ -87,6 +88,176 @@
       <div style="margin-top:14px;" class="muted">
         <small>İlan gönderildikten sonra admin onayına düşer. Onaylandıktan sonra yayına alınacaktır.</small>
       </div>
+  <!-- Category UI placeholder -->
+  
+  <div class="category-wrap" id="categoryUI">
+    <div class="category-grid" role="list" aria-label="Kategoriler">
+      <button type="button" class="category-item" data-cat="ev" aria-pressed="false">
+        <span class="cat-icon">🏠</span>
+        <div><span class="cat-label">Ev & Hobi</span><span class="cat-sub">Ev eşyaları, hobi ürünleri</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="tasinmaz" aria-pressed="false">
+        <span class="cat-icon">🏡</span>
+        <div><span class="cat-label">Taşınmaz</span><span class="cat-sub">Ev, arsa, tarla</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="motorlu" aria-pressed="false">
+        <span class="cat-icon">🚗</span>
+        <div><span class="cat-label">Motorlu Taşıtlar</span><span class="cat-sub">Araba, motosiklet, yedek parça</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="oyuncak" aria-pressed="false">
+        <span class="cat-icon">🧸</span>
+        <div><span class="cat-label">Oyuncak</span><span class="cat-sub">Her yaşa uygun oyuncaklar</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="giyim" aria-pressed="false">
+        <span class="cat-icon">👗</span>
+        <div><span class="cat-label">Giyim</span><span class="cat-sub">Kadın, erkek, çocuk</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="beyazesya" aria-pressed="false">
+        <span class="cat-icon">⚡</span>
+        <div><span class="cat-label">Beyaz Eşya</span><span class="cat-sub">Ev aletleri, mutfak</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="teknoloji" aria-pressed="false">
+        <span class="cat-icon">��</span>
+        <div><span class="cat-label">Teknoloji</span><span class="cat-sub">Bilgisayar, telefon</span></div>
+      </button>
+      <button type="button" class="category-item" data-cat="mobilya" aria-pressed="false">
+        <span class="cat-icon">🛋️</span>
+        <div><span class="cat-label">Mobilya</span><span class="cat-sub">Koltuk, masa, dolap</span></div>
+      </button>
+    </div>
+
+    <!-- Subcategory panels -->
+    <div class="subcat-panel" data-for="ev">
+      <div class="heading"><div class="title">Ev & Hobi — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="ev-esyasi">Ev Eşyası</button>
+        <button type="button" class="subcat-chip" data-sub="hobi">Hobi</button>
+        <button type="button" class="subcat-chip" data-sub="el-yapimi">El Yapımı</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="tasinmaz">
+      <div class="heading"><div class="title">Taşınmaz — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="ev">Ev</button>
+        <button type="button" class="subcat-chip" data-sub="arsa">Arsa</button>
+        <button type="button" class="subcat-chip" data-sub="tarla">Tarla</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="motorlu">
+      <div class="heading"><div class="title">Motorlu Taşıtlar — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="araba">Araba</button>
+        <button type="button" class="subcat-chip" data-sub="motosiklet">Motosiklet</button>
+        <button type="button" class="subcat-chip" data-sub="yedek-parca">Yedek Parça</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="oyuncak">
+      <div class="heading"><div class="title">Oyuncak — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="0-3">0–3 yaş</button>
+        <button type="button" class="subcat-chip" data-sub="3-7">3–7 yaş</button>
+        <button type="button" class="subcat-chip" data-sub="8plus">8+ yaş</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="giyim">
+      <div class="heading"><div class="title">Giyim — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="kadin">Kadın</button>
+        <button type="button" class="subcat-chip" data-sub="erkek">Erkek</button>
+        <button type="button" class="subcat-chip" data-sub="cocuk">Çocuk</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="beyazesya">
+      <div class="heading"><div class="title">Beyaz Eşya — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="buzdolabi">Buzdolabı</button>
+        <button type="button" class="subcat-chip" data-sub="camasir">Çamaşır Mak.</button>
+        <button type="button" class="subcat-chip" data-sub="bulasik">Bulaşık Mak.</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="teknoloji">
+      <div class="heading"><div class="title">Teknoloji — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="bilgisayar">Bilgisayar</button>
+        <button type="button" class="subcat-chip" data-sub="telefon">Telefon</button>
+        <button type="button" class="subcat-chip" data-sub="tablet">Tablet</button>
+      </div>
+    </div>
+
+    <div class="subcat-panel" data-for="mobilya">
+      <div class="heading"><div class="title">Mobilya — Alt kategoriler</div><div class="hint">Birini seç</div></div>
+      <div class="subcategory-list">
+        <button type="button" class="subcat-chip" data-sub="koltuk">Koltuk</button>
+        <button type="button" class="subcat-chip" data-sub="masa">Masa</button>
+        <button type="button" class="subcat-chip" data-sub="dolap">Dolap</button>
+      </div>
+    </div>
+
+    <!-- hidden subcat input (form'a eklenir; varsa üzerine yazmaz) -->
+    <input type="hidden" id="subcat" name="subcat" />
+
+    <script>
+      (function(){
+        const wrap = document.getElementById('categoryUI');
+        if(!wrap) return;
+        const catButtons = wrap.querySelectorAll('.category-item');
+        const panels = Array.from(wrap.querySelectorAll('.subcat-panel'));
+        const catSelect = document.getElementById('cat'); // existing select in form
+        let subInput = document.getElementById('subcat');
+        if(!subInput){
+          subInput = document.createElement('input');
+          subInput.type='hidden'; subInput.id='subcat'; subInput.name='subcat';
+          const form = wrap.closest('form') || document.querySelector('form');
+          form && form.appendChild(subInput);
+        }
+
+        function clearSelectedCategory(){
+          catButtons.forEach(b=>{ b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
+          panels.forEach(p=>p.classList.remove('active'));
+        }
+
+        catButtons.forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const cat = btn.dataset.cat;
+            clearSelectedCategory();
+            btn.classList.add('selected'); btn.setAttribute('aria-pressed','true');
+            const panel = wrap.querySelector('.subcat-panel[data-for=\"'+cat+'\"]');
+            if(panel) panel.classList.add('active');
+            // set select value (add option if missing)
+            if(catSelect){
+              if(!Array.from(catSelect.options).some(o=>o.value===cat)){
+                const opt = document.createElement('option');
+                opt.value = cat; opt.text = btn.querySelector('.cat-label')?.textContent || cat;
+                catSelect.appendChild(opt);
+              }
+              catSelect.value = cat;
+            }
+            // clear subcat
+            subInput.value = '';
+            wrap.querySelectorAll('.subcat-chip.selected').forEach(c=>c.classList.remove('selected'));
+          });
+        });
+
+        // subcat chips
+        wrap.querySelectorAll('.subcat-chip').forEach(chip=>{
+          chip.addEventListener('click', ()=>{
+            // deselect all siblings (single-select)
+            const parent = chip.closest('.subcat-panel');
+            parent && parent.querySelectorAll('.subcat-chip.selected').forEach(c=>c.classList.remove('selected'));
+            chip.classList.add('selected');
+            subInput.value = chip.dataset.sub || chip.textContent.trim();
+          });
+        });
+      })();
+    </script>
+  </div>
+
     </form>
   </main>
 

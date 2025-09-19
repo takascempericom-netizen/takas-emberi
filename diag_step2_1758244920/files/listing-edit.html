@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>İlan Düzenle • Takas Çemberi</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{ --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee; --pri:#0ea5e9; --ok:#16a34a; --bad:#dc2626; --bg:#ffffff; }
+    *{box-sizing:border-box} body{margin:0;background:#f7f8fb;color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:940px;margin:24px auto;padding:16px}
+    .card{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(10,20,40,.06)}
+    .hd{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+    .bd{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .full{grid-column:1/-1}
+    label{display:block;font-weight:600;margin:6px 0}
+    input[type="text"],input[type="number"],textarea,select{
+      width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;outline:none
+    }
+    textarea{min-height:120px;resize:vertical}
+    .muted{color:var(--muted);font-size:12px}
+    .ft{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}
+    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+    .btn-pri{background:var(--pri);color:#fff}
+    .btn-ghost{background:#fff;border:1px solid var(--line)}
+    .grid-photos{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+    .ph{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;position:relative}
+    .ph img{width:100%;height:120px;object-fit:cover;display:block}
+    .ph .rm{position:absolute;top:6px;right:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:11px;cursor:pointer}
+    .ph .cv{position:absolute;left:6px;top:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:11px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="hd">
+        <h1 style="margin:0;font-size:20px">İlan Düzenle</h1>
+        <a href="/profile.html" class="muted" style="text-decoration:none">⬅ Profil</a>
+      </div>
+      <div class="bd">
+        <div class="full muted" id="note">Yükleniyor…</div>
+
+        <div class="full">
+          <label for="title">Başlık</label>
+          <input id="title" type="text" required maxlength="120"/>
+        </div>
+
+        <div class="full">
+          <label for="description">Açıklama</label>
+          <textarea id="description" required minlength="20"></textarea>
+        </div>
+
+        <div>
+          <label for="category">Kategori</label>
+          <input id="category" type="text" placeholder="Elektronik, Kitap…"/>
+        </div>
+
+        <div>
+          <label for="price">Fiyat (₺)</label>
+          <input id="price" type="number" min="0" step="1"/>
+        </div>
+
+        <div>
+          <label for="city">İl</label>
+          <input id="city" type="text"/>
+        </div>
+
+        <div>
+          <label for="district">İlçe</label>
+          <input id="district" type="text"/>
+        </div>
+
+        <div class="full">
+          <label>Mevcut Fotoğraflar</label>
+          <div id="photosList" class="grid-photos"></div>
+          <div class="muted">“Kaldır” ile listeden çıkar; “Kapak Yap” ile kapak seç.</div>
+        </div>
+
+        <div class="full">
+          <label for="photos">Yeni Fotoğraf Ekle</label>
+          <input id="photos" type="file" accept="image/*" multiple/>
+          <div class="muted">Yeni yüklediklerin eskilere eklenir.</div>
+        </div>
+      </div>
+      <div class="ft">
+        <button id="btnCancel" class="btn btn-ghost">İptal</button>
+        <button id="btnSave" class="btn btn-pri">Değişiklikleri Gönder (Onaya)</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./listing-edit.js"></script>
+</body>
+</html>

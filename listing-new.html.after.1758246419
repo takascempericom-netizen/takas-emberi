@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>İlan Ver • Takas Çemberi</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{ --fg:#0b0b0b; --muted:#6b7280; --line:#e6e8ee; --pri:#0ea5e9; --ok:#16a34a; --bad:#dc2626; --bg:#ffffff; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f8fb;color:var(--fg)}
+    .wrap{max-width:940px;margin:24px auto;padding:16px}
+    .card{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(10,20,40,.06)}
+    .hd{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0}
+    .bd{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .ft{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}
+    .full{grid-column:1 / -1}
+    label{display:block;font-weight:600;margin:6px 0 6px}
+    input[type="text"],input[type="number"],textarea,select{
+      width:100%;padding:12px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;
+      font-size:14px
+    }
+    textarea{min-height:120px;resize:vertical}
+    .muted{color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+    .btn-pri{background:var(--pri);color:#fff}
+    .btn-ghost{background:#fff;border:1px solid var(--line)}
+    .danger{color:var(--bad)}
+    .ok{color:var(--ok)}
+    .photos{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+    .slot{border:1px dashed var(--line);border-radius:12px;aspect-ratio:1/1;background:#fafbff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .slot img{width:100%;height:100%;object-fit:cover}
+    .prog{position:absolute;left:0;right:0;bottom:0;height:6px;background:#e5e7eb}
+    .bar{height:100%;width:0%;background:var(--pri);transition:width .2s}
+    .loginBox{padding:18px 20px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="hd">
+        <h1>İlan Ver</h1>
+        <div id="userBox" class="muted">Giriş durumu kontrol ediliyor…</div>
+      </div>
+      <div id="login" class="loginBox hidden">
+        <p class="muted">İlan verebilmek için önce giriş yapın.</p>
+        <button id="btnGoogle" class="btn btn-pri">Google ile giriş yap</button>
+      </div>
+      <form id="form" class="bd hidden" autocomplete="off">
+          
+          <div class="ph-slot">2</div>
+              <div class="ph-slot">3</div>
+              <div class="ph-slot">4</div>
+              <div class="ph-slot">5</div>
+            </div>
+          </div>
+        <div class="full">
+          <label for="title">Başlık</label>
+          <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
+        </div>
+        <div class="full">
+          <label for="desc">Açıklama</label>
+          <textarea id="desc" placeholder="Durum, aksesuarlar, takas tercihi… (en az 20 karakter)" required minlength="20"></textarea>
+          <div class="muted">Spam/iletisim bilgisi, küfür vs. otomatik reddedilir.</div>
+        </div>
+        <div>
+          <label for="cat">Kategori</label>
+          <select id="cat" required>
+            <option value="">Kategori seçin…</option>
+            <option value="ev">🏡 Ev & Hobi</option>
+            <option value="tasınmaz">🏠 Taşınmaz</option>
+            <option value="tasit">🚗 Motorlu Taşıtlar</option>
+            <option value="oyuncak">🧸 Oyuncak</option>
+            <option value="giyim">👗 Giyim</option>
+            <option value="beyaz">⚡ Beyaz Eşya</option>
+            <option value="teknoloji">💻 Teknoloji</option>
+            <option value="mobilya">🛋️ Mobilya</option>
+          </select>
+        </div>
+        <div>
+          <label for="city">Şehir</label>
+          <input id="city" type="text" placeholder="Örn: İstanbul" required maxlength="40"/>
+        </div>
+        <div>
+          <label for="price">Fiyat / Değer (TL)</label>
+          <input id="price" type="number" min="0" step="1" placeholder="Opsiyonel"/></div>
+        <div class="full">
+          <label for="photos">Fotoğraflar (max 5)</label>
+          <input id="photos" type="file" accept="image/*" multiple />
+<div class="photos" id="preview">
+            <div class="slot"><span>1</span><div class="prog"><div class="bar"></div></div></div>
+            <div class="slot"><span>2</span><div class="prog"><div class="bar"></div></div></div>
+            <div class="slot"><span>3</span><div class="prog"><div class="bar"></div></div></div>
+            <div class="slot"><span>4</span><div class="prog"><div class="bar"></div></div></div>
+            <div class="slot"><span>5</span><div class="prog"><div class="bar"></div></div></div>
+          </div>
+        </div>
+        <div id="note" class="full muted"></div>
+        <div class="ft full">
+          <button type="button" id="btnCancel" class="btn btn-ghost">Vazgeç</button>
+          <button type="submit" id="btnSend" class="btn btn-pri">İlanı Gönder</button>
+<script id="send-confirm-redirect">
+  document.addEventListener("DOMContentLoaded",()=>{
+    const btn=document.getElementById("btnSend");
+    if(btn){
+      btn.addEventListener("click",(e)=>{
+        e.preventDefault();
+        alert("İlanınız onay sürecindedir.");
+        document.getElementById("profilePanel")?.remove();
+        window.location.href="home.html";
+      });
+    }
+  });
+</script>
+        </div>
+  <script id="badwords-filter">
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btnSend");
+    if (!btn) return;
+    const badWords = [
+      // Küfür / hakaret
+      "yavşak","orospu","sik","amk","piç","göt","yarak","orospu çocuğu","oç","pezevenk","ibne","ibne","salak","aptal","gerizekalı","mal","dangalak","kahpe",
+      // Irkçılık / nefret
+      "gerici","yobaz","zenci","çingene","kafir","gavur",
+      // Terör / şiddet
+      "daeş","işid","isil","el kaide","pkk","ypg","dhkp-c","fetö","terör","bombalı","silah","tabanca","bomba",
+      // Pedofili / istismar
+      "çocuk istismarı","pedofil","çocuk pornosu","çocuk tacizi","underage",
+      // Uyuşturucu
+      "eroin","kokain","esrar","metamfetamin","uyuşturucu"
+    ];
+    btn.addEventListener("click", (e) => {
+      const title = document.getElementById("title")?.value.toLowerCase() || "";
+      const desc  = document.getElementById("desc")?.value.toLowerCase() || "";
+      for (const w of badWords) {
+        if (title.includes(w) || desc.includes(w)) {
+          e.preventDefault();
+          alert(`\"${w}\" kelimesi topluluk kurallarına uygun değildir. Lütfen düzeltip tekrar deneyin.`);
+          return;
+        }
+      }
+    });
+  });
+  </script>
+      </form>
+<script id="close-panel-logic">
+  document.addEventListener("DOMContentLoaded",()=>{
+    const btn=document.getElementById("panelCloseBtn");
+    if(btn){ btn.addEventListener("click",()=>{
+      document.getElementById("profilePanel")?.remove();
+      window.location.href="home.html";
+    }); }
+  });
+</script>
+    </div>
+  </div>
+  <script type="module" src="./listing-new.js"></script>
+<script type="module" src="js/redirect-after-create.js"></script>
+</body>
+<script id="panel-close-wire">
+  document.addEventListener("DOMContentLoaded",function(){
+    var btn=document.getElementById("panelCloseBtn");
+    if(!btn) return;
+    btn.addEventListener("click", function(){
+      var form=document.getElementById("form");
+      var card=form && form.closest ? form.closest(".card") : null;
+      if(card){ card.remove(); return; }
+      if(form){ form.remove(); }
+    });
+  });
+</script>
+</html>
+
+<style id="photo-block-style">
+.photo-block{margin-bottom:16px}
+.photo-previews{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ph-slot{width:48px;height:48px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;border-radius:6px}
+</style>
+

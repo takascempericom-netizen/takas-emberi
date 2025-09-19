@@ -1,0 +1,14 @@
+== Özet: Bulunan dosyaları listele ==
+HTML adayları:
+== İlan ekleme ile ilgili muhtemel sayfalar (HTML) ==
+_backup/ilan-1758135086/ilan-ver.html
+_backup/recover-1758138340/listing-new.html
+admin/index.html
+home.html
+listing-edit.html
+listing-new.html
+profile-panel.snippet.html
+profile.html
+
+Script adayları:
+== JS/TS içinde upload & Firestore çağrıları ==

@@ -1,0 +1,13 @@
+== Durum anahtar kelimeleri sayımı ==
+pending: 67
+approved: 50
+active: 58
+rejected: 9
+expired: 49
+moderation: 54
+state: 59
+status: 84
+expiresAt: 54
+photos: 81
+uploadBytesResumable: 48
+getDownloadURL: 60

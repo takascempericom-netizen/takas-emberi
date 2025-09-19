@@ -18,10 +18,7 @@ const cfg = {
 };
 
 const app = initializeApp(cfg);
-\1
-// Admin oturumunu sekmeye izole et: bu sekmede giriş/çıkış diğer sekmeleri etkilemez.
-await setPersistence(auth, browserSessionPersistence).catch(e=>console.warn("[admin] setPersistence", e?.message||e));
-
+const auth = getAuth(app);
 const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 
 const who = document.getElementById('who');
@@ -131,14 +128,20 @@ async function renderOnay(){
     if(a){
       if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
       try{
-        await updateDoc(doc(db,'listings',a.dataset.approve), { status: 'active', state: 'approved', moderation: 'approved', approved: true, isApproved: true, approvedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        await updateDoc(doc(db,'listings',a.dataset.approve), {
+          status:'active', state:'approved', moderation:'approved',
+          approved:true, isApproved:true, approvedAt:serverTimestamp(), updatedAt:serverTimestamp()
+        });
         a.closest('.item').remove();
       }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
     }
     if(r){
       if(!IS_ADMIN){ note.textContent='Admin yetkisi gerekli.'; return; }
       try{
-        await updateDoc(doc(db,'listings',r.dataset.reject), { status: 'rejected', state: 'rejected', moderation: 'rejected', approved: false, isApproved: false, rejectedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        await updateDoc(doc(db,'listings',r.dataset.reject), {
+          status:'rejected', state:'rejected', moderation:'rejected',
+          approved:false, isApproved:false, rejectedAt:serverTimestamp(), updatedAt:serverTimestamp()
+        });
         r.closest('.item').remove();
       }catch(err){ note.textContent = 'Hata: '+(err?.message||err); }
     }

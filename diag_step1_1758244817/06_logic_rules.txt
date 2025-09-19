@@ -1,0 +1,124 @@
+admin/app.js:7:  initializeFirestore, collection, collectionGroup, getDocs, getDoc, query, where, orderBy, limit,
+admin/app.js:29:  onay: document.getElementById('v-onay'),
+admin/app.js:38:  onay: "İlan Onay",
+admin/app.js:61:  if(view==='onay') renderOnay();
+admin/app.js:74:// --- admin check
+admin/app.js:79:    const snap = await getDocs(query(collection(db,'users'), where('uid','==',uid), limit(1))).then(s=>s);
+admin/app.js:83:      if(d.exists() && (d.data().role==='admin')) return true;
+admin/app.js:85:    for(const x of snap.docs){ if((x.data().role||'')==='admin') return true; }
+admin/app.js:92:  const box = document.getElementById('onay-list');
+admin/app.js:96:    query(coll, where('status','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:97:    query(coll, where('state','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:98:    query(coll, where('moderation','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:118:      <div><a class="btn btn-ghost" href="/admin/index.html#id=${encodeURIComponent(d.id)}" data-open="${d.id}">Detay</a></div>
+admin/app.js:120:        <button class="btn btn-ok" data-approve="${d.id}">Yayına Al</button>
+admin/app.js:127:    const a = e.target.closest('[data-approve]'); const r = e.target.closest('[data-reject]');
+admin/app.js:131:        await updateDoc(doc(db,'listings',a.dataset.approve), {
+admin/app.js:132:          status:'active', state:'approved', moderation:'approved',
+admin/app.js:133:          approved:true, isApproved:true, approvedAt:serverTimestamp(), updatedAt:serverTimestamp()
+admin/app.js:143:          approved:false, isApproved:false, rejectedAt:serverTimestamp(), updatedAt:serverTimestamp()
+admin/app.js:175:      const snap = await getDocs(query(collection(db,'public'), orderBy('createdAt','desc'), limit(30)));
+admin/app.js:222:      const snap = await getDocs(query(collection(db,'public'), where('type','==','notice'), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:267:      const snap = await getDocs(query(collection(db,'announcements'), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:312:      const snap = await getDocs(query(collection(db,'users'), orderBy('createdAt','desc'), limit(200)));
+admin/app.js:331:        <td>${u.role||'-'}</td>
+admin/app.js:348:    const snap = await getDocs(query(collectionGroup(db,'messages'), where('type','in',['complaint','report']), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:397:    // Email/Şifre ile giriş talep et (admin hesabı)
+admin/app.js:408:  who.innerHTML = `${u.email||u.displayName} • ${IS_ADMIN ? '<span class="ok">admin</span>' : '<span class="err">admin değil</span>'} • <code>${u.uid}</code>`;
+admin/app.js:409:  show('onay');
+_backup/ilan-1758135086/ilan-ver.init.js:57:    alert("İlan admin onayına gönderildi!");
+profile.page.v4.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v4.js:43:    const snap = await getDocs(query(collection(db,"users"), where(field,"==",value), limit(1)));
+profile.page.v4.js:216:  const snap = await getDocs(query(collection(db,"listings"), where("ownerId","==",uid), limit(120)));
+reorder-strong.js:7:    var hs = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]'));
+profile.page.v2.js:3:import { getFirestore, getDocs, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v2.js:94:  const qy = query(collection(db,"listings"), where("ownerId","==",uid), limit(120));
+listing-edit.js:46:  // yetki: sadece sahibi veya admin düzenleyebilir (admin check client'ta zayıf; asıl kontrol rules)
+listing-edit.js:93:      const up = uploadBytesResumable(r, f, { contentType: (f.type && f.type.startsWith("image")) ? f.type : "image/jpeg" });
+listing-edit.js:115:      // MODERATION: her düzenleme tekrar onaya düşsün
+listing-edit.js:116:      status: "pending",
+listing-edit.js:117:      state: "pending",
+listing-edit.js:118:      moderation: "pending",
+listing-edit.js:119:      approved: false,
+listing-edit.js:121:      pendingAt: serverTimestamp(),
+listing-edit.js:125:    note.textContent = "Değişiklikler gönderildi. Admin onayına alındı.";
+profile-fix.v4.js:3:import { getFirestore, getDoc, doc, getDocs, query, where, orderBy, limit, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile-fix.v4.js:132:    const qy=query(collection(db,"listings"), where("ownerId","==",uid), orderBy("createdAt","desc"), limit(200));
+profile.page.v1758197075.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v1758197075.js:62:  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(status);
+profile.page.v1758197075.js:63:  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(status) || d?.moderation==="pending" || (d?.approved===false || d?.isApproved===false);
+profile.page.v1758197075.js:64:  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number" ? d.expiresAt : null);
+profile.page.v1758197075.js:65:  const expired = (expTs && expTs < now) || ["expired","passive","suresi-dolan"].includes(status);
+profile.page.v1758197075.js:66:  if (expired) return "exp";
+profile.page.v1758197075.js:67:  if (pending) return "pend";
+profile.page.v1758197075.js:68:  if (approved) return "pub";
+profile.page.v1758197075.js:117:    const q = query(collection(db,"listings"), where("ownerId","==",uid), limit(300));
+profile.page.v1758197075.js:175:    t.setAttribute("role","button");
+profile.page.v1758197075.js:204:  const task = uploadBytesResumable(ref(st, path), f, { contentType: f.type || "image/jpeg" });
+.bak_admin/listing.js:54:    (d.approved!==undefined) ? tag(`approved: ${d.approved}`) : '',
+.bak_admin/listing.js:90:        state: "approved",
+.bak_admin/listing.js:91:        moderation: "approved",
+.bak_admin/listing.js:92:        approved: true,
+.bak_admin/listing.js:94:        approvedAt: serverTimestamp(),
+.bak_admin/listing.js:108:        approved: false,
+.bak_admin/listing.js:122:        status: "expired",
+.bak_admin/listing.js:123:        state: "expired",
+.bak_admin/listing.js:125:        expiresAt: serverTimestamp()
+.bak_admin/listing.js:136:      // Silmeyi istersen ayrı admin arayüzünden yap; burada sadece Firestore doc silme var.
+.bak_admin/listing-link.js:2: * Mevcut admin listelerinden tek tıkla detay sayfasına gitmek için yardımcılar.
+.bak_admin/listing-link.js:4: * - openListing(id): direkt /admin/listing.html?id=ID adresine götürür
+.bak_admin/listing-link.js:11:  location.href = `/admin/listing.html?id=${encodeURIComponent(id)}`;
+.bak_admin/listing-link.js:28:      a.href = `/admin/listing.html?id=${encodeURIComponent(id)}`;
+.bak_admin/listing-link.js:34:      el.href = `/admin/listing.html?id=${encodeURIComponent(id)}`;
+avatar-func.js:11:          + ' font-family="Inter,Arial,sans-serif" font-size="96" fill="#fff">'+ch+'</text></svg>';
+avatar-func.js:12:  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+.live_pf.js:3:import { getFirestore, getDoc, doc, getDocs, query, where, orderBy, limit, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+reorder-shared-before-categories.js:5:    const heads = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]'));
+assets/js/bildirimler.js:2:// Kullanıcı ve admin için anlık bildirimler (onay/ret/teklif/pending).
+assets/js/bildirimler.js:47:   - pending -> active : "İlan onaylandı"
+assets/js/bildirimler.js:48:   - pending -> rejected : "İlan reddedildi"
+assets/js/bildirimler.js:70:          if (prev === "pending" && curr === "active") notify(`İlan onaylandı: ${d.title || id}`);
+assets/js/bildirimler.js:71:          if (prev === "pending" && curr === "rejected") notify(`İlan reddedildi: ${d.title || id}`);
+assets/js/bildirimler.js:104:   - Yeni pending ilan eklendiğinde uyar
+assets/js/bildirimler.js:114:      const qPend = query(collection(db, "listings"), where("status", "==", "pending"));
+assets/js/bildirimler.js:121:            notify(`Yeni onay bekleyen ilan: ${d.title || id}`);
+assets/js/bildirimler.js:124:      }, (e)=>console.warn("[notify:pending]", e));
+assets/js/bildirimler.js:127:      console.warn("[notify:pending] query hata", e);
+assets/js/inline-chat-override.js:34:        bubble('Merhaba! Canlı Destek’e hoş geldiniz. Konuyu açıklayıcı yazarsanız size yardımcı olmaya çalışacağım. 🙌', 'sys');
+assets/js/bildirimler.admin-stub.js:4:  console.log("[admin-stub] startAdminNotifications() disabled (no Firestore listen).");
+assets/js/bildirimler.admin-stub.js:7:  console.log("[admin-stub] startUserNotifications() disabled for admin context.");
+assets/js/notify-bell.js:9:  .tc-bell-badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:999px;font-size:11px;
+assets/js/notify-bell.js:14:  .tc-dd h4{margin:10px 12px 6px;font-size:13px;letter-spacing:.2px;color:#93a3b8}
+assets/js/notify-bell.js:21:  .tc-time{font-size:11px;color:#93a3b8;margin-top:3px}
+assets/js/livechat.js:4:  collection, addDoc, query, orderBy, onSnapshot, where, getDocs, deleteDoc, limit
+assets/js/livechat.js:45:    const snap = await getDocs(query(mCol, orderBy("createdAt"), limit(100)));
+assets/js/livechat.js:58:    query(collection(tRef,"messages"), where("sender","==","admin"), orderBy("createdAt")),
+assets/js/livechat.js:68:    pushBubble("Merhaba! Canlı Destek’e hoş geldiniz. Konuyu açıklayıcı yazarsanız size yardımcı olmaya çalışacağım. 🙌","sys");
+profile.page.v3.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v3.js:43:    const snap = await getDocs(query(collection(db,"users"), where(field,"==",value), limit(1)));
+profile.page.v3.js:212:  const snap = await getDocs(query(collection(db,"listings"), where("ownerId","==",uid), limit(120)));
+js/home-feed.js:48:  var ms = x.expiresAt && (x.expiresAt.toMillis ? x.expiresAt.toMillis() : (x.expiresAt.seconds*1000));
+js/notify-bell.js:2: * SAFE STUB for admin – no classes, no imports, plain ES5.
+js/notify-bell.js:3: * Prevents SyntaxError in admin panel.
+js/redirect-after-create.js:25:  // ownerId=ben ve status=pending olanları canlı dinle
+js/redirect-after-create.js:28:                  where("status","==","pending"));
+js/redirect-after-create.js:40:      // Sayfa açıldıktan sonra eklenen/güncellenen ve daha önce yönlendirilmemiş bir "pending" ilan görürsek
+js/redirect-after-create.js:50:        location.href = "profile.html#pending";
+listing-new.js:39:    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
+listing-new.js:112:      pendingAt: serverTimestamp(),
+listing-new.js:118:      status: "pending",
+listing-new.js:125:    for (const ff of files) { if (ff.size > 10*1024*1024) { alert("Foto 10MB üstü: " + ff.name); return; } }
+listing-new.js:127:    for(let i=0;i<files.length;i++){
+profile.page.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.js:62:  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(status);
+profile.page.js:63:  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(status) || d?.moderation==="pending" || (d?.approved===false || d?.isApproved===false);
+profile.page.js:64:  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number" ? d.expiresAt : null);
+profile.page.js:65:  const expired = (expTs && expTs < now) || ["expired","passive","suresi-dolan"].includes(status);
+profile.page.js:66:  if (expired) return "exp";
+profile.page.js:67:  if (pending) return "pend";
+profile.page.js:68:  if (approved) return "pub";
+profile.page.js:117:    const q = query(collection(db,"listings"), where("ownerId","==",uid), limit(300));
+profile.page.js:175:    t.setAttribute("role","button");
+profile.page.js:204:  const task = uploadBytesResumable(ref(st, path), f, { contentType: f.type || "image/jpeg" });
+profile.page.js:309:      avatarPreview.src = photoURL || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect width='100%' height='100%' fill='%23111'/><text x='50%' y='54%' font-size='22' fill='%23aaa' text-anchor='middle' font-family='Inter,Arial'>Avatar</text></svg>";
+profile.page.js:326:          const up  = uploadBytesResumable(r, file, { contentType:file.type||"image/jpeg" });

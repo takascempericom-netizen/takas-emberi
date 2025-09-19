@@ -1,0 +1,60 @@
+== İlan ekleme ile ilgili muhtemel sayfalar (HTML) ==
+admin/index.html:82:        <button data-view="onay" class="active">İlan Onay</button>
+admin/index.html:96:      <div class="top"><h2 id="title">İlan Onay</h2><div id="note" class="muted"></div></div>
+admin/index.html:99:          <div class="muted">status/state/moderation alanları “pending/*” olan tüm ilanlar listelenir. Onay/Reddet tek tık.</div>
+admin/index.html:145:            <div class="muted">Birden fazla ilan ekleyebilirsiniz; son eklenenler üstte listelenir.</div>
+listing-edit.html:6:  <title>İlan Düzenle • Takas Çemberi</title>
+listing-edit.html:38:        <h1 style="margin:0;font-size:20px">İlan Düzenle</h1>
+listing-edit.html:75:          <label>Mevcut Fotoğraflar</label>
+listing-edit.html:82:          <input id="photos" type="file" accept="image/*" multiple/>
+_backup/recover-1758138340/listing-new.html:6:  <title>İlan Ver • Takas Çemberi</title>
+_backup/recover-1758138340/listing-new.html:42:      <h1>İlan Ver</h1>
+_backup/recover-1758138340/listing-new.html:43:      <p class="muted">Görseller: sadece <strong>JPG/PNG/WebP</strong>, her biri <strong>10MB</strong> altı, en fazla <strong>5 adet</strong>. İlan önce <span class="tag">onay bekliyor</span> durumuna düşer.</p>
+_backup/recover-1758138340/listing-new.html:77:        <input id="photos" type="file" accept="image/*" multiple />
+_backup/recover-1758138340/listing-new.html:80:        <button id="submitBtn" class="btn" type="submit">İlanı Gönder</button>
+_backup/ilan-1758135086/ilan-ver.html:6:<title>İlan Ver • Takas Çemberi</title>
+_backup/ilan-1758135086/ilan-ver.html:93:        <h1>İlan Ver</h1>
+_backup/ilan-1758135086/ilan-ver.html:96:          <label for="photos">Kapak / Fotoğraflar (en az 1, en çok 10)</label>
+_backup/ilan-1758135086/ilan-ver.html:98:            <input id="photos" type="file" accept="image/*" multiple />
+_backup/ilan-1758135086/ilan-ver.html:192:          <button id="yayinaAl" class="btn primary" type="button" disabled>İlanı Yayınla</button>
+_backup/ilan-1758135086/ilan-ver.html:196:          Yayınla’ya basınca ilan <b>admin onayına</b> düşer. Onaylanana kadar profilinde “Onay Bekleyen İlanlar”da görünür.
+_backup/ilan-1758135086/ilan-ver.html:330:    console.log("İlan (pending) → admin onayı bekliyor:", collect());
+_backup/ilan-1758135086/ilan-ver.html:331:    alert("İlan admin onayına gönderildi!\nOnaylanana kadar profilinde 'Onay Bekleyen İlanlar'da görünecek.");
+_backup/ilan-1758135086/ilan-ver.html:432:      alert("İlan admin onayına gönderildi! Onaylanana kadar profilinde 'Onay Bekleyenler'de görebilirsin.");
+home.html:130:  /* sağ üstte mobil menü + küçük ilan ekle butonu */
+home.html:186:/* Paylaşılan İlanlar boş mesajı */
+home.html:212:/* --- Paylaşılan İlanlar (responsive grid) --- */
+home.html:223:/* --- /Paylaşılan İlanlar --- */
+home.html:232:    <div class="search"><input id="q" type="search" placeholder="İlanlarda ara..."></div>
+home.html:238:      <a href="listing-new.html" class="btn add"><div>➕</div><span>İlan Ekle</span></a>
+home.html:245:      <a class="mobile-add" href="listing-new.html" aria-label="İlan Ekle">➕</a>
+home.html:250:        <a href="listing-new.html" class="btn add"><div>➕</div><span>İlan Ekle</span></a>
+home.html:263:    <a href="search.html" class="start">🔎 İlan Ara</a>
+home.html:281:  <!-- FEED (boş ilan ortamı) -->
+home.html:283:    <h2 id="sharedListings">Paylaşılan İlanlar</h2>
+home.html:284:    <p>Henüz ilan bulunmamaktadır. Yeni ilanlar eklendikçe burada görünecek.</p>
+home.html:290:    <div class="info-card"><div class="in"><h3>📱 Kolay Kullanım</h3><p>Mobil uyumlu arayüz ile her yerde ilan ver.</p></div></div>
+home.html:335:          <li>İlan kuralları ve yasaklı içerikler.</li>
+home.html:431:  <h2>Paylaşılan İlanlar</h2>
+home.html:432:  <div id="feed-empty" class="sub" style="padding:12px">Henüz ilan bulunmamaktadır. Yeni ilanlar eklendikçe burada görünecek.</div>
+profile.html:140:  /* İlan kartları */
+profile.html:183:  /* --- 2) İlan kartları (dokunma) --- */
+profile.html:259:  /* İlan kartları: dokunma; görseller doğal renk */
+profile.html:271:  #profilePanel input[type="file"]{
+profile.html:331:    <div class="note" id="note">İlanlar yükleniyor…</div>
+profile.html:369:        <input type="file" id="prof_photo" accept="image/*"/>
+profile.html:418:          <div class="full"><label>Profil Fotoğrafı</label><input id="inpAvatar" type="file" accept="image/*"></div>
+profile.html:515:    listEl.innerHTML=""; note.style.display="block"; note.textContent="İlanlar yükleniyor…"; stat.textContent="—";
+profile.html:517:    if(snap.empty){ cntPub.textContent="0"; cntPend.textContent="0"; cntExp.textContent="0"; listEl.innerHTML=""; note.textContent="Bu kullanıcıya ait ilan bulunamadı."; stat.textContent="0 ilan"; return; }
+profile.html:529:    wireListingActions(); note.style.display="none"; stat.textContent=`${show.length} ilan • ${ok} görsel yüklendi${fail?`, ${fail} eksik görsel`:``}`;
+profile.html:1033:          if(!confirm("Bu ilanı kalıcı olarak silmek istediğine emin misin?")) return;
+profile.html:1053:              alert("İlan silindi.");
+listing-new.html:6:  <title>İlan Ver • Takas Çemberi</title>
+listing-new.html:45:        <h1>İlan Ver</h1>
+listing-new.html:49:        <p class="muted">İlan verebilmek için önce giriş yapın.</p>
+listing-new.html:55:            <label for="photos">Fotoğraflar (max 5)</label>
+listing-new.html:94:          <input id="photos" type="file" accept="image/*" multiple />
+listing-new.html:98:          <label for="photos">Fotoğraflar (max 5)</label>
+listing-new.html:110:          <button type="submit" id="btnSend" class="btn btn-pri">İlanı Gönder</button>
+listing-new.html:117:        alert("İlanınız onay sürecindedir.");
+profile-panel.snippet.html:38:        <input type="file" id="prof_photo" accept="image/*"/>

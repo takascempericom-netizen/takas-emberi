@@ -1,0 +1,247 @@
+admin/app.js:7:  initializeFirestore, collection, collectionGroup, getDocs, getDoc, query, where, orderBy, limit,
+admin/app.js:8:  addDoc, updateDoc, deleteDoc, doc, serverTimestamp
+admin/app.js:69:document.querySelectorAll('.nav button').forEach(b=>{
+admin/app.js:70:  b.onclick=()=>{ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); show(b.dataset.view); };
+admin/app.js:78:    const uref = doc(db,'users',uid);
+admin/app.js:79:    const snap = await getDocs(query(collection(db,'users'), where('uid','==',uid), limit(1))).then(s=>s);
+admin/app.js:94:  const coll = collection(db,'listings');
+admin/app.js:96:    query(coll, where('status','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:97:    query(coll, where('state','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:98:    query(coll, where('moderation','in',['pending','waiting','bekleyen','onay-bekliyor']), orderBy('createdAt','desc'), limit(50)),
+admin/app.js:102:    try{ const snap = await getDocs(qy); snap.forEach(d=>{ if(!seen.has(d.id)){ seen.add(d.id); items.push({id:d.id, ...d.data()}); } }); }catch(e){}
+admin/app.js:112:          <span class="tag">status: ${d.status||'-'}</span>
+admin/app.js:131:        await updateDoc(doc(db,'listings',a.dataset.approve), {
+admin/app.js:132:          status:'active', state:'approved', moderation:'approved',
+admin/app.js:141:        await updateDoc(doc(db,'listings',r.dataset.reject), {
+admin/app.js:142:          status:'rejected', state:'rejected', moderation:'rejected',
+admin/app.js:163:      await addDoc(collection(db,'public'), {
+admin/app.js:175:      const snap = await getDocs(query(collection(db,'public'), orderBy('createdAt','desc'), limit(30)));
+admin/app.js:191:          try{ await deleteDoc(doc(db,'public',del.dataset.del)); del.closest('.item').remove(); }
+admin/app.js:212:      await addDoc(collection(db,'public'),{
+admin/app.js:222:      const snap = await getDocs(query(collection(db,'public'), where('type','==','notice'), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:237:          try{ await deleteDoc(doc(db,'public',del.dataset.del)); del.closest('.item').remove(); }
+admin/app.js:257:      await addDoc(collection(db,'announcements'),{
+admin/app.js:267:      const snap = await getDocs(query(collection(db,'announcements'), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:287:            await updateDoc(doc(db,'announcements',t.dataset.toggle), { active:true, updatedAt:serverTimestamp() });
+admin/app.js:293:          try{ await deleteDoc(doc(db,'announcements',del.dataset.del)); del.closest('.item').remove(); }
+admin/app.js:305:  const tbody = document.querySelector('#user-table tbody');
+admin/app.js:312:      const snap = await getDocs(query(collection(db,'users'), orderBy('createdAt','desc'), limit(200)));
+admin/app.js:348:    const snap = await getDocs(query(collectionGroup(db,'messages'), where('type','in',['complaint','report']), orderBy('createdAt','desc'), limit(50)));
+admin/app.js:356:        <div class="muted">${v.status||'—'}</div>
+profile.page.v4.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v4.js:4:import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.v4.js:25:const st   = getStorage(app);
+profile.page.v4.js:27:const $  = sel => document.querySelector(sel);
+profile.page.v4.js:43:    const snap = await getDocs(query(collection(db,"users"), where(field,"==",value), limit(1)));
+profile.page.v4.js:59:    document.querySelector('meta[name="profile-uid"]')?.content,
+profile.page.v4.js:60:    document.querySelector('meta[name="uid"]')?.content,
+profile.page.v4.js:66:    document.querySelector('meta[name="username"]')?.content,
+profile.page.v4.js:67:    document.querySelector('meta[name="profile-username"]')?.content,
+profile.page.v4.js:74:    document.querySelector("[data-profile-uid]")?.dataset?.profileUid,
+profile.page.v4.js:75:    document.querySelector("[data-user-id]")?.dataset?.userId,
+profile.page.v4.js:76:    document.querySelector("[data-uid]")?.dataset?.uid,
+profile.page.v4.js:77:    document.querySelector("#profile-uid")?.textContent?.trim(),
+profile.page.v4.js:166:    const __DEF = document.querySelector('meta[name="default-uid"]')?.content || null;
+profile.page.v4.js:189:      try{ return await getDownloadURL(ref(st, pathOnly)); }catch{}
+profile.page.v4.js:191:    try{ return await getDownloadURL(ref(st, u)); }catch{}
+profile.page.v4.js:216:  const snap = await getDocs(query(collection(db,"listings"), where("ownerId","==",uid), limit(120)));
+profile.page.v4.js:233:  const cards = Array.from(listEl.querySelectorAll(".listing-card"));
+profile.page.v4.js:239:      const img = el.querySelector("img");
+profile.page.v4.js:253:    const snap = await getDoc(doc(db,"users",uid));
+reorder-strong.js:7:    var hs = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]'));
+profile.page.v2.js:3:import { getFirestore, getDocs, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v2.js:4:import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.v2.js:25:const st   = getStorage(app);
+profile.page.v2.js:27:const $ = sel => document.querySelector(sel);
+profile.page.v2.js:65:      try { return await getDownloadURL(ref(st, pathOnly)); } catch {}
+profile.page.v2.js:69:    try { return await getDownloadURL(ref(st, u)); } catch {}
+profile.page.v2.js:94:  const qy = query(collection(db,"listings"), where("ownerId","==",uid), limit(120));
+profile.page.v2.js:95:  const snap = await getDocs(qy);
+profile.page.v2.js:116:  const cards = Array.from(listEl.querySelectorAll(".listing-card"));
+profile.page.v2.js:126:    const img = el.querySelector("img");
+profile.page.v2.js:144:  const el = document.querySelector("[data-profile-uid],[data-user-id],[data-uid],#profile-uid,meta[name='profile-uid']");
+listing-edit.js:3:import { getFirestore, getDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+listing-edit.js:4:import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+listing-edit.js:17:const st   = getStorage(app);
+listing-edit.js:19:const $ = s => document.querySelector(s);
+listing-edit.js:42:  const snap = await getDoc(doc(db,"listings",id));
+listing-edit.js:91:    const r = ref(st, path);
+listing-edit.js:93:      const up = uploadBytesResumable(r, f, { contentType: (f.type && f.type.startsWith("image")) ? f.type : "image/jpeg" });
+listing-edit.js:96:    urls.push(await getDownloadURL(r));
+listing-edit.js:116:      status: "pending",
+listing-edit.js:124:    await updateDoc(doc(db,"listings",id), patch);
+profile-fix.v4.js:3:import { getFirestore, getDoc, doc, getDocs, query, where, orderBy, limit, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile-fix.v4.js:4:import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile-fix.v4.js:25:const st   = getStorage(app);
+profile-fix.v4.js:29:const $all  = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+profile-fix.v4.js:42:    const el=document.querySelector(sel);
+profile-fix.v4.js:60:function parseIdFromHref(href){
+profile-fix.v4.js:95:    try{ const url=await getDownloadURL(ref(st,u)); if(url) return url; }catch{}
+profile-fix.v4.js:102:  const picture=card.querySelector("picture");
+profile-fix.v4.js:103:  if(picture){ picture.querySelectorAll("source").forEach(s=>s.srcset=url); }
+profile-fix.v4.js:104:  const img=card.querySelector("img");
+profile-fix.v4.js:110:  const bg=card.querySelector(".thumb,.cover,[data-bg],[class*='thumb'],[class*='cover']");
+profile-fix.v4.js:118:    const s=await getDoc(doc(db,"listings",id));
+profile-fix.v4.js:132:    const qy=query(collection(db,"listings"), where("ownerId","==",uid), orderBy("createdAt","desc"), limit(200));
+profile-fix.v4.js:133:    const snap=await getDocs(qy);
+profile-fix.v4.js:169:    const id=parseIdFromHref(a.getAttribute("href")); if(id) push(id,a);
+profile-fix.v4.js:203:    const t = norm( (c.el.querySelector(".title,h2,h3")?.textContent)||"" );
+profile-fix.v4.js:215:    const cur = c.el.querySelector("img")?.src || "";
+profile.page.v1758197075.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v1758197075.js:4:import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.v1758197075.js:19:const st   = getStorage(app);
+profile.page.v1758197075.js:21:const $  = s => document.querySelector(s);
+profile.page.v1758197075.js:22:const $$ = s => Array.from(document.querySelectorAll(s));
+profile.page.v1758197075.js:53:  const meta = document.querySelector('meta[name="profile-uid"]')?.content
+profile.page.v1758197075.js:54:            || document.querySelector('meta[name="default-uid"]')?.content
+profile.page.v1758197075.js:61:  const status = (d?.status || d?.state || "").toString().toLowerCase();
+profile.page.v1758197075.js:62:  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(status);
+profile.page.v1758197075.js:63:  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(status) || d?.moderation==="pending" || (d?.approved===false || d?.isApproved===false);
+profile.page.v1758197075.js:64:  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number" ? d.expiresAt : null);
+profile.page.v1758197075.js:65:  const expired = (expTs && expTs < now) || ["expired","passive","suresi-dolan"].includes(status);
+profile.page.v1758197075.js:103:      try { return await getDownloadURL(ref(st, pathOnly)); } catch {}
+profile.page.v1758197075.js:105:    try { return await getDownloadURL(ref(st, u)); } catch {}
+profile.page.v1758197075.js:117:    const q = query(collection(db,"listings"), where("ownerId","==",uid), limit(300));
+profile.page.v1758197075.js:118:    const snap = await getDocs(q);
+profile.page.v1758197075.js:148:      const img = el.querySelector("img");
+profile.page.v1758197075.js:163:  const s = await getDoc(doc(db,"users",uid));
+profile.page.v1758197075.js:204:  const task = uploadBytesResumable(ref(st, path), f, { contentType: f.type || "image/jpeg" });
+profile.page.v1758197075.js:206:    const url = await getDownloadURL(ref(st, path));
+profile.page.v1758197075.js:208:    await setDoc(doc(db,"users",user.uid), { photoURL:url, updatedAt:serverTimestamp() }, { merge:true });
+profile.page.v1758197075.js:224:    await setDoc(doc(db,"users",user.uid), data, { merge:true });
+.bak_admin/listing.js:3:import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+.bak_admin/listing.js:31:  const ref = doc(db, "listings", id);
+.bak_admin/listing.js:42:    const uref = doc(db, "users", d.ownerId);
+.bak_admin/listing.js:50:  const statusLine = [
+.bak_admin/listing.js:51:    tag(`status: ${d.status||'-'}`),
+.bak_admin/listing.js:65:        <div><b>Durum</b></div><div>${statusLine}</div>
+.bak_admin/listing.js:88:      await updateDoc(ref, {
+.bak_admin/listing.js:89:        status: "active",
+.bak_admin/listing.js:104:      await updateDoc(ref, {
+.bak_admin/listing.js:105:        status: "rejected",
+.bak_admin/listing.js:121:      await updateDoc(ref, {
+.bak_admin/listing.js:122:        status: "expired",
+.bak_admin/listing.js:125:        expiresAt: serverTimestamp()
+.bak_admin/listing.js:137:      await updateDoc(ref, { status: "deleted", updatedAt: serverTimestamp() });
+.bak_admin/listing.js:138:      note.innerHTML = '<span class="ok">🗑 Silindi (status=deleted).</span>';
+.bak_admin/listing-link.js:21:  const candidates = root.querySelectorAll("[data-doc-id],[data-id],[data-open-listing]");
+.live_pf.js:3:import { getFirestore, getDoc, doc, getDocs, query, where, orderBy, limit, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+.live_pf.js:4:import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+.live_pf.js:25:const st   = getStorage(app);
+.live_pf.js:31:const $all = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+.live_pf.js:35:function textOf(el, sels){ for(const s of sels){ const n=el.querySelector(s); if(n){ const t=n.textContent?.trim(); if(t) return t; } } return null; }
+.live_pf.js:40:function parseIdFromHref(href){
+.live_pf.js:75:      const r = ref(st, u);
+.live_pf.js:76:      const url = await getDownloadURL(r);
+.live_pf.js:86:  const picture = card.querySelector("picture");
+.live_pf.js:87:  if(picture){ picture.querySelectorAll("source").forEach(s=>s.srcset=url); }
+.live_pf.js:89:  const img = card.querySelector("img");
+.live_pf.js:100:  const bg = card.querySelector(".thumb, .cover, [data-bg], [class*='thumb'], [class*='cover']");
+nav-profile-link.js:23:  const anchors = Array.from(document.querySelectorAll(
+profile-actions.js:9:  document.querySelectorAll(".listing-card").forEach(card=>{
+profile-actions.js:10:    if(card.querySelector(".row-actions")) return; // zaten var
+profile-actions.js:50:        await deleteDoc(doc(db,"listings",id));
+reorder-shared-before-categories.js:5:    const heads = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]'));
+assets/js/bildirimler.js:9:import { getFirestore, collection, collectionGroup, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+assets/js/bildirimler.js:61:    const qMine = query(collection(db, "listings"), where("ownerId", "==", user.uid));
+assets/js/bildirimler.js:65:        const prev = lastStatus.get(id); const curr = d.status;
+assets/js/bildirimler.js:82:      const qOffers = query(collectionGroup(db, "offers"), where("sellerId", "==", user.uid));
+assets/js/bildirimler.js:114:      const qPend = query(collection(db, "listings"), where("status", "==", "pending"));
+assets/js/bildirimler.js:127:      console.warn("[notify:pending] query hata", e);
+assets/js/notify-bell.js:34:  const listEl = dd.querySelector('#tc-dd-list');
+assets/js/notify-bell.js:90:    dd = document.querySelector('.tc-dd');
+assets/js/notify-bell.js:140:    var a = document.querySelector('a.nav-bildir');
+assets/js/livechat.js:3:  doc, getDoc, setDoc, serverTimestamp,
+assets/js/livechat.js:4:  collection, addDoc, query, orderBy, onSnapshot, where, getDocs, deleteDoc, limit
+assets/js/livechat.js:29:  const tRef = doc(db,"chats",uid);
+assets/js/livechat.js:32:    await setDoc(tRef,{ ownerId:uid, createdAt:serverTimestamp(), lastMessageAt:serverTimestamp(), lastMessageBy:"system" });
+assets/js/livechat.js:37:  const mRef = await addDoc(collection(tRef,"messages"),{ sender, text, createdAt:serverTimestamp() });
+assets/js/livechat.js:38:  await setDoc(tRef,{ lastMessageAt:serverTimestamp(), lastMessageBy:sender },{ merge:true });
+assets/js/livechat.js:42:  const tRef = doc(db,"chats",uid);
+assets/js/livechat.js:43:  const mCol = collection(tRef,"messages");
+assets/js/livechat.js:45:    const snap = await getDocs(query(mCol, orderBy("createdAt"), limit(100)));
+assets/js/livechat.js:58:    query(collection(tRef,"messages"), where("sender","==","admin"), orderBy("createdAt")),
+profile.page.v3.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.v3.js:4:import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.v3.js:25:const st   = getStorage(app);
+profile.page.v3.js:27:const $  = sel => document.querySelector(sel);
+profile.page.v3.js:43:    const snap = await getDocs(query(collection(db,"users"), where(field,"==",value), limit(1)));
+profile.page.v3.js:59:    document.querySelector('meta[name="profile-uid"]')?.content,
+profile.page.v3.js:60:    document.querySelector('meta[name="uid"]')?.content,
+profile.page.v3.js:66:    document.querySelector('meta[name="username"]')?.content,
+profile.page.v3.js:67:    document.querySelector('meta[name="profile-username"]')?.content,
+profile.page.v3.js:74:    document.querySelector("[data-profile-uid]")?.dataset?.profileUid,
+profile.page.v3.js:75:    document.querySelector("[data-user-id]")?.dataset?.userId,
+profile.page.v3.js:76:    document.querySelector("[data-uid]")?.dataset?.uid,
+profile.page.v3.js:77:    document.querySelector("#profile-uid")?.textContent?.trim(),
+profile.page.v3.js:185:      try{ return await getDownloadURL(ref(st, pathOnly)); }catch{}
+profile.page.v3.js:187:    try{ return await getDownloadURL(ref(st, u)); }catch{}
+profile.page.v3.js:212:  const snap = await getDocs(query(collection(db,"listings"), where("ownerId","==",uid), limit(120)));
+profile.page.v3.js:229:  const cards = Array.from(listEl.querySelectorAll(".listing-card"));
+profile.page.v3.js:235:      const img = el.querySelector("img");
+profile.page.v3.js:249:    const snap = await getDoc(doc(db,"users",uid));
+js/logout.js:6:  document.querySelectorAll('a[data-logout], a.logout').forEach(a=>{
+js/logout.js:15:  document.querySelectorAll('a').forEach(a=>{
+js/firebase-config.js:5:import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+js/firebase-config.js:21:export const storage = getStorage(app);
+js/home-feed.js:4:  getFirestore, collection, query, where, onSnapshot,
+js/home-feed.js:5:  addDoc, serverTimestamp
+js/home-feed.js:43:var q = query(collection(db, "listings"), where("status","==","active"));
+js/home-feed.js:48:  var ms = x.expiresAt && (x.expiresAt.toMillis ? x.expiresAt.toMillis() : (x.expiresAt.seconds*1000));
+js/home-feed.js:88:    await addDoc(collection(db, 'listings/' + listingId + '/offers'), {
+js/auth.js:14:const status = el("status");
+js/auth.js:18:  status.textContent = msg || "";
+js/auth.js:19:  status.style.color = isError ? "#ffb4b4" : "#b8c1e3";
+js/redirect-after-create.js:3:import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+js/redirect-after-create.js:25:  // ownerId=ben ve status=pending olanları canlı dinle
+js/redirect-after-create.js:26:  const q = query(collection(db,"listings"),
+js/redirect-after-create.js:27:                  where("ownerId","==",u.uid),
+js/redirect-after-create.js:28:                  where("status","==","pending"));
+listing-new.js:6:  initializeFirestore, collection, addDoc, updateDoc, doc, serverTimestamp
+listing-new.js:9:  getStorage, ref as sref, uploadBytesResumable, getDownloadURL
+listing-new.js:24:const st   = getStorage(app);
+listing-new.js:40:  [...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
+listing-new.js:41:    const img = slot.querySelector('img');
+listing-new.js:43:    slot.querySelector('span')?.classList.remove('hidden');
+listing-new.js:49:      slot.querySelector('span')?.classList.add('hidden');
+listing-new.js:51:    slot.querySelector('.bar').style.width = '0%';
+listing-new.js:84:    [...preview.querySelectorAll('.bar')].forEach(b=>b.style.width="0%");
+listing-new.js:85:    [...preview.querySelectorAll('img')].forEach(im=>im.remove());
+listing-new.js:105:    const docRef = await addDoc(collection(db,"listings"),{
+listing-new.js:118:      status: "pending",
+listing-new.js:130:      const ref = sref(st, path);
+listing-new.js:131:      const task = uploadBytesResumable(ref, f);
+listing-new.js:133:      const bar=preview.querySelectorAll('.bar')[i];
+listing-new.js:138:      urls.push(await getDownloadURL(task.snapshot.ref));
+listing-new.js:142:    await updateDoc(doc(db,"listings",docRef.id),{
+profile.page.js:3:import { getFirestore, getDocs, getDoc, doc, query, where, collection, limit, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.js:4:import { getStorage, ref, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.js:19:const st   = getStorage(app);
+profile.page.js:21:const $  = s => document.querySelector(s);
+profile.page.js:22:const $$ = s => Array.from(document.querySelectorAll(s));
+profile.page.js:53:  const meta = document.querySelector('meta[name="profile-uid"]')?.content
+profile.page.js:54:            || document.querySelector('meta[name="default-uid"]')?.content
+profile.page.js:61:  const status = (d?.status || d?.state || "").toString().toLowerCase();
+profile.page.js:62:  const approved = d?.approved===true || d?.isApproved===true || ["approved","active","yayında","yayinda","published"].includes(status);
+profile.page.js:63:  const pending  = ["pending","waiting","bekleyen","onay-bekliyor"].includes(status) || d?.moderation==="pending" || (d?.approved===false || d?.isApproved===false);
+profile.page.js:64:  const expTs = d?.expiresAt?.toMillis ? d.expiresAt.toMillis() : (typeof d?.expiresAt==="number" ? d.expiresAt : null);
+profile.page.js:65:  const expired = (expTs && expTs < now) || ["expired","passive","suresi-dolan"].includes(status);
+profile.page.js:103:      try { return await getDownloadURL(ref(st, pathOnly)); } catch {}
+profile.page.js:105:    try { return await getDownloadURL(ref(st, u)); } catch {}
+profile.page.js:117:    const q = query(collection(db,"listings"), where("ownerId","==",uid), limit(300));
+profile.page.js:118:    const snap = await getDocs(q);
+profile.page.js:148:      const img = el.querySelector("img");
+profile.page.js:163:  const s = await getDoc(doc(db,"users",uid));
+profile.page.js:204:  const task = uploadBytesResumable(ref(st, path), f, { contentType: f.type || "image/jpeg" });
+profile.page.js:206:    const url = await getDownloadURL(ref(st, path));
+profile.page.js:208:    await setDoc(doc(db,"users",user.uid), { photoURL:url, updatedAt:serverTimestamp() }, { merge:true });
+profile.page.js:224:    await setDoc(doc(db,"users",user.uid), data, { merge:true });
+profile.page.js:268:import { setDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+profile.page.js:269:import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+profile.page.js:293:    const st   = getStorage();
+profile.page.js:299:      const uref = doc((await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')).getFirestore(), "users", user.uid);
+profile.page.js:325:          const r   = ref(st, key);
+profile.page.js:326:          const up  = uploadBytesResumable(r, file, { contentType:file.type||"image/jpeg" });
+profile.page.js:328:          const url = await getDownloadURL(r);
+profile.page.js:331:          await setDoc(uref, { photoURL:url, updatedAt:serverTimestamp() }, { merge:true });
+profile.page.js:351:          await setDoc(uref, patch, { merge:true });

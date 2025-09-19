@@ -1,0 +1,178 @@
+/* css/categories.css
+   Category / subcategory UI for listing-new form
+   - main `.category-grid` shows category cards (icon + label)
+   - `.category-item.selected` marks chosen category
+   - `.subcat-panel` shows subcategories for the selected category
+   - `.subcat-chip` are selectable subcategory chips
+   Add data attributes in HTML:
+     <button class="category-item" data-cat="ev">...</button>
+     <div class="subcat-panel" data-for="ev"> ... </div>
+*/
+
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#3b82f6;
+  --accent-600:#2563eb;
+  --border: #e6e9ee;
+  --chip-bg: #f1f5f9;
+  --chip-border: #e6eefc;
+  --radius: 10px;
+  --shadow: 0 6px 18px rgba(15,23,42,0.06);
+  --transition: 180ms cubic-bezier(.2,.9,.3,1);
+}
+
+/* Container */
+.category-wrap {
+  margin: 12px 0 22px;
+}
+
+/* grid of categories */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* single category card / button */
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+  text-align: left;
+  min-height: 64px;
+}
+.category-item .cat-icon {
+  flex: 0 0 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+  color: #374151;
+}
+.category-item .cat-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+  line-height: 1;
+}
+.category-item .cat-sub {
+  display:block;
+  font-size:12px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight:400;
+}
+
+/* hover / focus */
+.category-item:hover,
+.category-item:focus {
+  transform: translateY(-3px);
+  border-color: rgba(59,130,246,0.14);
+  box-shadow: 0 12px 30px rgba(59,130,246,0.06);
+  outline: none;
+}
+
+/* selected state */
+.category-item.selected {
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(59,130,246,0.12);
+  background: linear-gradient(180deg, rgba(59,130,246,0.04), var(--card));
+}
+.category-item.selected .cat-icon {
+  background: var(--accent-600);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Subcategory panel */
+.subcat-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  transition: opacity var(--transition), transform var(--transition);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Active panel */
+.subcat-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  height: auto;
+}
+
+/* Subcategory chips */
+.subcategory-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.subcat-chip {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  font-size: 13px;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), border-color var(--transition);
+  user-select: none;
+}
+.subcat-chip:hover { transform: translateY(-2px); }
+.subcat-chip.selected {
+  background: linear-gradient(90deg,var(--accent),var(--accent-600));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(59,130,246,0.12);
+}
+
+/* helper row for label + hint */
+.subcat-panel .heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.subcat-panel .heading .title {
+  font-weight:700;
+  font-size:14px;
+  color:#111827;
+}
+.subcat-panel .hint {
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* responsive: tighten on small screens */
+@media (max-width:640px){
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .category-item { padding:10px; min-height:56px; }
+  .category-item .cat-icon { width:36px; height:36px; font-size:18px; }
+}
+
+/* small utility */
+.hidden { display:none !important; }

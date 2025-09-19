@@ -1,0 +1,5 @@
+== firebase yapı dosyaları ==
+firebase.json
+.firebaserc
+firestore.rules
+storage.rules
