@@ -93,6 +93,19 @@
         <div class="ft full">
           <button type="button" id="btnCancel" class="btn btn-ghost">Vazgeç</button>
           <button type="submit" id="btnSend" class="btn btn-pri">İlanı Gönder</button>
+<script id="send-confirm-redirect">
+  document.addEventListener("DOMContentLoaded",()=>{
+    const btn=document.getElementById("btnSend");
+    if(btn){
+      btn.addEventListener("click",(e)=>{
+        e.preventDefault();
+        alert("İlanınız onay sürecindedir.");
+        document.getElementById("profilePanel")?.remove();
+        window.location.href="home.html";
+      });
+    }
+  });
+</script>
         </div>
       </form>
     </div>
