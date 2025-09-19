@@ -41,7 +41,7 @@ files = files.filter(f => (f.type || '').startsWith('image/'));
 // en az 1 foto zorunlu
 if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
 // en fazla 5 foto
-if (files.length > 5) { alert('En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak.'); files = files.slice(0,5); }
+if (files.length > 5) { alert("En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak."); files = files.slice(0,5); }
 // boyut limiti: 10MB
 for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
 [...preview.querySelectorAll('.slot')].forEach((slot,i)=>{
@@ -134,7 +134,7 @@ files = files.filter(f => (f.type || '').startsWith('image/'));
 // en az 1 foto zorunlu
 if (files.length === 0) { alert('En az 1 fotoğraf seçmelisin (sadece görüntü dosyaları).'); return; }
 // en fazla 5 foto
-if (files.length > 5) { alert('En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak.'); files = files.slice(0,5); }
+if (files.length > 5) { alert("En fazla 5 fotoğraf yükleyebilirsin. İlk 5'i alınacak."); files = files.slice(0,5); }
 // boyut limiti: 10MB
 for (const ff of files) { if (ff.size > 10*1024*1024) { alert('Foto 10MB üstü: ' + ff.name); return; } }
 const urls=[];
