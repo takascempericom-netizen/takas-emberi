@@ -254,12 +254,12 @@ async function loadUserMeta(uid, metaHint=null){
     const data = snap.exists()? snap.data() : (metaHint||{});
     const display = d.name || d.displayName || d.username || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.displayName) ? auth.currentUser.displayName : "") || d.email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : "") || "Profil";
     const photo   = data.photoURL || data.avatar || auth.currentUser?.photoURL || "https://i.imgur.com/3SgkGmQ.png";
-    avatar.src = photo;
+    if (avatar) avatar.src = photo;
     nameEl.textContent = display;
     uidEl.textContent  = uid;
   }catch(e){
     log("loadUserMeta hata",e?.message||e);
-    avatar.src = "https://i.imgur.com/3SgkGmQ.png";
+    if (avatar) avatar.src = "https://i.imgur.com/3SgkGmQ.png";
     nameEl.textContent = "Profil";
     uidEl.textContent  = uid;
   }
@@ -274,7 +274,7 @@ async function start(){
     note.style.display = "block";
     note.textContent = "Bir profil göstermek için URL’ye ?uid=<kullanıcıUid> veya ?u=<kullanıcıAdı> ekleyin.";
     stat.textContent = "—";
-    avatar.src = "https://i.imgur.com/3SgkGmQ.png";
+    if (avatar) avatar.src = "https://i.imgur.com/3SgkGmQ.png";
     nameEl.textContent = "Profil";
     uidEl.textContent  = "— oturum yok —";
     log("no uid; not found in params/meta/dataset/localStorage/cookie/path");
