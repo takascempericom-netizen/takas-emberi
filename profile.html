@@ -1005,6 +1005,84 @@ meta.appendChild(uidEl);
 })();
 </script>
 
+
+<script id="listing-actions-wire">
+(function(){
+  // 1) Wire fonksiyonu yoksa tanımla
+  if(!window.wireListingActions){
+    window.wireListingActions = function(){
+      var qsa = function(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+      var edits = qsa(".listing-card .actions .edit").filter(function(b){ return !b._wired; });
+      var dels  = qsa(".listing-card .actions .delete").filter(function(b){ return !b._wired; });
+
+      edits.forEach(function(btn){
+        btn.addEventListener("click", function(e){
+          e.preventDefault();
+          var id = btn.getAttribute("data-id");
+          if(!id) return alert("id yok");
+          location.href = "listing-edit.html?id=" + encodeURIComponent(id);
+        });
+        btn._wired = true;
+      });
+
+      dels.forEach(function(btn){
+        btn.addEventListener("click", function(e){
+          e.preventDefault();
+          var id = btn.getAttribute("data-id");
+          if(!id) return alert("id yok");
+          if(!confirm("Bu ilanı kalıcı olarak silmek istediğine emin misin?")) return;
+
+          // Firebase modüler importlarını dinamik yükle
+          Promise.all([
+            import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+            import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+            import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")
+          ]).then(function(mods){
+            var appm=mods[0], fsm=mods[1], authm=mods[2];
+            var getApps=appm.getApps, getApp=appm.getApp;
+            var doc=fsm.doc, getFirestore=fsm.getFirestore, deleteDoc=fsm.deleteDoc;
+            var getAuth=authm.getAuth;
+            var app = getApps().length ? getApp() : null;
+            if(!app) return alert("Firebase app yok");
+            var db  = getFirestore(app);
+            var auth= getAuth(app);
+            if(!(auth && auth.currentUser)) return alert("Giriş gerekli");
+            deleteDoc(doc(db,"listings",id)).then(function(){
+              var card = btn.closest(".listing-card");
+              if(card) card.remove();
+              alert("İlan silindi.");
+            }).catch(function(err){
+              alert("Silinemedi: " + (err && (err.message||err) || "hata"));
+            });
+          }).catch(function(err){
+            alert("SDK yüklenemedi: " + (err && (err.message||err) || "hata"));
+          });
+        });
+        btn._wired = true;
+      });
+
+      console.log("wired edit:", edits.length, "wired delete:", dels.length);
+    };
+  }
+
+  // 2) renderListings biter bitmez wire’la (wrap)
+  try{
+    if(window.renderListings && !window.renderListings._wrappedForWire){
+      var _orig = window.renderListings;
+      window.renderListings = async function(){
+        var r = await _orig.apply(this, arguments);
+        try{ window.wireListingActions(); }catch(e){}
+        return r;
+      };
+      window.renderListings._wrappedForWire = true;
+    }
+  }catch(e){}
+
+  // 3) Sayfa zaten render ettiyse de hemen bir kere dene
+  try{ window.wireListingActions(); }catch(e){}
+})();
+</script>
+
 </body>
 <script type="module" id="username-mini-fix3">import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";function trInitial(s){ if(!s||typeof s!=="string") return "?"; const w=(s.trim().split(/\s+/)[0]||s.trim()); return w.charAt(0).toLocaleUpperCase("tr-TR"); }async function run(){  try{    const app = getApp();    const auth = getAuth(app);    const db   = getFirestore(app);    let uid = (document.getElementById("profileUid")?.textContent||"").trim();    if(!uid){ uid = auth.currentUser?.uid || ""; }    if(!uid) return; /* uid yoksa dokunma */    const snap = await getDoc(doc(db, "users", uid));    if(!snap.exists()) return;    const d = snap.data();    const uEl   = document.getElementById("profileUsername");    const aInit = document.getElementById("avatarInitial") || document.querySelector(".avatar-initial");    const mailV = document.getElementById("profileEmail")  || document.getElementById("user-email");    const uname = (d.username||"").trim();    const name  = (d.name||"").trim();    const email = (d.email||"").trim();    if(uEl && !uEl.textContent){ uEl.textContent = uname || name || ""; }    if(aInit && !aInit.textContent){ aInit.textContent = trInitial(uname || name || email || "?"); }    if(mailV){ mailV.textContent = email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : ""); }  }catch(e){ /* sessiz geç */ }}document.addEventListener("DOMContentLoaded", ()=>{ run(); setTimeout(run, 800); setTimeout(run, 2000); });</script>
 <script id="username-mini-fix2">(function(){  function getUID(){    var t = (document.getElementById("profileUid") && document.getElementById("profileUid").textContent || "").trim();    if(t) return t;    try{ var cu=(window.auth&&window.auth.currentUser)?window.auth.currentUser:(window.firebase&&window.firebase.auth?window.firebase.auth().currentUser:null); if(cu&&cu.uid) return cu.uid; }catch(e){}    try{ if(typeof uid!=="undefined" && uid) return uid; }catch(e){}    return "";  }  function trInitial(s){ if(!s||typeof s!=="string") return "?"; var w=(s.trim().split(/\s+/)[0]||s.trim()); return w.charAt(0).toLocaleUpperCase("tr-TR"); }  async function readUser(uid){    try{      var db = (window.db?window.db:null);      if(!db && window.getFirestore) db = window.getFirestore();      if(!db && window.firebase && window.firebase.firestore) db = window.firebase.firestore();      if(!db) return null;      if(window.getDoc && window.doc){        var s = await window.getDoc(window.doc(db, "users", uid));        return (s && s.exists && s.exists() && s.data) ? s.data() : (s && s.data ? s.data() : null);      }      if(db.collection){        var snap = await db.collection("users").doc(uid).get();        return (snap && snap.exists && snap.data && snap.data()) ? snap.data() : null;      }      return null;    }catch(e){ return null; }  }  async function apply(){    var uEl = document.getElementById("profileUsername");    var aInit = document.getElementById("avatarInitial") || document.querySelector(".avatar-initial");    var mailView = document.getElementById("profileEmail") || document.getElementById("user-email");    var uid = getUID();    if(!uid) return; /* UID yoksa dokunma */    var d = await readUser(uid); if(!d) return;    var uname = (d.username||"").trim();    var name  = (d.name||"").trim();    var email = (d.email||"").trim();    if(uEl && !uEl.textContent){ uEl.textContent = uname || name || ""; }    if(aInit && !aInit.textContent){ aInit.textContent = trInitial(uname || name || email || "?"); }    if(mailView){ mailView.textContent = email || ((typeof auth!=="undefined" && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : ""); }  }  document.addEventListener("DOMContentLoaded", function(){    apply();    var mo = new MutationObserver(function(){ apply(); });    mo.observe(document.documentElement, {childList:true, subtree:true, characterData:true});    setTimeout(function(){ try{mo.disconnect();}catch(e){} }, 6000);  });})();</script>
