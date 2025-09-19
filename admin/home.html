@@ -20,6 +20,13 @@
     button{padding:6px 10px;border:0;border-radius:6px;cursor:pointer;font-size:13px}
     .ok{background:#10b981;color:#fff}
     .no{background:#ef4444;color:#fff}
+    .detail{background:#3b82f6;color:#fff}
+    #modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
+    #modal .inner{background:#fff;padding:20px;border-radius:12px;max-width:600px;width:100%;max-height:80vh;overflow:auto}
+    .notifBox{margin-top:30px;padding:16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px}
+    .usersBox{margin-top:30px}
+    .usersBox ul{list-style:none;padding:0}
+    .usersBox li{padding:8px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
   </style>
 </head>
 <body>
@@ -42,44 +49,66 @@
       <thead><tr><th>Başlık</th><th>Sahip</th><th>Durum</th><th>İşlem</th></tr></thead>
       <tbody></tbody>
     </table>
+
+    <div class="notifBox">
+      <h2>Tüm Kullanıcılara Bildirim Gönder</h2>
+      <form id="notifForm">
+        <input type="text" id="notifMsg" placeholder="Mesajınızı yazın" style="width:80%;padding:8px"/>
+        <button type="submit">Gönder</button>
+      </form>
+    </div>
+
+    <div class="usersBox">
+      <h2>Kullanıcı Yönetimi</h2>
+      <ul id="userList"></ul>
+    </div>
   </div>
 
-  <!-- Firebase modülleri -->
+  <!-- Modal ilan detay -->
+  <div id="modal"><div class="inner" id="modalInner"></div></div>
+
   <script type="module">
     import { app } from "../js/firebase-config.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { 
-      getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp 
+      getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, addDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const auth = getAuth(app);
     const db   = getFirestore(app);
 
-    const logoutBtn = document.getElementById("logout");
-    logoutBtn.onclick = () => signOut(auth);
+    document.getElementById("logout").onclick=()=>signOut(auth);
 
-    // Çıkış/giriş kontrolü
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user)=>{
       if(!user){ location.href="/admin/login.html"; return; }
-
-      // Rol kontrolü
       const uref = doc(db,"users",user.uid);
       const snap = await getDoc(uref);
       const role = snap.exists()? (snap.data().role||"user"):"user";
       if(role!=="admin"){ alert("Admin yetkisi yok"); await signOut(auth); return; }
 
-      // İstatistikleri dinle
-      const publishedQ = query(collection(db,"listings"), where("status","==","published"));
-      onSnapshot(publishedQ,(s)=>{ document.getElementById("countPublished").innerText=s.size; });
+      // İlan sayaçları
+      onSnapshot(query(collection(db,"listings"),where("status","==","published")),(s)=>{document.getElementById("countPublished").innerText=s.size;});
+      onSnapshot(query(collection(db,"listings"),where("status","==","pending")),(s)=>{document.getElementById("countPending").innerText=s.size; renderPending(s);});
+      onSnapshot(query(collection(db,"listings"),where("status","==","expired")),(s)=>{document.getElementById("countExpired").innerText=s.size;});
 
-      const pendingQ = query(collection(db,"listings"), where("status","==","pending"));
-      onSnapshot(pendingQ,(s)=>{ document.getElementById("countPending").innerText=s.size; renderPending(s); });
-
-      const expiredQ = query(collection(db,"listings"), where("status","==","expired"));
-      onSnapshot(expiredQ,(s)=>{ document.getElementById("countExpired").innerText=s.size; });
+      // Kullanıcı listesi
+      onSnapshot(collection(db,"users"),(s)=>{
+        const ul=document.getElementById("userList"); ul.innerHTML="";
+        s.forEach(docSnap=>{
+          const u=docSnap.data();
+          const li=document.createElement("li");
+          li.innerHTML=\`
+            <span>\${u.email||docSnap.id} — Rol: \${u.role||"user"} — Durum: \${u.status||"active"}</span>
+            <span>
+              <button onclick="viewUser('\${docSnap.id}')">İncele</button>
+              <button class="no" onclick="banUser('\${docSnap.id}')">Engelle</button>
+            </span>\`;
+          ul.appendChild(li);
+        });
+      });
     });
 
-    // Pending tablo render
+    // Pending ilan tablosu
     function renderPending(snapshot){
       const tbody=document.querySelector("#pendingTable tbody");
       tbody.innerHTML="";
@@ -91,6 +120,7 @@
           <td>\${d.ownerId}</td>
           <td>\${d.status}</td>
           <td>
+            <button class="detail" onclick="viewListing('\${docSnap.id}')">Detay</button>
             <button class="ok" onclick="approveListing('\${docSnap.id}')">Onayla</button>
             <button class="no" onclick="rejectListing('\${docSnap.id}')">Reddet</button>
           </td>\`;
@@ -98,18 +128,50 @@
       });
     }
 
-    // Global fonksiyonlar
-    window.approveListing = async (id)=>{
-      await updateDoc(doc(db,"listings",id),{
-        status:"published",
-        publishedAt:serverTimestamp()
-      });
+    // Modal ilan detay
+    window.viewListing = async (id)=>{
+      const lref=doc(db,"listings",id); const snap=await getDoc(lref);
+      if(!snap.exists()) return;
+      const d=snap.data();
+      const inner=document.getElementById("modalInner");
+      inner.innerHTML=\`
+        <h2>\${d.title}</h2>
+        <p>\${d.description||""}</p>
+        <div>\${(d.images||[]).map(u=>'<img src="'+u+'" style="max-width:100%;margin:4px 0">').join("")}</div>
+        <p>Sahip: \${d.ownerId}</p>
+        <p>Durum: \${d.status}</p>
+        <button onclick="closeModal()">Kapat</button>\`;
+      document.getElementById("modal").style.display="flex";
     };
-    window.rejectListing = async (id)=>{
-      await updateDoc(doc(db,"listings",id),{
-        status:"rejected",
-        rejectedAt:serverTimestamp()
+    window.closeModal=()=>{document.getElementById("modal").style.display="none";};
+
+    window.approveListing=async(id)=>{await updateDoc(doc(db,"listings",id),{status:"published",publishedAt:serverTimestamp()});};
+    window.rejectListing=async(id)=>{await updateDoc(doc(db,"listings",id),{status:"rejected",rejectedAt:serverTimestamp()});};
+
+    // Bildirim gönder
+    document.getElementById("notifForm").addEventListener("submit",async(e)=>{
+      e.preventDefault();
+      const msg=document.getElementById("notifMsg").value.trim();
+      if(!msg) return;
+      await addDoc(collection(db,"notifications"),{
+        message:msg,
+        createdAt:serverTimestamp()
       });
+      alert("Bildirim gönderildi.");
+      document.getElementById("notifMsg").value="";
+    });
+
+    // Kullanıcı işlemleri
+    window.viewUser=async(uid)=>{
+      const snap=await getDoc(doc(db,"users",uid));
+      if(!snap.exists()) return alert("Bulunamadı");
+      const u=snap.data();
+      alert("Kullanıcı: "+(u.email||uid)+"\\nRol: "+(u.role||"user")+"\\nDurum: "+(u.status||"active"));
+    };
+    window.banUser=async(uid)=>{
+      if(!confirm("Bu kullanıcıyı engellemek istiyor musunuz?")) return;
+      await updateDoc(doc(db,"users",uid),{status:"banned"});
+      alert("Kullanıcı engellendi.");
     };
   </script>
 </body>
