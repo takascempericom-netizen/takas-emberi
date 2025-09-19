@@ -526,7 +526,7 @@ async function renderListings(uid, tab="pub"){
       const url=await resolveImageURL(it?._raw); const img=el.querySelector("img");
       if(url){ img.src=url; img.srcset=url; img.referrerPolicy="no-referrer"; ok++; } else { img.src="https://i.imgur.com/3SgkGmQ.png"; fail++; }
     }
-    note.style.display="none"; stat.textContent=`${show.length} ilan • ${ok} görsel yüklendi${fail?`, ${fail} eksik görsel`:``}`;
+    wireListingActions(); note.style.display="none"; stat.textContent=`${show.length} ilan • ${ok} görsel yüklendi${fail?`, ${fail} eksik görsel`:``}`;
   }catch(e){ console.error(e); note.style.display="block"; note.textContent="Hata: "+(e?.message||e); }
 }
 async function loadUser(uid){
