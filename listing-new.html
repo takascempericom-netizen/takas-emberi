@@ -107,6 +107,35 @@
   });
 </script>
         </div>
+  <script id="badwords-filter">
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btnSend");
+    if (!btn) return;
+    const badWords = [
+      // Küfür / hakaret
+      "yavşak","orospu","sik","amk","piç","göt","yarak","orospu çocuğu","oç","pezevenk","ibne","ibne","salak","aptal","gerizekalı","mal","dangalak","kahpe",
+      // Irkçılık / nefret
+      "gerici","yobaz","zenci","çingene","kafir","gavur",
+      // Terör / şiddet
+      "daeş","işid","isil","el kaide","pkk","ypg","dhkp-c","fetö","terör","bombalı","silah","tabanca","bomba",
+      // Pedofili / istismar
+      "çocuk istismarı","pedofil","çocuk pornosu","çocuk tacizi","underage",
+      // Uyuşturucu
+      "eroin","kokain","esrar","metamfetamin","uyuşturucu"
+    ];
+    btn.addEventListener("click", (e) => {
+      const title = document.getElementById("title")?.value.toLowerCase() || "";
+      const desc  = document.getElementById("desc")?.value.toLowerCase() || "";
+      for (const w of badWords) {
+        if (title.includes(w) || desc.includes(w)) {
+          e.preventDefault();
+          alert(`\"${w}\" kelimesi topluluk kurallarına uygun değildir. Lütfen düzeltip tekrar deneyin.`);
+          return;
+        }
+      }
+    });
+  });
+  </script>
       </form>
     </div>
   </div>
