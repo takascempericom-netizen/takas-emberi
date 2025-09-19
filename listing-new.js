@@ -1,6 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-console.debug('[TC] Firebase:', getApp().options?.projectId, (getApp().options?.apiKey||'').slice(0,6)+'…');
   getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
