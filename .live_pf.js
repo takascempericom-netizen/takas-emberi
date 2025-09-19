@@ -7,13 +7,13 @@ const cfg = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  storageBucket: "ureten-eller-v2.appspot.com",
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
 
 const app = (()=>{ try{ const a=getApp(); const o=a.options||{};
-  if(o.projectId!=="ureten-eller-v2" || o.storageBucket!=="ureten-eller-v2.firebasestorage.app"){
+  if(o.projectId!=="ureten-eller-v2" || o.storageBucket!=="ureten-eller-v2.appspot.com"){
     return initializeApp(cfg,"profileFix");
   }
   return a;

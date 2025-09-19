@@ -6,7 +6,7 @@ if(!s.includes(want)){
   s=s.replace(
     /const app = getApps\(\)\.length \? getApp\(\) : initializeApp\(cfg\);/,
 `const app = (()=>{ try{ const a=getApp(); const o=a.options||{};
-  if(o.projectId!=="ureten-eller-v2" || o.storageBucket!=="ureten-eller-v2.firebasestorage.app"){
+  if(o.projectId!=="ureten-eller-v2" || o.storageBucket!=="ureten-eller-v2.appspot.com"){
     return initializeApp(cfg,"profileFix");
   }
   return a;
