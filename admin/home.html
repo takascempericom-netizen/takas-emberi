@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Panel • Takas Çemberi</title>
+  <style>
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f9fafb;color:#111827}
+    header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#0ea5e9;color:#fff}
+    header h1{font-size:18px;margin:0}
+    nav a{color:#fff;margin-left:14px;text-decoration:none;font-size:14px}
+    .wrap{padding:20px;max-width:1200px;margin:auto}
+    .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .card{flex:1 1 200px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+    .card h2{margin:0;font-size:15px;color:#374151}
+    .card p{margin:8px 0 0;font-size:22px;font-weight:700}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    th,td{padding:8px 10px;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:left}
+    th{background:#f3f4f6;color:#374151}
+    button{padding:6px 10px;border:0;border-radius:6px;cursor:pointer;font-size:13px}
+    .ok{background:#10b981;color:#fff}
+    .no{background:#ef4444;color:#fff}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Panel</h1>
+    <nav>
+      <a href="#" id="logout">Çıkış</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="card"><h2>Yayında Olan</h2><p id="countPublished">0</p></div>
+      <div class="card"><h2>Onay Bekleyen</h2><p id="countPending">0</p></div>
+      <div class="card"><h2>Süresi Dolan</h2><p id="countExpired">0</p></div>
+    </div>
+
+    <h2>Onay Bekleyen İlanlar</h2>
+    <table id="pendingTable">
+      <thead><tr><th>Başlık</th><th>Sahip</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase modülleri -->
+  <script type="module">
+    import { app } from "../js/firebase-config.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { 
+      getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    const logoutBtn = document.getElementById("logout");
+    logoutBtn.onclick = () => signOut(auth);
+
+    // Çıkış/giriş kontrolü
+    onAuthStateChanged(auth, async (user) => {
+      if(!user){ location.href="/admin/login.html"; return; }
+
+      // Rol kontrolü
+      const uref = doc(db,"users",user.uid);
+      const snap = await getDoc(uref);
+      const role = snap.exists()? (snap.data().role||"user"):"user";
+      if(role!=="admin"){ alert("Admin yetkisi yok"); await signOut(auth); return; }
+
+      // İstatistikleri dinle
+      const publishedQ = query(collection(db,"listings"), where("status","==","published"));
+      onSnapshot(publishedQ,(s)=>{ document.getElementById("countPublished").innerText=s.size; });
+
+      const pendingQ = query(collection(db,"listings"), where("status","==","pending"));
+      onSnapshot(pendingQ,(s)=>{ document.getElementById("countPending").innerText=s.size; renderPending(s); });
+
+      const expiredQ = query(collection(db,"listings"), where("status","==","expired"));
+      onSnapshot(expiredQ,(s)=>{ document.getElementById("countExpired").innerText=s.size; });
+    });
+
+    // Pending tablo render
+    function renderPending(snapshot){
+      const tbody=document.querySelector("#pendingTable tbody");
+      tbody.innerHTML="";
+      snapshot.forEach(docSnap=>{
+        const d=docSnap.data();
+        const tr=document.createElement("tr");
+        tr.innerHTML=\`
+          <td>\${d.title||"-"}</td>
+          <td>\${d.ownerId}</td>
+          <td>\${d.status}</td>
+          <td>
+            <button class="ok" onclick="approveListing('\${docSnap.id}')">Onayla</button>
+            <button class="no" onclick="rejectListing('\${docSnap.id}')">Reddet</button>
+          </td>\`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Global fonksiyonlar
+    window.approveListing = async (id)=>{
+      await updateDoc(doc(db,"listings",id),{
+        status:"published",
+        publishedAt:serverTimestamp()
+      });
+    };
+    window.rejectListing = async (id)=>{
+      await updateDoc(doc(db,"listings",id),{
+        status:"rejected",
+        rejectedAt:serverTimestamp()
+      });
+    };
+  </script>
+</body>
+</html>
