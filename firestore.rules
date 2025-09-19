@@ -33,5 +33,29 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
       );
     }
+
+    // Admin’e giden mesajlar (kullanıcı gönderir, admin okur)
+    match /adminMessages/{mid} {
+      allow create: if request.auth != null; // herkes mesaj atabilir
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Şikayetler (kullanıcı oluşturur, admin okur/işler)
+    match /complaints/{cid} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Tüm kullanıcılara bildirim (admin yazar, herkes okur)
+    match /notifications/{nid} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
+}
+
+function isAdmin() {
+  return request.auth != null
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
 }
