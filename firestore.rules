@@ -1,62 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() { return request.auth != null; }
-    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
-    function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.admin == true ||
-        (request.auth.token.role in ['admin','moderator','support']) ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
-      );
+
+    // Kullanıcı profilleri
+    match /users/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
     }
-    function devWindow() { return request.time < timestamp.date(2025, 9, 20); }
 
     // İlanlar
-    match /listings/{id} {
+    match /listings/{lid} {
       allow read: if true;
 
-      // Oluşturma: sadece kendi uid ve status=pending
-      allow create: if isSignedIn()
+      // Oluşturma: sadece giriş yapan kullanıcı ve sadece pending
+      allow create: if request.auth != null
                     && request.resource.data.ownerId == request.auth.uid
-                    && request.resource.data.status == 'pending';
+                    && request.resource.data.status == "pending";
 
-      // Güncelleme:
-      // - Admin: her şeyi
-      // - Kullanıcı (sahibi): ownerId değişmeden ve status YA aynı kalır YA DA 'pending' olabilir
-      allow update: if isAdmin() || (
-        isOwner(resource.data.ownerId) &&
-        request.resource.data.ownerId == resource.data.ownerId &&
-        (request.resource.data.status == resource.data.status || request.resource.data.status == 'pending')
+      // Güncelleme
+      allow update: if request.auth != null && (
+        // İlan sahibi: status değiştiremez
+        (request.auth.uid == resource.data.ownerId
+         && request.resource.data.status == resource.data.status)
+        ||
+        // Admin: users/{uid}.role == "admin"
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin")
       );
 
-      // Silme: Admin ya da ilan sahibi
-      allow delete: if isAdmin() || isOwner(resource.data.ownerId);
+      // Silme: ilan sahibi veya admin
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.ownerId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
     }
-
-    // Public notifications
-    match /public/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
-
-    // Announcements (kayan yazı)
-    match /announcements/{doc} { allow read: if true; allow create,update,delete: if isAdmin() || devWindow(); }
-
-    // Kullanıcı dokümanları
-    match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin() || devWindow());
-      allow create: if isSignedIn() && request.auth.uid == uid;
-      allow update, delete: if request.auth.uid == uid || isAdmin() || devWindow();
-    }
-
-    // Ban kayıtları
-    match /bans/{uid} { allow read: if isAdmin() || devWindow(); allow create,update,delete: if isAdmin() || devWindow(); }
-
-    // Support
-    match /support/{uid}/messages/{msgId} {
-      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == uid) || devWindow();
-    }
-
-    // Diğer her şey (geçici dev pencere)
-    match /{document=**} { allow read: if devWindow(); }
   }
 }
