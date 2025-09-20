@@ -7,374 +7,120 @@
 <style>
   :root{
     --bg:#0b0b0b; --card:#121212; --fg:#f8fafc; --muted:#9ca3af; --line:#1f2937;
-    --accent1:#8b5cf6; --accent2:#06b6d4; --accent3:#22c55e; --accent4:#f59e0b;
-    --danger:#ef4444; --ok:#10b981;
+    --pri:#8b5cf6; --sec:#06b6d4; --ok:#10b981; --err:#ef4444;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  .grad{
-    position:fixed; inset:0; pointer-events:none; opacity:.22;
-    background:
-      radial-gradient(1200px 600px at 0% -10%, var(--accent1), transparent 60%),
-      radial-gradient(900px 600px at 120% 10%, var(--accent2), transparent 60%),
-      radial-gradient(900px 500px at 40% 120%, var(--accent4), transparent 55%);
-    filter: blur(22px);
-    animation: pulse 12s ease-in-out infinite alternate;
-  }
-  @keyframes pulse{ from{opacity:.18; transform:scale(1)} to{opacity:.34; transform:scale(1.02)} }
-
-  .wrap{max-width:980px; margin:28px auto; padding:16px}
-  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-  h1{font-size:22px;margin:0}
-  .muted{color:var(--muted)}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 4px 24px rgba(0,0,0,.25)}
-
-  /* form */
-  form{display:grid; grid-template-columns: repeat(12,1fr); gap:12px}
-  label{display:block;font-size:13px;color:#cbd5e1;margin:6px 0}
-  input[type=text], input[type=number], select, textarea{
-    width:100%; padding:10px 12px; border:1px solid var(--line); background:#0e1013; color:#f1f5f9;
-    border-radius:10px; outline:none; font-size:15px;
-  }
-  textarea{min-height:120px; resize:vertical}
-
-  .col-12{grid-column:span 12}
-  .col-6{grid-column:span 6}
-  .col-4{grid-column:span 4}
-  .col-3{grid-column:span 3}
-
-  /* foto yükleme alanı */
-  .photos{grid-column:span 12}
-  .grid-5{display:grid; grid-template-columns: repeat(5,1fr); gap:10px; max-width:860px}
-  .slot{position:relative; aspect-ratio:1/1; border:1px dashed #334155; border-radius:12px; overflow:hidden; background:#0d0f12}
-  .slot input{position:absolute; inset:0; opacity:0; cursor:pointer}
-  .slot .hint{position:absolute; inset:auto 0 0 0; padding:8px; font-size:12px; color:var(--muted); text-align:center; background:linear-gradient(180deg,rgba(0,0,0,.0),rgba(0,0,0,.55))}
-  .slot.has-img .hint{display:none}
-  .slot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-  .slot .bar{position:absolute; left:0; bottom:0; height:4px; width:0%; background:linear-gradient(90deg,var(--accent2),var(--accent1))}
-
-  .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:6px}
-  .chip{font-size:11px; padding:4px 8px; border:1px solid #334155; border-radius:999px; color:#cbd5e1}
-
-  .note{background:#052e2b; border:1px solid #134e4a; color:#a7f3d0; padding:10px 12px; border-radius:10px}
-  .error{background:#3b0d0c; border:1px solid #7f1d1d; color:#fecaca; padding:10px 12px; border-radius:10px}
-
-  .actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
-  .btn{appearance:none; border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer}
-  .btn-pri{background:linear-gradient(90deg,var(--accent2),var(--accent1)); color:white; box-shadow:0 10px 30px rgba(0,0,0,.45)}
-  .btn-sec{background:#1f2937; color:#e5e7eb}
-  .btn:disabled{opacity:.6; cursor:not-allowed}
-
-  /* modal */
-  .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index:50}
-  .modal .box{max-width:520px; width:92%; background:#0c0f13; border:1px solid #243449; border-radius:16px; padding:18px}
-
-  /* helper */
-  small.help{color:#94a3b8; display:block; margin-top:4px}
-  .hidden{display:none !important}
+  .wrap{max-width:980px;margin:24px auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  h1{margin:0 0 12px;font-size:22px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row-1{grid-template-columns:1fr}
+  label{display:block;margin:10px 0 6px;font-weight:600}
+  input[type=text], textarea, select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0f1115;color:var(--fg);outline:none}
+  textarea{min-height:120px;resize:vertical}
+  .muted{color:var(--muted);font-size:13px}
+  .grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .slot{position:relative;aspect-ratio:1/1;border:1px dashed #2b3545;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#94a3b8;background:#0c0f14;overflow:hidden}
+  .slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .slot .x{position:absolute;top:6px;right:6px;background:#00000099;border:1px solid #334155;border-radius:8px;padding:4px 6px;cursor:pointer}
+  .note{margin-top:10px;padding:10px;border-radius:10px;background:#0b2a1f;color:#d1fae5;border:1px solid #14532d;display:none}
+  .error{margin-top:10px;padding:10px;border-radius:10px;background:#3b0d0c;color:#fee2e2;border:1px solid #7f1d1d;display:none}
+  .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn{appearance:none;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+  .btn-pri{background:linear-gradient(90deg,var(--pri),var(--sec));color:#fff}
+  .btn-sec{background:#1f2937;color:#e5e7eb}
+  .modal{position:fixed;inset:0;background:#00000080;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal .box{max-width:440px;width:100%;background:#111827;border:1px solid #374151;border-radius:14px;padding:18px}
 </style>
 </head>
 <body>
-  <div class="grad" aria-hidden="true"></div>
-
   <div class="wrap">
-    <div class="head">
-      <h1>İlan Ver</h1>
-      <div class="muted">UI tasarım – backend’e bağlamaya hazır</div>
-    </div>
-
     <div class="card">
-      <form id="listingForm" novalidate>
-        <!-- FOTOĞRAFLAR -->
-        <div class="photos col-12">
-          <label>Fotoğraflar (en fazla 5 adet)</label>
-          <div class="grid-5" id="photoGrid">
-            <!-- 5 slot -->
+      <h1>İlan Ver</h1>
+      <p class="muted">Bu sayfa şimdilik <b>UI-only</b>. Kayıt & yükleme sonra eklenecek.</p>
+
+      <form id="ilanForm" novalidate>
+        <!-- Fotoğraflar -->
+        <label>Fotoğraflar (en fazla 5 adet)</label>
+        <div id="fotoGrid" class="grid-5">
+          <div class="slot"><span>Görsel ekle</span><input type="file" accept="image/*"></div>
+          <div class="slot"><span>Görsel ekle</span><input type="file" accept="image/*"></div>
+          <div class="slot"><span>Görsel ekle</span><input type="file" accept="image/*"></div>
+          <div class="slot"><span>Görsel ekle</span><input type="file" accept="image/*"></div>
+          <div class="slot"><span>Görsel ekle</span><input type="file" accept="image/*"></div>
+        </div>
+
+        <div class="row row-1">
+          <div>
+            <label for="title">Başlık</label>
+            <input id="title" type="text" placeholder="Örn: Temiz motosiklet – takas olur" maxlength="80" required>
           </div>
-          <small class="help">Sadece JPG/PNG/WebP, her biri ≤10MB.</small>
-        </div>
-
-        <!-- BAŞLIK / AÇIKLAMA -->
-        <div class="col-12">
-          <label for="title">Başlık</label>
-          <input id="title" type="text" placeholder="Örn: Akıllı Saat – Temiz, kutulu" required maxlength="80"/>
-        </div>
-
-        <div class="col-12">
-          <label for="desc">Açıklama</label>
-          <textarea id="desc" placeholder="Durum, aksesuarlar, takas tercihi… (en az 20 karakter)" required minlength="20"></textarea>
-        </div>
-
-        <!-- KATEGORİLER -->
-        <div class="col-6">
-          <label for="cat">Ana Kategori</label>
-          <select id="cat" required>
-            <option value="" disabled selected>-- Kategori seçin --</option>
-            <option value="ev-hobi">🏠 Ev & Hobi</option>
-            <option value="tasinmaz">🏡 Taşınmaz</option>
-            <option value="tasit">🚗 Motorlu Taşıtlar</option>
-            <option value="oyuncak">🧸 Oyuncak</option>
-            <option value="giyim">👗 Giyim</option>
-            <option value="beyaz-esya">⚡ Beyaz Eşya</option>
-            <option value="teknoloji">💻 Teknoloji</option>
-            <option value="mobilya">🛋️ Mobilya</option>
-          </select>
-        </div>
-
-        <div class="col-6">
-          <label for="subcat">Alt Kategori</label>
-          <select id="subcat" required disabled>
-            <option value="" disabled selected>(Önce ana kategori seçin)</option>
-          </select>
-        </div>
-
-        <!-- DİNAMİK ALANLAR -->
-        <div class="col-12" id="dynamicFields"></div>
-
-        <!-- KONUM -->
-        <div class="col-6">
-          <label for="city">İl</label>
-          <select id="city" required>
-            <option value="" disabled selected>İl seçin</option>
-          </select>
-        </div>
-        <div class="col-6">
-          <label for="district">İlçe</label>
-          <input id="district" type="text" placeholder="Örn: Kadıköy" maxlength="40"/>
-        </div>
-
-        <!-- BİLGİ -->
-        <div class="col-12">
-          <div class="note">İlanlar ilk aşamada <b>onay bekliyor</b> durumunda olur. Kurallara aykırı içerikler reddedilir.</div>
-          <div class="chips">
-            <div class="chip">Max 5 görsel</div>
-            <div class="chip">Küfür/nefret söylemi yasak</div>
-            <div class="chip">Süre: 30 gün</div>
+          <div>
+            <label for="desc">Açıklama</label>
+            <textarea id="desc" placeholder="Durum, aksesuarlar, takas tercihi… (en az 20 karakter)" minlength="20" required></textarea>
           </div>
         </div>
 
-        <div class="col-12 actions">
-          <button class="btn btn-pri" type="submit" id="btnSend">İlanı Gönder</button>
-          <a class="btn btn-sec" href="/profile.html">İptal</a>
+        <div class="row">
+          <div>
+            <label for="cat">Kategori</label>
+            <select id="cat" required>
+              <option value="" selected>-- Kategori seçin --</option>
+              <option value="tasit">🚗 Motorlu Taşıtlar</option>
+              <option value="tasinmaz">🏡 Taşınmaz</option>
+              <option value="ev-hobi">🏠 Ev & Hobi</option>
+              <option value="oyuncak">🧸 Oyuncak</option>
+              <option value="giyim">👗 Giyim</option>
+              <option value="beyaz-esya">⚡ Beyaz Eşya</option>
+              <option value="teknoloji">💻 Teknoloji</option>
+              <option value="mobilya">🛋️ Mobilya</option>
+            </select>
+          </div>
+          <div>
+            <label for="subcat">Alt Kategori</label>
+            <select id="subcat" disabled required>
+              <option value="">(Önce kategori seçin)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="dynFields" class="row row-1"></div>
+
+        <div class="row">
+          <div>
+            <label for="city">İl</label>
+            <select id="city" required></select>
+          </div>
+          <div>
+            <label for="district">İlçe</label>
+            <input id="district" type="text" placeholder="Örn: Kadıköy" maxlength="40">
+          </div>
+        </div>
+
+        <div id="okNote" class="note">Metin uygun görünüyor.</div>
+        <div id="errNote" class="error"></div>
+
+        <div class="actions">
+          <button id="btnSubmit" type="submit" class="btn btn-pri">İlanı Gönder</button>
+          <a class="btn btn-sec" href="/home.html">İptal</a>
         </div>
       </form>
-      <div id="msg" class="error hidden" style="margin-top:12px"></div>
     </div>
   </div>
 
-  <!-- MODAL: küfür uyarısı -->
-  <div class="modal" id="badModal" role="dialog" aria-modal="true">
+  <!-- UI-only modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true">
     <div class="box">
-      <h3 style="margin:0 0 6px">Uyarı</h3>
-      <p class="muted" id="badText" style="margin:0 0 12px"></p>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-sec" id="badClose">Tamam</button>
+      <h3 style="margin:0 0 8px;font-size:18px">İlanınız kontrol aşamasındadır</h3>
+      <p class="muted" style="margin:0 0 12px">Kontrol sonrası onaylanacaktır. Tamam’a basınca ana sayfaya döneceksiniz.</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button id="modalOk" class="btn btn-pri">Tamam</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: gönderildi (UI-only) -->
-  <div class="modal" id="okModal" role="dialog" aria-modal="true">
-    <div class="box">
-      <h3 style="margin:0 0 6px">İlanınız gönderildi</h3>
-      <p class="muted" style="margin:0 0 12px">Kontrol aşamasındadır. Onay sonrası yayına alınır.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <a class="btn btn-pri" href="/profile.html">Tamam</a>
-      </div>
-    </div>
-  </div>
-
-<script>
-  // ==== Sabitler ====
-  const SUBCATS = {
-    "ev-hobi": ["Ev eşyaları","Hobi","Bahçe"],
-    "tasinmaz": ["Ev","Arsa","Tarla"],
-    "tasit": ["Araba","Motosiklet","Yedek Parça"],
-    "oyuncak": ["0-3 Yaş","4-7 Yaş","8+ Yaş"],
-    "giyim": ["Kadın","Erkek","Çocuk"],
-    "beyaz-esya": ["Mutfak","Elektrikli Süpürge","Çamaşır/Bulaşık"],
-    "teknoloji": ["Bilgisayar","Telefon","Aksesuar"],
-    "mobilya": ["Koltuk","Masa","Dolap"]
-  };
-
-  const TR_CITIES = [
-    "Adana","Adıyaman","Afyonkarahisar","Ağrı","Aksaray","Amasya","Ankara","Antalya","Ardahan","Artvin",
-    "Aydın","Balıkesir","Bartın","Batman","Bayburt","Bilecik","Bingöl","Bitlis","Bolu","Burdur",
-    "Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Düzce","Edirne","Elazığ","Erzincan",
-    "Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Iğdır","Isparta","İstanbul",
-    "İzmir","Kahramanmaraş","Karabük","Karaman","Kars","Kastamonu","Kayseri","Kırıkkale","Kırklareli","Kırşehir",
-    "Kilis","Kocaeli","Konya","Kütahya","Malatya","Manisa","Mardin","Mersin","Muğla","Muş",
-    "Nevşehir","Niğde","Ordu","Osmaniye","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas",
-    "Şanlıurfa","Şırnak","Tekirdağ","Tokat","Trabzon","Tunceli","Uşak","Van","Yalova","Yozgat","Zonguldak"
-  ];
-
-  const BAD_WORDS = [
-    "piç","oç","orospu","sürtük","ibne","yavşak","amk","aq","sikerim","sik","pezevenk","kahpe",
-    "mal","salak","gerizekalı","aptal","şerefsiz","haysiyetsiz"
-  ];
-
-  // ==== DOM kısayolları ====
-  const $ = s => document.querySelector(s);
-  const $$ = s => Array.from(document.querySelectorAll(s));
-
-  // ==== Foto slotlarını kur ====
-  const grid = $("#photoGrid");
-  for(let i=0;i<5;i++){
-    const slot = document.createElement("div");
-    slot.className = "slot";
-    slot.innerHTML = \`
-      <input type="file" accept="image/*" aria-label="Foto yükle">
-      <div class="hint">➕ Foto ekle</div>
-      <div class="bar"></div>
-    \`;
-    grid.appendChild(slot);
-  }
-
-  // Foto önizleme/temizleme (UI-only)
-  grid.addEventListener("change", e=>{
-    const input = e.target.closest("input[type=file]");
-    if(!input) return;
-    const f = input.files && input.files[0];
-    const slot = input.closest(".slot");
-    if(!f){ slot.classList.remove("has-img"); slot.querySelector("img")?.remove(); return; }
-    if(!f.type.startsWith("image/")){ alert("Sadece görsel yükleyin."); input.value=""; return; }
-    if(f.size > 10*1024*1024){ alert("Foto 10MB üstü: "+f.name); input.value=""; return; }
-    const img = slot.querySelector("img") || document.createElement("img");
-    img.src = URL.createObjectURL(f);
-    if(!img.parentNode) slot.appendChild(img);
-    slot.classList.add("has-img");
-  });
-
-  // Slot tıklayınca kaldır
-  grid.addEventListener("click", e=>{
-    const slot = e.target.closest(".slot");
-    if(!slot) return;
-    // Eğer görsel varsa tıkla kaldır
-    if(slot.classList.contains("has-img")){
-      if(confirm("Bu görseli kaldır?")){
-        slot.querySelector("img")?.remove();
-        slot.querySelector("input").value = "";
-        slot.classList.remove("has-img");
-        slot.querySelector(".bar").style.width = "0%";
-      }
-    }
-  });
-
-  // ==== Kategori/Alt kategori ====
-  const cat = $("#cat"), sub = $("#subcat"), dyn = $("#dynamicFields");
-
-  function fillSubcats() {
-    const val = cat.value;
-    const list = SUBCATS[val] || [];
-    sub.innerHTML = "";
-    if(!list.length){
-      sub.disabled = true;
-      sub.innerHTML = '<option value="" disabled selected>(Önce ana kategori seçin)</option>';
-    } else {
-      sub.disabled = false;
-      sub.innerHTML = '<option value="" disabled selected>-- Seçin --</option>' +
-        list.map(s=>\`<option value="\${s.toLowerCase().replace(/[^a-z0-9ğüşöçıİĞÜŞÖÇ ]/gi,'').replace(/\\s+/g,'-')}">\${s}</option>\`).join("");
-    }
-    dyn.innerHTML = "";
-  }
-  cat.addEventListener("change", fillSubcats);
-  sub.addEventListener("change", renderDynamicFields);
-
-  function renderDynamicFields(){
-    const c = cat.value;
-    const s = sub.value;
-    dyn.innerHTML = "";
-    const wrap = document.createElement("div");
-    wrap.className = "grid";
-    if(c==="tasit" && (s==="motosiklet" || s==="araba")){
-      wrap.innerHTML = `
-        <div class="col-4"><label>Marka</label><input type="text" id="meta-brand" placeholder="Örn: Honda"></div>
-        <div class="col-4"><label>Model</label><input type="text" id="meta-model" placeholder="Örn: CBR"></div>
-        <div class="col-4"><label>Yıl</label><input type="number" id="meta-year" min="1950" max="2100" placeholder="Örn: 2018"></div>
-      `;
-    } else if(c==="tasinmaz" && s==="ev"){
-      wrap.innerHTML = `
-        <div class="col-4"><label>Kat</label><input type="number" id="meta-floor" min="0" max="100" placeholder="Örn: 3"></div>
-        <div class="col-4"><label>m²</label><input type="number" id="meta-sqm" min="5" max="10000" placeholder="Örn: 120"></div>
-        <div class="col-4"><label>Oda</label><input type="text" id="meta-rooms" placeholder="Örn: 3+1"></div>
-      `;
-    } else if(c==="tasinmaz" && (s==="arsa" || s==="tarla")){
-      wrap.innerHTML = `
-        <div class="col-6"><label>m²</label><input type="number" id="meta-sqm" min="5" max="1000000" placeholder="Örn: 450"></div>
-        <div class="col-6"><label>İmar Durumu</label><input type="text" id="meta-zoning" placeholder="Örn: Konut İmarlı"></div>
-      `;
-    } else {
-      // genel: isteğe bağlı marka/model alanları
-      wrap.innerHTML = `
-        <div class="col-6"><label>Marka (ops.)</label><input type="text" id="meta-brand" placeholder="İsteğe bağlı"></div>
-        <div class="col-6"><label>Model (ops.)</label><input type="text" id="meta-model" placeholder="İsteğe bağlı"></div>
-      `;
-    }
-    dyn.appendChild(wrap);
-  }
-
-  // ==== 81 İl ====
-  const citySel = $("#city");
-  TR_CITIES.forEach(c=>{
-    const o=document.createElement("option"); o.value=c; o.textContent=c; citySel.appendChild(o);
-  });
-
-  // ==== Küfür filtresi ====
-  function checkBadWords(text){
-    const lower = (text||"").toLowerCase();
-    const hit = BAD_WORDS.filter(w => lower.includes(w));
-    if(hit.length){
-      const msg = \`Bazı ifadeler toplum kurallarına aykırı: <b>\${hit.join(", ")}</b>. Lütfen düzeltin.\`;
-      $("#badText").innerHTML = msg;
-      $("#badModal").style.display = "grid";
-      return false;
-    }
-    return true;
-  }
-  $("#badClose").addEventListener("click", ()=> $("#badModal").style.display="none");
-
-  // ==== Form submit (UI-only) ====
-  $("#listingForm").addEventListener("submit", (ev)=>{
-    ev.preventDefault();
-    $("#msg").classList.add("hidden");
-    const title = $("#title").value.trim();
-    const desc  = $("#desc").value.trim();
-    // basit zorunlu kontrol
-    if(!title || !desc || !cat.value || !sub.value || !citySel.value){
-      $("#msg").textContent = "Lütfen tüm zorunlu alanları doldurun.";
-      $("#msg").classList.remove("hidden");
-      return;
-    }
-    if(desc.length < 20){
-      $("#msg").textContent = "Açıklama en az 20 karakter olmalı.";
-      $("#msg").classList.remove("hidden");
-      return;
-    }
-    if(!checkBadWords(title + " " + desc)){
-      return;
-    }
-    // Görsel sayısı (UI)
-    const fileCount = $$("#photoGrid input[type=file]").reduce((n,i)=> n + (i.files && i.files[0] ? 1 : 0), 0);
-    if(fileCount === 0){
-      if(!confirm("Görsel eklemediniz. Devam edilsin mi?")) return;
-    }
-    if(fileCount > 5){
-      $("#msg").textContent = "En fazla 5 görsel yükleyebilirsiniz.";
-      $("#msg").classList.remove("hidden");
-      return;
-    }
-
-    // Burada normalde: Storage upload + Firestore doc oluşturma yapılacak.
-    // Şimdilik UI-only: başarı modalı göster.
-    $("#okModal").style.display = "grid";
-  });
-
-  // modal dışına tık kapatmaları
-  [$("#badModal"), $("#okModal")].forEach(m=>{
-    m.addEventListener("click", (e)=>{ if(e.target===m) m.style.display="none"; });
-  });
-</script>
   <script type="module" src="/assets/js/ilan-ver.ui.js"></script>
 </body>
 </html>
