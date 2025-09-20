@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Takas Çemberi • Giriş / Kayıt</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root{
+      --bg:#0b0d12; --fg:#0f1220; --paper:#ffffff; --ink:#0b0b0b; --muted:#5b6075; --line:#e8eaf3;
+      --brandA:#6a5cff; --brandB:#00d4ff;
+      /* Yeni renkler: mor, mavi, turkuaz, pembe */
+      --c1:#6a5cff; --c2:#00d4ff; --c3:#06d6a0; --c4:#ff69b4;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f8fc;color:var(--ink)}
+
+    .topbar{position:sticky;top:0;display:flex;align-items:center;gap:16px;height:64px;
+      background:linear-gradient(90deg,var(--brandA),var(--brandB));background-size:200% 200%;animation:barShift 8s ease-in-out infinite;
+      padding:0 16px;box-shadow:0 2px 14px rgba(40,40,80,.15)}
+    @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .brand img{height:44px}
+    .grow{flex:1}
+    .btn{border:0;border-radius:14px;padding:10px 16px;font-weight:600;cursor:pointer}
+    .btn.primary{background:#111827;color:#fff}
+    .btn.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35)}
+
+    .hero{max-width:1100px;margin:24px auto;padding:20px 16px}
+    .panel{background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:800% 800%;animation:panelBG 15s ease infinite;
+      border-radius:20px;padding:28px;box-shadow:0 10px 30px rgba(30,40,90,.08);color:#fff;text-align:center}
+    @keyframes panelBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .title{font-size:42px;font-weight:900;margin:0 0 12px}
+    .subtitle{font-size:20px;margin:0 0 20px}
+
+    /* Slogan panel */
+    .slogan-panel{margin:20px auto;max-width:900px;padding:30px;border-radius:20px;text-align:center;color:#fff;
+      background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));
+      background-size:800% 800%;animation:sloganBG 20s ease infinite}
+    @keyframes sloganBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .slogan-rotator{font-size:26px;font-weight:700;min-height:30px;transition:opacity 2s ease}
+
+    /* Kategori kartları */
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:20px}
+    .card{border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;text-align:center;
+      color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1)}
+    @keyframes cardColors{0%{background:var(--c1)}25%{background:var(--c2)}50%{background:var(--c3)}75%{background:var(--c4)}100%{background:var(--c1)}}
+    .emoji{font-size:26px}
+
+    /* Özellikler ve alt kısım */
+    .features{display:grid;gap:12px;margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+    .feature{padding:14px;border-radius:14px;color:#fff;text-align:center;animation:cardColors 20s infinite alternate ease-in-out}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><img src="assets/img/seffaf.png" alt="logo"/></a>
+    <div class="grow"></div>
+    <button class="btn ghost" id="btnLoginOpen">Giriş Yap</button>
+    <button class="btn primary" id="btnSignupOpen">Kaydol</button>
+  </header>
+
+  <main class="hero">
+    <section class="panel">
+      <h1 class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
+      <p class="subtitle">Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.</p>
+    </section>
+
+    <section class="slogan-panel">
+      <div class="slogan-rotator" id="slogan"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin-bottom:12px">Kategoriler</h2>
+      <div class="grid">
+        <div class="card"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
+        <div class="card"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
+        <div class="card"><div class="emoji">🚗</div><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet, yedek parça</p></div>
+        <div class="card"><div class="emoji">🧸</div><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></div>
+        <div class="card"><div class="emoji">👗</div><h3>Giyim</h3><p>Kadın, erkek, çocuk</p></div>
+        <div class="card"><div class="emoji">⚡</div><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak</p></div>
+        <div class="card"><div class="emoji">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></div>
+        <div class="card"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
+      </div>
+
+      <div class="features">
+        <div class="feature">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
+        <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
+        <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px">
+      <h2>KVKK</h2>
+      <p>Veri sorumlusu: Takas Çemberi A.Ş.<br/>Toplanan veriler: Ad, iletişim, işlem kayıtları.<br/>Amaç: Üyelik, güvenli takas, müşteri desteği.<br/>Haklarınız: Bilgi alma, düzeltme, silme, itiraz.</p>
+      <h2>Gizlilik</h2>
+      <p>Çerez kullanımı ve tercih yönetimi.<br/>Üçüncü taraflarla paylaşım ilkeleri.<br/>Veri saklama süreleri ve şifreleme.</p>
+      <h2>Güvenlik</h2>
+      <p>SSL/TLS ile şifreli bağlantı.<br/>2FA ve anormal aktivite izleme.<br/>İçerik moderasyonu ve raporlama.</p>
+      <h2>SSL Bilgisi</h2>
+      <p>Modern protokoller (TLS 1.3) desteği.<br/>Güncel sertifika ve HSTS uygulanması.<br/>Güvenli çerçeve ve CORS politikaları.</p>
+      <h2>Kullanım Şartları</h2>
+      <p>İlan kuralları ve yasaklı içerikler.<br/>Üyelik sorumlulukları ve fesih.<br/>Uyuşmazlık ve yetkili yargı mercii.</p>
+      <p>© 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️</p>
+    </section>
+  </main>
+
+  <script>
+    const slogans = [
+      "Yükle • Takasla • Kazan",
+      "Paylaş • Değiş • Mutlu Ol",
+      "Doğaya • Bütçene • Dost"
+    ];
+    let i=0;const box=document.getElementById('slogan');
+    function rotate(){box.style.opacity=0;setTimeout(()=>{box.textContent=slogans[i];box.style.opacity=1;i=(i+1)%slogans.length},2000)}
+    rotate();setInterval(rotate,15000);
+  </script>
+</body>
+</html>
