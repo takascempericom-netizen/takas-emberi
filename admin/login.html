@@ -49,16 +49,16 @@
 </head>
 <body>
   <main class="wrap">
-    <form id="adminLogin" class="card" autocomplete="on">
+    <form autocomplete="off" id="adminLogin" class="card" autocomplete="on">
       <h1>Admin Girişi</h1>
       <p class="sub">Yalnızca yetkili kullanıcılar giriş yapabilir.</p>
 
       <label for="email">E‑posta</label>
-      <input id="email" class="in" type="email" placeholder="ornek@site.com" required value="ozkank603@gmail.com" />
+      <input id="email" autocomplete="off" class="in" type="email" placeholder="ornek@site.com" required />
 
       <label for="pass">Şifre</label>
       <div style="position:relative">
-        <input id="pass" class="in" type="password" placeholder="••••••••" required />
+        <input id="pass" autocomplete="off" class="in" type="password" placeholder="••••••••" required />
         <button type="button" id="toggle" class="eye" aria-label="Şifreyi Göster">Göster</button>
       </div>
 
