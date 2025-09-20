@@ -186,6 +186,14 @@
       // App + Auth
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
+    // POST_LOGIN_REDIRECT (yedek)
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      const verified = user.emailVerified || (user.providerData||[]).some(p=>p.providerId==="google.com");
+      if (verified && !/\/home\.html$/.test(location.pathname)) {
+        location.replace("/home.html");
+      }
+    });
       try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
       const db = getFirestore(app);
 
@@ -211,8 +219,13 @@
       // Google
       const provider = new GoogleAuthProvider();
       async function googleLogin(){
-        const cred = await signInWithPopup(auth, provider);
-        try{ await setDoc(doc(db,'users',cred.user.uid),{ uid:cred.user.uid, displayName:cred.user.displayName||'', email:cred.user.email||'', photoURL:cred.user.photoURL||'', provider:'google', createdAt:serverTimestamp(), lastLoginAt:serverTimestamp() },{merge:true}); }catch{}
+const cred = await signInWithPopup(auth, provider);
+        try{ await setDoc(doc(db,'users',cred.user.uid),{ uid:cred.user.uid, displayName:cred.user.displayName||'', email:cred.user.email||'', photoURL:cred.user.photoURL||'', provider:'google', createdAt:serverTimestamp(), lastLoginAt:serverTimestamp() 
+  try{ /* no-op */ }catch(e){}
+  1000 103 986 987 988 989 990 991 992 993 994 995 996 1000 1001"#dlgLogin")?.close(); 1000 103 986 987 988 989 990 991 992 993 994 995 996 1000 1001"#dlgSignup")?.close();
+  location.href = "/home.html";
+}
+,{merge:true}); }catch{}
         dlgLogin?.close(); dlgSignup?.close();
       }
       $('#btnGoogleLogin')?.addEventListener('click', googleLogin);
