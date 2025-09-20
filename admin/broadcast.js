@@ -1,21 +1,11 @@
 // takas-emberi/admin/broadcast.js
 import { getFirestore, collection, addDoc, serverTimestamp } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getApp as coreGetApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-// Firebase init (tekrar import gerekirse)
-const firebaseConfig = {
-  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",
-  authDomain: "ureten-eller-v2.firebaseapp.com",
-  projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.appspot.com",
-  messagingSenderId: "621494781131",
-  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const db = getFirestore(coreGetApp());
+const auth = getAuth(coreGetApp());
 
 export function render(el){
   el.innerHTML = `
