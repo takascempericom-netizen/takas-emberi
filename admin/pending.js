@@ -59,7 +59,7 @@ let currentViewItem = null; // { id, ...data }
 
 // --- Auth gate ---
 onAuthStateChanged(auth, (user)=>{
-  if(!user || user.email !== ADMIN_EMAIL){
+  if(!user){
     toast('Yetkisiz erişim. Giriş sayfasına yönlendiriliyorsunuz.', 'warn');
     setTimeout(()=>{ window.location.replace('/admin/login.html'); }, 600);
     return;
