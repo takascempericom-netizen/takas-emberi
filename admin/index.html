@@ -28,7 +28,6 @@
     <button id="btnLogout" class="btn">Çıkış</button>
   </header>
 
-  <nav id="adminNav" class="tabs">
     <button class="tab active" data-tab="pending">Onay Bekleyen</button>
     <button class="tab" data-tab="support">Canlı Destek</button>
     <button class="tab" data-tab="users">Kullanıcılar</button>
@@ -36,6 +35,7 @@
   </nav>
 
   <main>
+<aside id="sidebar" style="float:left;width:200px;min-height:100%;background:#0d1019;padding:12px;box-sizing:border-box">    <button class="tab active" data-tab="pending">Onay Bekleyen</button><br/>    <button class="tab" data-tab="support">Canlı Destek</button><br/>    <button class="tab" data-tab="users">Kullanıcılar</button><br/>    <button class="tab" data-tab="broadcast">Bildiri</button>  </aside>  <section id="mainContent" style="margin-left:220px;padding:12px">
     <!-- Onay Bekleyen -->
     <section id="view-pending" class="active">
       <div id="pendingToolbar">
@@ -57,7 +57,6 @@
         <button id="btnRefresh">Yenile</button>
       </div>
       <div id="pendingList" class="cards"></div>
-      <button id="btnMore" class="btn">Daha Fazla</button>
       <dialog id="dlgView">
         <article>
           <button id="dlgClose">✕</button>
@@ -88,7 +87,8 @@
         <button type="submit" class="btn">Gönder</button>
       </form>
     </section>
-  </main>
+  </section>
+</main>
 
   <script type="module" src="/admin/main.js"></script>
 </body>
