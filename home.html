@@ -1,3 +1,4 @@
+<!-- /home.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -7,26 +8,32 @@
   <meta name="color-scheme" content="light dark" />
   <style>
     :root{
-      /* Şeker pembesi arka plan + palet */
       --bg:#ffc0cb; --bg2:#ffd6e7;
       --paper:#ffffff; --paper2:#fff5f8; --ink:#1b1b1f; --muted:#5f5f68; --line:#ffd0dc;
       --brandA:#6a5cff; --brandB:#00d4ff; --focus:#0ea5e9;
       --btn:#111827; --btnInk:#fff;
-      /* 5 renkli akış paleti */
       --c1:#ff80ab; --c2:#a78bfa; --c3:#60a5fa; --c4:#34d399; --c5:#f59e0b;
-      /* Alt siyah alan */
       --black:#0b0b0f; --black-ink:#e8e8f0; --black-line:#1e1e27;
-      --bottomH:64px;
+      --bottomH:64px; /* alt bar yüksekliği */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px)}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px); /* alt barla çakışmayı önler */
+    }
     a,button{font:inherit}
 
     /* Topbar */
-    .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;padding:0 12px 0 16px;
+    .topbar{
+      position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;
+      padding:0 12px 0 16px;
       background:linear-gradient(90deg,var(--brandA),var(--brandB)); background-size:200% 200%; animation:barShift 8s ease-in-out infinite;
-      border-bottom:1px solid rgba(0,0,0,.06); box-shadow:0 2px 12px rgba(10,20,60,.25)}
+      border-bottom:1px solid rgba(0,0,0,.06); box-shadow:0 2px 12px rgba(10,20,60,.25)
+    }
     @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
     .brand img{height:44px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
@@ -39,22 +46,36 @@
     /* Hero */
     .hero{max-width:1200px;margin:20px auto;padding:0 16px}
     .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 8px 28px rgba(170, 26, 80, .22)}
-    .hero-panel{display:grid;place-items:center;text-align:center;padding:40px;background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c5));background-size:400% 400%;animation:barShift 14s ease infinite;border-color:transparent}
+    .hero-panel{
+      display:grid;place-items:center;text-align:center;padding:40px;
+      background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c5));
+      background-size:400% 400%;animation:barShift 14s ease infinite;border-color:transparent
+    }
     .title{margin:0 0 10px;font-size:46px;font-weight:900}
     .subtitle{margin:0;font-size:20px}
-    /* Gradient yazı */
+    /* Kontrast için beyaz + gölge */
     .gx{color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,.25),0 0 24px rgba(0,0,0,.15)}
     .gx-sub{color:#fffefc;opacity:.96;text-shadow:0 1px 6px rgba(0,0,0,.18)}
-    .slogan{margin:16px auto 12px;max-width:900px;text-align:center;background:var(--paper2);border:1px solid var(--line);
-      border-radius:16px;padding:16px 18px;font-weight:800;letter-spacing:.5px}
+    .slogan{
+      margin:16px auto 12px;max-width:900px;text-align:center;background:var(--paper2);border:1px solid var(--line);
+      border-radius:16px;padding:16px 18px;font-weight:800;letter-spacing:.5px
+    }
 
     /* Kategoriler */
     .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:16px}
-    .card{border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
+    .card{
+      border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
       color:#fff;border:1px solid rgba(255,255,255,.22);text-align:center;
-      background:linear-gradient(135deg,var(--c1),var(--c2));background-size:300% 300%;animation:cardShift 16s ease-in-out infinite}
+      background:linear-gradient(135deg,var(--c1),var(--c2));background-size:300% 300%;animation:cardShift 16s ease-in-out infinite; text-decoration:none
+    }
     .card:hover{transform:translateY(-4px)}
-    @keyframes cardShift{0%{background-position:0% 50%}25%{background-position:50% 0%;background-image:linear-gradient(135deg,var(--c2),var(--c3))}50%{background-position:100% 50%;background-image:linear-gradient(135deg,var(--c3),var(--c4))}75%{background-position:50% 100%;background-image:linear-gradient(135deg,var(--c4),var(--c5))}100%{background-position:0% 50%;background-image:linear-gradient(135deg,var(--c1),var(--c2))}}
+    @keyframes cardShift{
+      0%{background-position:0% 50%}
+      25%{background-position:50% 0%;background-image:linear-gradient(135deg,var(--c2),var(--c3))}
+      50%{background-position:100% 50%;background-image:linear-gradient(135deg,var(--c3),var(--c4))}
+      75%{background-position:50% 100%;background-image:linear-gradient(135deg,var(--c4),var(--c5))}
+      100%{background-position:0% 50%;background-image:linear-gradient(135deg,var(--c1),var(--c2))}
+    }
     .emoji{font-size:28px}
 
     /* Özellikler */
@@ -63,27 +84,32 @@
       background:linear-gradient(135deg,#fff,#ffeaf3)}
 
     /* Bottom nav */
-    .bottom-nav{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);
-      display:grid;grid-template-columns:repeat(3,1fr);z-index:40;height:var(--bottomH)}
+    .bottom-nav{
+      position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);
+      display:grid;grid-template-columns:repeat(3,1fr);z-index:40;height:var(--bottomH)
+    }
     .tab{appearance:none;border:0;background:transparent;color:#6b7280;padding:10px 8px;display:flex;gap:6px;flex-direction:column;align-items:center;justify-content:center}
     .tab svg{width:22px;height:22px}
     .tab.active{color:#111827}
-    .spacer{height:0}
 
     /* Support FAB + popover */
-    .support-fab{position:fixed;right:16px;bottom:80px;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;
-      background:#111827;color:#fff;display:grid;place-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:45}
+    .support-fab{
+      position:fixed;right:16px;bottom:calc(var(--bottomH) + 16px);width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;
+      background:#111827;color:#fff;display:grid;place-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:45
+    }
     .support-fab:focus{outline:3px solid var(--focus);outline-offset:2px}
-    .support-pop{position:fixed;right:16px;bottom:146px;min-width:320px;max-width:90vw;border-radius:16px;text-align:center;
+    .support-pop{
+      position:fixed;right:16px;bottom:calc(var(--bottomH) + 82px);min-width:320px;max-width:90vw;border-radius:16px;text-align:center;
       background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c5));background-size:400% 400%;
-      animation:barShift 14s ease infinite; padding:18px 14px;color:#fff;box-shadow:0 14px 40px rgba(0,0,0,.3);display:none;z-index:46}
-    .support-pop .msg{margin:0;font-weight:800;font-size:16px;line-height:1.35;-webkit-background-clip:text;background-clip:text;color:#fff}
+      animation:barShift 14s ease infinite; padding:18px 14px;color:#fff;box-shadow:0 14px 40px rgba(0,0,0,.3);display:none;z-index:46
+    }
+    .support-pop .msg{margin:0;font-weight:800;font-size:16px;line-height:1.35}
     .support-pop .input-row{display:flex;gap:8px;margin-top:12px;justify-content:center}
     .support-pop .in{flex:1;min-width:180px;max-width:260px;padding:10px;border-radius:12px;border:0}
     .support-pop .send{padding:10px 14px;border-radius:12px;border:0;background:#111827;color:#fff;cursor:pointer}
     .support-pop .arrow{position:absolute;right:24px;bottom:-10px;width:18px;height:18px;transform:rotate(45deg);background:inherit;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
 
-    /* Alt siyah bilgi alanı */
+    /* Legal footer */
     .legal{background:var(--black);color:var(--black-ink);border-top:1px solid var(--black-line);margin-top:20px}
     .legal .wrap{max-width:1200px;margin:0 auto;padding:18px 16px}
     .accordion{border:1px solid var(--black-line);border-radius:12px;overflow:hidden}
@@ -91,6 +117,11 @@
     .acc-btn{width:100%;text-align:left;background:transparent;color:var(--black-ink);border:0;padding:14px 16px;cursor:pointer;font-weight:800}
     .acc-panel{display:none;padding:0 16px 16px 16px;color:#cfd3e3}
     .acc-item.open .acc-panel{display:block}
+
+    @media (min-width:720px){
+      .title{font-size:52px}
+      .subtitle{font-size:22px}
+    }
   </style>
 </head>
 <body>
@@ -101,7 +132,6 @@
       <strong>Takas Çemberi</strong>
     </a>
     <div class="grow"></div>
-    <!-- Arama ALANI kaldırıldı, butona dönüştürüldü -->
     <button id="btnSearch" class="btn" aria-label="Ara">Ara</button>
     <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
     <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
@@ -116,8 +146,6 @@
     </section>
 
     <section class="slogan" aria-live="polite">Doğaya • Bütçene • Dost</section>
-
-    <!-- ⚠️ Sahte liste kaldırıldı. Gerçek ilanlar bağlandığında bu bölüm tekrar eklenecek. -->
   </main>
 
   <!-- Kategoriler + Özellikler -->
@@ -156,14 +184,13 @@
       <span style="font-size:12px">Bildirimler</span>
     </button>
   </nav>
-  <div class="spacer" aria-hidden="true"></div>
 
   <!-- Canlı Destek FAB + Popover -->
   <button class="support-fab" id="btnSupport" aria-label="Canlı Destek">
     <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
   </button>
   <div class="support-pop" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
-    <p class="msg gx">Merhaba! Yardım için mesaj bırakın. WhatsApp/telefon bağlantısını sonra ekleyeceğiz.</p>
+    <p class="msg">Merhaba! Yardım için mesaj bırakın. WhatsApp/telefon bağlantısını sonra ekleyeceğiz.</p>
     <div class="input-row">
       <input class="in" id="chatInput" placeholder="Mesajınız" />
       <button type="button" class="send" id="chatSend">Gönder</button>
@@ -203,7 +230,7 @@
 
   <!-- JS -->
   <script type="module">
-    // Firebase yalnızca Çıkış için; diğer yönlendirmeler direkt çalışır
+    // Neden Firebase? Sadece Çıkış çalışsın diye.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -222,7 +249,7 @@
 
     const $ = (s, r=document)=>r.querySelector(s);
 
-    // Üst bar butonları (tüm yönlendirmeler aktif)
+    // Üst bar yönlendirmeleri
     $('#btnLogout')?.addEventListener('click', async ()=>{ try{ await signOut(auth);}catch{} location.href = "/"; });
     $('#btnProfile')?.addEventListener('click', ()=>{ location.href = "/profil"; });
     $('#btnPostAd')?.addEventListener('click', ()=>{ location.href = "/ilan-ver"; });
@@ -238,7 +265,7 @@
       if(t.id==='tabNotifs') location.href = "/bildirimler";
     }));
 
-    // Canlı destek popover (FAB üstünde)
+    // Canlı destek popover
     const pop = $('#supportPop');
     const fab = $('#btnSupport');
     fab?.addEventListener('click', ()=>{
@@ -250,13 +277,13 @@
       const text = (input.value||'').trim();
       if(!text) return;
       const p = document.createElement('p');
-      p.className = 'msg gx';
+      p.className = 'msg';
       p.textContent = text;
       pop.insertBefore(p, pop.querySelector('.input-row'));
       input.value = '';
     });
 
-    // Accordion (aç/kapat)
+    // Accordion
     document.querySelectorAll('.acc-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const item = btn.parentElement;
