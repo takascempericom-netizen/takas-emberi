@@ -239,7 +239,7 @@
       const city=$('#city').value.trim(); const username=$('#username').value.trim();
       const email=$('#email').value.trim(); const p1=$('#pass1').value; const p2=$('#pass2').value;
       if(p1!==p2){ alert('Şifreler eşleşmiyor'); return; }
-      const cred = await createUserWithEmailAndPassword(auth,email,p1);
+      const cred = await createUserWithEmailAndPassword(auth,email,p1).catch(e=>{ const code=(e&&e.code)||''; if(code.includes('auth/email-already-in-use')){ alert('Bu e-posta zaten kayıtlı. Giriş yap veya Şifremi Unuttum ile sıfırla.'); document.getElementById('dlgSignup')?.close(); document.getElementById('dlgLogin')?.showModal(); } else { alert('Kayıt hatası: '+(e?.message||e)); } throw e; });
       await updateProfile(cred.user,{ displayName:`${firstName} ${lastName}` });
       try{ const db = getFirestore(app); await setDoc(doc(db,'users',cred.user.uid),{ uid:cred.user.uid, firstName,lastName,city,username,email, provider:'password', createdAt:serverTimestamp() },{merge:true}); }catch{}
       $('#dlgSignup')?.close();
