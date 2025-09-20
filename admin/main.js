@@ -22,7 +22,6 @@ const navBtns = document.querySelectorAll('.nav-btn');
 // Auth kontrol
 onAuthStateChanged(auth, (user)=>{
   if(!user){
-    window.location.replace('/admin/login.html');
   } else {
     loadTab("pending");
   }
