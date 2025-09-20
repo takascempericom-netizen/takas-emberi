@@ -54,10 +54,6 @@ const fCat     = $('#fCat');
 const fCity    = $('#fCity');
 const refresh  = $('#btnRefresh');
 const dlg      = $('#dlgView');
-const dlgBody  = $('#dlgBody');
-const dlgClose = $('#dlgClose');
-const dlgApprove = $('#dlgApprove');
-const dlgReject  = $('#dlgReject');
 
 let currentViewItem = null; // { id, ...data }
 
@@ -175,8 +171,6 @@ function openDetail(item){
 
 dlgClose && (dlgClose.onclick = ()=> dlg.close());
 
-const dlgApprove = $('#dlgApprove');
-const dlgReject  = $('#dlgReject');
 dlgApprove && (dlgApprove.onclick = ()=> currentViewItem && approve(currentViewItem.id));
 dlgReject  && (dlgReject.onclick  = ()=> currentViewItem && rejectFlow(currentViewItem.id));
 
