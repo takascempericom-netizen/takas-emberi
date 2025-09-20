@@ -46,19 +46,21 @@
 
     .footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center}
   </style>
+<style id="fix-login-pointer">input,button{pointer-events:auto!important}button[disabled]{opacity:.6}</style>
+<style id="kill-admin-anim">[class*=anim],[class*=spin],[class*=orbit],.bg-anim,.spinner{display:none!important} .overlay,.backdrop,.mask{pointer-events:none!important} input,button{pointer-events:auto!important}</style>
 </head>
 <body>
   <main class="wrap">
-    <form autocomplete="off" id="adminLogin" class="card" autocomplete="on">
+    <form autocomplete="off" autocomplete="off" id="adminLogin" class="card" autocomplete="on">
       <h1>Admin Girişi</h1>
       <p class="sub">Yalnızca yetkili kullanıcılar giriş yapabilir.</p>
 
       <label for="email">E‑posta</label>
-      <input id="email" autocomplete="off" class="in" type="email" placeholder="ornek@site.com" required />
+      <input id="email" autocomplete="off" autocomplete="off" class="in" type="email" placeholder="ornek@site.com" required />
 
       <label for="pass">Şifre</label>
       <div style="position:relative">
-        <input id="pass" autocomplete="off" class="in" type="password" placeholder="••••••••" required />
+        <input id="pass" autocomplete="off" autocomplete="off" class="in" type="password" placeholder="••••••••" required />
         <button type="button" id="toggle" class="eye" aria-label="Şifreyi Göster">Göster</button>
       </div>
 
@@ -158,5 +160,38 @@
       }catch{}
     });
   </script>
+<script id="kill-admin-anim-js">(function(){[.bg-anim,.spinner,.login-orbit,.login-waves,[data-anim]].forEach(function(s){document.querySelectorAll(s).forEach(function(n){n.remove();});}); [email,pass].forEach(function(id){var el=document.getElementById(id); if(el){el.removeAttribute(readonly); el.removeAttribute(disabled); el.style.pointerEvents=auto;}}); var btn=document.getElementById(btnLogin)||document.querySelector(button[type=submit]); if(btn){btn.disabled=false; btn.style.pointerEvents=auto;}})();</script>
 </body>
 </html>
+<script type=\\"module\\">
+  import { initializeApp } from \\"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js\\";
+  import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signInWithEmailAndPassword } from \\"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js\\";
+
+  // Firebase config (projenle aynı)
+  const firebaseConfig = {
+    apiKey: \\"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg\\",
+    authDomain: \\"ureten-eller-v2.firebaseapp.com\\",
+    projectId: \\"ureten-eller-v2\\",
+    storageBucket: \\"ureten-eller-v2.firebasestorage.app\\",
+    messagingSenderId: \\"621494781131\\",
+    appId: \\"1:621494781131:web:13cc3b061a5e94b7cf874e\\"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  (async()=>{ try{ await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); } })();
+
+  const $ = (s,r=document)=>r.querySelector(s);
+  const form  = $(form);
+  const email = $(#email);
+  const pass  = $(#pass);
+  const btn   = $(#btnLogin) || (form ? form.querySelector(button[type=submit]) : null);
+
+  // Yazılabilir/kliklenebilir olmasını garanti altına al
+  [email,pass,btn].forEach(el=>{ if(!el) return; el.removeAttribute(readonly); el.removeAttribute(disabled); el.style.pointerEvents=auto; });
+
+  form && form.addEventListener(submit, async (e)=>{
+    e.preventDefault();
+    const mail = (email?.value||).trim();
+    const pwd  = pass?.value||;
+    if(!mail || !pwd){ alert(E-posta
