@@ -9,80 +9,84 @@
     :root{
       --bg:#0b0d12; --fg:#0f1220; --paper:#ffffff; --ink:#0b0b0b; --muted:#5b6075; --line:#e8eaf3;
       --brandA:#6a5cff; --brandB:#00d4ff;
-      /* Yeni renkler: mor, mavi, turkuaz, pembe */
       --c1:#6a5cff; --c2:#00d4ff; --c3:#06d6a0; --c4:#ff69b4;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f8fc;color:var(--ink)}
-
+    /* top bar */
     .topbar{position:sticky;top:0;display:flex;align-items:center;gap:16px;height:64px;
       background:linear-gradient(90deg,var(--brandA),var(--brandB));background-size:200% 200%;animation:barShift 8s ease-in-out infinite;
-      padding:0 16px;box-shadow:0 2px 14px rgba(40,40,80,.15)}
+      padding:0 16px;box-shadow:0 2px 14px rgba(40,40,80,.15);z-index:100}
     @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .brand img{height:44px}
     .grow{flex:1}
     .btn{border:0;border-radius:14px;padding:10px 16px;font-weight:600;cursor:pointer}
     .btn.primary{background:#111827;color:#fff}
-    .btn.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35)}
-
+    .btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.18)}
+    /* hero */
     .hero{max-width:1100px;margin:24px auto;padding:20px 16px}
     .panel{background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:800% 800%;animation:panelBG 15s ease infinite;
       border-radius:20px;padding:28px;box-shadow:0 10px 30px rgba(30,40,90,.08);color:#fff;text-align:center}
     @keyframes panelBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .title{font-size:42px;font-weight:900;margin:0 0 12px}
+    .title{font-size:44px;font-weight:900;margin:0 0 12px}
     .subtitle{font-size:20px;margin:0 0 20px}
-
-    /* Slogan panel */
+    /* slogan */
     .slogan-panel{margin:20px auto;max-width:900px;padding:30px;border-radius:20px;text-align:center;color:#fff;
-      background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));
-      background-size:800% 800%;animation:sloganBG 20s ease infinite}
+      background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:800% 800%;animation:sloganBG 20s ease infinite}
     @keyframes sloganBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .slogan-rotator{font-size:26px;font-weight:700;min-height:30px;transition:opacity 2s ease}
-
-    /* Kategori kartları */
+    .slogan-rotator{font-size:26px;font-weight:700;min-height:34px;transition:opacity 1.5s ease}
+    /* grid */
     .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:20px}
-    .card{border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;text-align:center;
-      color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1)}
+    .card{border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
+      color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1);transition:transform .18s}
+    .card:hover{transform:translateY(-6px)}
     @keyframes cardColors{0%{background:var(--c1)}25%{background:var(--c2)}50%{background:var(--c3)}75%{background:var(--c4)}100%{background:var(--c1)}}
-    .emoji{font-size:26px}
-
-    /* Özellikler ve alt kısım */
-    .features{display:grid;gap:12px;margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+    .emoji{font-size:28px}
+    /* features */
+    .features{display:grid;gap:12px;margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
     .feature{padding:14px;border-radius:14px;color:#fff;text-align:center;animation:cardColors 20s infinite alternate ease-in-out}
+    /* dialog styles fallback */
+    dialog{border:0;border-radius:14px;padding:0}
+    .modal{padding:18px}
+    .in{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,.08);margin-bottom:8px}
+    .x{position:absolute;top:10px;right:12px;background:transparent;border:0;font-size:20px;cursor:pointer}
+    @media (prefers-color-scheme: dark){ body{background:#0c1019;color:#e8ecf8} .panel,.feature{box-shadow:none} }
   </style>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#"><img src="assets/img/seffaf.png" alt="logo"/></a>
     <div class="grow"></div>
-    <button class="btn ghost" id="btnLoginOpen" onclick="document.getElementById('dlgLogin').showModal()">Giriş Yap</button>
-    <button class="btn primary" id="btnSignupOpen" onclick="document.getElementById('dlgSignup').showModal()">Kaydol</button>
+    <!-- onclick fallback ensures modallar çalışır -->
+    <button class="btn ghost" id="btnLoginOpen" onclick="document.getElementById('dlgLogin') && document.getElementById('dlgLogin').showModal()">Giriş Yap</button>
+    <button class="btn primary" id="btnSignupOpen" onclick="document.getElementById('dlgSignup') && document.getElementById('dlgSignup').showModal()">Kaydol</button>
   </header>
 
   <main class="hero">
-    <section class="panel">
-      <h1 class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
+    <section class="panel" aria-labelledby="welcome-title">
+      <h1 id="welcome-title" class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
       <p class="subtitle">Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.</p>
     </section>
 
-    <section class="slogan-panel">
-      <div class="slogan-rotator" id="slogan"></div>
+    <section class="slogan-panel" aria-hidden="false">
+      <div class="slogan-rotator" id="slogan" aria-live="polite"></div>
     </section>
 
-    <section class="panel">
-      <h2 style="margin-bottom:12px">Kategoriler</h2>
-      <div class="grid">
-        <div class="card"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
-        <div class="card"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
-        <div class="card"><div class="emoji">🚗</div><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet, yedek parça</p></div>
-        <div class="card"><div class="emoji">🧸</div><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></div>
-        <div class="card"><div class="emoji">👗</div><h3>Giyim</h3><p>Kadın, erkek, çocuk</p></div>
-        <div class="card"><div class="emoji">⚡</div><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak</p></div>
-        <div class="card"><div class="emoji">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></div>
-        <div class="card"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
+    <section class="panel" aria-labelledby="cats-title" style="margin-top:12px">
+      <h2 id="cats-title" style="margin-bottom:12px">Kategoriler</h2>
+      <div class="grid" role="list">
+        <div class="card" role="listitem"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
+        <div class="card" role="listitem"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
+        <div class="card" role="listitem"><div class="emoji">🚗</div><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet, yedek parça</p></div>
+        <div class="card" role="listitem"><div class="emoji">🧸</div><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></div>
+        <div class="card" role="listitem"><div class="emoji">👗</div><h3>Giyim</h3><p>Kadın, erkek, çocuk</p></div>
+        <div class="card" role="listitem"><div class="emoji">⚡</div><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak</p></div>
+        <div class="card" role="listitem"><div class="emoji">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></div>
+        <div class="card" role="listitem"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
       </div>
 
-      <div class="features">
+      <div class="features" style="margin-top:18px">
         <div class="feature">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
         <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
         <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
@@ -92,27 +96,129 @@
     <section class="panel" style="margin-top:20px">
       <h2>KVKK</h2>
       <p>Veri sorumlusu: Takas Çemberi A.Ş.<br/>Toplanan veriler: Ad, iletişim, işlem kayıtları.<br/>Amaç: Üyelik, güvenli takas, müşteri desteği.<br/>Haklarınız: Bilgi alma, düzeltme, silme, itiraz.</p>
-      <h2>Gizlilik</h2>
+      <h3>Gizlilik</h3>
       <p>Çerez kullanımı ve tercih yönetimi.<br/>Üçüncü taraflarla paylaşım ilkeleri.<br/>Veri saklama süreleri ve şifreleme.</p>
-      <h2>Güvenlik</h2>
+      <h3>Güvenlik</h3>
       <p>SSL/TLS ile şifreli bağlantı.<br/>2FA ve anormal aktivite izleme.<br/>İçerik moderasyonu ve raporlama.</p>
-      <h2>SSL Bilgisi</h2>
+      <h3>SSL Bilgisi</h3>
       <p>Modern protokoller (TLS 1.3) desteği.<br/>Güncel sertifika ve HSTS uygulanması.<br/>Güvenli çerçeve ve CORS politikaları.</p>
-      <h2>Kullanım Şartları</h2>
+      <h3>Kullanım Şartları</h3>
       <p>İlan kuralları ve yasaklı içerikler.<br/>Üyelik sorumlulukları ve fesih.<br/>Uyuşmazlık ve yetkili yargı mercii.</p>
-      <p>© 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️</p>
+      <p style="margin-top:8px">© 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️</p>
     </section>
   </main>
 
+  <!-- MODALS -->
+  <dialog id="dlgLogin" aria-modal="true" role="dialog">
+    <form method="dialog" class="modal" style="min-width:min(520px,95vw);padding:18px;position:relative">
+      <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
+      <h3 style="margin:0 0 12px">Giriş Yap</h3>
+      <button type="button" class="btn primary" id="btnGoogleLogin" style="width:100%;margin-bottom:10px">Google ile Giriş</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="flex:1;height:1px;background:#e8eaf3"></span><small style="color:#6b7280">veya e-posta ile</small><span style="flex:1;height:1px;background:#e8eaf3"></span></div>
+      <input class="in" type="email" id="loginEmail" placeholder="E-posta" required />
+      <input class="in" type="password" id="loginPass" placeholder="Şifre" required />
+      <button type="button" class="btn primary" id="btnEmailLogin" style="width:100%;margin-top:8px">Giriş Yap</button>
+    </form>
+  </dialog>
+
+  <dialog id="dlgSignup" aria-modal="true" role="dialog">
+    <form method="dialog" class="modal" style="min-width:min(560px,95vw);padding:18px;position:relative">
+      <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
+      <h3 style="margin:0 0 12px">Kaydol</h3>
+      <button type="button" class="btn primary" id="btnGoogleSignup" style="width:100%;margin-bottom:10px">Google ile Devam Et</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="flex:1;height:1px;background:#e8eaf3"></span><small style="color:#6b7280">veya formu doldur</small><span style="flex:1;height:1px;background:#e8eaf3"></span></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input class="in" type="text" id="firstName" placeholder="İsim" required style="flex:1"/>
+        <input class="in" type="text" id="lastName" placeholder="Soyisim" required style="flex:1"/>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input class="in" type="text" id="city" placeholder="Yaşadığı Şehir" required style="flex:1"/>
+        <input class="in" type="text" id="username" placeholder="Kullanıcı Adı" required style="flex:1"/>
+      </div>
+      <input class="in" type="email" id="email" placeholder="E-posta" required />
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input class="in" type="password" id="pass1" placeholder="Şifre" required style="flex:1"/>
+        <input class="in" type="password" id="pass2" placeholder="Şifre (tekrar)" required style="flex:1"/>
+      </div>
+      <button type="button" class="btn primary" id="btnEmailSignup" style="width:100%;margin-top:10px">Kaydol</button>
+    </form>
+  </dialog>
+
   <script>
+    // --- SLOGAN ROTATOR ---
     const slogans = [
       "Yükle • Takasla • Kazan",
       "Paylaş • Değiş • Mutlu Ol",
       "Doğaya • Bütçene • Dost"
     ];
-    let i=0;const box=document.getElementById('slogan');
-    function rotate(){box.style.opacity=0;setTimeout(()=>{box.textContent=slogans[i];box.style.opacity=1;i=(i+1)%slogans.length},2000)}
-    rotate();setInterval(rotate,15000);
+    let i=0;
+    const box = document.getElementById('slogan');
+    function rotateSlogan(){
+      if(!box) return;
+      box.style.opacity = 0;
+      setTimeout(()=>{
+        box.textContent = slogans[i];
+        box.style.opacity = 1;
+        i = (i+1) % slogans.length;
+      }, 600);
+    }
+    rotateSlogan();
+    setInterval(rotateSlogan, 15000);
+
+    // --- MODAL BAĞLANTILARI (ek güvenlik: varsa JS listener'ları) ---
+    (function(){
+      const dlgLogin = document.getElementById('dlgLogin');
+      const dlgSignup = document.getElementById('dlgSignup');
+      const bLoginOpen = document.getElementById('btnLoginOpen');
+      const bSignupOpen = document.getElementById('btnSignupOpen');
+
+      // Eğer showModal desteklenmiyorsa polyfill fallback (basit)
+      if (!HTMLDialogElement.prototype.showModal) {
+        HTMLDialogElement.prototype.showModal = function(){ this.style.display='block'; };
+        HTMLDialogElement.prototype.close = function(){ this.style.display='none'; };
+      }
+
+      try {
+        if(bLoginOpen) bLoginOpen.addEventListener('click', ()=> dlgLogin && dlgLogin.showModal());
+        if(bSignupOpen) bSignupOpen.addEventListener('click', ()=> dlgSignup && dlgSignup.showModal());
+      } catch(e){ /* silent */ }
+
+      // modal içindeki butonları bağla (şu an sadece UI)
+      document.getElementById('btnEmailLogin')?.addEventListener('click', ()=>{
+        alert('Test: e-posta ile giriş (henüz backend yok)');
+        dlgLogin.close();
+      });
+      document.getElementById('btnGoogleLogin')?.addEventListener('click', ()=>{
+        alert('Test: Google ile giriş (henüz backend yok)');
+        dlgLogin.close();
+      });
+      document.getElementById('btnEmailSignup')?.addEventListener('click', ()=>{
+        const p1 = document.getElementById('pass1').value;
+        const p2 = document.getElementById('pass2').value;
+        if(p1 !== p2){ alert('Şifreler eşleşmiyor'); return; }
+        alert('Test: kayıt formu gönderildi (henüz backend yok)');
+        dlgSignup.close();
+      });
+      document.getElementById('btnGoogleSignup')?.addEventListener('click', ()=>{
+        alert('Test: Google ile kayıt (henüz backend yok)');
+        dlgSignup.close();
+      });
+    })();
+
+    // --- (Opsiyonel) Firebase config hazır (kullanmak istersen uncomment) ---
+    /*
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = initializeApp(firebaseConfig);
+    */
+
   </script>
 </body>
 </html>
