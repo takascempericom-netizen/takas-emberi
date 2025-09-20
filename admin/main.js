@@ -48,19 +48,19 @@ async function loadTab(tab){
   panelBody.innerHTML = `<p style="color:#888">Yükleniyor...</p>`;
   try {
     if(tab==="pending"){
-      const mod = await import(/admin/pending.js);
+      const mod = await import('/admin/pending.js');
       if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
     }
     if(tab==="support"){
-      const mod = await import(/admin/support.js);
+      const mod = await import('/admin/support.js');
       if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
     }
     if(tab==="users"){
-      const mod = await import(/admin/users.js);
+      const mod = await import('/admin/users.js');
       if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
     }
     if(tab==="broadcast"){
-      const mod = await import(/admin/broadcast.js);
+      const mod = await import('/admin/broadcast.js');
       if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
     }
   } catch(e){
