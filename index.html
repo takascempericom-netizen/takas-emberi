@@ -178,17 +178,37 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
     appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
   };
 
-  const app  = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  (async()=>{try{await setPersistence(auth,indexedDBLocalPersistence);}catch{await setPersistence(auth,browserLocalPersistence);}})();const $ = (s, r=document)=>r.querySelector(s);
 
+  try { await setPersistence(auth, indexedDBLocalPersistence); }
+  catch { await setPersistence(auth, browserLocalPersistence); }
 
-  // Google ile giriş → /home.html
+  const $ = (sel, root=document) => root.querySelector(sel);
+
+  // Dialog açma
+  const openDlg = (sel) => {
+    const d = $(sel);
+    if (!d) return;
+    if (typeof d.showModal === "function") d.showModal();
+    else d.setAttribute("open", "");
+  };
+  $("#btnLoginOpen")?.addEventListener("click", ()=>openDlg("#dlgLogin"));
+  $("#btnSignupOpen")?.addEventListener("click", ()=>openDlg("#dlgSignup"));
+
+  // Şifre göster/gizle
+  addEventListener("click",(e)=>{
+    const t=e.target;
+    if(t?.classList?.contains("toggle")){
+      const id=t.getAttribute("data-target");
+      const inp=$("#"+id);
+      if(inp) inp.type = (inp.type==="password"?"text":"password");
+    }
+  });
+
+  // Google ile giriş/kayıt
   const provider = new GoogleAuthProvider();
-  async function googleLogin(){
-    await signInWithPopup(auth, provider);
-    location.href = "/home.html";
-  }
+  async function googleLogin(){ await signInWithPopup(auth, provider); location.href="/home.html"; }
   $("#btnGoogleLogin")?.addEventListener("click", googleLogin);
   $("#btnGoogleSignup")?.addEventListener("click", googleLogin);
 
@@ -197,37 +217,43 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
     const email = $("#loginEmail")?.value?.trim() || "";
     const pass  = $("#loginPass")?.value || "";
     if(!email || !pass) return;
-
     const { user } = await signInWithEmailAndPassword(auth, email, pass);
-    if (!user.emailVerified) {
-      try { await sendEmailVerification(user); } catch {}
+    if(!user.emailVerified){
+      try{ await sendEmailVerification(user); }catch{}
       alert("E-postanı doğrulaman gerekiyor. Doğrulama linkini gönderdik. Gelen kutunu/SPAM’ı kontrol et.");
-      try { await signOut(auth); } catch {}
+      try{ await signOut(auth); }catch{}
       return;
     }
-    location.href = "/home.html";
+    location.href="/home.html";
   });
 
-  // Şifremi Unuttum
+  // Şifremi unuttum
   $("#btnForgot")?.addEventListener("click", async ()=>{
     let email = $("#loginEmail")?.value?.trim() || prompt("E-posta:") || "";
     if(!email) return;
     await sendPasswordResetEmail(auth, email);
-    alert("Sıfırlama e-postası gönderildi: " + email);
+    alert("Sıfırlama e-postası gönderildi: "+email);
+  });
+
+  // Doğrulama mailini tekrar gönder (oturum açıksa)
+  $("#btnResendVerify")?.addEventListener("click", async ()=>{
+    const u = auth.currentUser;
+    if(!u){ alert("Önce giriş yapmalısın."); return; }
+    try{ await sendEmailVerification(u); alert("Doğrulama e-postası gönderildi."); }catch{ alert("Gönderilemedi."); }
   });
 
   // Çıkış
   $("#btnLogout")?.addEventListener("click", async ()=>{
-    try { await signOut(auth); } catch {}
-    location.href = "/";
+    try{ await signOut(auth); }catch{}
+    location.href="/";
   });
 
-  // Yedek: oturum açık & doğrulanmışsa /home.html
+  // Oturum durumu
   onAuthStateChanged(auth, (user)=>{
     const verified = !!user && (user.emailVerified || (user?.providerData||[]).some(p=>p.providerId==="google.com"));
-    if (verified && !/\/home\.html$/.test(location.pathname)) {
-      location.replace("/home.html");
-    }
+    const onHome = /\/home\.html$/.test(location.pathname);
+    const logoutBtn = $("#btnLogout"); if(logoutBtn) logoutBtn.style.display = user ? "" : "none";
+    if(verified && !onHome){ location.replace("/home.html"); }
   });
 </script>
   </body>
