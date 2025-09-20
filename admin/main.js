@@ -29,14 +29,14 @@ onAuthStateChanged(auth, (user)=>{
 });
 
 // Logout
-$(#btnLogout).addEventListener(click, async ()=>{
+document.querySelector('#btnLogout').addEventListener('click', async ()=>{
   try { await signOut(auth); } catch {}
   location.href="/admin/login.html";
 });
 
 // Sekme geçişleri
 navBtns.forEach(btn=>{
-  btn.addEventListener(click, ()=>{
+  btn.addEventListener('click', ()=>{
     navBtns.forEach(b=>b.classList.remove(active));
     btn.classList.add(active);
     loadTab(btn.dataset.tab);
