@@ -1,11 +1,12 @@
 // takas-emberi/admin/broadcast.js
 import { getFirestore, collection, addDoc, serverTimestamp } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getApp as coreGetApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-const db = getFirestore(coreGetApp());
-const auth = getAuth(coreGetApp());
+const app = getApp();
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 export function render(el){
   el.innerHTML = `
