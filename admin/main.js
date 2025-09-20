@@ -17,7 +17,7 @@ const auth = getAuth(app);
 const ADMIN_EMAIL = "ozkank603@gmail.com";
 
 const $ = (s,r=document)=>r.querySelector(s);
-const panelBody = $(#panelBody);
+const panelBody = $(panelBody);
 const navBtns = document.querySelectorAll(.nav-btn);
 
 // Auth kontrol
