@@ -144,6 +144,7 @@
       <button type="button" class="btn primary" id="btnEmailLogin" style="width:100%;margin-top:8px">Giriş Yap</button>
       <div style="text-align:center;margin-top:8px">
         <button type="button" id="btnForgot" style="background:none;border:0;color:#60a5fa;font-weight:700;cursor:pointer">Şifremi Unuttum</button>
+        <button type="button" id="btnResendVerify" style="background:none;border:0;color:#34d399;font-weight:700;cursor:pointer">Doğrulama Mailini Tekrar Gönder</button>
       </div>
     </form>
   </dialog>
@@ -180,7 +181,7 @@
   <script type="module">
     /* Firebase */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, initializeAuth, browserLocalPersistence, indexedDBLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -258,13 +259,189 @@ import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
     });
 
     // Şifre sıfırlama
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
     $('#btnForgot')?.addEventListener('click', async ()=>{
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
       let email = $('#loginEmail')?.value?.trim();
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
       if(!email){ email = prompt('Şifre sıfırlama için e‑posta:')?.trim() || ''; }
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
       if(!email) return;
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
       await sendPasswordResetEmail(auth, email);
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
       alert('Sıfırlama e‑postası gönderildi: '+email);
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
     });
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
   </script>
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
 </body>
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
 </html>
+        // Doğrulama yeniden gönder
+        $('#btnResendVerify')?.addEventListener('click', async ()=>{
+          const email = $('#loginEmail')?.value?.trim() || prompt('E-posta:')?.trim() || '';
+          if(!email) return;
+          try {
+            const tempPass = $('#loginPass')?.value || prompt('Şifre (geçici giriş için):') || '';
+            if(!tempPass) return;
+            const { user } = await signInWithEmailAndPassword(auth, email, tempPass);
+            await sendEmailVerification(user);
+            alert('Doğrulama e-postası gönderildi: '+email);
+          } catch(e) {
+            alert('Gönderilemedi: ' + (e?.message || e));
+          } finally {
+            try { await signOut(auth); } catch {}
+          }
+        });
