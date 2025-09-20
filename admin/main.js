@@ -22,7 +22,7 @@ const navBtns = document.querySelectorAll('.nav-btn');
 // Auth kontrol
 onAuthStateChanged(auth, (user)=>{
   if(!user || user.email !== ADMIN_EMAIL){
-    window.location.replace(/admin/login.html);
+    window.location.replace('/admin/login.html');
   } else {
     loadTab("pending");
   }
