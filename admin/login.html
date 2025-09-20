@@ -1,197 +1,87 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin Giriş • Takas Çemberi</title>
-  <link rel="icon" href="/favicon.png">
+  <meta name="color-scheme" content="dark light"/>
   <style>
-    :root{
-      --bg1:#0b0b10; --bg2:#12121a; --ink:#e8e8f3; --muted:#a3a7bf; --line:#23263a; --focus:#38bdf8;
-      --brandA:#6a5cff; --brandB:#00d4ff; --danger:#ef4444; --ok:#10b981; --panel:#0f1422; --panel2:#0b0f1b;
-    }
+    :root{--bg:#0b0b10;--panel:#0f1422;--ink:#e8ecf8;--muted:#a4acc7;--line:#23263a;--focus:#38bdf8;--btn:#111827;--ok:#10b981;--danger:#ef4444}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 600px at 10% 10%,#151826 0%,transparent 60%), radial-gradient(900px 500px at 90% 90%,#151826 0%,transparent 60%), linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--ink)}
-
-    .wrap{min-height:100%;display:grid;place-items:center;padding:24px}
-
-    /* Panel */
-    .card{
-      width:min(480px,95vw);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius:18px; padding:22px 18px; position:relative; overflow:hidden;
-      box-shadow:0 12px 40px rgba(0,0,0,.45);
-    }
-    /* Sadece çerçevede dalgalı koyu hat */
-    .card::before{content:"";position:absolute;inset:-2px;border-radius:20px; padding:2px; background:conic-gradient(from 0deg, #0f172a, #111827, #0b1220, #1f2937, #0f172a); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:spin 10s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    h1{margin:0 0 2px;font-size:22px}
-    .sub{margin:0 0 14px;color:var(--muted);font-size:14px}
-
+    body{margin:0;background:linear-gradient(180deg,#0b0b10,#141622);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;display:grid;place-items:center}
+    .card{width:min(480px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    h1{margin:0 0 6px;font-size:20px}
+    p{margin:0 0 16px;color:var(--muted)}
     label{display:block;font-weight:700;margin:10px 0 6px}
-    .in{width:100%;padding:12px 44px 12px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:15px}
+    .in{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b0f1b;color:var(--ink)}
     .in:focus{outline:2px solid var(--focus);border-color:transparent}
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-
-    .btn{width:100%;padding:12px;border-radius:12px;border:0;background:#111827;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}
-    .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
-
-    .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#9fb2d7;cursor:pointer}
-
-    .err{display:none;margin:10px 0 0;padding:10px;border-radius:10px;background:rgba(239,68,68,.12);color:#fecaca;border:1px solid rgba(239,68,68,.35)}
-    .ok{display:none;margin:10px 0 0;padding:10px;border-radius:10px;background:rgba(16,185,129,.12);color:#bbf7d0;border:1px solid rgba(16,185,129,.35)}
-
-    .footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;background:var(--btn);color:#fff;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    small.hint{display:block;color:#90a1c9;margin-top:6px}
   </style>
-<style id="fix-login-pointer">input,button{pointer-events:auto!important}button[disabled]{opacity:.6}</style>
-<style id="kill-admin-anim">[class*=anim],[class*=spin],[class*=orbit],.bg-anim,.spinner{display:none!important} .overlay,.backdrop,.mask{pointer-events:none!important} input,button{pointer-events:auto!important}</style>
 </head>
 <body>
-  <main class="wrap">
-    <form autocomplete="off" autocomplete="off" id="adminLogin" class="card" autocomplete="on">
-      <h1>Admin Girişi</h1>
-      <p class="sub">Yalnızca yetkili kullanıcılar giriş yapabilir.</p>
-
-      <label for="email">E‑posta</label>
-      <input id="email" autocomplete="off" autocomplete="off" class="in" type="email" placeholder="ornek@site.com" required />
+  <main class="card">
+    <h1>Admin Giriş</h1>
+    <p>Lütfen admin e-posta ve şifrenizi girin.</p>
+    <form id="loginForm" autocomplete="off" novalidate>
+      <label for="email">E-posta</label>
+      <input id="email" name="email" type="email" class="in" placeholder="ornek@site.com" autocomplete="off" required>
 
       <label for="pass">Şifre</label>
-      <div style="position:relative">
-        <input id="pass" autocomplete="off" autocomplete="off" class="in" type="password" placeholder="••••••••" required />
-        <button type="button" id="toggle" class="eye" aria-label="Şifreyi Göster">Göster</button>
+      <input id="pass" name="pass" type="password" class="in" placeholder="••••••••" autocomplete="new-password" required>
+
+      <div class="row">
+        <small class="hint">Sadece yetkili kullanıcılar.</small>
+        <button id="btnLogin" type="submit" class="btn">Giriş Yap</button>
       </div>
-
-      <div class="row" style="margin:10px 0 6px">
-        <label style="display:flex;gap:8px;align-items:center;margin:0"><input id="remember" type="checkbox"/> Beni hatırla</label>
-        <button type="button" id="forgot" style="background:none;border:0;color:#93c5fd;cursor:pointer">Şifremi unuttum</button>
-      </div>
-
-      <button class="btn" type="submit">Giriş Yap</button>
-
-      <div id="err" class="err"></div>
-      <div id="ok" class="ok">Giriş başarılı, yönlendiriliyorsunuz…</div>
-
-      <p class="footer">© 2025 Takas Çemberi • Admin Paneli</p>
     </form>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    // Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
       projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.appspot.com",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
       messagingSenderId: "621494781131",
       appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
+    (async()=>{ try{ await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); } })();
 
-    const $ = (s, r=document)=>r.querySelector(s);
-    const form = $('#adminLogin');
-    const email = $('#email');
-    const pass  = $('#pass');
-    const errBx = $('#err');
-    const okBx  = $('#ok');
+    // DOM
+    const $ = (s,r=document)=>r.querySelector(s);
+    const form = $("#loginForm");
+    const email = $("#email");
+    const pass  = $("#pass");
+    const btn   = $("#btnLogin");
 
-    const ADMIN_EMAIL = 'ozkank603@gmail.com'; // sadece bu e‑posta panele girebilir
+    // Her ihtimale karşı giriş engellerini temizle
+    [email,pass,btn].forEach(el=>{ if(!el) return; el.removeAttribute("readonly"); el.removeAttribute("disabled"); el.style.pointerEvents="auto"; });
 
-    // Giriş yapılmışsa ve admin ise indexe at
-    onAuthStateChanged(auth, (user)=>{
-      if(!user) return;
-      if(user.email === ADMIN_EMAIL){
-        window.location.replace('/admin/index.html');
-      } else {
-        // yanlış bir kullanıcı oturum açtıysa kapat
-        signOut(auth).catch(()=>{});
+    form.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const mail = (email.value||"").trim();
+      const pwd  = pass.value||"";
+      if(!mail || !pwd){ alert("E-posta ve şifre gerekli."); return; }
+      btn.disabled = true;
+      try{
+        await signInWithEmailAndPassword(auth, mail, pwd);
+        // Başarılı giriş → admin ana
+        location.href = "/admin/index.html";
+      }catch(err){
+        alert("Giriş hatası: " + (err?.message || err));
+        btn.disabled = false;
       }
     });
-
-    $('#toggle')?.addEventListener('click', ()=>{
-      const t = pass.getAttribute('type') === 'password' ? 'text' : 'password';
-      pass.setAttribute('type', t);
-      $('#toggle').textContent = t === 'password' ? 'Göster' : 'Gizle';
-    });
-
-    $('#forgot')?.addEventListener('click', async ()=>{
-      const mail = (email.value||'').trim();
-      if(!mail){ err('E‑posta yazın.'); return; }
-      try{ await sendPasswordResetEmail(auth, mail); ok('Şifre sıfırlama e‑postası gönderildi.'); }
-      catch(e){ err(humanError(e)); }
-    });
-
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault(); hideAll();
-      const mail = (email.value||'').trim();
-      const pw   = pass.value;
-
-      if(mail !== ADMIN_EMAIL){ err('Yetkisiz e‑posta. Bu panele sadece yetkili hesap erişebilir.'); return; }
-
-      try{
-        await signInWithEmailAndPassword(auth, mail, pw);
-        ok('Giriş başarılı. Yönlendiriliyor…');
-        setTimeout(()=>window.location.replace('/admin/index.html'), 600);
-      }catch(e){ err(humanError(e)); }
-    });
-
-    function hideAll(){ errBx.style.display='none'; okBx.style.display='none'; }
-    function err(m){ errBx.textContent=m; errBx.style.display='block'; }
-    function ok(m){ okBx.textContent=m; okBx.style.display='block'; }
-    function humanError(e){
-      const c = e?.code||'';
-      if(c.includes('invalid-credential')||c.includes('wrong-password')) return 'E‑posta veya şifre hatalı.';
-      if(c.includes('too-many-requests')) return 'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.';
-      if(c.includes('user-not-found')) return 'Kullanıcı bulunamadı.';
-      return 'Giriş yapılamadı: '+(e?.message||'bilinmeyen hata');
-    }
-
-    // "Beni hatırla" için kalıcılığı değiştir
-    $('#remember')?.addEventListener('change', async (ev)=>{
-      try{
-        await setPersistence(auth, ev.target.checked ? indexedDBLocalPersistence : browserLocalPersistence);
-      }catch{}
-    });
   </script>
-<script id="kill-admin-anim-js">(function(){[.bg-anim,.spinner,.login-orbit,.login-waves,[data-anim]].forEach(function(s){document.querySelectorAll(s).forEach(function(n){n.remove();});}); [email,pass].forEach(function(id){var el=document.getElementById(id); if(el){el.removeAttribute(readonly); el.removeAttribute(disabled); el.style.pointerEvents=auto;}}); var btn=document.getElementById(btnLogin)||document.querySelector(button[type=submit]); if(btn){btn.disabled=false; btn.style.pointerEvents=auto;}})();</script>
 </body>
 </html>
-<script type=\\"module\\">
-  import { initializeApp } from \\"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js\\";
-  import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signInWithEmailAndPassword } from \\"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js\\";
-
-  // Firebase config (projenle aynı)
-  const firebaseConfig = {
-    apiKey: \\"AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg\\",
-    authDomain: \\"ureten-eller-v2.firebaseapp.com\\",
-    projectId: \\"ureten-eller-v2\\",
-    storageBucket: \\"ureten-eller-v2.firebasestorage.app\\",
-    messagingSenderId: \\"621494781131\\",
-    appId: \\"1:621494781131:web:13cc3b061a5e94b7cf874e\\"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  (async()=>{ try{ await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); } })();
-
-  const $ = (s,r=document)=>r.querySelector(s);
-  const form  = $(form);
-  const email = $(#email);
-  const pass  = $(#pass);
-  const btn   = $(#btnLogin) || (form ? form.querySelector(button[type=submit]) : null);
-
-  // Yazılabilir/kliklenebilir olmasını garanti altına al
-  [email,pass,btn].forEach(el=>{ if(!el) return; el.removeAttribute(readonly); el.removeAttribute(disabled); el.style.pointerEvents=auto; });
-
-  form && form.addEventListener(submit, async (e)=>{
-    e.preventDefault();
-    const mail = (email?.value||).trim();
-    const pwd  = pass?.value||;
-    if(!mail || !pwd){ alert(E-posta
