@@ -1,7 +1,6 @@
 // takas-emberi/admin/main.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 // --- Firebase ---
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",
@@ -17,8 +16,8 @@ const auth = getAuth(app);
 const ADMIN_EMAIL = "ozkank603@gmail.com";
 
 const $ = (s,r=document)=>r.querySelector(s);
-const panelBody = $(panelBody);
-const navBtns = document.querySelectorAll(.nav-btn);
+const panelBody = '#panelBody' ? document.querySelector('#panelBody') : null;
+const navBtns = document.querySelectorAll('.nav-btn');
 
 // Auth kontrol
 onAuthStateChanged(auth, (user)=>{
