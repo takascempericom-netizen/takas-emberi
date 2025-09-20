@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Panel • Takas Çemberi</title>
+  <link rel="icon" href="/favicon.png">
+  <style>
+    :root{--bg:#0b0b10;--ink:#e8e8f3;--muted:#a3a7bf;--line:#23263a;--panel:#0f1422;--btn:#111827;--ok:#10b981;--danger:#ef4444;}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0b10,#12121a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:#0d1019;position:sticky;top:0;z-index:10}
+    header h1{font-size:16px;margin:0;color:#fff}
+    header .grow{flex:1}
+    header .btn{background:var(--btn);color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+    main{max-width:1100px;margin:16px auto;padding:0 16px}
+    #pendingToolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    #pendingToolbar input,#pendingToolbar select{background:#0b0f1b;color:#eaeafa;border:1px solid var(--line);border-radius:10px;padding:10px;min-width:180px}
+    #pendingToolbar button{background:#111827;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .row{display:flex;gap:10px}
+    .grow{flex:1}
+    .ttl{font-weight:800}
+    .meta,.muted{color:var(--muted);font-size:12px}
+    .actions{display:flex;gap:6px;align-items:center}
+    .btn{background:#111827;color:#fff;border:0;border-radius:10px;padding:8px 10px;cursor:pointer}
+    .btn.sm{padding:6px 8px;font-size:12px}
+    .btn.ok{background:var(--ok)}
+    .btn.danger{background:var(--danger)}
+    #btnMore{margin:16px auto 0;display:block}
+    dialog{border:0;border-radius:14px;background:#0f1422;color:#fff;border:1px solid var(--line);max-width:95vw;padding:0}
+    dialog article{padding:14px 14px 12px}
+    #dlgClose{position:absolute;right:10px;top:8px;background:transparent;border:0;color:#9fb2d7;font-size:20px;cursor:pointer}
+    /* Toast */
+    .adm-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:-60px;background:#1f2937;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;transition:all .25s;border:1px solid #374151;z-index:50}
+    .adm-toast.show{bottom:16px;opacity:1}
+    .adm-toast.ok{background:#065f46}
+    .adm-toast.danger{background:#7f1d1d}
+    .adm-toast.warn{background:#78350f}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Panel</h1>
+    <div class="grow"></div>
+    <button id="btnLogout" class="btn">Çıkış</button>
+  </header>
+
+  <main>
+    <!-- Filtre/toolbar -->
+    <div id="pendingToolbar">
+      <input id="search" placeholder="Başlıkta ara">
+      <select id="fCat">
+        <option value="">Kategori (tümü)</option>
+        <option value="tasit">Motorlu Taşıtlar</option>
+        <option value="tasinmaz">Taşınmaz</option>
+        <option value="oyuncak">Oyuncak</option>
+        <option value="giyim">Giyim</option>
+        <option value="beyaz">Beyaz Eşya</option>
+        <option value="teknoloji">Teknoloji</option>
+        <option value="mobilya">Mobilya</option>
+      </select>
+      <select id="fCity">
+        <option value="">Şehir (tümü)</option>
+        <option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option>
+      </select>
+      <button id="btnRefresh">Yenile</button>
+    </div>
+
+    <!-- Liste -->
+    <div id="pendingList" class="cards"></div>
+    <button id="btnMore" class="btn">Daha Fazla</button>
+
+    <!-- İnceleme diyaloğu -->
+    <dialog id="dlgView">
+      <article>
+        <button id="dlgClose">✕</button>
+        <div id="dlgBody"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+          <button id="dlgApprove" class="btn ok">Onayla</button>
+          <button id="dlgReject" class="btn danger">Reddet</button>
+        </div>
+      </article>
+    </dialog>
+  </main>
+
+  <!-- Pending JS -->
+  <script type="module" src="/admin/pending.js"></script>
+</body>
+</html>
