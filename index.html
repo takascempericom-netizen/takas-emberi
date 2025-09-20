@@ -194,7 +194,18 @@ import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const auth = initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence] });
+    // İlk yüklemede bozuk/expire oturumları temizle (400 accounts:lookup koruması)
+    (async () => {
+      try { await auth.authStateReady(); } catch (e) { console.warn("authStateReady", e); }
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) return;
+        try { await user.reload(); } catch (e) {
+          console.warn("stale session -> signOut", e);
+          try { await signOut(auth); } catch {}
+        }
+      });
+    })();
 // const actionCodeSettings = { url: 'https://takascemberi.com/verify-complete', handleCodeInApp: false };
 
     const $ = (s, r=document)=>r.querySelector(s);
