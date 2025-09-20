@@ -194,6 +194,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+ const actionCodeSettings = { url: 'https://takascemberi.com/verify-complete', handleCodeInApp: false };
 
     const $ = (s, r=document)=>r.querySelector(s);
 
