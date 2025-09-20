@@ -181,6 +181,7 @@
     /* Firebase */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithPopup, sendPasswordResetEmail, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -194,7 +195,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
- const actionCodeSettings = { url: 'https://takascemberi.com/verify-complete', handleCodeInApp: false };
+// const actionCodeSettings = { url: 'https://takascemberi.com/verify-complete', handleCodeInApp: false };
 
     const $ = (s, r=document)=>r.querySelector(s);
 
