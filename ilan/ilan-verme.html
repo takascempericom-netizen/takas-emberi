@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>İlan Ver • Takas Çemberi</title>
+  <link rel="icon" href="/favicon.png">
+  <style>
+    :root{
+      --bg:#f9fafb; --ink:#111827; --line:#d1d5db; --focus:#2563eb;
+      --muted:#6b7280; --btn:#111827; --btnInk:#fff;
+      --c1:#ff0080; --c2:#7928ca; --c3:#2afadf; --c4:#4facfe;
+      --frame1:#111; --frame2:#333; --frame3:#000; --frame4:#222;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .container{max-width:960px;margin:24px auto;padding:16px}
+    h1{margin-bottom:16px}
+    .panel{
+      position:relative;
+      background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4));
+      background-size:300% 300%;
+      animation:panelShift 12s ease-in-out infinite;
+      border-radius:16px;padding:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,.15);
+      color:#fff;
+      z-index:1;
+    }
+    @keyframes panelShift{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Çerçevede dönen koyu renkler kaldırıldı */
+
+    label{font-weight:600;display:block;margin-top:12px;margin-bottom:6px}
+    input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;color:var(--ink)}
+    input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);border-color:transparent}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row .col{flex:1;min-width:200px}
+    .row-inline{display:flex;gap:12px;flex-wrap:wrap}
+    .row-inline select{flex:1}
+
+    .btn{margin-top:20px;padding:12px 20px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--btn);color:var(--btnInk)}
+    .note{font-size:14px;color:var(--muted);margin-top:6px}
+    .preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .preview img{width:100px;height:100px;object-fit:cover;border-radius:8px;position:relative}
+    .imgBox{position:relative;display:inline-block}
+    .imgBox button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;cursor:pointer;width:22px;height:22px}
+    .closeX{position:absolute;top:8px;right:12px;background:none;border:0;font-size:22px;color:#fff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <form id="listingForm" class="panel">
+      <button class="closeX" type="button" onclick="this.closest('form').style.display='none'">✕</button>
+      <h1>İlan Ver</h1>
+      <label for="title">İlan Başlığı</label>
+      <input id="title" required>
+
+      <label for="desc">Açıklama</label>
+      <textarea id="desc" rows="4" required></textarea>
+
+      <label for="photos">Fotoğraflar</label>
+      <input id="photos" type="file" multiple accept="image/*">
+      <div id="preview" class="preview"></div>
+      <p class="note">En fazla 5 fotoğraf yükleyebilirsiniz.</p>
+
+      <div class="row">
+        <div class="col">
+          <label for="city">Şehir</label>
+          <select id="city" required>
+            <option value="">Seçiniz</option>
+            <option>Adana</option><option>Adıyaman</option><option>Afyonkarahisar</option><option>Ağrı</option><option>Amasya</option>
+            <option>Ankara</option><option>Antalya</option><option>Artvin</option><option>Aydın</option><option>Balıkesir</option>
+            <option>Bilecik</option><option>Bingöl</option><option>Bitlis</option><option>Bolu</option><option>Burdur</option>
+            <option>Bursa</option><option>Çanakkale</option><option>Çankırı</option><option>Çorum</option><option>Denizli</option>
+            <option>Diyarbakır</option><option>Edirne</option><option>Elazığ</option><option>Erzincan</option><option>Erzurum</option>
+            <option>Eskişehir</option><option>Gaziantep</option><option>Giresun</option><option>Gümüşhane</option><option>Hakkari</option>
+            <option>Hatay</option><option>Isparta</option><option>Mersin</option><option>İstanbul</option><option>İzmir</option>
+            <option>Kars</option><option>Kastamonu</option><option>Kayseri</option><option>Kırklareli</option><option>Kırşehir</option>
+            <option>Kocaeli</option><option>Konya</option><option>Kütahya</option><option>Malatya</option><option>Manisa</option>
+            <option>Kahramanmaraş</option><option>Mardin</option><option>Muğla</option><option>Muş</option><option>Nevşehir</option>
+            <option>Niğde</option><option>Ordu</option><option>Rize</option><option>Sakarya</option><option>Samsun</option>
+            <option>Siirt</option><option>Sinop</option><option>Sivas</option><option>Tekirdağ</option><option>Tokat</option>
+            <option>Trabzon</option><option>Tunceli</option><option>Şanlıurfa</option><option>Uşak</option><option>Van</option>
+            <option>Yozgat</option><option>Zonguldak</option><option>Aksaray</option><option>Bayburt</option><option>Kilis</option>
+            <option>Osmaniye</option><option>Düzce</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="district">İlçe</label>
+          <input id="district" required>
+        </div>
+      </div>
+
+      <div class="row-inline">
+        <div>
+          <label for="cat">Kategori</label>
+          <select id="cat" required>
+            <option value="">Seçiniz</option>
+            <option value="tasit">Motorlu Taşıtlar</option>
+            <option value="tasinmaz">Taşınmaz</option>
+            <option value="oyuncak">Oyuncak</option>
+            <option value="giyim">Giyim</option>
+            <option value="beyaz">Beyaz Eşya</option>
+            <option value="teknoloji">Teknoloji</option>
+            <option value="mobilya">Mobilya</option>
+          </select>
+        </div>
+        <div id="subcatWrap"></div>
+      </div>
+
+      <div id="subcatFields"></div>
+
+      <label for="cond">Durum</label>
+      <select id="cond" required>
+        <option value="">Seçiniz</option>
+        <option>Parçaniyetine</option>
+        <option>Kötü</option>
+        <option>Orta</option>
+        <option>İyi</option>
+        <option>Sıfır</option>
+      </select>
+
+      <button class="btn primary" type="submit">İlanı Gönder</button>
+    </form>
+  </main>
+
+  <script>
+    const photos = document.getElementById('photos');
+    const preview = document.getElementById('preview');
+
+    photos.addEventListener('change', ()=>{
+      preview.innerHTML='';
+      [...photos.files].forEach((file,i)=>{
+        const url = URL.createObjectURL(file);
+        const box = document.createElement('div');
+        box.className='imgBox';
+        box.innerHTML = `<img src="${url}"><button type="button">✕</button>`;
+        box.querySelector('button').onclick=()=>{
+          const dt=new DataTransfer();
+          [...photos.files].forEach((f,idx)=>{if(idx!==i) dt.items.add(f)});
+          photos.files=dt.files;
+          box.remove();
+        };
+        preview.appendChild(box);
+      });
+    });
+
+    const catSel = document.getElementById('cat');
+    const subcatDiv = document.getElementById('subcatFields');
+
+    catSel.addEventListener('change', ()=>{
+      subcatDiv.innerHTML = '';
+      if(catSel.value==='tasit'){
+        subcatDiv.innerHTML = `
+          <label>Alt Kategori</label>
+          <select required>
+            <option value="">Seçiniz</option>
+            <option>Araba</option>
+            <option>Motosiklet</option>
+            <option>Yedek Parça</option>
+          </select>
+          <label>Kilometre</label><input>
+          <label>Yıl</label><input type="number">
+          <label>Marka</label><input>
+          <label>Model</label><input>
+        `;
+      }
+      if(catSel.value==='tasinmaz'){
+        subcatDiv.innerHTML = `
+          <label>Alt Kategori</label>
+          <select required>
+            <option value="">Seçiniz</option>
+            <option>Konut</option>
+            <option>Arsa</option>
+            <option>Tarla</option>
+          </select>
+          <label>Metrekare</label><input type="number">
+          <label>Oda Sayısı</label><input>
+          <label>Kat</label><input>
+          <label>İmar Durumu</label><input>
+        `;
+      }
+    });
+
+    // Küfür filtre
+    const banned = ["piç","orospu","sik","amk","şerefsiz","b.k","aq","a.q","yalacı","kopek","pezevenk","amcık","göt","pezevenk","dolandırıcı","terror"];
+    document.getElementById('listingForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const text = (document.getElementById('title').value+" "+document.getElementById('desc').value).toLowerCase();
+      if(banned.some(w=>text.includes(w))){
+        alert("Toplum kurallarına aykırı kelime tespit edildi. Lütfen düzeltin.");
+        return;
+      }
+      alert('İlan kurallar gereği admin onayına gönderildi.');
+    });
+  </script>
+  <script type="module" src="ilanver.js"></script>
+</body>
+</html>
