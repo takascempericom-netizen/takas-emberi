@@ -1,4 +1,4 @@
-// profile/profile.js — FINAL (modal güvenli, incele/düzenle/sil/süre al)
+// profile/profile.js — FINAL: modal + foto + çift alan (uid/ownerId) desteği
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signOut, updateProfile,
@@ -51,8 +51,8 @@ const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 /* Çıkış */
 btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
 
-/* ---- Modal Refs (her seferinde taze al) ---- */
-function getModalRefs(){
+/* ---- Modal Refs ve fonksiyonları ---- */
+function refs(){
   return {
     modal: $("listingModal"),
     mTitle: $("mTitle"),
@@ -65,10 +65,23 @@ function getModalRefs(){
     mClose: $("mClose"),
   };
 }
-function openModal(){ const {modal}=getModalRefs(); modal?.classList.add("show"); }
-function closeModal(){ const {modal}=getModalRefs(); modal?.classList.remove("show"); }
+function openModal(){ refs().modal?.classList.add("show"); }
+function closeModal(){ refs().modal?.classList.remove("show"); }
 
-/* ---- RENDER LISTING (görsel + aksiyonlar) ---- */
+/* ---- Alt koleksiyondan ilk foto ---- */
+async function getFirstPhotoFromSub(listingId){
+  try{
+    const sub = collection(db, "listings", listingId, "photos");
+    const ss = await getDocs(sub);
+    for (const docu of ss.docs) {
+      const urls = docu.data()?.urls;
+      if (Array.isArray(urls) && urls.length) return urls[0];
+    }
+  }catch(e){ console.warn("[photos-sub] okunamadı:", e); }
+  return "";
+}
+
+/* ---- Kart oluşturucu ---- */
 window.renderListing = (item) => {
   const live    = document.getElementById("tab-live");
   const pending = document.getElementById("tab-pending");
@@ -109,7 +122,7 @@ window.renderListing = (item) => {
 
 /* ---- Modal doldur ---- */
 function fillModal(data, editable=false){
-  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave, mClose} = getModalRefs();
+  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave} = refs();
   if (![modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave].every(Boolean)) {
     console.error("[modal] DOM eksik, HTML'deki modal bloğunu kontrol et.");
     alert("İnceleme penceresi yüklenemedi. Lütfen sayfayı yenileyin.");
@@ -127,7 +140,6 @@ function fillModal(data, editable=false){
   mInputDesc.disabled  = !editable;
   mSave.style.display  = editable ? "inline-block" : "none";
   mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
-  mClose?.addEventListener("click", closeModal, { once:true });
 }
 
 /* ---- İlan Aksiyonları ---- */
@@ -135,8 +147,14 @@ async function viewListing(id, editable=false){
   const snap = await getDoc(doc(db,"listings",id));
   if (!snap.exists()) { alert("İlan bulunamadı."); return; }
   const d = snap.data()||{};
-  fillModal({ id, ...d }, editable);
-  const { mSave } = getModalRefs();
+  // Foto alanı yoksa alt koleksiyondan bir kapak çek
+  let photos = Array.isArray(d.photos) ? d.photos : [];
+  if (!photos.length) {
+    const first = await getFirstPhotoFromSub(id);
+    if (first) photos = [first];
+  }
+  fillModal({ id, ...d, photos }, editable);
+  const { mSave } = refs();
   if (mSave) {
     mSave.onclick = async ()=>{
       try{
@@ -244,34 +262,74 @@ onAuthStateChanged(auth, async (user)=>{
   });
 });
 
-/* ---- İlanları getir & çiz ---- */
+/* ---- İlanları getir & çiz (uid + ownerId) ---- */
 async function loadListings(uid){
-  const hasDom = $("tab-live") && $("tab-pending") && $("tab-expired");
-  if (!hasDom) return;
+  const liveEl = $("tab-live"), pendEl = $("tab-pending"), expEl = $("tab-expired");
+  if (!(liveEl && pendEl && expEl)) return;
+
+  const colRef = collection(db, "listings");
+
+  // ownerId alanı için 3 sorgu
+  const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"),    orderBy("createdAt","desc"));
+  const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"), orderBy("createdAt","desc"));
+  const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"), orderBy("createdAt","desc"));
+
+  // uid alanı için 3 sorgu (eski ilanlar)
+  const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"),    orderBy("createdAt","desc"));
+  const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"), orderBy("createdAt","desc"));
+  const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"), orderBy("createdAt","desc"));
+
   try{
-    const col = collection(db, "listings");
-    const qLive    = query(col, where("ownerId","==",uid), where("status","==","live"),    orderBy("createdAt","desc"));
-    const qPending = query(col, where("ownerId","==",uid), where("status","==","pending"), orderBy("createdAt","desc"));
-    const qExpired = query(col, where("ownerId","==",uid), where("status","==","expired"), orderBy("createdAt","desc"));
+    const [
+      s1o, s2o, s3o,
+      s1u, s2u, s3u
+    ] = await Promise.all([
+      getDocs(qLive_owner), getDocs(qPending_owner), getDocs(qExpired_owner),
+      getDocs(qLive_uid),   getDocs(qPending_uid),   getDocs(qExpired_uid)
+    ]);
 
-    const [s1, s2, s3] = await Promise.all([getDocs(qLive), getDocs(qPending), getDocs(qExpired)]);
+    // Merge helper (id bazlı tekille)
+    const mergeSnaps = (...snaps)=>{
+      const map = new Map();
+      snaps.forEach(s => s.forEach(docu => map.set(docu.id, docu)));
+      return Array.from(map.values());
+    };
 
-    const renderSnap = (snap, status)=>{
-      snap.forEach(docu=>{
+    const liveDocs    = mergeSnaps(s1o, s1u);
+    const pendingDocs = mergeSnaps(s2o, s2u);
+    const expiredDocs = mergeSnaps(s3o, s3u);
+
+    // Doc → item (foto alanı yoksa alt koleksiyondan ilk url’i al)
+    async function docsToItems(docs, status){
+      return Promise.all(docs.map(async (docu)=>{
         const d = docu.data()||{};
-        window.renderListing({
+        let photos = Array.isArray(d.photos) ? d.photos : [];
+        if (!photos.length) {
+          const first = await getFirstPhotoFromSub(docu.id);
+          if (first) photos = [first];
+        }
+        return {
           id: docu.id,
           title: d.title || "İlan",
           desc:  d.description || "",
-          photos: d.photos || [],
+          photos,
           createdAt: d.createdAt,
           expiresAt: d.expiresAt,
           status
-        });
-      });
-    };
-    renderSnap(s1, "live");
-    renderSnap(s2, "pending");
-    renderSnap(s3, "expired");
-  }catch(e){ console.error("[profile] listings yüklenemedi:", e); }
+        };
+      }));
+    }
+
+    const [liveItems, pendingItems, expiredItems] = await Promise.all([
+      docsToItems(liveDocs, "live"),
+      docsToItems(pendingDocs, "pending"),
+      docsToItems(expiredDocs, "expired")
+    ]);
+
+    // Çiz
+    [...liveItems, ...pendingItems, ...expiredItems].forEach(window.renderListing);
+
+  }catch(e){
+    console.error("[profile] listings yüklenemedi:", e);
+  }
 }
