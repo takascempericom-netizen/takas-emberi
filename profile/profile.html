@@ -199,6 +199,41 @@
       });
     }
   </script>
+  <!-- DETAY / DÜZENLE MODAL (İNCELE için) -->
+<div class="modal" id="listingModal" aria-hidden="true" style="position:fixed;inset:0;display:none;place-items:center;background:rgba(15,23,42,.45);z-index:50">
+  <div class="dialog" style="width:min(880px,92vw);background:#fff;border-radius:18px;border:1px solid #e2e8f0;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div class="head" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0">
+      <strong id="mTitle">İlan</strong>
+      <span class="badge" id="mStatus"></span>
+    </div>
+    <div class="body" style="padding:14px;display:grid;grid-template-columns:220px 1fr;gap:14px">
+      <img id="mPhoto" alt="ilan" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover;aspect-ratio:1/1">
+      <div class="f" style="display:grid;gap:8px">
+        <label>Başlık</label>
+        <input id="mInputTitle" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc">
+        <label>Açıklama</label>
+        <textarea id="mInputDesc" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc;min-height:120px;resize:vertical"></textarea>
+        <div class="muted" id="mMeta" style="font-size:12px;color:#64748b"></div>
+      </div>
+    </div>
+    <div class="foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid #e2e8f0;background:#f8fafc">
+      <button class="btn sm ghost" id="mClose">Kapat</button>
+      <button class="btn sm" id="mSave" style="display:none">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* profile.js 'show' class'ını kontrol ediyor → burada display:grid yapıyoruz */
+  (function(){
+    const modal = document.getElementById('listingModal');
+    if (!modal) return;
+    const obs = new MutationObserver(()=>{
+      modal.style.display = modal.classList.contains('show') ? 'grid' : 'none';
+    });
+    obs.observe(modal, { attributes:true, attributeFilter:['class'] });
+  })();
+</script>
 
   <!-- İş mantığı -->
   <script type="module" src="./profile.js"></script>
