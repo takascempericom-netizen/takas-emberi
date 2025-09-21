@@ -1,3 +1,4 @@
+console.log("pending.js loaded:", new Date().toISOString());
 // takas-emberi/admin/pending.js
 // Onay bekleyen ilanlar: listele, incele, onayla, reddet
 
