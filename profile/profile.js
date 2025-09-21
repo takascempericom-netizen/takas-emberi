@@ -1,4 +1,4 @@
-// profile/profile.js — minimal stabil sürüm (önce yüklenmeyi doğrula)
+// profile/profile.js — minimal stabil sürüm
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -17,10 +17,10 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// Basit UI refs (varsa)
+// UI refs
 const logoutBtn = document.getElementById("btnLogout");
 
-// Log: dosya yüklendi
+// yüklendi logu
 console.log("[profile.js] loaded", new Date().toISOString());
 
 // Çıkış
