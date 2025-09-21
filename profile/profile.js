@@ -1,4 +1,6 @@
 /* profile/profile.js (UI-only, temiz JS) */
+// Avatar fallback (inline onerror kaldırıldı)
+var __av=document.getElementById("avatar"); if(__av){ __av.addEventListener("error", function(){ __av.src="https://placehold.co/200x200?text=Avatar"; }, {once:true}); }
 console.log("profile.js loaded");
 
 /* Tema değiştirici */
