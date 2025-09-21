@@ -1,21 +1,14 @@
 // takas-emberi/ilan/ilanver.js
-import { initializeApp } , getApp, getApps from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-  getAuth, onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { 
-  getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { 
-  getStorage, ref, uploadBytes, getDownloadURL 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.appspot.com", // düzeltildi (.app değil)
+  storageBucket: "ureten-eller-v2.firebasestorage.app",
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
