@@ -1,7 +1,7 @@
 // takas-emberi/admin/main.js
 import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
+\n// Dynamic import helper with cache-busting\nconst importAdmin = (name) => import("/admin/"+name+".js?v="+Date.now());\n
 // Firebase (duplicate-app koruması)
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
