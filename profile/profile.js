@@ -74,7 +74,7 @@ onAuthStateChanged(auth, async (user)=>{
   fill(elFirst, first);
   fill(elLast,  last);
   fill(elMail,  user.email || user.providerData?.[0]?.email || "");
-  setSrc(avatarImg, user.photoURL || "/assets/img/avatar.png");
+  if (user.photoURL) setSrc(avatarImg, user.photoURL);
 
   // Firestore users/{uid} → city, ad/soyad override (varsa)
   try{
