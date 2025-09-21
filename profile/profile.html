@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profil</title>
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body class="theme-1">
+  <header class="hdr">
+    <div class="in">
+      <h1 class="ttl">Profil</h1>
+      <div class="row">
+        <div class="theme-picker" title="Tema değiştir">
+          <div class="swatch s1" data-theme="1"></div>
+          <div class="swatch s2" data-theme="2"></div>
+          <div class="swatch s3" data-theme="3"></div>
+          <div class="swatch s4" data-theme="4"></div>
+        </div>
+        <button class="btn" id="btnNew">+ Yeni İlan</button>
+        <button class="btn danger" id="btnLogout">Çıkış</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- PROFİL PANELİ -->
+    <section class="card" id="profileCard">
+      <div class="profile-grid">
+        <div class="left">
+          <img class="avatar" id="avatar" src="" alt="avatar" onerror="this.src=https://placehold.co/200x200?text=Avatar">
+          <div class="name" id="nameUnder">—</div>
+          <div class="stars" id="rating"></div>
+          <div class="rating-num" id="ratingNum">0.0 / 5 (0 oy)</div>
+        </div>
+        <div class="right">
+          <label>Ad</label>
+          <input id="firstName" placeholder="Ad">
+          <label>Soyad</label>
+          <input id="lastName" placeholder="Soyad">
+          <label>E-posta</label>
+          <input id="email" placeholder="eposta@example.com">
+          <label>Şehir</label>
+          <input id="city" placeholder="Şehir">
+          <label>Şifre Değiştir</label>
+          <input id="password" type="password" placeholder="Yeni şifre">
+          <div class="row end" style="margin-top:10px">
+            <button class="btn ok" id="btnSave">Güncelle</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEKME PANELİ (profilin ALTINDA) -->
+    <section class="card" id="tabsCard" style="margin-top:12px">
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-tab="live">Yayındaki İlanlar</div>
+        <div class="tab" data-tab="pending">Onay Bekleyen</div>
+        <div class="tab" data-tab="expired">Süresi Dolan</div>
+      </div>
+      <div id="tab-live" class="list"></div>
+      <div id="tab-pending" class="list" style="display:none"></div>
+      <div id="tab-expired" class="list" style="display:none"></div>
+    </section>
+  </div>
+
+  <!-- ALT SABİT BAR -->
+  <nav class="fixedbar">
+    <div class="in">
+      <a href="/" class="active" id="navHome">🏠<span>Ana Sayfa</span></a>
+      <a href="/messages.html" id="navMsgs">💬<span>Mesajlar</span></a>
+      <a href="/notifications.html" id="navNotifs">🔔<span>Bildirimler</span></a>
+      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+    </div>
+  </nav>
+
+  <script type="module" src="profile.js"></script>
+</body>
+</html>
