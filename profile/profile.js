@@ -1,6 +1,4 @@
-// profile/profile.js — FINAL: otomatik doldur, avatar yükle, şifre değiştir,
-// ilanları görsel + butonlarla listele, incele/düzenle/sil/süre al
-
+// profile/profile.js — FINAL (modal güvenli, incele/düzenle/sil/süre al)
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signOut, updateProfile,
@@ -53,6 +51,23 @@ const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 /* Çıkış */
 btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
 
+/* ---- Modal Refs (her seferinde taze al) ---- */
+function getModalRefs(){
+  return {
+    modal: $("listingModal"),
+    mTitle: $("mTitle"),
+    mStatus: $("mStatus"),
+    mPhoto: $("mPhoto"),
+    mInputTitle: $("mInputTitle"),
+    mInputDesc: $("mInputDesc"),
+    mMeta: $("mMeta"),
+    mSave: $("mSave"),
+    mClose: $("mClose"),
+  };
+}
+function openModal(){ const {modal}=getModalRefs(); modal?.classList.add("show"); }
+function closeModal(){ const {modal}=getModalRefs(); modal?.classList.remove("show"); }
+
 /* ---- RENDER LISTING (görsel + aksiyonlar) ---- */
 window.renderListing = (item) => {
   const live    = document.getElementById("tab-live");
@@ -83,9 +98,7 @@ window.renderListing = (item) => {
       ${item.status === "live" ? `
         <button class="btn sm" data-action="edit">Düzenle</button>
         <button class="btn sm danger" data-action="delete">Sil</button>
-      ` : item.status === "pending" ? `
-        <!-- sadece İncele -->
-      ` : `
+      ` : item.status === "pending" ? `` : `
         <button class="btn sm" data-action="renew">Süre Al</button>
         <button class="btn sm danger" data-action="delete">Sil</button>
       `}
@@ -94,31 +107,27 @@ window.renderListing = (item) => {
   container.appendChild(card);
 };
 
-/* ---- MODAL Yardımcıları ---- */
-const modal = $("listingModal");
-const mTitle = $("mTitle");
-const mStatus = $("mStatus");
-const mPhoto = $("mPhoto");
-const mInputTitle = $("mInputTitle");
-const mInputDesc = $("mInputDesc");
-const mMeta = $("mMeta");
-const mSave = $("mSave");
-
-function openModal()  { modal?.classList.add("show"); }
-function closeModal() { modal?.classList.remove("show"); }
-$("mClose")?.addEventListener("click", closeModal);
-
+/* ---- Modal doldur ---- */
 function fillModal(data, editable=false){
+  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave, mClose} = getModalRefs();
+  if (![modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave].every(Boolean)) {
+    console.error("[modal] DOM eksik, HTML'deki modal bloğunu kontrol et.");
+    alert("İnceleme penceresi yüklenemedi. Lütfen sayfayı yenileyin.");
+    return;
+  }
   mTitle.textContent = data.title || "İlan";
   mStatus.textContent = data.status === "live" ? "Yayında" : data.status === "pending" ? "Onay Bekliyor" : "Süresi Doldu";
   mStatus.className = "badge " + data.status;
-  mPhoto.src = firstPhoto(data.photos) || "";
+  const url = firstPhoto(data.photos);
+  if (url) { mPhoto.src = url; mPhoto.style.display = "block"; }
+  else { mPhoto.removeAttribute("src"); mPhoto.style.display = "none"; }
   mInputTitle.value = data.title || "";
   mInputDesc.value  = data.description || data.desc || "";
   mInputTitle.disabled = !editable;
   mInputDesc.disabled  = !editable;
   mSave.style.display  = editable ? "inline-block" : "none";
   mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
+  mClose?.addEventListener("click", closeModal, { once:true });
 }
 
 /* ---- İlan Aksiyonları ---- */
@@ -127,70 +136,50 @@ async function viewListing(id, editable=false){
   if (!snap.exists()) { alert("İlan bulunamadı."); return; }
   const d = snap.data()||{};
   fillModal({ id, ...d }, editable);
-  mSave.onclick = async ()=>{
-    try{
-      // Sahip güncelleyebilir: admin alanlarına dokunmuyoruz
-      await updateDoc(doc(db,"listings",id), {
-        title: mInputTitle.value.trim(),
-        description: mInputDesc.value.trim(),
-        updatedAt: serverTimestamp()
-      });
-      alert("İlan güncellendi.");
-      closeModal();
-      // Basitçe sayfayı tazele: (istersen sadece kartı güncelle)
-      location.reload();
-    }catch(e){
-      console.error(e);
-      alert("Güncellenemedi: " + (e?.message||e));
-    }
-  };
+  const { mSave } = getModalRefs();
+  if (mSave) {
+    mSave.onclick = async ()=>{
+      try{
+        await updateDoc(doc(db,"listings",id), {
+          title: document.getElementById("mInputTitle").value.trim(),
+          description: document.getElementById("mInputDesc").value.trim(),
+          updatedAt: serverTimestamp()
+        });
+        alert("İlan güncellendi.");
+        closeModal();
+        location.reload();
+      }catch(e){
+        console.error(e);
+        alert("Güncellenemedi: " + (e?.message||e));
+      }
+    };
+  }
   openModal();
 }
 
 async function deleteListing(id){
   if (!confirm("Bu ilanı silmek istiyor musun?")) return;
-  try{
-    await deleteDoc(doc(db,"listings",id));
-    alert("İlan silindi.");
-    location.reload();
-  }catch(e){
-    console.error(e);
-    alert("Silinemedi: " + (e?.message||e));
-  }
+  try{ await deleteDoc(doc(db,"listings",id)); alert("İlan silindi."); location.reload(); }
+  catch(e){ console.error(e); alert("Silinemedi: " + (e?.message||e)); }
 }
 
 async function renewListing(id){
   if (!confirm("Süreyi +30 gün uzatıp incelemeye göndereyim mi?")) return;
   try{
-    const now = new Date();
-    const newExp = new Date();
-    newExp.setDate(now.getDate()+30);
-    // Kurallar: status aynı kalabilir veya 'pending' olabilir → expired'da pending'e çeviriyoruz
+    const now = new Date(); const newExp = new Date(); newExp.setDate(now.getDate()+30);
     await updateDoc(doc(db,"listings",id), {
-      status: "pending",
-      expiresAt: newExp,
-      renewedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      status: "pending", expiresAt: newExp, renewedAt: serverTimestamp(), updatedAt: serverTimestamp()
     });
-    alert("Süre uzatıldı ve tekrar incelemeye gönderildi.");
-    location.reload();
-  }catch(e){
-    console.error(e);
-    alert("Süre uzatılamadı: " + (e?.message||e));
-  }
+    alert("Süre uzatıldı ve tekrar incelemeye gönderildi."); location.reload();
+  }catch(e){ console.error(e); alert("Süre uzatılamadı: " + (e?.message||e)); }
 }
 
 /* Liste alanlarında event delegation */
 ["tab-live","tab-pending","tab-expired"].forEach(listId=>{
   const root = $(listId);
   root?.addEventListener("click",(ev)=>{
-    const btn = ev.target.closest("button[data-action]");
-    if (!btn) return;
-    const card = btn.closest(".item");
-    const id = card?.dataset.id;
-    const action = btn.dataset.action;
-    if (!id) return;
-
+    const btn = ev.target.closest("button[data-action]"); if (!btn) return;
+    const card = btn.closest(".item"); const id = card?.dataset.id; const action = btn.dataset.action; if (!id) return;
     if (action === "view")  viewListing(id, false);
     if (action === "edit")  viewListing(id, true);
     if (action === "delete") deleteListing(id);
@@ -200,19 +189,14 @@ async function renewListing(id){
 
 /* ---- Auth + Profil doldurma ---- */
 onAuthStateChanged(auth, async (user)=>{
-  if (!user) {
-    location.href = "/auth.html?next=/profile/profile.html";
-    return;
-  }
+  if (!user) { location.href = "/auth.html?next=/profile/profile.html"; return; }
 
-  // Profil bilgileri
   const displayName = user.displayName || (user.providerData?.[0]?.displayName) || "";
   const parts = displayName.trim().split(/\s+/);
   const first = parts.length ? parts.slice(0, -1).join(" ") || parts[0] : "";
   const last  = parts.length > 1 ? parts.at(-1) : "";
 
-  fill(elFirst, first);
-  fill(elLast,  last);
+  fill(elFirst, first); fill(elLast, last);
   fill(elMail,  user.email || user.providerData?.[0]?.email || "");
   if (user.photoURL) setSrc(avatarImg, user.photoURL);
 
@@ -229,52 +213,34 @@ onAuthStateChanged(auth, async (user)=>{
     }
   }catch(e){ console.warn("[profile] users doc okunamadı:", e); }
 
-  // İlanları çek
   await loadListings(user.uid);
 
-  // Avatar yükleme
   btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
   avatarFile?.addEventListener("change", async ()=>{
     try{
-      const f = avatarFile.files?.[0];
-      if (!f) return;
-      const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
-      const r = sref(st, path);
-      await uploadBytes(r, f);
-      const url = await getDownloadURL(r);
+      const f = avatarFile.files?.[0]; if (!f) return;
+      const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+      const r = sref(st, path); await uploadBytes(r, f); const url = await getDownloadURL(r);
       await updateProfile(user, { photoURL: url });
       await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
-      setSrc(avatarImg, url);
-      alert("Profil fotoğrafı güncellendi.");
-    }catch(e){
-      console.error("Avatar yükleme hatası:", e);
-      alert("Profil fotoğrafı güncellenemedi.");
-    }
+      setSrc(avatarImg, url); alert("Profil fotoğrafı güncellendi.");
+    }catch(e){ console.error("Avatar yükleme hatası:", e); alert("Profil fotoğrafı güncellenemedi."); }
   });
 
-  // Şifre değiştirme
   window.addEventListener("change-pass-submit", async (ev)=>{
     const { old, n1, n2 } = ev.detail||{};
     try{
       if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
       if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
       const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
-      if (!hasPasswordProvider) {
-        await sendPasswordResetEmail(auth, user.email);
-        alert("Hesabın Google ile bağlı görünüyor. Mailine şifre oluşturma bağlantısı gönderdik.");
-        return;
-      }
+      if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Hesabın Google ile bağlı görünüyor. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
       if (!old) throw new Error("Mevcut şifreni gir.");
       const cred = EmailAuthProvider.credential(user.email, old);
       await reauthenticateWithCredential(user, cred);
       await updatePassword(user, n1);
       alert("Şifren güncellendi.");
       ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
-    }catch(e){
-      console.error("Şifre değiştirme hatası:", e);
-      alert(e?.message || "Şifre güncellenemedi.");
-    }
+    }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
   });
 });
 
@@ -307,7 +273,5 @@ async function loadListings(uid){
     renderSnap(s1, "live");
     renderSnap(s2, "pending");
     renderSnap(s3, "expired");
-  }catch(e){
-    console.error("[profile] listings yüklenemedi:", e);
-  }
+  }catch(e){ console.error("[profile] listings yüklenemedi:", e); }
 }
