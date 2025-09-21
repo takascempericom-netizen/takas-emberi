@@ -54,3 +54,41 @@ if (btnSave){
     alert("Profil güncellendi (yerel)"); // Backend bağlanınca kaldır
   });
 }
+/* Şifre değiştir */
+async function maybeChangePassword(user){
+  if (!passEl || !passEl.value) return;
+  try{
+    await updatePassword(user, passEl.value);
+    alert("Şifre değiştirildi");
+    passEl.value = "";
+  }catch(e){
+    alert("Şifre değiştirilemedi: " + (e && e.message ? e.message : e));
+  }
+}
+
+/* Olaylar */
+if (logoutBtn){
+  logoutBtn.addEventListener("click", function(){
+    signOut(auth).then(function(){ location.href="/auth.html"; });
+  });
+}
+if (newBtn){
+  newBtn.addEventListener("click", function(){ location.href="/listing-new.html"; });
+}
+if (saveBtn){
+  saveBtn.addEventListener("click", async function(){
+    var u = auth.currentUser; if(!u) return;
+    await saveProfile(u.uid, u);
+    await maybeChangePassword(u);
+  });
+}
+
+/* Auth gate */
+onAuthStateChanged(auth, async function(user){
+  if(!user){
+    location.href = "/auth.html?next=/profile/";
+    return;
+  }
+  await fillProfile(user.uid, user);
+  await loadMyListings(user.uid);
+});
