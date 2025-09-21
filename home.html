@@ -232,19 +232,19 @@
   <!-- JS -->
   <script type="module">
     // Neden Firebase? Sadece Çıkış çalışsın diye.
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { initializeApp } , getApp, getApps from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
       authDomain: "ureten-eller-v2.firebaseapp.com",
       projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      storageBucket: "ureten-eller-v2.appspot.com",
       messagingSenderId: "621494781131",
       appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
 

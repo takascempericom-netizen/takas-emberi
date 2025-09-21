@@ -1,7 +1,7 @@
 // takas-emberi/admin/pending.js
 // Onay bekleyen ilanlar: listele, incele, onayla, reddet
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, query, where, orderBy, limit, startAfter,
@@ -17,7 +17,7 @@ const firebaseConfig = {
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 

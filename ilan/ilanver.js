@@ -1,5 +1,5 @@
 // takas-emberi/ilan/ilanver.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } , getApp, getApps from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
   getAuth, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -21,7 +21,7 @@ const firebaseConfig = {
 };
 
 // Init
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
