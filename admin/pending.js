@@ -33,7 +33,7 @@ function toast(msg, type='info'){
   t.textContent = msg;
   t.className = `adm-toast ${type}`;
   document.body.appendChild(t);
-  setTimeout(()=>t.classList.add('show');
+  setTimeout(()=>t.classList.add('show'));
 
   setTimeout(()=>{t.classList.remove('show'); t.remove();}, 3000);
 }
