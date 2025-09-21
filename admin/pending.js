@@ -33,7 +33,8 @@ function toast(msg, type='info'){
   t.textContent = msg;
   t.className = `adm-toast ${type}`;
   document.body.appendChild(t);
-  setTimeout(()=>t.classList.add('show'));
+  setTimeout(()=>t.classList.add('show');
+
   setTimeout(()=>{t.classList.remove('show'); t.remove();}, 3000);
 }
 
@@ -73,15 +74,15 @@ async function loadMore(){
     collection(db, 'listings'),
     where('status','==','pending'),
     orderBy('createdAt','desc'),
-    limit(PAGE_SIZE)
-  );
+    limit(PAGE_SIZE);
+
   if(lastDoc) q = query(
     collection(db, 'listings'),
     where('status','==','pending'),
     orderBy('createdAt','desc'),
     startAfter(lastDoc),
-    limit(PAGE_SIZE)
-  );
+    limit(PAGE_SIZE);
+
 
   const snap = await getDocs(q);
   if(snap.empty){
@@ -95,7 +96,8 @@ async function loadMore(){
   snap.forEach(d=>{
     const item = { id:d.id, ...d.data() };
     if(!passesClientFilter(item)) return;
-    listEl && listEl.appendChild(renderCard(item));
+    listEl && listEl.appendChild(renderCard(item);
+
   });
 
   loading = false;
@@ -161,10 +163,13 @@ function openDetail(item){
   if(typeof dlg.showModal === 'function') dlg.showModal();
 }
 
-dlgClose && (dlgClose.onclick = ()=> dlg.close());
+dlgClose && (dlgClose.onclick = ()=> dlg.close();
 
-dlgApprove && (dlgApprove.onclick = ()=> currentViewItem && approve(currentViewItem.id));
-dlgReject  && (dlgReject.onclick  = ()=> currentViewItem && rejectFlow(currentViewItem.id));
+
+dlgApprove && (dlgApprove.onclick = ()=> currentViewItem && approve(currentViewItem.id);
+
+dlgReject  && (dlgReject.onclick  = ()=> currentViewItem && rejectFlow(currentViewItem.id);
+
 
 async function approve(id){
   try{
@@ -195,9 +200,12 @@ async function rejectFlow(id){
 moreBtn && moreBtn.addEventListener('click', loadMore);
 refresh && refresh.addEventListener('click', resetAndLoad);
 searchIn && searchIn.addEventListener('input', ()=>{ if(!loading) { listEl.innerHTML=''; lastDoc=null; reachedEnd=false; loadMore(); }});
-fCat && fCat.addEventListener('change', ()=> resetAndLoad());
-fCity && fCity.addEventListener('change', ()=> resetAndLoad());
+fCat && fCat.addEventListener('change', ()=> resetAndLoad();
+
+fCity && fCity.addEventListener('change', ()=> resetAndLoad();
+
 
 // Çıkış
 const logoutBtn = document.getElementById('btnLogout');
-logoutBtn && logoutBtn.addEventListener('click', ()=> signOut(auth).then(()=>location.href='/admin/login.html'));
+logoutBtn && logoutBtn.addEventListener('click', ()=> signOut(auth).then(()=>location.href='/admin/login.html');
+
