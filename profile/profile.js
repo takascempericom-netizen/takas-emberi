@@ -1,94 +1,41 @@
-/* profile/profile.js (UI-only, temiz JS) */
-// Avatar fallback (inline onerror kaldırıldı)
-var __av=document.getElementById("avatar"); if(__av){ __av.addEventListener("error", function(){ __av.src="https://placehold.co/200x200?text=Avatar"; }, {once:true}); }
-console.log("profile.js loaded");
+// profile/profile.js — minimal stabil sürüm (önce yüklenmeyi doğrula)
 
-/* Tema değiştirici */
-document.querySelectorAll(".swatch").forEach(function(el){
-  el.addEventListener("click", function(){
-    document.body.className = "theme-" + el.dataset.theme;
-  });
-});
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* Yıldız UI (varsayılan 0 puan) */
-function renderStars(container, value){
-  if (!container) return;
-  var v = Math.round(Number(value || 0));
-  container.innerHTML = "";
-  for (var i = 1; i <= 5; i++){
-    var s = document.createElement("svg");
-    s.setAttribute("viewBox","0 0 24 24");
-    s.className = "star";
-    s.style.color = (i <= v) ? "gold" : "#4b5375";
-    s.innerHTML = "<path fill=\"currentColor\" d=\"M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z\"/>";
-    container.appendChild(s);
-  }
-}
-renderStars(document.getElementById("rating"), 0);
-
-/* Sekmeler */
-var tabs = document.getElementById("tabs");
-var panes = {
-  live:    document.getElementById("tab-live"),
-  pending: document.getElementById("tab-pending"),
-  expired: document.getElementById("tab-expired")
+// Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+  authDomain: "ureten-eller-v2.firebaseapp.com",
+  projectId: "ureten-eller-v2",
+  storageBucket: "ureten-eller-v2.appspot.com",
+  messagingSenderId: "621494781131",
+  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
-if (tabs){
-  tabs.addEventListener("click", function(e){
-    var t = e.target.closest(".tab"); if(!t) return;
-    Array.prototype.forEach.call(tabs.children, function(x){ x.classList.remove("active"); });
-    t.classList.add("active");
-    Object.keys(panes).forEach(function(k){ if(panes[k]) panes[k].style.display = "none"; });
-    var pane = document.getElementById("tab-" + t.dataset.tab);
-    if (pane) pane.style.display = "grid";
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// Basit UI refs (varsa)
+const logoutBtn = document.getElementById("btnLogout");
+
+// Log: dosya yüklendi
+console.log("[profile.js] loaded", new Date().toISOString());
+
+// Çıkış
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth).then(() => location.href="/auth.html");
   });
 }
 
-/* Form güncelle (şimdilik isim üstte görünsün) */
-var btnSave = document.getElementById("btnSave");
-if (btnSave){
-  btnSave.addEventListener("click", function(){
-    var full = (document.getElementById("firstName").value + " " + document.getElementById("lastName").value).trim();
-    var nameUnder = document.getElementById("nameUnder");
-    if (nameUnder) nameUnder.textContent = full || "—";
-    alert("Profil güncellendi (yerel)"); // Backend bağlanınca kaldır
-  });
-}
-/* Şifre değiştir */
-async function maybeChangePassword(user){
-  if (!passEl || !passEl.value) return;
-  try{
-    await updatePassword(user, passEl.value);
-    alert("Şifre değiştirildi");
-    passEl.value = "";
-  }catch(e){
-    alert("Şifre değiştirilemedi: " + (e && e.message ? e.message : e));
-  }
-}
-
-/* Olaylar */
-if (logoutBtn){
-  logoutBtn.addEventListener("click", function(){
-    signOut(auth).then(function(){ location.href="/auth.html"; });
-  });
-}
-if (newBtn){
-  newBtn.addEventListener("click", function(){ location.href="/listing-new.html"; });
-}
-if (saveBtn){
-  saveBtn.addEventListener("click", async function(){
-    var u = auth.currentUser; if(!u) return;
-    await saveProfile(u.uid, u);
-    await maybeChangePassword(u);
-  });
-}
-
-/* Auth gate */
-onAuthStateChanged(auth, async function(user){
-  if(!user){
+// Auth gate
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    console.warn("[profile.js] not signed in → redirect");
     location.href = "/auth.html?next=/profile/";
     return;
   }
-  await fillProfile(user.uid, user);
-  await loadMyListings(user.uid);
+  console.log("[profile.js] signed in as", user.email);
 });
