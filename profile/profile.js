@@ -20,7 +20,7 @@ const db   = getFirestore(app);
 // UI refs
 const logoutBtn = document.getElementById("btnLogout");
 
-// yüklendi logu
+// Yüklendi logu
 console.log("[profile.js] loaded", new Date().toISOString());
 
 // Çıkış
