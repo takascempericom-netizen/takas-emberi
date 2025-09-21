@@ -1,18 +1,19 @@
-// profile/profile.js — FINAL: modal + foto + çift alan (uid/ownerId) desteği
+// profile/profile.js — FINAL (incele/düzenle/sil/süre al + foto kapsaması + null-korumalı)
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signOut, updateProfile,
   reauthenticateWithCredential, EmailAuthProvider, updatePassword, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs,
+  getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs,
   updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as sref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-/* Firebase Init */
+/* ==== Firebase Init ==== */
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -24,9 +25,10 @@ const firebaseConfig = {
 const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+// Storage'ı bucket ile hedefleyelim (CORS uyumlu)
 const st   = getStorage(app, "gs://ureten-eller-v2.firebasestorage.app");
 
-/* UI refs */
+/* ==== UI refs ==== */
 const $ = (id)=>document.getElementById(id);
 const elFirst = $("firstName");
 const elLast  = $("lastName");
@@ -37,21 +39,21 @@ const avatarFile = $("avatarFile");
 const btnChangeAvatar = $("btnChangeAvatar");
 const btnLogout = $("btnLogout");
 
-/* helpers */
+/* ==== Helpers ==== */
 const fill = (el,val)=>{ if(el){ el.value = val||""; } };
 const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
 const fmt = (ts)=> {
   try {
     const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
-    return d.toLocaleDateString("tr-TR", {day:"2-digit", month:"2-digit", year:"numeric"});
+    return isNaN(d) ? "—" : d.toLocaleDateString("tr-TR", {day:"2-digit", month:"2-digit", year:"numeric"});
   } catch { return "—"; }
 };
 const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 
-/* Çıkış */
+/* ==== Çıkış ==== */
 btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
 
-/* ---- Modal Refs ve fonksiyonları ---- */
+/* ==== Modal refs (her çağrıda güncel DOM) ==== */
 function refs(){
   return {
     modal: $("listingModal"),
@@ -63,12 +65,19 @@ function refs(){
     mMeta: $("mMeta"),
     mSave: $("mSave"),
     mClose: $("mClose"),
+    liveEl: $("tab-live"),
+    pendEl: $("tab-pending"),
+    expEl: $("tab-expired"),
   };
+}
+function modalReady(){
+  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave} = refs();
+  return [modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave].every(Boolean);
 }
 function openModal(){ refs().modal?.classList.add("show"); }
 function closeModal(){ refs().modal?.classList.remove("show"); }
 
-/* ---- Alt koleksiyondan ilk foto ---- */
+/* ==== Alt koleksiyondan ilk foto (fallback) ==== */
 async function getFirstPhotoFromSub(listingId){
   try{
     const sub = collection(db, "listings", listingId, "photos");
@@ -81,14 +90,12 @@ async function getFirstPhotoFromSub(listingId){
   return "";
 }
 
-/* ---- Kart oluşturucu ---- */
+/* ==== Kart render ==== */
 window.renderListing = (item) => {
-  const live    = document.getElementById("tab-live");
-  const pending = document.getElementById("tab-pending");
-  const expired = document.getElementById("tab-expired");
+  const { liveEl, pendEl, expEl } = refs();
   const container =
-    item.status === "live"    ? live :
-    item.status === "pending" ? pending : expired;
+    item.status === "live"    ? liveEl :
+    item.status === "pending" ? pendEl : expEl;
 
   if (!container) { console.warn("[renderListing] container yok:", item.status); return; }
 
@@ -120,40 +127,46 @@ window.renderListing = (item) => {
   container.appendChild(card);
 };
 
-/* ---- Modal doldur ---- */
+/* ==== Modal doldur ==== */
 function fillModal(data, editable=false){
-  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave} = refs();
-  if (![modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave].every(Boolean)) {
+  if (!modalReady()) {
     console.error("[modal] DOM eksik, HTML'deki modal bloğunu kontrol et.");
     alert("İnceleme penceresi yüklenemedi. Lütfen sayfayı yenileyin.");
     return;
   }
+  const { mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave, mClose } = refs();
+
   mTitle.textContent = data.title || "İlan";
   mStatus.textContent = data.status === "live" ? "Yayında" : data.status === "pending" ? "Onay Bekliyor" : "Süresi Doldu";
   mStatus.className = "badge " + data.status;
+
   const url = firstPhoto(data.photos);
   if (url) { mPhoto.src = url; mPhoto.style.display = "block"; }
   else { mPhoto.removeAttribute("src"); mPhoto.style.display = "none"; }
+
   mInputTitle.value = data.title || "";
   mInputDesc.value  = data.description || data.desc || "";
   mInputTitle.disabled = !editable;
   mInputDesc.disabled  = !editable;
   mSave.style.display  = editable ? "inline-block" : "none";
   mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
+
+  mClose?.addEventListener("click", closeModal, { once:true });
 }
 
-/* ---- İlan Aksiyonları ---- */
+/* ==== İlan aksiyonları ==== */
 async function viewListing(id, editable=false){
   const snap = await getDoc(doc(db,"listings",id));
   if (!snap.exists()) { alert("İlan bulunamadı."); return; }
   const d = snap.data()||{};
-  // Foto alanı yoksa alt koleksiyondan bir kapak çek
+  // Foto alanı yoksa alt koleksiyondan kapak çek
   let photos = Array.isArray(d.photos) ? d.photos : [];
   if (!photos.length) {
     const first = await getFirstPhotoFromSub(id);
     if (first) photos = [first];
   }
   fillModal({ id, ...d, photos }, editable);
+
   const { mSave } = refs();
   if (mSave) {
     mSave.onclick = async ()=>{
@@ -186,13 +199,17 @@ async function renewListing(id){
   try{
     const now = new Date(); const newExp = new Date(); newExp.setDate(now.getDate()+30);
     await updateDoc(doc(db,"listings",id), {
-      status: "pending", expiresAt: newExp, renewedAt: serverTimestamp(), updatedAt: serverTimestamp()
+      status: "pending",
+      expiresAt: newExp,
+      renewedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
-    alert("Süre uzatıldı ve tekrar incelemeye gönderildi."); location.reload();
+    alert("Süre uzatıldı ve tekrar incelemeye gönderildi.");
+    location.reload();
   }catch(e){ console.error(e); alert("Süre uzatılamadı: " + (e?.message||e)); }
 }
 
-/* Liste alanlarında event delegation */
+/* ==== Liste alanlarında event delegation ==== */
 ["tab-live","tab-pending","tab-expired"].forEach(listId=>{
   const root = $(listId);
   root?.addEventListener("click",(ev)=>{
@@ -205,7 +222,7 @@ async function renewListing(id){
   });
 });
 
-/* ---- Auth + Profil doldurma ---- */
+/* ==== Auth + Profil doldurma ==== */
 onAuthStateChanged(auth, async (user)=>{
   if (!user) { location.href = "/auth.html?next=/profile/profile.html"; return; }
 
@@ -237,12 +254,19 @@ onAuthStateChanged(auth, async (user)=>{
   avatarFile?.addEventListener("change", async ()=>{
     try{
       const f = avatarFile.files?.[0]; if (!f) return;
-      const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_'); const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
-      const r = sref(st, path); await uploadBytes(r, f); const url = await getDownloadURL(r);
+      const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+      const r = sref(st, path);
+      await uploadBytes(r, f);
+      const url = await getDownloadURL(r);
       await updateProfile(user, { photoURL: url });
       await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
-      setSrc(avatarImg, url); alert("Profil fotoğrafı güncellendi.");
-    }catch(e){ console.error("Avatar yükleme hatası:", e); alert("Profil fotoğrafı güncellenemedi."); }
+      setSrc(avatarImg, url);
+      alert("Profil fotoğrafı güncellendi.");
+    }catch(e){
+      console.error("Avatar yükleme hatası:", e);
+      alert("Profil fotoğrafı güncellenemedi.");
+    }
   });
 
   window.addEventListener("change-pass-submit", async (ev)=>{
@@ -262,22 +286,22 @@ onAuthStateChanged(auth, async (user)=>{
   });
 });
 
-/* ---- İlanları getir & çiz (uid + ownerId) ---- */
+/* ==== İlanları getir & çiz (uid + ownerId) ==== */
 async function loadListings(uid){
-  const liveEl = $("tab-live"), pendEl = $("tab-pending"), expEl = $("tab-expired");
+  const { liveEl, pendEl, expEl } = refs();
   if (!(liveEl && pendEl && expEl)) return;
 
   const colRef = collection(db, "listings");
 
   // ownerId alanı için 3 sorgu
-  const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"),    orderBy("createdAt","desc"));
-  const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"), orderBy("createdAt","desc"));
-  const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"), orderBy("createdAt","desc"));
+  const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"));
+  const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"));
+  const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"));
 
   // uid alanı için 3 sorgu (eski ilanlar)
-  const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"),    orderBy("createdAt","desc"));
-  const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"), orderBy("createdAt","desc"));
-  const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"), orderBy("createdAt","desc"));
+  const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"));
+  const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"));
+  const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"));
 
   try{
     const [
@@ -288,7 +312,7 @@ async function loadListings(uid){
       getDocs(qLive_uid),   getDocs(qPending_uid),   getDocs(qExpired_uid)
     ]);
 
-    // Merge helper (id bazlı tekille)
+    // Tekille
     const mergeSnaps = (...snaps)=>{
       const map = new Map();
       snaps.forEach(s => s.forEach(docu => map.set(docu.id, docu)));
@@ -299,7 +323,7 @@ async function loadListings(uid){
     const pendingDocs = mergeSnaps(s2o, s2u);
     const expiredDocs = mergeSnaps(s3o, s3u);
 
-    // Doc → item (foto alanı yoksa alt koleksiyondan ilk url’i al)
+    // Doc → item (foto fallback)
     async function docsToItems(docs, status){
       return Promise.all(docs.map(async (docu)=>{
         const d = docu.data()||{};
@@ -326,7 +350,6 @@ async function loadListings(uid){
       docsToItems(expiredDocs, "expired")
     ]);
 
-    // Çiz
     [...liveItems, ...pendingItems, ...expiredItems].forEach(window.renderListing);
 
   }catch(e){
