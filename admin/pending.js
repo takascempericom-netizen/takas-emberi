@@ -39,7 +39,6 @@ function toast(msg, type='info'){
 
 function humanDate(ts){
   try{ return new Date(ts?.seconds? ts.seconds*1000 : ts).toLocaleString('tr-TR'); }catch{ return '-'; }
-}
 
 // --- State ---
 let lastDoc = null;
@@ -177,7 +176,6 @@ async function approve(id){
     resetAndLoad();
     dlg?.open && dlg.close();
   }catch(e){ toast('Onay hata: '+(e?.message||e), 'danger'); }
-}
 
 async function rejectFlow(id){
   const reason = prompt('Reddetme gerekçesi:');
@@ -192,7 +190,6 @@ async function rejectFlow(id){
     resetAndLoad();
     dlg?.open && dlg.close();
   }catch(e){ toast('Red hata: '+(e?.message||e), 'danger'); }
-}
 
 // Etkileşimler
 moreBtn && moreBtn.addEventListener('click', loadMore);

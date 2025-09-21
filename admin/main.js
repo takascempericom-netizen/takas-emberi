@@ -1,7 +1,7 @@
 // takas-emberi/admin/main.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-// --- Firebase ---
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
@@ -10,59 +10,52 @@ const firebaseConfig = {
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-const ADMIN_EMAIL = "ozkank603@gmail.com";
+if(getApps().length===0) initializeApp(firebaseConfig);
+const auth = getAuth();
 
 const $ = (s,r=document)=>r.querySelector(s);
-const panelBody = '#panelBody' ? document.querySelector('#panelBody') : null;
-const navBtns = document.querySelectorAll('.nav-btn');
+const panelBody = $(#panelBody);
+const navBtns = document.querySelectorAll(.nav-btn);
 
-// Auth kontrol
-onAuthStateChanged(auth, (user)=>{
-  if(!user){
-  } else {
-    loadTab("pending");
+async function loadTab(tab){
+  panelBody.innerHTML = `<p style="color:#888">Yükleniyor...</p>`;
+  try{
+    if(tab==="pending"){
+      const mod = await import(/admin/pending.js);
+      panelBody.innerHTML="";
+      await mod.render(panelBody);
+    }else if(tab==="support"){
+      const mod = await import(/admin/support.js);
+      panelBody.innerHTML="";
+      mod.render(panelBody);
+    }else if(tab==="users"){
+      const mod = await import(/admin/users.js);
+      panelBody.innerHTML="";
+      mod.render(panelBody);
+    }else if(tab==="broadcast"){
+      const mod = await import(/admin/broadcast.js);
+      panelBody.innerHTML="";
+      mod.render(panelBody);
+    }else{
+      panelBody.innerHTML = `<p style="color:#9aa3bd">Sekme hazırlanıyor...</p>`;
+    }
+  }catch(e){
+    panelBody.innerHTML = `<p style="color:red">Hata: ${e?.message||e}</p>`;
   }
-});
+}
 
-// Logout
-document.querySelector('#btnLogout').addEventListener('click', async ()=>{
-  try { await signOut(auth); } catch {}
-  location.href="/admin/login.html";
-});
-
-// Sekme geçişleri
 navBtns.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    navBtns.forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+  btn.addEventListener(click, ()=>{
+    navBtns.forEach(b=>b.classList.remove(active));
+    btn.classList.add(active);
     loadTab(btn.dataset.tab);
   });
 });
 
-// Dinamik içerik yükleme
-async function loadTab(tab){
-  panelBody.innerHTML = `<p style="color:#888">Yükleniyor...</p>`;
-  try {
-    if(tab==="pending"){
-      const mod = await import('/admin/pending.js');
-      if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
-    }
-    if(tab==="support"){
-      const mod = await import('/admin/support.js');
-      if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
-    }
-    if(tab==="users"){
-      const mod = await import('/admin/users.js');
-      if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
-    }
-    if(tab==="broadcast"){
-      const mod = await import('/admin/broadcast.js');
-      if(mod.render) { panelBody.innerHTML=""; mod.render(panelBody); }
-    }
-  } catch(e){
-    panelBody.innerHTML = `<p style="color:red">Hata: ${e.message}</p>`;
-  }
-}
+$(#btnLogout)?.addEventListener(click, async ()=>{
+  try{ await signOut(auth); }catch{}
+  location.href="/admin/login.html";
+});
+
+// İlk açılışta "pending"
+loadTab(pending);
