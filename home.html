@@ -14,7 +14,7 @@
       --btn:#111827; --btnInk:#fff;
       --c1:#ff80ab; --c2:#a78bfa; --c3:#60a5fa; --c4:#34d399; --c5:#f59e0b;
       --black:#0b0b0f; --black-ink:#e8e8f0; --black-line:#1e1e27;
-      --bottomH:64px; /* alt bar yüksekliği */
+      --bottomH:64px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -23,7 +23,7 @@
       background:linear-gradient(180deg,var(--bg),var(--bg2));
       color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px); /* alt barla çakışmayı önler */
+      padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px);
     }
     a,button{font:inherit}
 
@@ -53,7 +53,6 @@
     }
     .title{margin:0 0 10px;font-size:46px;font-weight:900}
     .subtitle{margin:0;font-size:20px}
-    /* Kontrast için beyaz + gölge */
     .gx{color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,.25),0 0 24px rgba(0,0,0,.15)}
     .gx-sub{color:#fffefc;opacity:.96;text-shadow:0 1px 6px rgba(0,0,0,.18)}
     .slogan{
@@ -214,7 +213,7 @@
 
   <!-- Canlı Destek FAB + Popover -->
   <button class="support-fab" id="btnSupport" aria-label="Canlı Destek">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
   </button>
   <div class="support-pop" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
     <p class="msg">Merhaba! Yardım için mesaj bırakın. WhatsApp/telefon bağlantısını sonra ekleyeceğiz.</p>
@@ -259,7 +258,7 @@
   <script type="module">
     // Firebase
     import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
@@ -273,63 +272,19 @@
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Auth guard
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Giriş kontrolü (anonim değilse /auth.html'e)
     onAuthStateChanged(auth, (u)=>{
       if(!u){ location.href="/auth.html"; return; }
     });
 
-    try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
+    try { await setPersistence(auth, indexedDBLocalPersistence); }
+    catch { await setPersistence(auth, browserLocalPersistence); }
 
-    // Firestore: İlanları çek ve render et
-    import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    const db = getFirestore();
-
-    const q = query(
-      collection(db, "listings"),
-      where("status", "==", "approved"),
-      where("expiresAt", ">", new Date()),
-      orderBy("expiresAt", "asc"),
-      limit(20)
-    );
-
-    const snap = await getDocs(q);
-    const grid = document.getElementById('adsGrid');
-    if(grid) grid.innerHTML = '';
-
-    function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
-
-    snap.forEach(d => {
-      const x = d.data() || {};
-      const id = d.id;
-      const title = x.title || x.name || 'İlan';
-      const city = x.city || x.location || '—';
-      const price = (x.price != null && x.price !== '') ? (x.price + ' ₺') : (x.want || '');
-      const cover = (Array.isArray(x.photos) && x.photos[0]) || x.coverUrl || x.photoURL || '';
-      const url = `/ilan/${id}.html`; // detay yolunu kendi yapına göre ayarla
-
-      const a = document.createElement('a');
-      a.className = 'ad-card';
-      a.href = url;
-      a.setAttribute('role','listitem');
-      a.innerHTML = `
-        <div class="ad-media">
-          ${cover ? `<img loading="lazy" src="${cover}" alt="">` : '📦'}
-        </div>
-        <div class="ad-body">
-          <h3 class="ad-title">${escapeHTML(title)}</h3>
-          <div class="ad-meta"><span>${escapeHTML(city)}</span><span>${escapeHTML(price)}</span></div>
-        </div>
-      `;
-      grid?.appendChild(a);
-    });
-
-    // Mini helpers
     const $ = (s, r=document)=>r.querySelector(s);
 
     // Üst bar yönlendirmeleri
     $('#btnLogout')?.addEventListener('click', async ()=>{ try{ await signOut(auth);}catch{} location.href = "/"; });
-    $('#btnProfile')?.addEventListener('click', ()=>{ location.href = "/profil"; });
+    $('#btnProfile')?.addEventListener('click', ()=>{ location.href = "/profile/profile.html"; });
     $('#btnPostAd')?.addEventListener('click', ()=>{ location.href = "/ilan/ilan-verme.html"; });
     $('#btnSearch')?.addEventListener('click', ()=>{ location.href = "/ara"; });
 
@@ -338,9 +293,9 @@
     tabs.forEach(t => t.addEventListener('click', ()=>{
       tabs.forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
-      if(t.id==='tabHome') location.href = "/";
-      if(t.id==='tabMessages') location.href = "/messages.html";       // düzeltildi
-      if(t.id==='tabNotifs') location.href = "/notifications.html";     // düzeltildi
+      if(t.id==='tabHome')      location.href = "/";
+      if(t.id==='tabMessages')  location.href = "/messages.html";
+      if(t.id==='tabNotifs')    location.href = "/notifications.html";
     }));
 
     // Canlı destek popover
@@ -367,8 +322,64 @@
         const item = btn.parentElement;
         const open = item.classList.contains('open');
         item.classList.toggle('open', !open);
-      });
+      })
     });
+
+    /* ===== İLANLARI YÜKLE — EN SONDA VE TRY/CATCH İÇİNDE ===== */
+    import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const db = getFirestore();
+
+    async function loadAds(){
+      try{
+        const q = query(
+          collection(db, "listings"),
+          where("status", "==", "approved"),
+          where("expiresAt", ">", new Date()),
+          orderBy("expiresAt", "asc"),
+          limit(20)
+        );
+        const snap = await getDocs(q);
+
+        const grid = document.getElementById('adsGrid');
+        if(!grid) return;
+
+        if(snap.empty){
+          grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Şu an yeni ilan yok.</div>';
+          return;
+        }
+
+        grid.innerHTML = '';
+        snap.forEach(d=>{
+          const x = d.data() || {};
+          const cover = (x.photos?.[0] || x.coverUrl || '/assets/img/placeholder.jpg');
+          const title = (x.title || 'Başlıksız');
+          const city  = (x.city  || '-');
+          const wish  = (x.wish  || x.price || 'Takas');
+
+          const a = document.createElement('a');
+          a.className = 'ad-card';
+          a.href = `/ilan/${d.id}.html`; // yapına göre değiştir
+          a.setAttribute('role','listitem');
+          a.innerHTML = `
+            <div class="ad-media"><img src="${cover}" alt=""></div>
+            <div class="ad-body">
+              <h3 class="ad-title">${title}</h3>
+              <div class="ad-meta"><span>${city}</span><span>${wish}</span></div>
+            </div>
+          `;
+          grid.appendChild(a);
+        });
+
+      }catch(err){
+        console.error("İlan yükleme hatası:", err);
+        const grid = document.getElementById('adsGrid');
+        if(grid){
+          grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err?.code || 'hata'}</div>`;
+        }
+      }
+    }
+
+    loadAds();
   </script>
 </body>
 </html>
