@@ -285,10 +285,6 @@ async function loadAds(){
       const d = doc.data() || {};
 
       // client-side filtre
-      const exp = d.expiresAt?.toDate ? d.expiresAt.toDate() : d.expiresAt instanceof Date ? d.expiresAt : null;
-      if (d.status !== 'approved') return;
-      if (exp && exp <= new Date()) return;
-
       const cover = d.photos?.[0] || "/assets/img/seffaf.png";
       const title = d.title || "İlan";
       const city  = d.city  || "";
