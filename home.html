@@ -255,131 +255,79 @@
   </footer>
 
   <!-- JS -->
-  <script type="module">
-    // Firebase
-    import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script type="module" src="assets/js/firebase-init.js"></script>
+<script type="module">
+  const { auth, db, requireAuth } = window.__fb;
+  requireAuth();
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.appspot.com",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  // İlanları çek
+  async function loadAds(){
+    const grid = document.getElementById("adsGrid");
+    if(!grid) return;
+    try {
+      const q = query(
+        collection(db,"listings"),
+        where("status","==","approved"),
+        where("expiresAt",">", new Date()),
+        orderBy("expiresAt","asc"),
+        limit(20)
+      );
+      const snap = await getDocs(q);
 
-    // Giriş kontrolü (anonim değilse /auth.html'e)
-    onAuthStateChanged(auth, (u)=>{
-      if(!u){ location.href="/auth.html"; return; }
-    });
+      if(snap.empty){
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz ilan yok</div>';
+        return;
+      }
 
-    try { await setPersistence(auth, indexedDBLocalPersistence); }
-    catch { await setPersistence(auth, browserLocalPersistence); }
+      grid.innerHTML = "";
+      snap.forEach(doc=>{
+        const d = doc.data() || {};
+        const cover = d.photos?.[0] || "/assets/img/seffaf.png";
+        const title = d.title || "İlan";
+        const city  = d.city  || "";
+        const cond  = d.cond  || "";
 
-    const $ = (s, r=document)=>r.querySelector(s);
-
-    // Üst bar yönlendirmeleri
-    $('#btnLogout')?.addEventListener('click', async ()=>{ try{ await signOut(auth);}catch{} location.href = "/"; });
-    $('#btnProfile')?.addEventListener('click', ()=>{ location.href = "/profile/profile.html"; });
-    $('#btnPostAd')?.addEventListener('click', ()=>{ location.href = "/ilan/ilan-verme.html"; });
-    $('#btnSearch')?.addEventListener('click', ()=>{ location.href = "/ara"; });
-
-    // Alt bar
-    const tabs = [$('#tabHome'), $('#tabMessages'), $('#tabNotifs')].filter(Boolean);
-    tabs.forEach(t => t.addEventListener('click', ()=>{
-      tabs.forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      if(t.id==='tabHome')      location.href = "/";
-      if(t.id==='tabMessages')  location.href = "/messages.html";
-      if(t.id==='tabNotifs')    location.href = "/notifications.html";
-    }));
-
-    // Canlı destek popover
-    const pop = $('#supportPop');
-    const fab = $('#btnSupport');
-    fab?.addEventListener('click', ()=>{
-      const showing = pop.style.display === 'block';
-      pop.style.display = showing ? 'none' : 'block';
-    });
-    $('#chatSend')?.addEventListener('click', ()=>{
-      const input = $('#chatInput');
-      const text = (input.value||'').trim();
-      if(!text) return;
-      const p = document.createElement('p');
-      p.className = 'msg';
-      p.textContent = text;
-      pop.insertBefore(p, pop.querySelector('.input-row'));
-      input.value = '';
-    });
-
-    // Accordion
-    document.querySelectorAll('.acc-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const item = btn.parentElement;
-        const open = item.classList.contains('open');
-        item.classList.toggle('open', !open);
-      })
-    });
-
-    /* ===== İLANLARI YÜKLE — EN SONDA VE TRY/CATCH İÇİNDE ===== */
-    import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    const db = getFirestore();
-
-    async function loadAds(){
-      try{
-        const q = query(
-          collection(db, "listings"),
-          where("status", "==", "approved"),
-          where("expiresAt", ">", new Date()),
-          orderBy("expiresAt", "asc"),
-          limit(20)
-        );
-        const snap = await getDocs(q);
-
-        const grid = document.getElementById('adsGrid');
-        if(!grid) return;
-
-        if(snap.empty){
-          grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Şu an yeni ilan yok.</div>';
-          return;
-        }
-
-        grid.innerHTML = '';
-        snap.forEach(d=>{
-          const x = d.data() || {};
-          const cover = (x.photos?.[0] || x.coverUrl || '/assets/img/placeholder.jpg');
-          const title = (x.title || 'Başlıksız');
-          const city  = (x.city  || '-');
-          const wish  = (x.wish  || x.price || 'Takas');
-
-          const a = document.createElement('a');
-          a.className = 'ad-card';
-          a.href = `/ilan/${d.id}.html`; // yapına göre değiştir
-          a.setAttribute('role','listitem');
-          a.innerHTML = `
-            <div class="ad-media"><img src="${cover}" alt=""></div>
+        grid.innerHTML += `
+          <a class="ad-card" href="/ilan/${doc.id}">
+            <div class="ad-media">
+              <img src="${cover}" alt="">
+            </div>
             <div class="ad-body">
               <h3 class="ad-title">${title}</h3>
-              <div class="ad-meta"><span>${city}</span><span>${wish}</span></div>
+              <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
             </div>
-          `;
-          grid.appendChild(a);
-        });
-
-      }catch(err){
-        console.error("İlan yükleme hatası:", err);
-        const grid = document.getElementById('adsGrid');
-        if(grid){
-          grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err?.code || 'hata'}</div>`;
-        }
-      }
+          </a>`;
+      });
+    } catch(err){
+      console.error("İlan yükleme hatası:", err);
+      grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
     }
+  }
+  loadAds();
 
-    loadAds();
-  </script>
+  // Üst bar butonları
+  const $ = (s,r=document)=>r.querySelector(s);
+  $('#btnLogout')?.addEventListener('click', async ()=>{
+    try{ await signOut(auth);}catch{}
+    location.href="/";
+  });
+  $('#btnProfile')?.addEventListener('click', ()=>location.href="/profile/profile.html");
+  $('#btnPostAd')?.addEventListener('click', ()=>location.href="/ilan/ilan-verme.html");
+  $('#btnSearch')?.addEventListener('click', ()=>location.href="/ara");
+
+  // Alt bar
+  const tabs=[$('#tabHome'),$('#tabMessages'),$('#tabNotifs')].filter(Boolean);
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    if(t.id==='tabHome') location.href="/";
+    if(t.id==='tabMessages') location.href="/messages.html";
+    if(t.id==='tabNotifs') location.href="/notifications.html";
+  }));
+</script>
+  
 </body>
 </html>
