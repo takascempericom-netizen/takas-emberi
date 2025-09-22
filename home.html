@@ -269,9 +269,9 @@ async function loadAds(){
   try {
   const q = query(
   collection(db,"listings"),
-  where("approved","==", true),
+  where("isApproved","==", true),
   limit(20)
-);
+ );
 
     const snap = await getDocs(q);
 
