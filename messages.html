@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mesajlar • Takas Çemberi</title>
+  <style>
+    :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
+      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
+    @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .hdr{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-bottom:1px solid var(--brd)}
+    .hdr .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+    .ttl{margin:0;font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .wrap{max-width:1100px;margin:16px auto 120px;padding:0 16px}
+    .grid{display:grid;grid-template-columns:280px 1fr;gap:12px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .left{display:flex;flex-direction:column;height:70vh}
+    .left .search{padding:10px;border-bottom:1px solid var(--brd)}
+    .left input{width:100%;border:1px solid var(--brd);border-radius:10px;padding:10px;background:#fff}
+    .threads{overflow:auto}
+    .thread{padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;display:grid;gap:2px}
+    .thread.active{background:#111827;color:#fff}
+    .thread small{color:#475569}
+    .right{display:flex;flex-direction:column;height:70vh}
+    .msgs{flex:1;overflow:auto;padding:12px;display:grid;gap:8px}
+    .msg{max-width:70%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff}
+    .msg.me{margin-left:auto;background:#eef2ff;border-color:#c7d2fe}
+    .composer{border-top:1px solid var(--brd);display:flex;gap:8px;padding:10px}
+    .composer input{flex:1;border:1px solid var(--brd);border-radius:10px;padding:10px;background:#fff}
+    .composer button{border:1px solid var(--brd);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
+    .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
+    .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
+    .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
+  </style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="in">
+      <h1 class="ttl">Mesajlar</h1>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <section class="card left">
+        <div class="search"><input id="srch" placeholder="Sohbet ara…"></div>
+        <div id="threads" class="threads"></div>
+      </section>
+
+      <section class="card right">
+        <div id="msgs" class="msgs"><div style="color:#475569">Sohbet seçin veya yeni bir sohbet başlatın.</div></div>
+        <div class="composer">
+          <input id="text" placeholder="Mesaj yazın…" />
+          <button id="send">Gönder</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="fixedbar">
+    <div class="in">
+      <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
+      <a href="/messages.html" class="active" id="navMsgs">💬<span>Mesajlar</span></a>
+      <a href="/notifications.html" id="navNotifs">🔔<span>Bildirimler</span></a>
+      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+    </div>
+  </nav>
+
+  <audio id="ding" preload="auto">
+    <source src="/assets/sounds/notify.wav" type="audio/wav">
+  </audio>
+
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    const elThreads = document.getElementById('threads');
+    const elMsgs = document.getElementById('msgs');
+    const elText = document.getElementById('text');
+    const btnSend = document.getElementById('send');
+    const ding = document.getElementById('ding');
+
+    let me = null;
+    let activeChatId = null;
+    let unsubMsgs = null;
+
+    const fmt = (ts)=>{ try{ const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts)); return isNaN(d)?"—":d.toLocaleString("tr-TR",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});}catch{return "—"} };
+
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ alert("Lütfen giriş yapın."); location.href="/auth.html"; return; }
+      me = user;
+
+      // Sol tarafta sohbet listesi
+      const qThreads = query(collection(db,"chats"), where("participants","array-contains", me.uid), orderBy("updatedAt","desc"));
+      onSnapshot(qThreads, (snap)=>{
+        elThreads.innerHTML = "";
+        snap.forEach(d=>{
+          const c = d.data()||{};
+          const div = document.createElement("div");
+          div.className = "thread" + (d.id===activeChatId?" active":"");
+          const title = c.title || (Array.isArray(c.participants)? c.participants.filter(x=>x!==me.uid).join(", "):"Sohbet");
+          div.innerHTML = `<strong>${title}</strong><small>${c.lastMsg||""}</small>`;
+          div.onclick = ()=> openChat(d.id);
+          elThreads.appendChild(div);
+        });
+      });
+
+      // URL ile direkt hedef (messages.html?to=<uid>)
+      const params = new URLSearchParams(location.search);
+      const toUid = params.get("to");
+      if(toUid) {
+        const id = await ensureDirectChat(me.uid, toUid);
+        openChat(id);
+      }
+    });
+
+    // İkili sohbeti bul veya oluştur
+    async function ensureDirectChat(a,b){
+      const qMine = query(collection(db,"chats"), where("participants","array-contains", a));
+      const ss = await getDocs(qMine);
+      const found = ss.docs.find(docu=>{
+        const p = docu.data()?.participants||[];
+        return p.length===2 && p.includes(a) && p.includes(b);
+      });
+      if(found) return found.id;
+      const docRef = await addDoc(collection(db,"chats"), {
+        participants:[a,b],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastMsg: ""
+      });
+      return docRef.id;
+    }
+
+    // Sohbeti aç
+    function openChat(chatId){
+      if(unsubMsgs) { unsubMsgs(); unsubMsgs=null; }
+      activeChatId = chatId;
+      elMsgs.innerHTML = "";
+
+      const msgsRef = collection(db,"chats",chatId,"messages");
+      const qMsgs = query(msgsRef, orderBy("createdAt","asc"));
+      let firstLoad = true;
+      unsubMsgs = onSnapshot(qMsgs, (snap)=>{
+        if(firstLoad) elMsgs.innerHTML = "";
+        snap.docChanges().forEach(ch=>{
+          const d = ch.doc.data()||{};
+          if(ch.type==="added"){
+            const div = document.createElement("div");
+            div.className = "msg" + (d.senderUid===me.uid ? " me": "");
+            div.innerHTML = `<div>${d.text||""}</div><small style="display:block;color:#64748b">${fmt(d.createdAt)}</small>`;
+            elMsgs.appendChild(div);
+            elMsgs.scrollTop = elMsgs.scrollHeight;
+
+            // başkasından geldiyse ve ilk yük değilse ses
+            if(!firstLoad && d.senderUid!==me.uid){ try{ ding.play(); }catch{} }
+          }
+        });
+        firstLoad = false;
+      });
+    }
+
+    // Mesaj gönder
+    btnSend.addEventListener("click", sendMsg);
+    elText.addEventListener("keydown",(e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); } });
+
+    async function sendMsg(){
+      const txt = elText.value.trim(); if(!txt || !activeChatId) return;
+      elText.value = "";
+      const ref = collection(db,"chats",activeChatId,"messages");
+      await addDoc(ref, {
+        senderUid: me.uid,
+        text: txt,
+        createdAt: serverTimestamp()
+      });
+      await updateDoc(doc(db,"chats",activeChatId), {
+        updatedAt: serverTimestamp(),
+        lastMsg: txt
+      });
+    }
+  </script>
+</body>
+</html>
