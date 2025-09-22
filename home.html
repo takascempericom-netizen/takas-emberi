@@ -259,7 +259,7 @@
   const { auth, db, requireAuth } = window.__fb;
   requireAuth();
 
-  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // İlanları çek
@@ -310,7 +310,16 @@ async function loadAds(){
     grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
   }
 }
-loadAds();
+onAuthStateChanged(auth, async (user) => {
+  const grid = document.getElementById("adsGrid");
+  if (!user) {
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">İlanları görmek için giriş yapın</div>';
+    return;
+  }
+  await user.getIdToken(true); // token güncellensin
+  await loadAds();
+});
+
 
   // Üst bar butonları
   const $ = (s,r=document)=>r.querySelector(s);
