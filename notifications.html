@@ -63,50 +63,59 @@
     </div>
   </nav>
 
+  <!-- Ses -->
   <audio id="ding" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
   </audio>
 
+  <!-- Firebase init (ortak) -->
+  <script type="module" src="assets/js/firebase-init.js"></script>
+
+  <!-- Sayfa scripti -->
   <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const { auth, db, requireAuth } = window.__fb;
+    requireAuth(); // giriş yoksa /auth.html
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const elList = document.getElementById('list');
+    const elList   = document.getElementById('list');
     const elStatus = document.getElementById('status');
-    const btnAll = document.getElementById('btnMarkAll');
+    const btnAll   = document.getElementById('btnMarkAll');
     const btnSound = document.getElementById('btnSound');
-    const ding = document.getElementById('ding');
+    const ding     = document.getElementById('ding');
+
+    // Alt bar linklerini .html ile sabitle
+    document.getElementById('navHome')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/"; });
+    document.getElementById('navMsgs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/messages.html"; });
+    document.getElementById('navNotifs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/notifications.html"; });
+    document.getElementById('navProfile')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/profile/profile.html"; });
 
     const fmt = (ts)=>{
-      try{ const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+      try{
+        const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
         return isNaN(d) ? "—" : d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
       }catch{ return "—"; }
     };
 
     let firstLoad = true;
-    let known = new Set();
+    const known = new Set();
 
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ elStatus.textContent="Lütfen giriş yapın."; elList.style.display="none"; return; }
 
       const inboxRef = collection(db, "users", user.uid, "inbox");
-      const qInbox = query(inboxRef, orderBy("createdAt","desc"));
+      const qInbox   = query(inboxRef, orderBy("createdAt","desc"));
 
       onSnapshot(qInbox, (snap)=>{
-        if(snap.empty){ elList.style.display="none"; elStatus.style.display="block"; elStatus.textContent="Bildirim yok."; return; }
+        if(snap.empty){
+          elList.style.display="none";
+          elStatus.style.display="block";
+          elStatus.textContent="Bildirim yok.";
+          firstLoad = false;
+          return;
+        }
+
         elList.innerHTML = "";
         snap.forEach(d=>{
           const data = d.data()||{};
@@ -127,17 +136,25 @@
             </div>
           `;
           div.addEventListener("click", async (ev)=>{
-            const b = ev.target.closest("button[data-act='read']"); if(!b) return;
+            const b = ev.target.closest("button[data-act='read']");
+            if(!b) return;
             await updateDoc(doc(db,"users",user.uid,"inbox",d.id),{read:true});
           });
           elList.appendChild(div);
 
-          if(!firstLoad && !data.read && !known.has(d.id)){ try{ ding.play(); }catch{} }
+          // Yeni düşen ve okunmamışsa ses
+          if(!firstLoad && !data.read && !known.has(d.id)){
+            try{ ding.currentTime = 0; ding.play(); }catch{}
+          }
           known.add(d.id);
         });
-        elStatus.style.display="none"; elList.style.display="grid"; firstLoad=false;
+
+        elStatus.style.display="none";
+        elList.style.display="grid";
+        firstLoad = false;
       });
 
+      // Toplu okundu
       btnAll?.addEventListener("click", async ()=>{
         const unreadQ = query(inboxRef, where("read","==",false));
         const ss = await getDocs(unreadQ);
@@ -145,7 +162,8 @@
       });
     });
 
-    btnSound?.addEventListener("click", ()=>{ try{ ding.play(); }catch{} });
+    // Ses testi
+    btnSound?.addEventListener("click", ()=>{ try{ ding.currentTime = 0; ding.play(); }catch{} });
   </script>
 </body>
 </html>
