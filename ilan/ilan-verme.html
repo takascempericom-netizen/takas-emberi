@@ -130,75 +130,204 @@
   </main>
 
   <script>
-    const photos = document.getElementById('photos');
-    const preview = document.getElementById('preview');
+  const photos = document.getElementById('photos');
+  const preview = document.getElementById('preview');
 
-    photos.addEventListener('change', ()=>{
-      preview.innerHTML='';
-      [...photos.files].forEach((file,i)=>{
-        const url = URL.createObjectURL(file);
-        const box = document.createElement('div');
-        box.className='imgBox';
-        box.innerHTML = `<img src="${url}"><button type="button">✕</button>`;
-        box.querySelector('button').onclick=()=>{
-          const dt=new DataTransfer();
-          [...photos.files].forEach((f,idx)=>{if(idx!==i) dt.items.add(f)});
-          photos.files=dt.files;
-          box.remove();
-        };
-        preview.appendChild(box);
-      });
+  // Foto önizleme (max 5 önerisi metinde; kullanıcı 5'ten fazla eklerse yine gösterir, istersen kısıt koyabiliriz)
+  photos.addEventListener('change', ()=>{
+    preview.innerHTML='';
+    [...photos.files].forEach((file,i)=>{
+      const url = URL.createObjectURL(file);
+      const box = document.createElement('div');
+      box.className='imgBox';
+      box.innerHTML = `<img src="${url}"><button type="button">✕</button>`;
+      box.querySelector('button').onclick=()=>{
+        const dt=new DataTransfer();
+        [...photos.files].forEach((f,idx)=>{if(idx!==i) dt.items.add(f)});
+        photos.files=dt.files;
+        box.remove();
+      };
+      preview.appendChild(box);
     });
+  });
 
-    const catSel = document.getElementById('cat');
-    const subcatDiv = document.getElementById('subcatFields');
+  // Kategori → Dinamik alt kategori ve alanlar
+  const catSel = document.getElementById('cat');
+  const subcatDiv = document.getElementById('subcatFields');
 
-    catSel.addEventListener('change', ()=>{
-      subcatDiv.innerHTML = '';
-      if(catSel.value==='tasit'){
-        subcatDiv.innerHTML = `
-          <label>Alt Kategori</label>
-          <select required>
-            <option value="">Seçiniz</option>
-            <option>Araba</option>
-            <option>Motosiklet</option>
-            <option>Yedek Parça</option>
-          </select>
-          <label>Kilometre</label><input>
-          <label>Yıl</label><input type="number">
-          <label>Marka</label><input>
-          <label>Model</label><input>
-        `;
-      }
-      if(catSel.value==='tasinmaz'){
-        subcatDiv.innerHTML = `
-          <label>Alt Kategori</label>
-          <select required>
-            <option value="">Seçiniz</option>
-            <option>Konut</option>
-            <option>Arsa</option>
-            <option>Tarla</option>
-          </select>
-          <label>Metrekare</label><input type="number">
-          <label>Oda Sayısı</label><input>
-          <label>Kat</label><input>
-          <label>İmar Durumu</label><input>
-        `;
-      }
-    });
+  catSel.addEventListener('change', ()=>{
+    subcatDiv.innerHTML = '';
 
-    // Küfür filtre
-    const banned = ["piç","orospu","sik","amk","şerefsiz","b.k","aq","a.q","yalacı","kopek","pezevenk","amcık","göt","pezevenk","dolandırıcı","terror"];
-    document.getElementById('listingForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const text = (document.getElementById('title').value+" "+document.getElementById('desc').value).toLowerCase();
-      if(banned.some(w=>text.includes(w))){
-        alert("Toplum kurallarına aykırı kelime tespit edildi. Lütfen düzeltin.");
-        return;
-      }
-      alert('İlan kurallar gereği admin onayına gönderildi.');
-    });
-  </script>
+    // === Motorlu Taşıtlar
+    if(catSel.value==='tasit'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Araba</option>
+          <option>Motosiklet</option>
+          <option>Yedek Parça</option>
+        </select>
+
+        <label>Kilometre</label>
+        <input inputmode="numeric" pattern="\\d*">
+
+        <label>Yıl</label>
+        <input type="number" min="1950" max="2100" step="1">
+
+        <label>Marka</label>
+        <input>
+
+        <label>Model</label>
+        <input>
+      `;
+    }
+
+    // === Taşınmaz
+    if(catSel.value==='tasinmaz'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Konut</option>
+          <option>Arsa</option>
+          <option>Tarla</option>
+        </select>
+
+        <label>Metrekare</label>
+        <input type="number" min="1" step="1">
+
+        <label>Oda Sayısı</label>
+        <input placeholder="3+1 gibi">
+
+        <label>Kat</label>
+        <input>
+
+        <label>İmar Durumu</label>
+        <input>
+      `;
+    }
+
+    // === Beyaz Eşya
+    if(catSel.value==='beyaz'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Buzdolabı</option>
+          <option>Çamaşır Makinesi</option>
+          <option>Bulaşık Makinesi</option>
+          <option>Küçük Ev Aletleri</option>
+        </select>
+
+        <label>Marka</label>
+        <input>
+
+        <label>Model</label>
+        <input>
+
+        <label>Enerji Sınıfı</label>
+        <input placeholder="A++ gibi">
+      `;
+    }
+
+    // === Giyim
+    if(catSel.value==='giyim'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Kadın</option>
+          <option>Erkek</option>
+          <option>Çocuk</option>
+          <option>Aksesuar</option>
+        </select>
+
+        <label>Beden</label>
+        <input placeholder="S / M / L / 36 / 38 ...">
+
+        <label>Renk</label>
+        <input>
+
+        <label>Marka</label>
+        <input>
+      `;
+    }
+
+    // === Teknoloji
+    if(catSel.value==='teknoloji'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Bilgisayar</option>
+          <option>Telefon</option>
+          <option>Tablet</option>
+          <option>Aksesuar</option>
+        </select>
+
+        <label>Marka</label>
+        <input>
+
+        <label>Model</label>
+        <input>
+
+        <label>Depolama</label>
+        <input placeholder="128 GB, 512 GB...">
+      `;
+    }
+
+    // === Mobilya (istersen kalsın)
+    if(catSel.value==='mobilya'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Koltuk</option>
+          <option>Masa</option>
+          <option>Dolap</option>
+          <option>Yatak</option>
+        </select>
+
+        <label>Malzeme</label>
+        <input placeholder="Ahşap, MDF, Metal...">
+
+        <label>Ölçüler</label>
+        <input placeholder="En x Boy x Yükseklik">
+      `;
+    }
+
+    // === Oyuncak (istersen kalsın)
+    if(catSel.value==='oyuncak'){
+      subcatDiv.innerHTML = `
+        <label>Alt Kategori</label>
+        <select required>
+          <option value="">Seçiniz</option>
+          <option>Eğitici</option>
+          <option>Figür</option>
+          <option>Araba</option>
+          <option>Oyun Seti</option>
+        </select>
+
+        <label>Yaş Aralığı</label>
+        <input placeholder="3-6 yaş gibi">
+      `;
+    }
+  });
+
+  // Küfür filtre (başlık + açıklama)
+  const banned = ["piç","orospu","sik","amk","şerefsiz","b.k","aq","a.q","yalacı","kopek","pezevenk","amcık","göt","pezevenk","dolandırıcı","terror"];
+  document.getElementById('listingForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const text = (document.getElementById('title').value+" "+document.getElementById('desc').value).toLowerCase();
+    if(banned.some(w=>text.includes(w))){
+      alert("Toplum kurallarına aykırı kelime tespit edildi. Lütfen düzeltin.");
+      return;
+    }
+    alert('İlan kurallar gereği admin onayına gönderildi.');
+    // Burada submit akışını Firestore’a bağlayacağız: ilan kaydı + durum: pending (istersen ekleyelim)
+  });
+</script>
   <script type="module" src="ilanver.js"></script>
 </body>
 </html>
