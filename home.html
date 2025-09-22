@@ -267,10 +267,9 @@ async function loadAds(){
   const grid = document.getElementById("adsGrid");
   if(!grid) return;
   try {
-    const q = query(
+  const q = query(
   collection(db,"listings"),
-  where("status","==","approved"),
-  orderBy("createdAt","desc"),
+  where("approved","==", true),
   limit(20)
 );
 
