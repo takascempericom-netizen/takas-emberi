@@ -5,87 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Profil • Takas Çemberi</title>
   <style>
-    :root{
-      --c1:#7c3aed; --c2:#06b6d4; --c3:#10b981; --c4:#f59e0b;
-      --fg:#0f172a; --glass: rgba(255,255,255,.78); --brd: rgba(255,255,255,.5);
-    }
-    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; color:var(--fg);
-      background: linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4)); background-size:300% 300%; animation: gradientShift 18s ease infinite; min-height:100vh; }
-    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .wave:before{ content:""; position:fixed; inset:-20%; pointer-events:none; z-index:0;
-      background: radial-gradient(60% 40% at 20% 30%,rgba(255,255,255,.12),transparent 60%),
-                  radial-gradient(40% 30% at 80% 70%,rgba(255,255,255,.10),transparent 60%);
-      filter: blur(40px); animation: waveMove 24s ease-in-out infinite;
-    }
-    @keyframes waveMove{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(2%,-2%,0)}}
-    .hdr{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.2); backdrop-filter: blur(10px); border-bottom:1px solid var(--brd);}
-    .hdr .in{max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;}
-    .ttl{margin:0; font-size:20px; font-weight:700; color:white; text-shadow:0 1px 2px rgba(0,0,0,.25)}
-    .row{display:flex; gap:8px; align-items:center}
-    .btn{appearance:none; border:1px solid var(--brd); background:var(--glass); color:#111827; font-weight:600; padding:8px 12px; border-radius:12px; cursor:pointer}
-    .btn:hover{background:white}
-    .btn.danger{border-color:#fca5a5; color:#991b1b}
-    .btn.ok{background:#111827; color:white; border-color:#111827}
-    .btn.sm{padding:6px 10px; border-radius:10px; font-size:12px}
-    .btn.ghost{background:transparent}
-    .wrap{max-width:1100px; margin:16px auto 120px; padding:0 16px; position:relative; z-index:1}
-    .card{background:var(--glass); border:1px solid var(--brd); border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,.08);}
-    .profile-grid{display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px}
-    @media (max-width: 840px){ .profile-grid{grid-template-columns:1fr} }
-    .left{display:flex; flex-direction:column; align-items:center; gap:10px}
-    .avatar{width:110px; height:110px; border-radius:999px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,.2); border:3px solid rgba(255,255,255,.9)}
-    .name{font-weight:700}
-    .stars{display:flex; gap:4px}
-    .rating-num{font-size:12px; color:#334155}
-    .right{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .right label{font-size:12px; color:#475569}
-    .right input{border:1px solid var(--brd); border-radius:12px; padding:10px 12px; background:#ffffffb3}
-    .right input[disabled]{color:#334155; background:#f8fafc}
-    .row.end{justify-content:flex-end}
-    .tabs{display:flex; gap:8px; padding:12px; border-bottom:1px solid var(--brd)}
-    .tab{padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:600; background:rgba(255,255,255,.6)}
-    .tab.active{background:#111827; color:white}
-    .list{padding:12px; display:grid; gap:8px}
-    .item{
-      background:white; border:1px solid #e5e7eb; border-radius:14px; padding:10px;
-      display:grid; grid-template-columns:84px 1fr auto; gap:12px; align-items:center;
-    }
-    .thumb{
-      width:84px; height:84px; border-radius:12px; background:#f1f5f9 center/cover no-repeat;
-      border:1px solid #e5e7eb;
-    }
-    .meta strong{display:block}
-    .muted{font-size:12px; color:#64748b}
-    .badge{font-size:12px; padding:4px 8px; border-radius:10px; border:1px solid #e5e7eb; background:#f8fafc; display:inline-block}
-    .badge.live{background:#dcfce7; color:#065f46; border-color:#bbf7d0}
-    .badge.pending{background:#fff7ed; color:#9a3412; border-color:#fed7aa}
-    .badge.expired{background:#fee2e2; color:#991b1b; border-color:#fecaca}
-    .actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
-    .fixedbar{position:fixed; left:0; right:0; bottom:0; z-index:30;}
-    .fixedbar .in{max-width:1100px; margin:0 auto 0; padding:8px 12px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
-    .fixedbar a{display:flex; flex-direction:column; gap:2px; align-items:center; justify-content:center; padding:8px 6px; border-radius:14px; text-decoration:none; color:#111827; font-weight:600; border:1px solid var(--brd); background:var(--glass)}
-    .fixedbar a.active{background:#111827; color:white; border-color:#111827}
-    .fixedbar:before{content:""; position:absolute; inset:-20px 0 -20px 0; z-index:-1; background: linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4)); filter: blur(30px); opacity:.6}
-    /* Modal */
-    .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(15,23,42,.45); z-index:50}
-    .modal.show{display:grid}
-    .dialog{width:min(880px,92vw); background:white; border-radius:18px; border:1px solid #e2e8f0; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden}
-    .dialog .head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #e2e8f0}
-    .dialog .body{padding:14px; display:grid; grid-template-columns:220px 1fr; gap:14px}
-    .dialog .body img{width:100%; border-radius:12px; border:1px solid #e5e7eb; object-fit:cover; aspect-ratio:1/1}
-    .dialog .f{display:grid; gap:8px}
-    .dialog label{font-size:12px; color:#475569}
-    .dialog input, .dialog textarea{ border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; font:inherit; background:#f8fafc; }
-    .dialog textarea{min-height:120px; resize:vertical}
-    .dialog .foot{display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid #e2e8f0; background:#f8fafc}
+  :root{
+    --c1:#7c3aed; --c2:#06b6d4; --c3:#10b981; --c4:#f59e0b;
+    --fg:#0f172a; --glass: rgba(255,255,255,.78); --brd: rgba(255,255,255,.5);
+  }
+  body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; color:var(--fg);
+    background: linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4)); background-size:300% 300%; animation: gradientShift 18s ease infinite; min-height:100vh; }
+  @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .wave:before{ content:""; position:fixed; inset:-20%; pointer-events:none; z-index:0;
+    background: radial-gradient(60% 40% at 20% 30%,rgba(255,255,255,.12),transparent 60%),
+                radial-gradient(40% 30% at 80% 70%,rgba(255,255,255,.10),transparent 60%);
+    filter: blur(40px); animation: waveMove 24s ease-in-out infinite;
+  }
+  @keyframes waveMove{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(2%,-2%,0)}}
+
+  .hdr{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.2); backdrop-filter: blur(10px); border-bottom:1px solid var(--brd);}
+  .hdr .in{max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;}
+  .ttl{margin:0; font-size:20px; font-weight:700; color:white; text-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .row{display:flex; gap:8px; align-items:center}
+  .btn{appearance:none; border:1px solid var(--brd); background:var(--glass); color:#111827; font-weight:600; padding:8px 12px; border-radius:12px; cursor:pointer}
+  .btn:hover{background:white}
+  .btn.danger{border-color:#fca5a5; color:#991b1b}
+  .btn.ok{background:#111827; color:white; border-color:#111827}
+  .btn.sm{padding:6px 10px; border-radius:10px; font-size:12px}
+  .btn.ghost{background:transparent}
+
+  .wrap{max-width:1100px; margin:16px auto 120px; padding:0 16px; position:relative; z-index:1}
+  .card{background:var(--glass); border:1px solid var(--brd); border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,.08);}
+
+  /* Profil grid */
+  .profile-grid{display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px}
+  @media (max-width: 840px){ .profile-grid{grid-template-columns:1fr} }
+  .left{display:flex; flex-direction:column; align-items:center; gap:10px}
+  .avatar{width:110px; height:110px; border-radius:999px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,.2); border:3px solid rgba(255,255,255,.9); background:#f1f5f9}
+  .name{font-weight:700}
+  .stars{display:flex; gap:4px}
+  .rating-num{font-size:12px; color:#334155}
+
+  .right{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .right label{font-size:12px; color:#475569}
+  .right input{border:1px solid var(--brd); border-radius:12px; padding:10px 12px; background:#ffffffb3}
+  .right input[disabled]{color:#334155; background:#f8fafc}
+  .row.end{justify-content:flex-end}
+
+  /* Sekmeler */
+  .tabs{display:flex; gap:8px; padding:12px; border-bottom:1px solid var(--brd)}
+  .tab{padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:600; background:rgba(255,255,255,.6)}
+  .tab.active{background:#111827; color:white}
+  .list{padding:12px; display:grid; gap:8px}
+
+  /* Kart + küçük kapak görseli (grid) */
+  .item{
+    background:white; border:1px solid #e5e7eb; border-radius:14px; padding:10px;
+    display:grid; grid-template-columns:84px 1fr auto; gap:12px; align-items:center;
+  }
+  .thumb{
+    width:84px; height:84px; border-radius:12px; background:#f1f5f9 center/cover no-repeat;
+    border:1px solid #e5e7eb;
+  }
+  .meta strong{display:block}
+  .muted{font-size:12px; color:#64748b}
+  .badge{font-size:12px; padding:4px 8px; border-radius:10px; border:1px solid #e5e7eb; background:#f8fafc; display:inline-block}
+  .badge.live{background:#dcfce7; color:#065f46; border-color:#bbf7d0}
+  .badge.pending{background:#fff7ed; color:#9a3412; border-color:#fed7aa}
+  .badge.expired{background:#fee2e2; color:#991b1b; border-color:#fecaca}
+  .actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+
+  /* Alt sabit bar */
+  .fixedbar{position:fixed; left:0; right:0; bottom:0; z-index:30;}
+  .fixedbar .in{max-width:1100px; margin:0 auto 0; padding:8px 12px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .fixedbar a{display:flex; flex-direction:column; gap:2px; align-items:center; justify-content:center; padding:8px 6px; border-radius:14px; text-decoration:none; color:#111827; font-weight:600; border:1px solid var(--brd); background:var(--glass)}
+  .fixedbar a.active{background:#111827; color:white; border-color:#111827}
+  .fixedbar:before{content:""; position:absolute; inset:-20px 0 -20px 0; z-index:-1; background: linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4)); filter: blur(30px); opacity:.6}
+
+  /* Modal */
+  .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(15,23,42,.45); z-index:50}
+  .modal.show{display:grid}
+  .dialog{width:min(880px,92vw); background:white; border-radius:18px; border:1px solid #e2e8f0; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden}
+  .dialog .head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #e2e8f0}
+  .dialog .body{padding:14px; display:grid; grid-template-columns:220px 1fr; gap:14px}
+  .dialog .body img{width:100%; border-radius:12px; border:1px solid #e5e7eb; object-fit:cover; aspect-ratio:1/1}
+  .dialog .f{display:grid; gap:8px}
+  .dialog label{font-size:12px; color:#475569}
+  .dialog input, .dialog textarea{ border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; font:inherit; background:#f8fafc; }
+  .dialog textarea{min-height:120px; resize:vertical}
+  .dialog .foot{display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid #e2e8f0; background:#f8fafc}
   </style>
 </head>
+
 <body class="wave">
   <header class="hdr">
     <div class="in">
       <h1 class="ttl">Profil</h1>
       <div class="row">
-        <button class="btn" id="btnNew">+ Yeni İlan</button>
+        <a class="btn" id="btnNew" href="/ilan/ilanver.html">+ Yeni İlan</a>
         <button class="btn danger" id="btnLogout">Çıkış</button>
       </div>
     </div>
@@ -112,6 +125,7 @@
           <input id="email" placeholder="eposta@example.com" disabled>
           <label>Şehir</label>
           <input id="city" placeholder="Şehir" disabled>
+
           <label>Mevcut Şifre</label>
           <input id="oldPassword" type="password" placeholder="Mevcut şifre">
           <label>Yeni Şifre</label>
@@ -138,7 +152,7 @@
     </section>
   </div>
 
-  <!-- DETAY / DÜZENLE MODAL -->
+  <!-- DETAY / DÜZENLE MODAL (TEK ADET) -->
   <div class="modal" id="listingModal" aria-hidden="true">
     <div class="dialog">
       <div class="head">
@@ -148,6 +162,7 @@
       <div class="body">
         <img id="mPhoto" alt="ilan">
         <div class="f">
+          <div id="mDetails" class="muted" style="font-size:13px;color:#475569;line-height:1.5"></div>
           <label>Başlık</label>
           <input id="mInputTitle">
           <label>Açıklama</label>
@@ -172,70 +187,47 @@
     </div>
   </nav>
 
-  <!-- Basit UI (sekme geçişi) -->
+  <!-- Basit UI (sekme geçişi, modal kapat, şifre event) -->
   <script type="module">
-    const tabsRoot = document.getElementById('tabsCard');
-    if (tabsRoot) {
-      const tabs = document.querySelectorAll('.tab');
-      const panes = {
-        live:    document.getElementById('tab-live'),
-        pending: document.getElementById('tab-pending'),
-        expired: document.getElementById('tab-expired')
-      };
-      tabs.forEach(t => t.addEventListener('click', () => {
-        tabs.forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-        const k = t.dataset.tab;
-        Object.entries(panes).forEach(([key, el]) => { if (!el) return; el.style.display = (key === k) ? 'grid' : 'none'; });
-      }));
+    // Sekmeler
+    const tabs = document.querySelectorAll('.tab');
+    const panes = {
+      live:    document.getElementById('tab-live'),
+      pending: document.getElementById('tab-pending'),
+      expired: document.getElementById('tab-expired')
+    };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const k = t.dataset.tab;
+      Object.entries(panes).forEach(([key, el]) => { if (!el) return; el.style.display = (key === k) ? 'grid' : 'none'; });
+    }));
 
-      // Modal kapat
-      document.getElementById('mClose')?.addEventListener('click',()=> document.getElementById('listingModal')?.classList.remove('show'));
-
-      // Alt bar aktifliği
-      const path = location.pathname;
-      document.querySelectorAll('.fixedbar a').forEach(a=>{
-        a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/profile') && a.id==='navProfile'));
-      });
-    }
-  </script>
-  <!-- DETAY / DÜZENLE MODAL (İNCELE için) -->
-<div class="modal" id="listingModal" aria-hidden="true" style="position:fixed;inset:0;display:none;place-items:center;background:rgba(15,23,42,.45);z-index:50">
-  <div class="dialog" style="width:min(880px,92vw);background:#fff;border-radius:18px;border:1px solid #e2e8f0;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
-    <div class="head" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0">
-      <strong id="mTitle">İlan</strong>
-      <span class="badge" id="mStatus"></span>
-    </div>
-    <div class="body" style="padding:14px;display:grid;grid-template-columns:220px 1fr;gap:14px">
-      <img id="mPhoto" alt="ilan" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover;aspect-ratio:1/1">
-      <div class="f" style="display:grid;gap:8px">
-        <label>Başlık</label>
-        <input id="mInputTitle" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc">
-        <label>Açıklama</label>
-        <textarea id="mInputDesc" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc;min-height:120px;resize:vertical"></textarea>
-        <div class="muted" id="mMeta" style="font-size:12px;color:#64748b"></div>
-      </div>
-    </div>
-    <div class="foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid #e2e8f0;background:#f8fafc">
-      <button class="btn sm ghost" id="mClose">Kapat</button>
-      <button class="btn sm" id="mSave" style="display:none">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  /* profile.js 'show' class'ını kontrol ediyor → burada display:grid yapıyoruz */
-  (function(){
-    const modal = document.getElementById('listingModal');
-    if (!modal) return;
-    const obs = new MutationObserver(()=>{
-      modal.style.display = modal.classList.contains('show') ? 'grid' : 'none';
+    // Şifre formu → profile.js'e event
+    document.getElementById('btnChangePass')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const ev = new CustomEvent('change-pass-submit', {detail:{
+        old: document.getElementById('oldPassword')?.value || '',
+        n1:  document.getElementById('newPassword')?.value || '',
+        n2:  document.getElementById('newPassword2')?.value || ''
+      }});
+      window.dispatchEvent(ev);
     });
-    obs.observe(modal, { attributes:true, attributeFilter:['class'] });
-  })();
-</script>
 
-  <!-- İş mantığı -->
+    // Avatar trigger (UI)
+    document.getElementById('btnChangeAvatar')?.addEventListener('click',()=> document.getElementById('avatarFile')?.click());
+
+    // Modal kapat
+    document.getElementById('mClose')?.addEventListener('click',()=> document.getElementById('listingModal')?.classList.remove('show'));
+
+    // Alt bar aktifliği
+    const path = location.pathname;
+    document.querySelectorAll('.fixedbar a').forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/profile') && a.id==='navProfile'));
+    });
+  </script>
+
+  <!-- İş mantığı (Firebase & render): profile.js bu HTML ile uyumlu -->
   <script type="module" src="./profile.js"></script>
 </body>
 </html>
