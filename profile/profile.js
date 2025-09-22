@@ -1,4 +1,4 @@
-// profile/profile.js — FINAL (incele/düzenle/sil/süre al + foto kapsaması + null-korumalı)
+// profile/profile.js — FINAL (modal kendini ekler, incele/düzenle/sil/süre al, foto fallback, uid/ownerId destekli)
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -25,7 +25,7 @@ const firebaseConfig = {
 const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
-// Storage'ı bucket ile hedefleyelim (CORS uyumlu)
+// Storage (bucket belirtilmiş)
 const st   = getStorage(app, "gs://ureten-eller-v2.firebasestorage.app");
 
 /* ==== UI refs ==== */
@@ -45,7 +45,7 @@ const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
 const fmt = (ts)=> {
   try {
     const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
-    return isNaN(d) ? "—" : d.toLocaleDateString("tr-TR", {day:"2-digit", month:"2-digit", year:"numeric"});
+    return isNaN(d) ? "—" : d.toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric"});
   } catch { return "—"; }
 };
 const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
@@ -53,8 +53,42 @@ const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 /* ==== Çıkış ==== */
 btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
 
-/* ==== Modal refs (her çağrıda güncel DOM) ==== */
+/* ==== MODAL: eksikse otomatik ekle ==== */
+function ensureModal(){
+  if (document.getElementById('listingModal')) return;
+  document.body.insertAdjacentHTML('beforeend', `
+<div class="modal" id="listingModal" aria-hidden="true" style="position:fixed;inset:0;display:none;place-items:center;background:rgba(15,23,42,.45);z-index:50">
+  <div class="dialog" style="width:min(880px,92vw);background:#fff;border-radius:18px;border:1px solid #e2e8f0;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div class="head" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0">
+      <strong id="mTitle">İlan</strong>
+      <span class="badge" id="mStatus"></span>
+    </div>
+    <div class="body" style="padding:14px;display:grid;grid-template-columns:220px 1fr;gap:14px">
+      <img id="mPhoto" alt="ilan" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover;aspect-ratio:1/1">
+      <div class="f" style="display:grid;gap:8px">
+        <label>Başlık</label>
+        <input id="mInputTitle" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc">
+        <label>Açıklama</label>
+        <textarea id="mInputDesc" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc;min-height:120px;resize:vertical"></textarea>
+        <div class="muted" id="mMeta" style="font-size:12px;color:#64748b"></div>
+      </div>
+    </div>
+    <div class="foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid #e2e8f0;background:#f8fafc">
+      <button class="btn sm ghost" id="mClose">Kapat</button>
+      <button class="btn sm" id="mSave" style="display:none">Kaydet</button>
+    </div>
+  </div>
+</div>`);
+  const modal = document.getElementById('listingModal');
+  const obs = new MutationObserver(()=>{
+    modal.style.display = modal.classList.contains('show') ? 'grid' : 'none';
+  });
+  obs.observe(modal, { attributes:true, attributeFilter:['class'] });
+}
+
+/* ==== Modal refs + kontrol ==== */
 function refs(){
+  ensureModal();
   return {
     modal: $("listingModal"),
     mTitle: $("mTitle"),
@@ -70,11 +104,7 @@ function refs(){
     expEl: $("tab-expired"),
   };
 }
-function modalReady(){
-  const {modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave} = refs();
-  return [modal, mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave].every(Boolean);
-}
-function openModal(){ refs().modal?.classList.add("show"); }
+function openModal(){ ensureModal(); refs().modal?.classList.add("show"); }
 function closeModal(){ refs().modal?.classList.remove("show"); }
 
 /* ==== Alt koleksiyondan ilk foto (fallback) ==== */
@@ -129,12 +159,8 @@ window.renderListing = (item) => {
 
 /* ==== Modal doldur ==== */
 function fillModal(data, editable=false){
-  if (!modalReady()) {
-    console.error("[modal] DOM eksik, HTML'deki modal bloğunu kontrol et.");
-    alert("İnceleme penceresi yüklenemedi. Lütfen sayfayı yenileyin.");
-    return;
-  }
   const { mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave, mClose } = refs();
+  if (!mTitle) return;
 
   mTitle.textContent = data.title || "İlan";
   mStatus.textContent = data.status === "live" ? "Yayında" : data.status === "pending" ? "Onay Bekliyor" : "Süresi Doldu";
@@ -148,8 +174,8 @@ function fillModal(data, editable=false){
   mInputDesc.value  = data.description || data.desc || "";
   mInputTitle.disabled = !editable;
   mInputDesc.disabled  = !editable;
-  mSave.style.display  = editable ? "inline-block" : "none";
-  mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
+  if (mSave) mSave.style.display  = editable ? "inline-block" : "none";
+  if (mMeta) mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
 
   mClose?.addEventListener("click", closeModal, { once:true });
 }
@@ -159,7 +185,6 @@ async function viewListing(id, editable=false){
   const snap = await getDoc(doc(db,"listings",id));
   if (!snap.exists()) { alert("İlan bulunamadı."); return; }
   const d = snap.data()||{};
-  // Foto alanı yoksa alt koleksiyondan kapak çek
   let photos = Array.isArray(d.photos) ? d.photos : [];
   if (!photos.length) {
     const first = await getFirstPhotoFromSub(id);
@@ -209,7 +234,7 @@ async function renewListing(id){
   }catch(e){ console.error(e); alert("Süre uzatılamadı: " + (e?.message||e)); }
 }
 
-/* ==== Liste alanlarında event delegation ==== */
+/* ==== Liste alanları: event delegation ==== */
 ["tab-live","tab-pending","tab-expired"].forEach(listId=>{
   const root = $(listId);
   root?.addEventListener("click",(ev)=>{
@@ -250,6 +275,7 @@ onAuthStateChanged(auth, async (user)=>{
 
   await loadListings(user.uid);
 
+  // Avatar değişimi
   btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
   avatarFile?.addEventListener("change", async ()=>{
     try{
@@ -269,13 +295,14 @@ onAuthStateChanged(auth, async (user)=>{
     }
   });
 
+  // Şifre değiştirme
   window.addEventListener("change-pass-submit", async (ev)=>{
     const { old, n1, n2 } = ev.detail||{};
     try{
       if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
       if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
       const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
-      if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Hesabın Google ile bağlı görünüyor. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
+      if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
       if (!old) throw new Error("Mevcut şifreni gir.");
       const cred = EmailAuthProvider.credential(user.email, old);
       await reauthenticateWithCredential(user, cred);
@@ -293,12 +320,12 @@ async function loadListings(uid){
 
   const colRef = collection(db, "listings");
 
-  // ownerId alanı için 3 sorgu
+  // ownerId alanı
   const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"));
   const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"));
   const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"));
 
-  // uid alanı için 3 sorgu (eski ilanlar)
+  // uid alanı (eski kayıtlar)
   const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"));
   const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"));
   const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"));
