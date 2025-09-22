@@ -268,10 +268,12 @@ async function loadAds(){
   if(!grid) return;
   try {
     const q = query(
-      collection(db,"listings"),
-      orderBy("createdAt","desc"),
-      limit(20)
-    );
+  collection(db,"listings"),
+  where("status","==","approved"),
+  where("expiresAt",">", new Date()),
+  orderBy("expiresAt","asc"),
+  limit(20)
+);
     const snap = await getDocs(q);
 
     if(snap.empty){
