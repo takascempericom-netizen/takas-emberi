@@ -74,55 +74,69 @@
     <source src="/assets/sounds/notify.wav" type="audio/wav">
   </audio>
 
-  <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <!-- Firebase init (ortak) -->
+  <script type="module" src="assets/js/firebase-init.js"></script>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+  <!-- Sayfa scripti -->
+  <script type="module">
+    const { auth, db, requireAuth } = window.__fb;
+    requireAuth(); // giriş yoksa /auth.html
+
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      collection, query, where, orderBy, onSnapshot, addDoc, doc, getDocs,
+      serverTimestamp, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const elThreads = document.getElementById('threads');
-    const elMsgs = document.getElementById('msgs');
-    const elText = document.getElementById('text');
-    const btnSend = document.getElementById('send');
-    const ding = document.getElementById('ding');
+    const elMsgs    = document.getElementById('msgs');
+    const elText    = document.getElementById('text');
+    const btnSend   = document.getElementById('send');
+    const ding      = document.getElementById('ding');
+
+    const $ = (s, r=document)=>r.querySelector(s);
+
+    // Alt bar linklerini .html ile sabitle
+    $('#navHome')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/"; });
+    $('#navMsgs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/messages.html"; });
+    $('#navNotifs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/notifications.html"; });
+    $('#navProfile')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/profile/profile.html"; });
 
     let me = null;
     let activeChatId = null;
     let unsubMsgs = null;
 
-    const fmt = (ts)=>{ try{ const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts)); return isNaN(d)?"—":d.toLocaleString("tr-TR",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});}catch{return "—"} };
+    const fmt = (ts)=>{
+      try{
+        const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+        return isNaN(d) ? "—" : d.toLocaleString("tr-TR",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});
+      }catch{ return "—"; }
+    };
 
     onAuthStateChanged(auth, async (user)=>{
-      if(!user){ alert("Lütfen giriş yapın."); location.href="/auth.html"; return; }
+      if(!user){ location.href="/auth.html"; return; }
       me = user;
 
-      // Sol tarafta sohbet listesi
-      const qThreads = query(collection(db,"chats"), where("participants","array-contains", me.uid), orderBy("updatedAt","desc"));
+      // Sohbet listesi
+      const qThreads = query(
+        collection(db,"chats"),
+        where("participants","array-contains", me.uid),
+        orderBy("updatedAt","desc")
+      );
       onSnapshot(qThreads, (snap)=>{
         elThreads.innerHTML = "";
         snap.forEach(d=>{
           const c = d.data()||{};
           const div = document.createElement("div");
-          div.className = "thread" + (d.id===activeChatId?" active":"");
-          const title = c.title || (Array.isArray(c.participants)? c.participants.filter(x=>x!==me.uid).join(", "):"Sohbet");
+          div.className = "thread" + (d.id===activeChatId ? " active": "");
+          const title = c.title || (Array.isArray(c.participants) ? c.participants.filter(x=>x!==me.uid).join(", ") : "Sohbet");
           div.innerHTML = `<strong>${title}</strong><small>${c.lastMsg||""}</small>`;
           div.onclick = ()=> openChat(d.id);
           elThreads.appendChild(div);
         });
       });
 
-      // URL ile direkt hedef (messages.html?to=<uid>)
+      // URL hedefi (messages.html?to=<uid>)
       const params = new URLSearchParams(location.search);
       const toUid = params.get("to");
       if(toUid) {
@@ -131,7 +145,7 @@
       }
     });
 
-    // İkili sohbeti bul veya oluştur
+    // İkili sohbeti bul/oluştur
     async function ensureDirectChat(a,b){
       const qMine = query(collection(db,"chats"), where("participants","array-contains", a));
       const ss = await getDocs(qMine);
@@ -140,13 +154,13 @@
         return p.length===2 && p.includes(a) && p.includes(b);
       });
       if(found) return found.id;
-      const docRef = await addDoc(collection(db,"chats"), {
+      const ref = await addDoc(collection(db,"chats"), {
         participants:[a,b],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         lastMsg: ""
       });
-      return docRef.id;
+      return ref.id;
     }
 
     // Sohbeti aç
@@ -168,8 +182,6 @@
             div.innerHTML = `<div>${d.text||""}</div><small style="display:block;color:#64748b">${fmt(d.createdAt)}</small>`;
             elMsgs.appendChild(div);
             elMsgs.scrollTop = elMsgs.scrollHeight;
-
-            // başkasından geldiyse ve ilk yük değilse ses
             if(!firstLoad && d.senderUid!==me.uid){ try{ ding.play(); }catch{} }
           }
         });
@@ -178,14 +190,10 @@
     }
 
     // Mesaj gönder
-    btnSend.addEventListener("click", sendMsg);
-    elText.addEventListener("keydown",(e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); } });
-
     async function sendMsg(){
-      const txt = elText.value.trim(); if(!txt || !activeChatId) return;
+      const txt = (elText.value||"").trim(); if(!txt || !activeChatId) return;
       elText.value = "";
-      const ref = collection(db,"chats",activeChatId,"messages");
-      await addDoc(ref, {
+      await addDoc(collection(db,"chats",activeChatId,"messages"), {
         senderUid: me.uid,
         text: txt,
         createdAt: serverTimestamp()
@@ -195,6 +203,9 @@
         lastMsg: txt
       });
     }
+
+    btnSend?.addEventListener('click', sendMsg);
+    elText?.addEventListener('keydown',(e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); } });
   </script>
 </body>
 </html>
