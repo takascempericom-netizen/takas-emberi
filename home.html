@@ -263,49 +263,52 @@
   import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // İlanları çek
-  async function loadAds(){
-    const grid = document.getElementById("adsGrid");
-    if(!grid) return;
-    try {
-      const q = query(
-        collection(db,"listings"),
-        where("status","==","approved"),
-        where("expiresAt",">", new Date()),
-        orderBy("expiresAt","asc"),
-        limit(20)
-      );
-      const snap = await getDocs(q);
+async function loadAds(){
+  const grid = document.getElementById("adsGrid");
+  if(!grid) return;
+  try {
+    const q = query(
+      collection(db,"listings"),
+      orderBy("createdAt","desc"),
+      limit(20)
+    );
+    const snap = await getDocs(q);
 
-      if(snap.empty){
-        grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz ilan yok</div>';
-        return;
-      }
-
-      grid.innerHTML = "";
-      snap.forEach(doc=>{
-        const d = doc.data() || {};
-        const cover = d.photos?.[0] || "/assets/img/seffaf.png";
-        const title = d.title || "İlan";
-        const city  = d.city  || "";
-        const cond  = d.cond  || "";
-
-        grid.innerHTML += `
-          <a class="ad-card" href="/ilan/${doc.id}">
-            <div class="ad-media">
-              <img src="${cover}" alt="">
-            </div>
-            <div class="ad-body">
-              <h3 class="ad-title">${title}</h3>
-              <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
-            </div>
-          </a>`;
-      });
-    } catch(err){
-      console.error("İlan yükleme hatası:", err);
-      grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
+    if(snap.empty){
+      grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz ilan yok</div>';
+      return;
     }
+
+    grid.innerHTML = "";
+    snap.forEach(doc=>{
+      const d = doc.data() || {};
+
+      // client-side filtre
+      const exp = d.expiresAt?.toDate ? d.expiresAt.toDate() : d.expiresAt instanceof Date ? d.expiresAt : null;
+      if (d.status !== 'approved') return;
+      if (exp && exp <= new Date()) return;
+
+      const cover = d.photos?.[0] || "/assets/img/seffaf.png";
+      const title = d.title || "İlan";
+      const city  = d.city  || "";
+      const cond  = d.cond  || "";
+
+      grid.innerHTML += `
+        <a class="ad-card" href="/ilan/${doc.id}">
+          <div class="ad-media"><img src="${cover}" alt=""></div>
+          <div class="ad-body">
+            <h3 class="ad-title">${title}</h3>
+            <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
+          </div>
+        </a>`;
+    });
+
+  } catch(err){
+    console.error("İlan yükleme hatası:", err);
+    grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
   }
-  loadAds();
+}
+loadAds();
 
   // Üst bar butonları
   const $ = (s,r=document)=>r.querySelector(s);
