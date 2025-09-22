@@ -246,6 +246,10 @@
 
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    onAuthStateChanged(auth, (u)=>{
+    if(!u){ location.href="/auth.html"; return; }
+   });
     try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
 
     const $ = (s, r=document)=>r.querySelector(s);
