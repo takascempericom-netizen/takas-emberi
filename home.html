@@ -310,6 +310,7 @@ async function loadAds(){
     grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
   }
 }
+  window.loadAds = loadAds;
 onAuthStateChanged(auth, async (user) => {
   const grid = document.getElementById("adsGrid");
   if (!user) {
