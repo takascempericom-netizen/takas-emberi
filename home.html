@@ -136,7 +136,7 @@
       transition:transform .15s ease;
     }
     .ad-card:hover{transform:translateY(-2px)}
-    + .ad-media{aspect-ratio:1/1;background:#f1f5f9;display:grid;place-items:center}
+     .ad-media{aspect-ratio:1/1;background:#f1f5f9;display:grid;place-items:center}
     .ad-media img{width:100%;height:100%;object-fit:cover;display:block}
     .ad-body{padding:10px}
     .ad-title{
@@ -151,8 +151,18 @@
   overflow:hidden;
   min-height: calc(1.25em * 2);
 }
-    .ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
-    html,body{overflow-x:hidden}
+
+.ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
+
+.ad-actions{display:flex;gap:8px;margin-top:8px}
+.ad-actions button{
+  flex:1;padding:8px 10px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;
+  border-radius:10px;cursor:pointer
+}
+.ad-actions .btn-view{background:#111827;color:#fff;border-color:#000}
+.ad-actions .btn-offer{background:#fff}
+
+html,body{overflow-x:hidden}
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
@@ -303,14 +313,23 @@ async function loadAds(){
       const cond  = d.cond  || "";
 
       grid.innerHTML += `
-        <a class="ad-card" href="/ilan/${doc.id}">
-          <div class="ad-media"><img src="${cover}" alt=""></div>
-          <div class="ad-body">
-            <h3 class="ad-title">${title}</h3>
-            <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
-          </div>
-        </a>`;
-    });
+  <div class="ad-card" data-id="${doc.id}">
+    <div class="ad-media">
+      <img src="${cover}" alt="${title}"
+           loading="lazy" decoding="async"
+           width="400" height="400"
+           style="width:100%;height:100%;object-fit:cover;object-position:center">
+    </div>
+    <div class="ad-body">
+      <h3 class="ad-title">${title}</h3>
+      <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
+      <div class="ad-actions">
+        <button type="button" class="btn-view"  data-id="${doc.id}">İncele</button>
+        <button type="button" class="btn-offer" data-id="${doc.id}" data-owner="${d.ownerId || d.uid || ''}">Teklif ver</button>
+      </div>
+    </div>
+  </div>`;
+ });
 
   } catch(err){
     console.error("İlan yükleme hatası:", err);
@@ -327,7 +346,132 @@ onAuthStateChanged(auth, async (user) => {
   await user.getIdToken(true); // token güncellensin
   await loadAds();
 });
+  // === Teklif akışı + bildirim + bip ===
 
+// Basit bip sesi
+function beep(duration=160, freq=880){
+  try{
+    const actx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(0.001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.2, actx.currentTime + 0.01);
+    o.start();
+    setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.04); o.stop(); actx.close(); }, duration);
+  }catch{}
+}
+
+// Kullanıcının en az 1 ilanı var mı?
+async function findMyListings(uid){
+  const { collection, query, where, limit, getDocs } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  const mine = [];
+  // 1) ownerId
+  let q1 = query(collection(db,'listings'), where('ownerId','==', uid), limit(20));
+  let s1 = await getDocs(q1); s1.forEach(d=>mine.push({id:d.id, ...d.data()}));
+  // 2) eski alan: uid
+  if(mine.length===0){
+    let q2 = query(collection(db,'listings'), where('uid','==', uid), limit(20));
+    let s2 = await getDocs(q2); s2.forEach(d=>mine.push({id:d.id, ...d.data()}));
+  }
+  return mine;
+}
+
+// Teklif akışı
+async function openOfferFlow(targetListingId, targetOwnerUid){
+  const user = auth.currentUser;
+  if(!user){ alert("Teklif vermek için giriş yapın."); return; }
+
+  const mine = await findMyListings(user.uid);
+  if(mine.length===0){
+    if(confirm("Teklif verebilmek için en az bir ilanınız olmalı. İlan ver sayfasına gidelim mi?")){
+      location.href = "/ilan/ilan-verme.html";
+    }
+    return;
+  }
+
+  // Hangi ilanla teklif verilecek? (çokluysa basit seçim)
+  let pick = 0;
+  if(mine.length>1){
+    const list = mine.map((m,i)=>`${i+1}) ${m.title||m.id}`).join('\n');
+    const ans = prompt("Hangi ilanla teklif vermek istiyorsunuz?\n" + list + "\nNumara girin:", "1");
+    const idx = Math.max(1, Math.min(mine.length, parseInt(ans||"1",10))) - 1;
+    pick = isNaN(idx) ? 0 : idx;
+  }
+  const myListingId = mine[pick].id;
+  const msg = prompt("Mesaj (opsiyonel):", "") || "";
+
+  const { collection, addDoc, serverTimestamp } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+  const offer = {
+    fromUid: user.uid,
+    toUid:   targetOwnerUid,
+    fromListingId: myListingId,
+    createdAt: serverTimestamp(),
+    message: msg
+  };
+
+  try{
+    await addDoc(collection(db,'listings', targetListingId, 'offers'), offer);
+    alert("Teklif gönderildi ✅");
+  }catch(e){
+    console.error("Teklif gönderilemedi:", e);
+    alert("Teklif gönderilemedi: " + (e.code||"hata"));
+  }
+}
+
+// Kart butonları (event delegation)
+const adsGridEl = document.getElementById("adsGrid");
+adsGridEl?.addEventListener('click', (ev)=>{
+  const btn = ev.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  if(btn.classList.contains('btn-view')){
+    location.href = `/ilan/${id}`;
+    return;
+  }
+  if(btn.classList.contains('btn-offer')){
+    const owner = btn.dataset.owner || "";
+    if(!owner){ alert("İlan sahibi bilgisi eksik."); return; }
+    openOfferFlow(id, owner);
+  }
+});
+
+// Bana gelen teklifleri dinle (ilan sahibi isem)
+let _offerUnsubs = [];
+async function watchOffersForMe(uid){
+  // eski dinleyicileri kapat
+  _offerUnsubs.forEach(u=>{ try{u()}catch{} });
+  _offerUnsubs = [];
+
+  const { collection, onSnapshot } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+  const myListings = await findMyListings(uid);
+  myListings.forEach(m=>{
+    const offRef = collection(db, 'listings', m.id, 'offers');
+    const unsub = onSnapshot(offRef, (snap)=>{
+      snap.docChanges().forEach(ch=>{
+        const d = ch.doc.data();
+        if(ch.type==='added' && d?.toUid === uid){
+          if(document.visibilityState !== 'hidden') beep();
+          const note = document.createElement('div');
+          note.style.cssText = "position:fixed;right:16px;bottom:90px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:1000";
+          note.textContent = `Yeni teklif! Gönderen: ${(d.fromUid||'').slice(0,6)}`;
+          document.body.appendChild(note);
+          setTimeout(()=>note.remove(), 2500);
+        }
+      });
+    }, (e)=>console.warn('offer watch err', e));
+    _offerUnsubs.push(unsub);
+  });
+}
+
+// Login olunca teklif dinlemeyi başlat
+onAuthStateChanged(auth, (u)=>{ if(u) watchOffersForMe(u.uid); });
 
   // Üst bar butonları
   const $ = (s,r=document)=>r.querySelector(s);
