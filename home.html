@@ -122,6 +122,26 @@
       .title{font-size:52px}
       .subtitle{font-size:22px}
     }
+
+    /* === İLAN KARTLARI (Yeni İlanlar) === */
+    .ads-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    @media (min-width:900px){.ads-grid{grid-template-columns:repeat(4,1fr)}}
+    .ad-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+      background:#fff;
+      color:#111827;
+      text-decoration:none;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      transition:transform .15s ease;
+    }
+    .ad-card:hover{transform:translateY(-2px)}
+    .ad-media{aspect-ratio:4/3;background:#f1f5f9;display:grid;place-items:center}
+    .ad-media img{width:100%;height:100%;object-fit:cover;display:block}
+    .ad-body{padding:10px}
+    .ad-title{margin:0 0 4px;font-size:14px;font-weight:800;line-height:1.25;color:#0f172a}
+    .ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
@@ -148,6 +168,12 @@
 
     <section class="slogan" aria-live="polite">Doğaya • Bütçene • Dost</section>
   </main>
+
+  <!-- İLANLAR -->
+  <section class="panel" id="ads" aria-labelledby="ads-title" style="margin:12px auto;max-width:1200px;padding:16px">
+    <h2 id="ads-title" style="margin:0 0 12px">Yeni İlanlar</h2>
+    <div class="ads-grid" id="adsGrid" role="list"></div>
+  </section>
 
   <!-- Kategoriler + Özellikler -->
   <section class="panel" aria-labelledby="cats-title" style="margin:12px auto;max-width:1200px;padding:24px 16px">
@@ -188,7 +214,7 @@
 
   <!-- Canlı Destek FAB + Popover -->
   <button class="support-fab" id="btnSupport" aria-label="Canlı Destek">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
   </button>
   <div class="support-pop" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
     <p class="msg">Merhaba! Yardım için mesaj bırakın. WhatsApp/telefon bağlantısını sonra ekleyeceğiz.</p>
@@ -231,7 +257,7 @@
 
   <!-- JS -->
   <script type="module">
-    // Neden Firebase? Sadece Çıkış çalışsın diye.
+    // Firebase
     import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -246,12 +272,59 @@
 
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
+
+    // Auth guard
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     onAuthStateChanged(auth, (u)=>{
-    if(!u){ location.href="/auth.html"; return; }
-   });
+      if(!u){ location.href="/auth.html"; return; }
+    });
+
     try { await setPersistence(auth, indexedDBLocalPersistence); } catch { await setPersistence(auth, browserLocalPersistence); }
 
+    // Firestore: İlanları çek ve render et
+    import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const db = getFirestore();
+
+    const q = query(
+      collection(db, "listings"),
+      where("status", "==", "approved"),
+      where("expiresAt", ">", new Date()),
+      orderBy("expiresAt", "asc"),
+      limit(20)
+    );
+
+    const snap = await getDocs(q);
+    const grid = document.getElementById('adsGrid');
+    if(grid) grid.innerHTML = '';
+
+    function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+    snap.forEach(d => {
+      const x = d.data() || {};
+      const id = d.id;
+      const title = x.title || x.name || 'İlan';
+      const city = x.city || x.location || '—';
+      const price = (x.price != null && x.price !== '') ? (x.price + ' ₺') : (x.want || '');
+      const cover = (Array.isArray(x.photos) && x.photos[0]) || x.coverUrl || x.photoURL || '';
+      const url = `/ilan/${id}.html`; // detay yolunu kendi yapına göre ayarla
+
+      const a = document.createElement('a');
+      a.className = 'ad-card';
+      a.href = url;
+      a.setAttribute('role','listitem');
+      a.innerHTML = `
+        <div class="ad-media">
+          ${cover ? `<img loading="lazy" src="${cover}" alt="">` : '📦'}
+        </div>
+        <div class="ad-body">
+          <h3 class="ad-title">${escapeHTML(title)}</h3>
+          <div class="ad-meta"><span>${escapeHTML(city)}</span><span>${escapeHTML(price)}</span></div>
+        </div>
+      `;
+      grid?.appendChild(a);
+    });
+
+    // Mini helpers
     const $ = (s, r=document)=>r.querySelector(s);
 
     // Üst bar yönlendirmeleri
@@ -266,8 +339,8 @@
       tabs.forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
       if(t.id==='tabHome') location.href = "/";
-      if(t.id==='tabMessages') location.href = "/mesajlar";
-      if(t.id==='tabNotifs') location.href = "/bildirimler";
+      if(t.id==='tabMessages') location.href = "/messages.html";       // düzeltildi
+      if(t.id==='tabNotifs') location.href = "/notifications.html";     // düzeltildi
     }));
 
     // Canlı destek popover
@@ -294,7 +367,7 @@
         const item = btn.parentElement;
         const open = item.classList.contains('open');
         item.classList.toggle('open', !open);
-      })
+      });
     });
   </script>
 </body>
