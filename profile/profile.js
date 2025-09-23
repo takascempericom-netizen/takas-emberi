@@ -1,5 +1,4 @@
-// profile/profile.js — FINAL (başkasının profiline bak, DM başlat, ilanları göster; self olmayan için düzenleme/gizleme)
-// Not: HTML’de header’da #btnDM butonu var. Bu dosya onu yönetiyor.
+// /profile/profile.js — Başkasının profiline bakınca foto/ad + aktif ilanlar + DM
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -39,15 +38,11 @@ const avatarFile = $("avatarFile");
 const btnChangeAvatar = $("btnChangeAvatar");
 const btnLogout = $("btnLogout");
 const btnDM = $("btnDM");
-
-/* ==== URL param: bir başkasının profili mi? ==== */
-const params    = new URLSearchParams(location.search);
-const viewedUid = params.get('uid') || "";
+const btnNew = $("btnNew");
 
 /* ==== Helpers ==== */
 const fill = (el,val)=>{ if(el){ el.value = val||""; } };
-const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
-const hide = (el)=>{ if(el){ el.style.display = "none"; } };
+const setSrc = (el,src)=>{ if(el){ el.src = src || "/assets/img/seffaf.png"; } };
 const fmt = (ts)=> {
   try {
     const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
@@ -57,11 +52,29 @@ const fmt = (ts)=> {
 const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 
 /* ==== Çıkış ==== */
-btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>{
-  // geri dönüş için mevcut sayfayı ilet
-  const next = encodeURIComponent(location.pathname + location.search);
-  location.href="/auth.html?next=" + next;
-}));
+btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
+
+/* ==== DM aç ==== */
+async function openDirectChat(myUid, peerUid){
+  try{
+    const pair = [myUid, peerUid].sort();
+    const chatId = `dm_${pair[0]}_${pair[1]}`;
+    const chatRef = doc(db, "chats", chatId);
+    const snap = await getDoc(chatRef);
+    if (!snap.exists()) {
+      await setDoc(chatRef, {
+        participants: pair,
+        type: "dm",
+        createdAt: serverTimestamp(),
+        lastMsgAt: serverTimestamp()
+      });
+    }
+    location.href = `/messages.html?chatId=${encodeURIComponent(chatId)}&peer=${encodeURIComponent(peerUid)}`;
+  }catch(e){
+    console.error("Sohbet açılamadı:", e);
+    alert("Sohbet açılamadı.");
+  }
+}
 
 /* ==== MODAL: eksikse otomatik ekle ==== */
 function ensureModal(){
@@ -127,31 +140,19 @@ async function getFirstPhotoFromSub(listingId){
 }
 
 /* ==== Kart render ==== */
-window.__canManage = false; // self değilse düzenleme butonlarını gizle
-
 window.renderListing = (item) => {
   const { liveEl, pendEl, expEl } = refs();
   const container =
     item.status === "live"    ? liveEl :
     item.status === "pending" ? pendEl : expEl;
 
-  if (!container) { console.warn("[renderListing] container yok:", item.status); return; }
+  if (!container) return;
 
   const img = firstPhoto(item.photos) || "";
   const card = document.createElement("div");
   card.className = "item";
   card.dataset.id = item.id;
   card.dataset.status = item.status;
-
-  const manageBtns = window.__canManage
-    ? (item.status === "live" ? `
-        <button class="btn sm" data-action="edit">Düzenle</button>
-        <button class="btn sm danger" data-action="delete">Sil</button>
-      ` : item.status === "pending" ? `` : `
-        <button class="btn sm" data-action="renew">Süre Al</button>
-        <button class="btn sm danger" data-action="delete">Sil</button>
-      `)
-    : ""; // başkasının profiliyse sadece incele
 
   card.innerHTML = `
     <div class="thumb" style="${img ? `background-image:url('${img}')` : ''}"></div>
@@ -163,7 +164,13 @@ window.renderListing = (item) => {
     </div>
     <div class="actions">
       <button class="btn sm" data-action="view">İncele</button>
-      ${manageBtns}
+      ${item.status === "live" ? `
+        <button class="btn sm" data-action="edit">Düzenle</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      ` : item.status === "pending" ? `` : `
+        <button class="btn sm" data-action="renew">Süre Al</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      `}
     </div>
   `;
   container.appendChild(card);
@@ -186,8 +193,8 @@ function fillModal(data, editable=false){
   mInputDesc.value  = data.description || data.desc || "";
   mInputTitle.disabled = !editable;
   mInputDesc.disabled  = !editable;
-  if (mSave) mSave.style.display  = editable ? "inline-block" : "none";
-  if (mMeta) mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
+  mSave.style.display  = editable ? "inline-block" : "none";
+  mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
 
   mClose?.addEventListener("click", closeModal, { once:true });
 }
@@ -202,15 +209,12 @@ async function viewListing(id, editable=false){
     const first = await getFirstPhotoFromSub(id);
     if (first) photos = [first];
   }
-  // Self değilse edit kapalı
-  const canEdit = editable && window.__canManage;
-  fillModal({ id, ...d, photos }, canEdit);
+  fillModal({ id, ...d, photos }, editable);
 
   const { mSave } = refs();
   if (mSave) {
     mSave.onclick = async ()=>{
       try{
-        if (!window.__canManage) return; // güvenlik
         await updateDoc(doc(db,"listings",id), {
           title: document.getElementById("mInputTitle").value.trim(),
           description: document.getElementById("mInputDesc").value.trim(),
@@ -227,16 +231,12 @@ async function viewListing(id, editable=false){
   }
   openModal();
 }
-
 async function deleteListing(id){
-  if (!window.__canManage) return;
   if (!confirm("Bu ilanı silmek istiyor musun?")) return;
   try{ await deleteDoc(doc(db,"listings",id)); alert("İlan silindi."); location.reload(); }
   catch(e){ console.error(e); alert("Silinemedi: " + (e?.message||e)); }
 }
-
 async function renewListing(id){
-  if (!window.__canManage) return;
   if (!confirm("Süreyi +30 gün uzatıp incelemeye göndereyim mi?")) return;
   try{
     const now = new Date(); const newExp = new Date(); newExp.setDate(now.getDate()+30);
@@ -264,37 +264,67 @@ async function renewListing(id){
   });
 });
 
-/* ==== İlanları getir & çiz (uid + ownerId) ==== */
-async function loadListings(uid){
+/* ==== İlanları getir & çiz ==== */
+async function loadListingsFor(uid, viewingSelf){
   const { liveEl, pendEl, expEl } = refs();
   if (!(liveEl && pendEl && expEl)) return;
 
-  // temizle
-  liveEl.innerHTML = ""; pendEl.innerHTML = ""; expEl.innerHTML = "";
-
   const colRef = collection(db, "listings");
 
-  // ownerId / uid — her iki alanı da destekle
+  // Sadece başkasına bakıyorsak: yalnızca live
+  if (!viewingSelf) {
+    // sekmeler: sadece live kalsın
+    document.querySelector(`.tab[data-tab="pending"]`)?.remove();
+    document.querySelector(`.tab[data-tab="expired"]`)?.remove();
+    $("tab-pending")?.remove();
+    $("tab-expired")?.remove();
+
+    const qLive_owner = query(colRef, where("ownerId","==",uid), where("status","==","live"));
+    const qLive_uid   = query(colRef, where("uid","==",uid),      where("status","==","live"));
+
+    try{
+      const [s1, s2] = await Promise.all([getDocs(qLive_owner), getDocs(qLive_uid)]);
+      const map = new Map();
+      s1.forEach(d=>map.set(d.id,d));
+      s2.forEach(d=>map.set(d.id,d));
+      const docs = Array.from(map.values());
+
+      for (const docu of docs){
+        const d = docu.data()||{};
+        let photos = Array.isArray(d.photos) ? d.photos : [];
+        if (!photos.length) {
+          const first = await getFirstPhotoFromSub(docu.id);
+          if (first) photos = [first];
+        }
+        window.renderListing({
+          id: docu.id,
+          title: d.title || "İlan",
+          desc:  d.description || "",
+          photos,
+          createdAt: d.createdAt,
+          expiresAt: d.expiresAt,
+          status: "live"
+        });
+      }
+    }catch(e){ console.error("[profile] live listings yüklenemedi:", e); }
+    return;
+  }
+
+  // Kendi profilimse: live + pending + expired (eski/ownerId destekli)
   const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"));
   const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"));
   const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"));
-
-  const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"));
-  const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"));
-  const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"));
+  const qLive_uid      = query(colRef, where("uid","==",uid),     where("status","==","live"));
+  const qPending_uid   = query(colRef, where("uid","==",uid),     where("status","==","pending"));
+  const qExpired_uid   = query(colRef, where("uid","==",uid),     where("status","==","expired"));
 
   try{
-    const [ s1o, s2o, s3o, s1u, s2u, s3u ] = await Promise.all([
+    const [s1o,s2o,s3o,s1u,s2u,s3u] = await Promise.all([
       getDocs(qLive_owner), getDocs(qPending_owner), getDocs(qExpired_owner),
       getDocs(qLive_uid),   getDocs(qPending_uid),   getDocs(qExpired_uid)
     ]);
 
-    // Tekille
-    const mergeSnaps = (...snaps)=>{
-      const map = new Map();
-      snaps.forEach(s => s.forEach(docu => map.set(docu.id, docu)));
-      return Array.from(map.values());
-    };
+    const mergeSnaps = (...snaps)=>{ const m=new Map(); snaps.forEach(s=>s.forEach(d=>m.set(d.id,d))); return Array.from(m.values()); };
 
     const liveDocs    = mergeSnaps(s1o, s1u);
     const pendingDocs = mergeSnaps(s2o, s2u);
@@ -308,15 +338,7 @@ async function loadListings(uid){
           const first = await getFirstPhotoFromSub(docu.id);
           if (first) photos = [first];
         }
-        return {
-          id: docu.id,
-          title: d.title || "İlan",
-          desc:  d.description || "",
-          photos,
-          createdAt: d.createdAt,
-          expiresAt: d.expiresAt,
-          status
-        };
+        return { id: docu.id, title: d.title||"İlan", desc: d.description||"", photos, createdAt: d.createdAt, expiresAt: d.expiresAt, status };
       }));
     }
 
@@ -328,114 +350,104 @@ async function loadListings(uid){
 
     [...liveItems, ...pendingItems, ...expiredItems].forEach(window.renderListing);
 
-  }catch(e){
-    console.error("[profile] listings yüklenemedi:", e);
-  }
+  }catch(e){ console.error("[profile] listings yüklenemedi:", e); }
 }
 
-/* ==== Auth + Profil doldurma + DM butonu ==== */
-onAuthStateChanged(auth, async (user)=>{
-  if (!user) {
-    const next = encodeURIComponent(location.pathname + location.search);
-    location.href = "/auth.html?next=" + next;
-    return;
-  }
+/* ==== Profil bilgisi doldurma ==== */
+function showName(name){
+  const nameUnder = $("nameUnder");
+  if (nameUnder) nameUnder.textContent = name || "—";
+}
 
-  // Gösterilecek hesap: URL’de uid varsa onu, yoksa kendi hesabını
-  const targetUid = (viewedUid && viewedUid !== user.uid) ? viewedUid : user.uid;
-  const isSelf    = (targetUid === user.uid);
-  window.__canManage = isSelf;
+/* ==== Auth + Görüntülenecek kullanıcıyı belirle ==== */
+onAuthStateChanged(auth, async (me)=>{
+  if (!me) { location.href = "/auth.html?next=/profile/profile.html"; return; }
 
-  // Kendi profili ise auth bilgisini doldur
-  if (isSelf) {
-    const displayName = user.displayName || (user.providerData?.[0]?.displayName) || "";
-    const parts = displayName.trim().split(/\s+/);
-    const first = parts.length ? (parts.slice(0, -1).join(" ") || parts[0]) : "";
-    const last  = parts.length > 1 ? parts.at(-1) : "";
+  // URL ile gelen hedef profil (başkasına bakıyor olabiliriz)
+  const params = new URLSearchParams(location.search);
+  const targetUid = params.get("uid");
+  const viewUid = (targetUid && targetUid !== me.uid) ? targetUid : me.uid;
+  const viewingSelf = (viewUid === me.uid);
 
-    fill(elFirst, first);
-    fill(elLast,  last);
-    fill(elMail,  user.email || user.providerData?.[0]?.email || "");
-    if (user.photoURL) setSrc(avatarImg, user.photoURL);
-  } else {
-    // Başkasının profili: düzenleme alanlarını gizle
-    hide(btnChangeAvatar);
-    hide(avatarFile);
+  // UI: DM / Yeni İlan / Avatar Değiştir görünürlüğü
+  if (btnDM)  btnDM.style.display  = viewingSelf ? "none" : "";
+  if (btnNew) btnNew.style.display = viewingSelf ? "" : "none";
+  if (btnChangeAvatar) btnChangeAvatar.style.display = viewingSelf ? "" : "none";
+  avatarFile?.setAttribute("aria-hidden", viewingSelf ? "false" : "true");
 
-    const ipOld = $("oldPassword"), ipN1 = $("newPassword"), ipN2 = $("newPassword2"), btnCP = $("btnChangePass");
-    [ipOld, ipN1, ipN2, btnCP].forEach(hide);
-    // varsa önceki label'ları da gizle
-    [ipOld, ipN1, ipN2].forEach(el=>{
-      if (el?.previousElementSibling?.tagName === "LABEL") hide(el.previousElementSibling);
-    });
-
-    // E-posta özel olabilir: gösterme (istersen yorum satırını kaldır)
-    // hide(elMail);
-  }
-
-  // users/{targetUid} oku ve alanları doldur
+  // ---- PROFİL VERİSİ ----
   try{
-    const snap = await getDoc(doc(db, "users", targetUid));
-    if (snap.exists()) {
-      const d = snap.data()||{};
-      if (d.city) fill(elCity, d.city);
-      if (isSelf) {
-        if (!elFirst.value && d.firstName) fill(elFirst, d.firstName);
-        if (!elLast.value  && d.lastName)  fill(elLast,  d.lastName);
-        if (!avatarImg.src && d.photoURL)  setSrc(avatarImg, d.photoURL);
-      } else {
-        fill(elFirst, d.firstName || "");
-        fill(elLast,  d.lastName  || "");
-        if (d.photoURL) setSrc(avatarImg, d.photoURL);
-      }
+    if (viewingSelf) {
+      // KENDİ PROFİLİM
+      const displayName = me.displayName || (me.providerData?.[0]?.displayName) || "";
+      const parts = displayName.trim().split(/\s+/);
+      const first = parts.length ? parts.slice(0, -1).join(" ") || parts[0] : "";
+      const last  = parts.length > 1 ? parts.at(-1) : "";
 
-      const nameUnder = $("nameUnder");
-      const dn = (d.firstName && d.lastName) ? `${d.firstName} ${d.lastName}` : (isSelf ? (user.displayName||"—") : "—");
-      if (nameUnder) nameUnder.textContent = dn || "—";
-    }
-  }catch(e){ console.warn("[profile] users doc okunamadı:", e); }
+      fill(elFirst, first); fill(elLast, last);
+      fill(elMail,  me.email || me.providerData?.[0]?.email || "");
+      if (me.photoURL) setSrc(avatarImg, me.photoURL);
 
-  // DM butonu: başkasına bakıyorsan göster ve sohbet aç
-  if (!isSelf && btnDM) {
-    btnDM.style.display = "inline-block";
-    btnDM.onclick = async ()=>{
+      // /users kendi doc (kurallar izin veriyor)
       try{
-        const chatId = [auth.currentUser.uid, targetUid].sort().join("_");
-        await setDoc(
-          doc(db, "chats", chatId),
-          {
-            participants: [auth.currentUser.uid, targetUid],
-            createdAt: serverTimestamp(),
-            lastMsgAt: serverTimestamp()
-          },
-          { merge: true }
-        );
-        location.href = `/messages.html?chat=${encodeURIComponent(chatId)}`;
+        const snap = await getDoc(doc(db, "users", me.uid));
+        if (snap.exists()) {
+          const d = snap.data()||{};
+          if (d.city) fill(elCity, d.city);
+          if (!first && d.firstName) fill(elFirst, d.firstName);
+          if (!last  && d.lastName)  fill(elLast,  d.lastName);
+          if (!me.photoURL && d.photoURL) setSrc(avatarImg, d.photoURL);
+          showName((d.firstName && d.lastName) ? `${d.firstName} ${d.lastName}` : (displayName || "—"));
+        } else {
+          showName(displayName || "—");
+        }
+      }catch(e){ console.warn("[profile] users doc okunamadı:", e); showName(me.displayName || "—"); }
+
+    } else {
+      // BAŞKA KULLANICININ PROFİLİ → public collection'dan oku
+      try{
+        const psnap = await getDoc(doc(db, "profiles_public", viewUid));
+        if (psnap.exists()) {
+          const p = psnap.data()||{};
+          // Görünür alanlar
+          if (p.photoURL) setSrc(avatarImg, p.photoURL); else setSrc(avatarImg, "");
+          fill(elCity, p.city || "");
+          showName(p.displayName || (p.firstName && p.lastName ? `${p.firstName} ${p.lastName}` : "—"));
+        } else {
+          // public profil yoksa sadece avatar fallback ve isim boş
+          setSrc(avatarImg, "");
+          showName("—");
+        }
       }catch(e){
-        console.error(e);
-        alert("Mesaj başlatılamadı: " + (e?.message||e));
+        console.warn("[profile] profiles_public okunamadı:", e);
+        setSrc(avatarImg, ""); showName("—");
       }
-    };
-  } else if (btnDM) {
-    btnDM.style.display = "none";
-  }
 
-  // İlanları yükle
-  await loadListings(targetUid);
+      // Başkasına bakarken kişisel alanları boş/donuk bırak
+      fill(elFirst, ""); fill(elLast, ""); fill(elMail, ""); // disabled zaten
+    }
+  }catch(e){ console.warn("[profile] profil doldurma hatası:", e); }
 
-  // Avatar değişimi sadece self için
-  if (isSelf) {
+  // DM butonu
+  btnDM?.addEventListener("click", ()=> openDirectChat(me.uid, viewUid));
+
+  // İLANLAR
+  await loadListingsFor(viewUid, viewingSelf);
+
+  // ---- SADECE KENDİ PROFİLİM İSE: Avatar değişimi & Şifre ----
+  if (viewingSelf) {
+    // Avatar değişimi
     btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
     avatarFile?.addEventListener("change", async ()=>{
       try{
         const f = avatarFile.files?.[0]; if (!f) return;
         const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-        const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+        const path = `avatars/${me.uid}/${Date.now()}_${safe}`;
         const r = sref(st, path);
         await uploadBytes(r, f);
         const url = await getDownloadURL(r);
-        await updateProfile(user, { photoURL: url });
-        await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
+        await updateProfile(me, { photoURL: url });
+        await setDoc(doc(db,"users",me.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
         setSrc(avatarImg, url);
         alert("Profil fotoğrafı güncellendi.");
       }catch(e){
@@ -444,21 +456,25 @@ onAuthStateChanged(auth, async (user)=>{
       }
     });
 
-    // Şifre değiştirme (sadece self)
+    // Şifre değiştirme
     window.addEventListener("change-pass-submit", async (ev)=>{
       const { old, n1, n2 } = ev.detail||{};
       try{
         if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
         if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
-        const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
-        if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
+        const hasPasswordProvider = (me.providerData||[]).some(p=> (p.providerId||"").includes("password"));
+        if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, me.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
         if (!old) throw new Error("Mevcut şifreni gir.");
-        const cred = EmailAuthProvider.credential(user.email, old);
-        await reauthenticateWithCredential(user, cred);
-        await updatePassword(user, n1);
+        const cred = EmailAuthProvider.credential(me.email, old);
+        await reauthenticateWithCredential(me, cred);
+        await updatePassword(me, n1);
         alert("Şifren güncellendi.");
         ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
       }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
     });
+  } else {
+    // Başkasının profili: modalda düzenleme/sil butonlarını devre dışı bırak (renderListing yine basar ama kullanıcı yetkisi olmayınca update denemeleri kuralda reddedilir)
+    // İstersen burada card içindeki "edit/delete/renew" butonlarını runtime'da gizleyebilirsin:
+    // document.querySelectorAll('.actions .btn[data-action="edit"], .actions .btn[data-action="delete"], .actions .btn[data-action="renew"]').forEach(b=> b.remove());
   }
 });
