@@ -85,6 +85,32 @@
     const btnSound = document.getElementById('btnSound');
     const ding     = document.getElementById('ding');
 
+    // --- Beep fallback (WebAudio) ---
+    function beep(duration=160, freq=880){
+      try{
+        const Actx = window.AudioContext || window.webkitAudioContext;
+        const ac = new Actx();
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        o.type='sine'; o.frequency.value=freq;
+        o.connect(g); g.connect(ac.destination);
+        g.gain.setValueAtTime(0.001, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.2, ac.currentTime + 0.01);
+        o.start();
+        setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.04); o.stop(); ac.close(); }, duration);
+      }catch{}
+    }
+
+    // --- Güvenli çal (dosya → olmazsa beep) ---
+    async function playDing(){
+      try{
+        ding.currentTime = 0;
+        await ding.play();
+      }catch{
+        beep(); // fallback
+      }
+    }
+
     // Alt bar linklerini .html ile sabitle
     document.getElementById('navHome')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/"; });
     document.getElementById('navMsgs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/messages.html"; });
@@ -144,7 +170,7 @@
 
           // Yeni düşen ve okunmamışsa ses
           if(!firstLoad && !data.read && !known.has(d.id)){
-            try{ ding.currentTime = 0; ding.play(); }catch{}
+            playDing();
           }
           known.add(d.id);
         });
@@ -163,7 +189,7 @@
     });
 
     // Ses testi
-    btnSound?.addEventListener("click", ()=>{ try{ ding.currentTime = 0; ding.play(); }catch{} });
+    btnSound?.addEventListener("click", ()=>{ playDing(); });
   </script>
 </body>
 </html>
