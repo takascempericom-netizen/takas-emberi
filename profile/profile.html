@@ -1,234 +1,464 @@
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profil • Takas Çemberi</title>
-  <style>
-  :root{
-    --c1:#7c3aed; --c2:#06b6d4; --c3:#10b981; --c4:#f59e0b;
-    --fg:#0f172a; --glass: rgba(255,255,255,.78); --brd: rgba(255,255,255,.5);
-  }
-  body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; color:var(--fg);
-    background: linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4)); background-size:300% 300%; animation: gradientShift 18s ease infinite; min-height:100vh; }
-  @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-  .wave:before{ content:""; position:fixed; inset:-20%; pointer-events:none; z-index:0;
-    background: radial-gradient(60% 40% at 20% 30%,rgba(255,255,255,.12),transparent 60%),
-                radial-gradient(40% 30% at 80% 70%,rgba(255,255,255,.10),transparent 60%);
-    filter: blur(40px); animation: waveMove 24s ease-in-out infinite;
-  }
-  @keyframes waveMove{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(2%,-2%,0)}}
+// profile/profile.js — FINAL (başkasının profiline bak, DM başlat, ilanları göster; self olmayan için düzenleme/gizleme)
+// Not: HTML’de header’da #btnDM butonu var. Bu dosya onu yönetiyor.
 
-  .hdr{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.2); backdrop-filter: blur(10px); border-bottom:1px solid var(--brd);}
-  .hdr .in{max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; justify-content:space-between;}
-  .ttl{margin:0; font-size:20px; font-weight:700; color:white; text-shadow:0 1px 2px rgba(0,0,0,.25)}
-  .row{display:flex; gap:8px; align-items:center}
-  .btn{appearance:none; border:1px solid var(--brd); background:var(--glass); color:#111827; font-weight:600; padding:8px 12px; border-radius:12px; cursor:pointer}
-  .btn:hover{background:white}
-  .btn.danger{border-color:#fca5a5; color:#991b1b}
-  .btn.ok{background:#111827; color:white; border-color:#111827}
-  .btn.sm{padding:6px 10px; border-radius:10px; font-size:12px}
-  .btn.ghost{background:transparent}
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut, updateProfile,
+  reauthenticateWithCredential, EmailAuthProvider, updatePassword, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs,
+  updateDoc, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getStorage, ref as sref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-  .wrap{max-width:1100px; margin:16px auto 120px; padding:0 16px; position:relative; z-index:1}
-  .card{background:var(--glass); border:1px solid var(--brd); border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,.08);}
+/* ==== Firebase Init ==== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+  authDomain: "ureten-eller-v2.firebaseapp.com",
+  projectId: "ureten-eller-v2",
+  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  messagingSenderId: "621494781131",
+  appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+};
+const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const st   = getStorage(app, "gs://ureten-eller-v2.firebasestorage.app");
 
-  /* Profil grid */
-  .profile-grid{display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px}
-  @media (max-width: 840px){ .profile-grid{grid-template-columns:1fr} }
-  .left{display:flex; flex-direction:column; align-items:center; gap:10px}
-  .avatar{width:110px; height:110px; border-radius:999px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,.2); border:3px solid rgba(255,255,255,.9); background:#f1f5f9}
-  .name{font-weight:700}
-  .stars{display:flex; gap:4px}
-  .rating-num{font-size:12px; color:#334155}
+/* ==== UI refs ==== */
+const $ = (id)=>document.getElementById(id);
+const elFirst = $("firstName");
+const elLast  = $("lastName");
+const elMail  = $("email");
+const elCity  = $("city");
+const avatarImg  = $("avatar");
+const avatarFile = $("avatarFile");
+const btnChangeAvatar = $("btnChangeAvatar");
+const btnLogout = $("btnLogout");
+const btnDM = $("btnDM");
 
-  .right{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-  .right label{font-size:12px; color:#475569}
-  .right input{border:1px solid var(--brd); border-radius:12px; padding:10px 12px; background:#ffffffb3}
-  .right input[disabled]{color:#334155; background:#f8fafc}
-  .row.end{justify-content:flex-end}
+/* ==== URL param: bir başkasının profili mi? ==== */
+const params    = new URLSearchParams(location.search);
+const viewedUid = params.get('uid') || "";
 
-  /* Sekmeler */
-  .tabs{display:flex; gap:8px; padding:12px; border-bottom:1px solid var(--brd)}
-  .tab{padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:600; background:rgba(255,255,255,.6)}
-  .tab.active{background:#111827; color:white}
-  .list{padding:12px; display:grid; gap:8px}
+/* ==== Helpers ==== */
+const fill = (el,val)=>{ if(el){ el.value = val||""; } };
+const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
+const hide = (el)=>{ if(el){ el.style.display = "none"; } };
+const fmt = (ts)=> {
+  try {
+    const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return isNaN(d) ? "—" : d.toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric"});
+  } catch { return "—"; }
+};
+const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 
-  /* Kart + küçük kapak görseli (grid) */
-  .item{
-    background:white; border:1px solid #e5e7eb; border-radius:14px; padding:10px;
-    display:grid; grid-template-columns:84px 1fr auto; gap:12px; align-items:center;
-  }
-  .thumb{
-    width:84px; height:84px; border-radius:12px; background:#f1f5f9 center/cover no-repeat;
-    border:1px solid #e5e7eb;
-  }
-  .meta strong{display:block}
-  .muted{font-size:12px; color:#64748b}
-  .badge{font-size:12px; padding:4px 8px; border-radius:10px; border:1px solid #e5e7eb; background:#f8fafc; display:inline-block}
-  .badge.live{background:#dcfce7; color:#065f46; border-color:#bbf7d0}
-  .badge.pending{background:#fff7ed; color:#9a3412; border-color:#fed7aa}
-  .badge.expired{background:#fee2e2; color:#991b1b; border-color:#fecaca}
-  .actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+/* ==== Çıkış ==== */
+btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>{
+  // geri dönüş için mevcut sayfayı ilet
+  const next = encodeURIComponent(location.pathname + location.search);
+  location.href="/auth.html?next=" + next;
+}));
 
-  /* Alt sabit bar */
-  .fixedbar{position:fixed; left:0; right:0; bottom:0; z-index:30;}
-  .fixedbar .in{max-width:1100px; margin:0 auto 0; padding:8px 12px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
-  .fixedbar a{display:flex; flex-direction:column; gap:2px; align-items:center; justify-content:center; padding:8px 6px; border-radius:14px; text-decoration:none; color:#111827; font-weight:600; border:1px solid var(--brd); background:var(--glass)}
-  .fixedbar a.active{background:#111827; color:white; border-color:#111827}
-  .fixedbar:before{content:""; position:absolute; inset:-20px 0 -20px 0; z-index:-1; background: linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4)); filter: blur(30px); opacity:.6}
-
-  /* Modal */
-  .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(15,23,42,.45); z-index:50}
-  .modal.show{display:grid}
-  .dialog{width:min(880px,92vw); background:white; border-radius:18px; border:1px solid #e2e8f0; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden}
-  .dialog .head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #e2e8f0}
-  .dialog .body{padding:14px; display:grid; grid-template-columns:220px 1fr; gap:14px}
-  .dialog .body img{width:100%; border-radius:12px; border:1px solid #e5e7eb; object-fit:cover; aspect-ratio:1/1}
-  .dialog .f{display:grid; gap:8px}
-  .dialog label{font-size:12px; color:#475569}
-  .dialog input, .dialog textarea{ border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; font:inherit; background:#f8fafc; }
-  .dialog textarea{min-height:120px; resize:vertical}
-  .dialog .foot{display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid #e2e8f0; background:#f8fafc}
-  </style>
-</head>
-
-<body class="wave">
-  <header class="hdr">
-  <div class="in">
-    <h1 class="ttl">Profil</h1>
-    <div class="row">
-      <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ Yeni İlan</a>
-      <button class="btn" id="btnDM" style="display:none">Mesaj yaz</button>
-      <button class="btn danger" id="btnLogout">Çıkış</button>
+/* ==== MODAL: eksikse otomatik ekle ==== */
+function ensureModal(){
+  if (document.getElementById('listingModal')) return;
+  document.body.insertAdjacentHTML('beforeend', `
+<div class="modal" id="listingModal" aria-hidden="true" style="position:fixed;inset:0;display:none;place-items:center;background:rgba(15,23,42,.45);z-index:50">
+  <div class="dialog" style="width:min(880px,92vw);background:#fff;border-radius:18px;border:1px solid #e2e8f0;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div class="head" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #e2e8f0">
+      <strong id="mTitle">İlan</strong>
+      <span class="badge" id="mStatus"></span>
     </div>
-  </div>
-</header>
-
-  <div class="wrap">
-    <!-- PROFİL PANELİ -->
-    <section class="card" id="profileCard">
-      <div class="profile-grid">
-        <div class="left">
-          <img class="avatar" id="avatar" alt="avatar">
-          <button class="btn" id="btnChangeAvatar">Profil Resmini Değiştir</button>
-          <input id="avatarFile" type="file" accept="image/*" style="display:none">
-          <div class="name" id="nameUnder">—</div>
-          <div class="stars" id="rating"></div>
-          <div class="rating-num" id="ratingNum">0.0 / 5 (0 oy)</div>
-        </div>
-        <div class="right">
-          <label>Ad</label>
-          <input id="firstName" placeholder="Ad" disabled>
-          <label>Soyad</label>
-          <input id="lastName" placeholder="Soyad" disabled>
-          <label>E-posta</label>
-          <input id="email" placeholder="eposta@example.com" disabled>
-          <label>Şehir</label>
-          <input id="city" placeholder="Şehir" disabled>
-
-          <label>Mevcut Şifre</label>
-          <input id="oldPassword" type="password" placeholder="Mevcut şifre">
-          <label>Yeni Şifre</label>
-          <input id="newPassword" type="password" placeholder="Yeni şifre">
-          <label>Yeni Şifre (Tekrar)</label>
-          <input id="newPassword2" type="password" placeholder="Yeni şifre (tekrar)">
-          <div class="row end" style="grid-column: 1 / -1; margin-top:10px">
-            <button class="btn ok" id="btnChangePass">Onayla</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SEKME PANELİ -->
-    <section class="card" id="tabsCard" style="margin-top:12px">
-      <div class="tabs" id="tabs">
-        <div class="tab active" data-tab="live">Yayındaki İlanlar</div>
-        <div class="tab" data-tab="pending">Onay Bekleyen</div>
-        <div class="tab" data-tab="expired">Süresi Dolan</div>
-      </div>
-      <div id="tab-live" class="list"></div>
-      <div id="tab-pending" class="list" style="display:none"></div>
-      <div id="tab-expired" class="list" style="display:none"></div>
-    </section>
-  </div>
-
-  <!-- DETAY / DÜZENLE MODAL (TEK ADET) -->
-  <div class="modal" id="listingModal" aria-hidden="true">
-    <div class="dialog">
-      <div class="head">
-        <strong id="mTitle">İlan</strong>
-        <span class="badge" id="mStatus"></span>
-      </div>
-      <div class="body">
-        <img id="mPhoto" alt="ilan">
-        <div class="f">
-          <div id="mDetails" class="muted" style="font-size:13px;color:#475569;line-height:1.5"></div>
-          <label>Başlık</label>
-          <input id="mInputTitle">
-          <label>Açıklama</label>
-          <textarea id="mInputDesc"></textarea>
-          <div class="muted" id="mMeta"></div>
-        </div>
-      </div>
-      <div class="foot">
-        <button class="btn sm ghost" id="mClose">Kapat</button>
-        <button class="btn sm" id="mSave" style="display:none">Kaydet</button>
+    <div class="body" style="padding:14px;display:grid;grid-template-columns:220px 1fr;gap:14px">
+      <img id="mPhoto" alt="ilan" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover;aspect-ratio:1/1">
+      <div class="f" style="display:grid;gap:8px">
+        <label>Başlık</label>
+        <input id="mInputTitle" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc">
+        <label>Açıklama</label>
+        <textarea id="mInputDesc" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#f8fafc;min-height:120px;resize:vertical"></textarea>
+        <div class="muted" id="mMeta" style="font-size:12px;color:#64748b"></div>
       </div>
     </div>
-  </div>
-
-  <!-- ALT SABİT BAR -->
-  <nav class="fixedbar">
-    <div class="in">
-      <a href="/" class="active" id="navHome">🏠<span>Ana Sayfa</span></a>
-      <a href="/messages.html" id="navMsgs">💬<span>Mesajlar</span></a>
-      <a href="/notifications.html" id="navNotifs">🔔<span>Bildirimler</span></a>
-      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+    <div class="foot" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid #e2e8f0;background:#f8fafc">
+      <button class="btn sm ghost" id="mClose">Kapat</button>
+      <button class="btn sm" id="mSave" style="display:none">Kaydet</button>
     </div>
-  </nav>
+  </div>
+</div>`);
+  const modal = document.getElementById('listingModal');
+  const obs = new MutationObserver(()=>{ modal.style.display = modal.classList.contains('show') ? 'grid' : 'none'; });
+  obs.observe(modal, { attributes:true, attributeFilter:['class'] });
+}
+function refs(){
+  ensureModal();
+  return {
+    modal: $("listingModal"),
+    mTitle: $("mTitle"),
+    mStatus: $("mStatus"),
+    mPhoto: $("mPhoto"),
+    mInputTitle: $("mInputTitle"),
+    mInputDesc: $("mInputDesc"),
+    mMeta: $("mMeta"),
+    mSave: $("mSave"),
+    mClose: $("mClose"),
+    liveEl: $("tab-live"),
+    pendEl: $("tab-pending"),
+    expEl: $("tab-expired"),
+  };
+}
+function openModal(){ ensureModal(); refs().modal?.classList.add("show"); }
+function closeModal(){ refs().modal?.classList.remove("show"); }
 
-  <!-- Basit UI (sekme geçişi, modal kapat, şifre event) -->
-  <script type="module">
-    // Sekmeler
-    const tabs = document.querySelectorAll('.tab');
-    const panes = {
-      live:    document.getElementById('tab-live'),
-      pending: document.getElementById('tab-pending'),
-      expired: document.getElementById('tab-expired')
+/* ==== Alt koleksiyondan ilk foto (fallback) ==== */
+async function getFirstPhotoFromSub(listingId){
+  try{
+    const sub = collection(db, "listings", listingId, "photos");
+    const ss = await getDocs(sub);
+    for (const docu of ss.docs) {
+      const urls = docu.data()?.urls;
+      if (Array.isArray(urls) && urls.length) return urls[0];
+    }
+  }catch(e){ console.warn("[photos-sub] okunamadı:", e); }
+  return "";
+}
+
+/* ==== Kart render ==== */
+window.__canManage = false; // self değilse düzenleme butonlarını gizle
+
+window.renderListing = (item) => {
+  const { liveEl, pendEl, expEl } = refs();
+  const container =
+    item.status === "live"    ? liveEl :
+    item.status === "pending" ? pendEl : expEl;
+
+  if (!container) { console.warn("[renderListing] container yok:", item.status); return; }
+
+  const img = firstPhoto(item.photos) || "";
+  const card = document.createElement("div");
+  card.className = "item";
+  card.dataset.id = item.id;
+  card.dataset.status = item.status;
+
+  const manageBtns = window.__canManage
+    ? (item.status === "live" ? `
+        <button class="btn sm" data-action="edit">Düzenle</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      ` : item.status === "pending" ? `` : `
+        <button class="btn sm" data-action="renew">Süre Al</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      `)
+    : ""; // başkasının profiliyse sadece incele
+
+  card.innerHTML = `
+    <div class="thumb" style="${img ? `background-image:url('${img}')` : ''}"></div>
+    <div class="meta">
+      <strong>${item.title || "İlan"}</strong>
+      <div class="muted">${item.desc || item.description || ""}</div>
+      <div class="muted">Oluşturma: ${fmt(item.createdAt)} • Bitiş: ${fmt(item.expiresAt)}</div>
+      <span class="badge ${item.status}">${item.status === "live" ? "Yayında" : item.status === "pending" ? "Onay Bekliyor" : "Süresi Doldu"}</span>
+    </div>
+    <div class="actions">
+      <button class="btn sm" data-action="view">İncele</button>
+      ${manageBtns}
+    </div>
+  `;
+  container.appendChild(card);
+};
+
+/* ==== Modal doldur ==== */
+function fillModal(data, editable=false){
+  const { mTitle, mStatus, mPhoto, mInputTitle, mInputDesc, mMeta, mSave, mClose } = refs();
+  if (!mTitle) return;
+
+  mTitle.textContent = data.title || "İlan";
+  mStatus.textContent = data.status === "live" ? "Yayında" : data.status === "pending" ? "Onay Bekliyor" : "Süresi Doldu";
+  mStatus.className = "badge " + data.status;
+
+  const url = firstPhoto(data.photos);
+  if (url) { mPhoto.src = url; mPhoto.style.display = "block"; }
+  else { mPhoto.removeAttribute("src"); mPhoto.style.display = "none"; }
+
+  mInputTitle.value = data.title || "";
+  mInputDesc.value  = data.description || data.desc || "";
+  mInputTitle.disabled = !editable;
+  mInputDesc.disabled  = !editable;
+  if (mSave) mSave.style.display  = editable ? "inline-block" : "none";
+  if (mMeta) mMeta.textContent = `Oluşturma: ${fmt(data.createdAt)} • Bitiş: ${fmt(data.expiresAt)} • İlan ID: ${data.id}`;
+
+  mClose?.addEventListener("click", closeModal, { once:true });
+}
+
+/* ==== İlan aksiyonları ==== */
+async function viewListing(id, editable=false){
+  const snap = await getDoc(doc(db,"listings",id));
+  if (!snap.exists()) { alert("İlan bulunamadı."); return; }
+  const d = snap.data()||{};
+  let photos = Array.isArray(d.photos) ? d.photos : [];
+  if (!photos.length) {
+    const first = await getFirstPhotoFromSub(id);
+    if (first) photos = [first];
+  }
+  // Self değilse edit kapalı
+  const canEdit = editable && window.__canManage;
+  fillModal({ id, ...d, photos }, canEdit);
+
+  const { mSave } = refs();
+  if (mSave) {
+    mSave.onclick = async ()=>{
+      try{
+        if (!window.__canManage) return; // güvenlik
+        await updateDoc(doc(db,"listings",id), {
+          title: document.getElementById("mInputTitle").value.trim(),
+          description: document.getElementById("mInputDesc").value.trim(),
+          updatedAt: serverTimestamp()
+        });
+        alert("İlan güncellendi.");
+        closeModal();
+        location.reload();
+      }catch(e){
+        console.error(e);
+        alert("Güncellenemedi: " + (e?.message||e));
+      }
     };
-    tabs.forEach(t => t.addEventListener('click', () => {
-      tabs.forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-      const k = t.dataset.tab;
-      Object.entries(panes).forEach(([key, el]) => { if (!el) return; el.style.display = (key === k) ? 'grid' : 'none'; });
-    }));
+  }
+  openModal();
+}
 
-    // Şifre formu → profile.js'e event
-    document.getElementById('btnChangePass')?.addEventListener('click', (e)=>{
-      e.preventDefault();
-      const ev = new CustomEvent('change-pass-submit', {detail:{
-        old: document.getElementById('oldPassword')?.value || '',
-        n1:  document.getElementById('newPassword')?.value || '',
-        n2:  document.getElementById('newPassword2')?.value || ''
-      }});
-      window.dispatchEvent(ev);
+async function deleteListing(id){
+  if (!window.__canManage) return;
+  if (!confirm("Bu ilanı silmek istiyor musun?")) return;
+  try{ await deleteDoc(doc(db,"listings",id)); alert("İlan silindi."); location.reload(); }
+  catch(e){ console.error(e); alert("Silinemedi: " + (e?.message||e)); }
+}
+
+async function renewListing(id){
+  if (!window.__canManage) return;
+  if (!confirm("Süreyi +30 gün uzatıp incelemeye göndereyim mi?")) return;
+  try{
+    const now = new Date(); const newExp = new Date(); newExp.setDate(now.getDate()+30);
+    await updateDoc(doc(db,"listings",id), {
+      status: "pending",
+      expiresAt: newExp,
+      renewedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    alert("Süre uzatıldı ve tekrar incelemeye gönderildi.");
+    location.reload();
+  }catch(e){ console.error(e); alert("Süre uzatılamadı: " + (e?.message||e)); }
+}
+
+/* ==== Liste alanları: event delegation ==== */
+["tab-live","tab-pending","tab-expired"].forEach(listId=>{
+  const root = $(listId);
+  root?.addEventListener("click",(ev)=>{
+    const btn = ev.target.closest("button[data-action]"); if (!btn) return;
+    const card = btn.closest(".item"); const id = card?.dataset.id; const action = btn.dataset.action; if (!id) return;
+    if (action === "view")  viewListing(id, false);
+    if (action === "edit")  viewListing(id, true);
+    if (action === "delete") deleteListing(id);
+    if (action === "renew") renewListing(id);
+  });
+});
+
+/* ==== İlanları getir & çiz (uid + ownerId) ==== */
+async function loadListings(uid){
+  const { liveEl, pendEl, expEl } = refs();
+  if (!(liveEl && pendEl && expEl)) return;
+
+  // temizle
+  liveEl.innerHTML = ""; pendEl.innerHTML = ""; expEl.innerHTML = "";
+
+  const colRef = collection(db, "listings");
+
+  // ownerId / uid — her iki alanı da destekle
+  const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"));
+  const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"));
+  const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"));
+
+  const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"));
+  const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"));
+  const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"));
+
+  try{
+    const [ s1o, s2o, s3o, s1u, s2u, s3u ] = await Promise.all([
+      getDocs(qLive_owner), getDocs(qPending_owner), getDocs(qExpired_owner),
+      getDocs(qLive_uid),   getDocs(qPending_uid),   getDocs(qExpired_uid)
+    ]);
+
+    // Tekille
+    const mergeSnaps = (...snaps)=>{
+      const map = new Map();
+      snaps.forEach(s => s.forEach(docu => map.set(docu.id, docu)));
+      return Array.from(map.values());
+    };
+
+    const liveDocs    = mergeSnaps(s1o, s1u);
+    const pendingDocs = mergeSnaps(s2o, s2u);
+    const expiredDocs = mergeSnaps(s3o, s3u);
+
+    async function docsToItems(docs, status){
+      return Promise.all(docs.map(async (docu)=>{
+        const d = docu.data()||{};
+        let photos = Array.isArray(d.photos) ? d.photos : [];
+        if (!photos.length) {
+          const first = await getFirstPhotoFromSub(docu.id);
+          if (first) photos = [first];
+        }
+        return {
+          id: docu.id,
+          title: d.title || "İlan",
+          desc:  d.description || "",
+          photos,
+          createdAt: d.createdAt,
+          expiresAt: d.expiresAt,
+          status
+        };
+      }));
+    }
+
+    const [liveItems, pendingItems, expiredItems] = await Promise.all([
+      docsToItems(liveDocs, "live"),
+      docsToItems(pendingDocs, "pending"),
+      docsToItems(expiredDocs, "expired")
+    ]);
+
+    [...liveItems, ...pendingItems, ...expiredItems].forEach(window.renderListing);
+
+  }catch(e){
+    console.error("[profile] listings yüklenemedi:", e);
+  }
+}
+
+/* ==== Auth + Profil doldurma + DM butonu ==== */
+onAuthStateChanged(auth, async (user)=>{
+  if (!user) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    location.href = "/auth.html?next=" + next;
+    return;
+  }
+
+  // Gösterilecek hesap: URL’de uid varsa onu, yoksa kendi hesabını
+  const targetUid = (viewedUid && viewedUid !== user.uid) ? viewedUid : user.uid;
+  const isSelf    = (targetUid === user.uid);
+  window.__canManage = isSelf;
+
+  // Kendi profili ise auth bilgisini doldur
+  if (isSelf) {
+    const displayName = user.displayName || (user.providerData?.[0]?.displayName) || "";
+    const parts = displayName.trim().split(/\s+/);
+    const first = parts.length ? (parts.slice(0, -1).join(" ") || parts[0]) : "";
+    const last  = parts.length > 1 ? parts.at(-1) : "";
+
+    fill(elFirst, first);
+    fill(elLast,  last);
+    fill(elMail,  user.email || user.providerData?.[0]?.email || "");
+    if (user.photoURL) setSrc(avatarImg, user.photoURL);
+  } else {
+    // Başkasının profili: düzenleme alanlarını gizle
+    hide(btnChangeAvatar);
+    hide(avatarFile);
+
+    const ipOld = $("oldPassword"), ipN1 = $("newPassword"), ipN2 = $("newPassword2"), btnCP = $("btnChangePass");
+    [ipOld, ipN1, ipN2, btnCP].forEach(hide);
+    // varsa önceki label'ları da gizle
+    [ipOld, ipN1, ipN2].forEach(el=>{
+      if (el?.previousElementSibling?.tagName === "LABEL") hide(el.previousElementSibling);
     });
 
-    // Avatar trigger (UI)
-    document.getElementById('btnChangeAvatar')?.addEventListener('click',()=> document.getElementById('avatarFile')?.click());
+    // E-posta özel olabilir: gösterme (istersen yorum satırını kaldır)
+    // hide(elMail);
+  }
 
-    // Modal kapat
-    document.getElementById('mClose')?.addEventListener('click',()=> document.getElementById('listingModal')?.classList.remove('show'));
+  // users/{targetUid} oku ve alanları doldur
+  try{
+    const snap = await getDoc(doc(db, "users", targetUid));
+    if (snap.exists()) {
+      const d = snap.data()||{};
+      if (d.city) fill(elCity, d.city);
+      if (isSelf) {
+        if (!elFirst.value && d.firstName) fill(elFirst, d.firstName);
+        if (!elLast.value  && d.lastName)  fill(elLast,  d.lastName);
+        if (!avatarImg.src && d.photoURL)  setSrc(avatarImg, d.photoURL);
+      } else {
+        fill(elFirst, d.firstName || "");
+        fill(elLast,  d.lastName  || "");
+        if (d.photoURL) setSrc(avatarImg, d.photoURL);
+      }
 
-    // Alt bar aktifliği
-    const path = location.pathname;
-    document.querySelectorAll('.fixedbar a').forEach(a=>{
-      a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/profile') && a.id==='navProfile'));
+      const nameUnder = $("nameUnder");
+      const dn = (d.firstName && d.lastName) ? `${d.firstName} ${d.lastName}` : (isSelf ? (user.displayName||"—") : "—");
+      if (nameUnder) nameUnder.textContent = dn || "—";
+    }
+  }catch(e){ console.warn("[profile] users doc okunamadı:", e); }
+
+  // DM butonu: başkasına bakıyorsan göster ve sohbet aç
+  if (!isSelf && btnDM) {
+    btnDM.style.display = "inline-block";
+    btnDM.onclick = async ()=>{
+      try{
+        const chatId = [auth.currentUser.uid, targetUid].sort().join("_");
+        await setDoc(
+          doc(db, "chats", chatId),
+          {
+            participants: [auth.currentUser.uid, targetUid],
+            createdAt: serverTimestamp(),
+            lastMsgAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+        location.href = `/messages.html?chat=${encodeURIComponent(chatId)}`;
+      }catch(e){
+        console.error(e);
+        alert("Mesaj başlatılamadı: " + (e?.message||e));
+      }
+    };
+  } else if (btnDM) {
+    btnDM.style.display = "none";
+  }
+
+  // İlanları yükle
+  await loadListings(targetUid);
+
+  // Avatar değişimi sadece self için
+  if (isSelf) {
+    btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
+    avatarFile?.addEventListener("change", async ()=>{
+      try{
+        const f = avatarFile.files?.[0]; if (!f) return;
+        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+        const r = sref(st, path);
+        await uploadBytes(r, f);
+        const url = await getDownloadURL(r);
+        await updateProfile(user, { photoURL: url });
+        await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
+        setSrc(avatarImg, url);
+        alert("Profil fotoğrafı güncellendi.");
+      }catch(e){
+        console.error("Avatar yükleme hatası:", e);
+        alert("Profil fotoğrafı güncellenemedi.");
+      }
     });
-  </script>
 
-  <!-- İş mantığı (Firebase & render): profile.js bu HTML ile uyumlu -->
-  <script type="module" src="./profile.js"></script>
-</body>
-</html>
+    // Şifre değiştirme (sadece self)
+    window.addEventListener("change-pass-submit", async (ev)=>{
+      const { old, n1, n2 } = ev.detail||{};
+      try{
+        if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
+        if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
+        const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
+        if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
+        if (!old) throw new Error("Mevcut şifreni gir.");
+        const cred = EmailAuthProvider.credential(user.email, old);
+        await reauthenticateWithCredential(user, cred);
+        await updatePassword(user, n1);
+        alert("Şifren güncellendi.");
+        ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
+      }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
+    });
+  }
+});
