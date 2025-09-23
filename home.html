@@ -171,6 +171,18 @@
 .ad-actions .btn-offer{background:#fff}
 
 html,body{overflow-x:hidden}
+    /* Mobil header düzeltmeleri — BUNU en sona ekle */
+@media (max-width: 480px){
+  .brand strong{ display:none; }        /* logonun yanındaki yazıyı gizle */
+  .brand img{ height:36px; }            /* logo biraz küçülsün */
+  .topbar{ gap:8px; padding-right:8px; }/* boşlukları daralt */
+  .btn{ padding:6px 10px; font-size:12px; } /* butonlar daralsın */
+}
+
+/* Çok küçük ekranlar için opsiyonel: 'Ara'yı gizle */
+@media (max-width: 380px){
+  #btnSearch{ display:none; }
+}
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
