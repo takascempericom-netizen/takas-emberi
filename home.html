@@ -475,12 +475,36 @@ async function openOfferFlow(targetListingId, targetOwnerUid){
 };
 
   try{
-    await addDoc(collection(db,'listings', targetListingId, 'offers'), offer);
-    alert("Teklif gönderildi ✅");
-  }catch(e){
-    console.error("Teklif gönderilemedi:", e);
-    alert("Teklif gönderilemedi: " + (e.code||"hata"));
-  }
+  // 1) Teklifi kaydet ve referansı al
+  const offerRef = await addDoc(
+    collection(db,'listings', targetListingId, 'offers'),
+    offer
+  );
+
+  // 2) Karşı tarafın inbox’ına bildirim bırak
+  const { collection: coll2, addDoc: add2, serverTimestamp: ts } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+  await add2(
+    coll2(db, 'users', targetOwnerUid, 'inbox'),
+    {
+      toUid: targetOwnerUid,
+      fromUid: user.uid,
+      type: 'offer',
+      title: 'Yeni teklif',
+      body: (msg && msg.trim()) ? msg.trim() : 'Bir teklifiniz var.',
+      listingId: targetListingId,
+      offerId: offerRef.id,
+      link: `/ilan/index.html?id=${encodeURIComponent(targetListingId)}`,
+      createdAt: ts(),
+      read: false
+    }
+  );
+
+  alert("Teklif gönderildi ✅");
+}catch(e){
+  console.error("Teklif gönderilemedi:", e);
+  alert("Teklif gönderilemedi: " + (e.code||"hata"));
 }
 
 // Kart tıklama + butonlar (event delegation)
