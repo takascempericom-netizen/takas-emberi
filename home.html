@@ -134,6 +134,7 @@
       text-decoration:none;
       box-shadow:0 6px 18px rgba(0,0,0,.06);
       transition:transform .15s ease;
+      .ad-card{ cursor:pointer; }
     }
     .ad-card:hover{transform:translateY(-2px)}
     .ad-media{position:relative;width:100%;background:#f1f5f9;border-bottom:1px solid var(--line)}
@@ -440,20 +441,30 @@ async function openOfferFlow(targetListingId, targetOwnerUid){
   }
 }
 
-// Kart butonları (event delegation)
+// Kart tıklama + butonlar (event delegation)
 const adsGridEl = document.getElementById("adsGrid");
 adsGridEl?.addEventListener('click', (ev)=>{
+  // Önce butonlar
   const btn = ev.target.closest('button');
-  if(!btn) return;
-  const id = btn.dataset.id;
- if(btn.classList.contains('btn-view')){
-  location.href = `/ilan/index.html?id=${encodeURIComponent(id)}`;
-  return;
-}
-  if(btn.classList.contains('btn-offer')){
-    const owner = btn.dataset.owner || "";
-    if(!owner){ alert("İlan sahibi bilgisi eksik."); return; }
-    openOfferFlow(id, owner);
+  if (btn) {
+    const id = btn.dataset.id;
+    if (btn.classList.contains('btn-view')) {
+      location.href = `/ilan/index.html?id=${encodeURIComponent(id)}`;
+      return;
+    }
+    if (btn.classList.contains('btn-offer')) {
+      const owner = btn.dataset.owner || "";
+      if (!owner) { alert("İlan sahibi bilgisi eksik."); return; }
+      openOfferFlow(id, owner);
+      return;
+    }
+  }
+
+  // Sonra kartın kendisi (buton alanına tıklanmadıysa)
+  const card = ev.target.closest('.ad-card');
+  if (card && !ev.target.closest('.ad-actions')) {
+    const id = card.dataset.id;
+    location.href = `/ilan/index.html?id=${encodeURIComponent(id)}`;
   }
 });
 
