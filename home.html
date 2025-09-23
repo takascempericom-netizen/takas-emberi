@@ -446,10 +446,10 @@ adsGridEl?.addEventListener('click', (ev)=>{
   const btn = ev.target.closest('button');
   if(!btn) return;
   const id = btn.dataset.id;
-  if(btn.classList.contains('btn-view')){
-    location.href = `/ilan/${id}`;
-    return;
-  }
+ if(btn.classList.contains('btn-view')){
+  location.href = `/ilan/index.html?id=${encodeURIComponent(id)}`;
+  return;
+}
   if(btn.classList.contains('btn-offer')){
     const owner = btn.dataset.owner || "";
     if(!owner){ alert("İlan sahibi bilgisi eksik."); return; }
