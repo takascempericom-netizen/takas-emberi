@@ -1,4 +1,5 @@
-// profile/profile.js — FINAL (modal kendini ekler, incele/düzenle/sil/süre al, foto fallback, uid/ownerId destekli)
+// profile/profile.js — FINAL (başkasının profiline bak, DM başlat, ilanları göster; self olmayan için düzenleme/gizleme)
+// Not: HTML’de header’da #btnDM butonu var. Bu dosya onu yönetiyor.
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -25,7 +26,6 @@ const firebaseConfig = {
 const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
-// Storage (bucket belirtilmiş)
 const st   = getStorage(app, "gs://ureten-eller-v2.firebasestorage.app");
 
 /* ==== UI refs ==== */
@@ -38,10 +38,16 @@ const avatarImg  = $("avatar");
 const avatarFile = $("avatarFile");
 const btnChangeAvatar = $("btnChangeAvatar");
 const btnLogout = $("btnLogout");
+const btnDM = $("btnDM");
+
+/* ==== URL param: bir başkasının profili mi? ==== */
+const params    = new URLSearchParams(location.search);
+const viewedUid = params.get('uid') || "";
 
 /* ==== Helpers ==== */
 const fill = (el,val)=>{ if(el){ el.value = val||""; } };
 const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
+const hide = (el)=>{ if(el){ el.style.display = "none"; } };
 const fmt = (ts)=> {
   try {
     const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
@@ -51,7 +57,11 @@ const fmt = (ts)=> {
 const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 
 /* ==== Çıkış ==== */
-btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
+btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>{
+  // geri dönüş için mevcut sayfayı ilet
+  const next = encodeURIComponent(location.pathname + location.search);
+  location.href="/auth.html?next=" + next;
+}));
 
 /* ==== MODAL: eksikse otomatik ekle ==== */
 function ensureModal(){
@@ -80,13 +90,9 @@ function ensureModal(){
   </div>
 </div>`);
   const modal = document.getElementById('listingModal');
-  const obs = new MutationObserver(()=>{
-    modal.style.display = modal.classList.contains('show') ? 'grid' : 'none';
-  });
+  const obs = new MutationObserver(()=>{ modal.style.display = modal.classList.contains('show') ? 'grid' : 'none'; });
   obs.observe(modal, { attributes:true, attributeFilter:['class'] });
 }
-
-/* ==== Modal refs + kontrol ==== */
 function refs(){
   ensureModal();
   return {
@@ -121,6 +127,8 @@ async function getFirstPhotoFromSub(listingId){
 }
 
 /* ==== Kart render ==== */
+window.__canManage = false; // self değilse düzenleme butonlarını gizle
+
 window.renderListing = (item) => {
   const { liveEl, pendEl, expEl } = refs();
   const container =
@@ -135,6 +143,16 @@ window.renderListing = (item) => {
   card.dataset.id = item.id;
   card.dataset.status = item.status;
 
+  const manageBtns = window.__canManage
+    ? (item.status === "live" ? `
+        <button class="btn sm" data-action="edit">Düzenle</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      ` : item.status === "pending" ? `` : `
+        <button class="btn sm" data-action="renew">Süre Al</button>
+        <button class="btn sm danger" data-action="delete">Sil</button>
+      `)
+    : ""; // başkasının profiliyse sadece incele
+
   card.innerHTML = `
     <div class="thumb" style="${img ? `background-image:url('${img}')` : ''}"></div>
     <div class="meta">
@@ -145,13 +163,7 @@ window.renderListing = (item) => {
     </div>
     <div class="actions">
       <button class="btn sm" data-action="view">İncele</button>
-      ${item.status === "live" ? `
-        <button class="btn sm" data-action="edit">Düzenle</button>
-        <button class="btn sm danger" data-action="delete">Sil</button>
-      ` : item.status === "pending" ? `` : `
-        <button class="btn sm" data-action="renew">Süre Al</button>
-        <button class="btn sm danger" data-action="delete">Sil</button>
-      `}
+      ${manageBtns}
     </div>
   `;
   container.appendChild(card);
@@ -190,12 +202,15 @@ async function viewListing(id, editable=false){
     const first = await getFirstPhotoFromSub(id);
     if (first) photos = [first];
   }
-  fillModal({ id, ...d, photos }, editable);
+  // Self değilse edit kapalı
+  const canEdit = editable && window.__canManage;
+  fillModal({ id, ...d, photos }, canEdit);
 
   const { mSave } = refs();
   if (mSave) {
     mSave.onclick = async ()=>{
       try{
+        if (!window.__canManage) return; // güvenlik
         await updateDoc(doc(db,"listings",id), {
           title: document.getElementById("mInputTitle").value.trim(),
           description: document.getElementById("mInputDesc").value.trim(),
@@ -214,12 +229,14 @@ async function viewListing(id, editable=false){
 }
 
 async function deleteListing(id){
+  if (!window.__canManage) return;
   if (!confirm("Bu ilanı silmek istiyor musun?")) return;
   try{ await deleteDoc(doc(db,"listings",id)); alert("İlan silindi."); location.reload(); }
   catch(e){ console.error(e); alert("Silinemedi: " + (e?.message||e)); }
 }
 
 async function renewListing(id){
+  if (!window.__canManage) return;
   if (!confirm("Süreyi +30 gün uzatıp incelemeye göndereyim mi?")) return;
   try{
     const now = new Date(); const newExp = new Date(); newExp.setDate(now.getDate()+30);
@@ -247,134 +264,27 @@ async function renewListing(id){
   });
 });
 
-/* ==== Auth + Profil doldurma (URL'den ?uid al; başkasının profili için profiles_public oku) ==== */
-onAuthStateChanged(auth, async (user)=>{
-  if (!user) {
-    const next = location.pathname + location.search;
-    location.href = "/auth.html?next=" + encodeURIComponent(next);
-    return;
-  }
-
-  // 1) URL'den ?uid= al; yoksa kendi uid'in
-  const params = new URLSearchParams(location.search);
-  const uidFromUrl = params.get('uid');
-  const targetUid = uidFromUrl || user.uid;
-  const isMe = (targetUid === user.uid);
-
-  // 2) Veriyi oku: kendinse /users, başkasıysa /profiles_public
-  let profileSnap = null;
-  try{
-    const ref = isMe ? doc(db, "users", targetUid) : doc(db, "profiles_public", targetUid);
-    profileSnap = await getDoc(ref);
-  }catch(e){
-    console.warn("[profile] profil okunamadı:", e);
-  }
-  const pdata = profileSnap?.exists() ? (profileSnap.data()||{}) : {};
-
-  // 3) İsim / e-posta / şehir alanlarını doldur
-  const displayNameAuth = user.displayName || user.providerData?.[0]?.displayName || "";
-  const parts = displayNameAuth.trim().split(/\s+/);
-  const fallbackFirst = parts.length ? (parts.slice(0, -1).join(" ") || parts[0]) : "";
-  const fallbackLast  = parts.length > 1 ? parts.at(-1) : "";
-
-  const first = pdata.firstName || (isMe ? fallbackFirst : "");
-  const last  = pdata.lastName  || (isMe ? fallbackLast  : "");
-  const email = isMe ? (user.email || user.providerData?.[0]?.email || "") : (pdata.emailPublic || "");
-  const city  = pdata.city || "";
-
-  fill(elFirst, first);
-  fill(elLast,  last);
-  fill(elMail,  email);
-  fill(elCity,  city);
-
-  // 4) Avatar
-  const photo = pdata.photoURL || (isMe ? user.photoURL : "");
-  if (photo) setSrc(avatarImg, photo);
-
-  const nameUnder = $("nameUnder");
-  if (nameUnder) {
-    nameUnder.textContent =
-      (first || last) ? `${first} ${last}`.trim() :
-      (pdata.displayName || displayNameAuth || "—");
-  }
-
-  // 5) Başkasının profilindeysek düzenleme alanlarını gizle
-  if (!isMe) {
-    ["btnChangeAvatar","avatarFile","oldPassword","newPassword","newPassword2","btnChangePass"]
-      .forEach(id => { const el = $(id); if (el) el.style.display = "none"; });
-  }
-
-  // 6) Kendi profilinde avatar & şifre event’leri
-  if (isMe) {
-    // Avatar değişimi
-    btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
-    avatarFile?.addEventListener("change", async ()=>{
-      try{
-        const f = avatarFile.files?.[0]; if (!f) return;
-        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-        const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
-        const r = sref(st, path);
-        await uploadBytes(r, f);
-        const url = await getDownloadURL(r);
-        await updateProfile(user, { photoURL: url });
-        await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
-        setSrc(avatarImg, url);
-        alert("Profil fotoğrafı güncellendi.");
-      }catch(e){
-        console.error("Avatar yükleme hatası:", e);
-        alert("Profil fotoğrafı güncellenemedi.");
-      }
-    });
-
-    // Şifre değiştirme
-    window.addEventListener("change-pass-submit", async (ev)=>{
-      const { old, n1, n2 } = ev.detail||{};
-      try{
-        if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
-        if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
-
-        const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
-        if (!hasPasswordProvider) {
-          await sendPasswordResetEmail(auth, user.email);
-          alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik.");
-          return;
-        }
-        if (!old) throw new Error("Mevcut şifreni gir.");
-        const cred = EmailAuthProvider.credential(user.email, old);
-        await reauthenticateWithCredential(user, cred);
-        await updatePassword(user, n1);
-        alert("Şifren güncellendi.");
-        ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
-      }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
-    });
-  }
-
-  // 7) Bu profilin ilanlarını yükle
-  await loadListings(targetUid);
-});
-
 /* ==== İlanları getir & çiz (uid + ownerId) ==== */
 async function loadListings(uid){
   const { liveEl, pendEl, expEl } = refs();
   if (!(liveEl && pendEl && expEl)) return;
 
+  // temizle
+  liveEl.innerHTML = ""; pendEl.innerHTML = ""; expEl.innerHTML = "";
+
   const colRef = collection(db, "listings");
 
-  // ownerId alanı
+  // ownerId / uid — her iki alanı da destekle
   const qLive_owner    = query(colRef, where("ownerId","==",uid), where("status","==","live"));
   const qPending_owner = query(colRef, where("ownerId","==",uid), where("status","==","pending"));
   const qExpired_owner = query(colRef, where("ownerId","==",uid), where("status","==","expired"));
 
-  // uid alanı (eski kayıtlar)
   const qLive_uid    = query(colRef, where("uid","==",uid), where("status","==","live"));
   const qPending_uid = query(colRef, where("uid","==",uid), where("status","==","pending"));
   const qExpired_uid = query(colRef, where("uid","==",uid), where("status","==","expired"));
 
   try{
-    const [
-      s1o, s2o, s3o,
-      s1u, s2u, s3u
-    ] = await Promise.all([
+    const [ s1o, s2o, s3o, s1u, s2u, s3u ] = await Promise.all([
       getDocs(qLive_owner), getDocs(qPending_owner), getDocs(qExpired_owner),
       getDocs(qLive_uid),   getDocs(qPending_uid),   getDocs(qExpired_uid)
     ]);
@@ -390,7 +300,6 @@ async function loadListings(uid){
     const pendingDocs = mergeSnaps(s2o, s2u);
     const expiredDocs = mergeSnaps(s3o, s3u);
 
-    // Doc → item (foto fallback)
     async function docsToItems(docs, status){
       return Promise.all(docs.map(async (docu)=>{
         const d = docu.data()||{};
@@ -423,3 +332,133 @@ async function loadListings(uid){
     console.error("[profile] listings yüklenemedi:", e);
   }
 }
+
+/* ==== Auth + Profil doldurma + DM butonu ==== */
+onAuthStateChanged(auth, async (user)=>{
+  if (!user) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    location.href = "/auth.html?next=" + next;
+    return;
+  }
+
+  // Gösterilecek hesap: URL’de uid varsa onu, yoksa kendi hesabını
+  const targetUid = (viewedUid && viewedUid !== user.uid) ? viewedUid : user.uid;
+  const isSelf    = (targetUid === user.uid);
+  window.__canManage = isSelf;
+
+  // Kendi profili ise auth bilgisini doldur
+  if (isSelf) {
+    const displayName = user.displayName || (user.providerData?.[0]?.displayName) || "";
+    const parts = displayName.trim().split(/\s+/);
+    const first = parts.length ? (parts.slice(0, -1).join(" ") || parts[0]) : "";
+    const last  = parts.length > 1 ? parts.at(-1) : "";
+
+    fill(elFirst, first);
+    fill(elLast,  last);
+    fill(elMail,  user.email || user.providerData?.[0]?.email || "");
+    if (user.photoURL) setSrc(avatarImg, user.photoURL);
+  } else {
+    // Başkasının profili: düzenleme alanlarını gizle
+    hide(btnChangeAvatar);
+    hide(avatarFile);
+
+    const ipOld = $("oldPassword"), ipN1 = $("newPassword"), ipN2 = $("newPassword2"), btnCP = $("btnChangePass");
+    [ipOld, ipN1, ipN2, btnCP].forEach(hide);
+    // varsa önceki label'ları da gizle
+    [ipOld, ipN1, ipN2].forEach(el=>{
+      if (el?.previousElementSibling?.tagName === "LABEL") hide(el.previousElementSibling);
+    });
+
+    // E-posta özel olabilir: gösterme (istersen yorum satırını kaldır)
+    // hide(elMail);
+  }
+
+  // users/{targetUid} oku ve alanları doldur
+  try{
+    const snap = await getDoc(doc(db, "users", targetUid));
+    if (snap.exists()) {
+      const d = snap.data()||{};
+      if (d.city) fill(elCity, d.city);
+      if (isSelf) {
+        if (!elFirst.value && d.firstName) fill(elFirst, d.firstName);
+        if (!elLast.value  && d.lastName)  fill(elLast,  d.lastName);
+        if (!avatarImg.src && d.photoURL)  setSrc(avatarImg, d.photoURL);
+      } else {
+        fill(elFirst, d.firstName || "");
+        fill(elLast,  d.lastName  || "");
+        if (d.photoURL) setSrc(avatarImg, d.photoURL);
+      }
+
+      const nameUnder = $("nameUnder");
+      const dn = (d.firstName && d.lastName) ? `${d.firstName} ${d.lastName}` : (isSelf ? (user.displayName||"—") : "—");
+      if (nameUnder) nameUnder.textContent = dn || "—";
+    }
+  }catch(e){ console.warn("[profile] users doc okunamadı:", e); }
+
+  // DM butonu: başkasına bakıyorsan göster ve sohbet aç
+  if (!isSelf && btnDM) {
+    btnDM.style.display = "inline-block";
+    btnDM.onclick = async ()=>{
+      try{
+        const chatId = [auth.currentUser.uid, targetUid].sort().join("_");
+        await setDoc(
+          doc(db, "chats", chatId),
+          {
+            participants: [auth.currentUser.uid, targetUid],
+            createdAt: serverTimestamp(),
+            lastMsgAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+        location.href = `/messages.html?chat=${encodeURIComponent(chatId)}`;
+      }catch(e){
+        console.error(e);
+        alert("Mesaj başlatılamadı: " + (e?.message||e));
+      }
+    };
+  } else if (btnDM) {
+    btnDM.style.display = "none";
+  }
+
+  // İlanları yükle
+  await loadListings(targetUid);
+
+  // Avatar değişimi sadece self için
+  if (isSelf) {
+    btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
+    avatarFile?.addEventListener("change", async ()=>{
+      try{
+        const f = avatarFile.files?.[0]; if (!f) return;
+        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+        const r = sref(st, path);
+        await uploadBytes(r, f);
+        const url = await getDownloadURL(r);
+        await updateProfile(user, { photoURL: url });
+        await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
+        setSrc(avatarImg, url);
+        alert("Profil fotoğrafı güncellendi.");
+      }catch(e){
+        console.error("Avatar yükleme hatası:", e);
+        alert("Profil fotoğrafı güncellenemedi.");
+      }
+    });
+
+    // Şifre değiştirme (sadece self)
+    window.addEventListener("change-pass-submit", async (ev)=>{
+      const { old, n1, n2 } = ev.detail||{};
+      try{
+        if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
+        if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
+        const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
+        if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
+        if (!old) throw new Error("Mevcut şifreni gir.");
+        const cred = EmailAuthProvider.credential(user.email, old);
+        await reauthenticateWithCredential(user, cred);
+        await updatePassword(user, n1);
+        alert("Şifren güncellendi.");
+        ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
+      }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
+    });
+  }
+});
