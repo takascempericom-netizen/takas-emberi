@@ -16,6 +16,7 @@
     .btn{appearance:none;border:1px solid var(--brd);background:var(--glass);color:#111827;font-weight:600;padding:8px 12px;border-radius:12px;cursor:pointer}
     .btn:hover{background:#fff}
     .btn.sm{padding:6px 10px;border-radius:10px;font-size:12px}
+    .btn.danger{border-color:#fca5a5;color:#991b1b}
     .wrap{max-width:1100px;margin:16px auto 120px;padding:0 16px}
     .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
     .list{padding:12px;display:grid;gap:8px}
@@ -77,9 +78,8 @@
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      collection, query, orderBy, onSnapshot,
-      doc, updateDoc, getDocs, where,
-      setDoc, getDoc, serverTimestamp
+      collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where,
+      setDoc, serverTimestamp, deleteDoc   // <-- deleteDoc eklendi
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const elList   = document.getElementById('list');
@@ -87,7 +87,7 @@
     const btnAll   = document.getElementById('btnMarkAll');
     const ding     = document.getElementById('ding');
 
-    // --- Ses: dosya çalmazsa WebAudio beep ---
+    // --- Beep fallback (WebAudio) ---
     function beep(duration=160, freq=880){
       try{
         const Actx = window.AudioContext || window.webkitAudioContext;
@@ -102,15 +102,16 @@
         setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.04); o.stop(); ac.close(); }, duration);
       }catch{}
     }
-    async function playDing(){ try{ ding.currentTime = 0; await ding.play(); }catch{ beep(); } }
+    async function playDing(){
+      try{ ding.currentTime = 0; await ding.play(); }catch{ beep(); }
+    }
 
-    // Alt bar linklerini düzelt
+    // Alt bar linklerini .html ile sabitle
     document.getElementById('navHome')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/"; });
     document.getElementById('navMsgs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/messages.html"; });
     document.getElementById('navNotifs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/notifications.html"; });
     document.getElementById('navProfile')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/profile/profile.html"; });
 
-    // Tarih format
     const fmt = (ts)=>{
       try{
         const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
@@ -142,7 +143,7 @@
           const div = document.createElement("div");
           div.className = "item" + (data.read ? "" : " unread");
 
-          // İçerik: Okundu, Git, Profil, Mesaj yaz
+          // Kart içeriği: Okundu, Git, Profil, Mesaj yaz, Sil
           div.innerHTML = `
             <div class="meta">
               <div class="row" style="display:flex;gap:8px;align-items:center">
@@ -155,17 +156,22 @@
             <div class="actions">
               ${data.read ? "" : `<button class="btn sm" data-act="read">Okundu</button>`}
               ${data.link ? `<a class="btn sm" href="${data.link}">Git</a>` : ""}
+
               ${data.fromUid && data.fromUid !== user.uid
                 ? `<a class="btn sm" href="/profile/profile.html?uid=${encodeURIComponent(data.fromUid)}">Profil</a>
                    <button class="btn sm" data-act="chat" data-peer="${data.fromUid}">Mesaj yaz</button>`
                 : ""}
+
+              <button class="btn sm danger" data-act="del">Sil</button>
             </div>
           `;
 
-          // Tıklamalar
+          // Butonlar
           div.addEventListener("click", async (ev)=>{
             const readBtn = ev.target.closest("button[data-act='read']");
             const chatBtn = ev.target.closest("button[data-act='chat']");
+            const delBtn  = ev.target.closest("button[data-act='del']");
+
             if (readBtn) {
               await updateDoc(doc(db,"users",user.uid,"inbox",d.id),{read:true});
               div.classList.remove("unread");
@@ -174,15 +180,23 @@
             if (chatBtn) {
               const peerUid = chatBtn.dataset.peer;
               if (!peerUid || peerUid === user.uid) return;
-              await openDirectChat(user.uid, peerUid);
+              await openDirectChat(user.uid, peerUid); // izin hatası fix (read yapmadan create)
+              return;
+            }
+            if (delBtn) {
+              if (!confirm("Bu bildirimi silmek istiyor musun?")) return;
+              await deleteDoc(doc(db,"users",user.uid,"inbox",d.id));
+              div.remove();
               return;
             }
           });
 
           elList.appendChild(div);
 
-          // Yeni ve okunmamışsa ses
-          if(!firstLoad && !data.read && !known.has(d.id)){ playDing(); }
+          // Yeni düşen ve okunmamışsa ses
+          if(!firstLoad && !data.read && !known.has(d.id)){
+            playDing();
+          }
           known.add(d.id);
         });
 
@@ -200,21 +214,21 @@
       });
     });
 
-    // DM sohbet aç / oluştur
+    // DM sohbet aç / oluştur — getDoc YOK → direkt setDoc(merge)
     async function openDirectChat(myUid, peerUid){
       try{
         const pair = [myUid, peerUid].sort();
         const chatId = `dm_${pair[0]}_${pair[1]}`;
-        const chatRef = doc(db, "chats", chatId);
-        const snap = await getDoc(chatRef);
-        if (!snap.exists()) {
-          await setDoc(chatRef, {
+        await setDoc(
+          doc(db, "chats", chatId),
+          {
             participants: pair,
             type: "dm",
             createdAt: serverTimestamp(),
             lastMsgAt: serverTimestamp()
-          });
-        }
+          },
+          { merge: true }
+        );
         location.href = `/messages.html?chatId=${encodeURIComponent(chatId)}&peer=${encodeURIComponent(peerUid)}`;
       }catch(e){
         console.error("Sohbet açılamadı:", e);
