@@ -126,16 +126,17 @@
     .ads-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
     @media (min-width:900px){.ads-grid{grid-template-columns:repeat(4,1fr)}}
     .ad-card{
-      border:1px solid var(--line);
-      border-radius:16px;
-      overflow:hidden;
-      background:#fff;
-      color:#111827;
-      text-decoration:none;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
-      transition:transform .15s ease;
-      .ad-card{ cursor:pointer; }
-    }
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  background:#fff;
+  color:#111827;
+  text-decoration:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  transition:transform .15s ease;
+  cursor:pointer;
+}
+
     .ad-card:hover{transform:translateY(-2px)}
     .ad-media{position:relative;width:100%;background:#f1f5f9;border-bottom:1px solid var(--line)}
     .ad-media::before{content:"";display:block;padding-top:100%} /* kare alan */
@@ -170,6 +171,13 @@
 }
 .ad-actions .btn-view{background:#111827;color:#fff;border-color:#000}
 .ad-actions .btn-offer{background:#fff}
+    
+    .badge{
+  position:absolute; top:-6px; right:-10px;
+  min-width:18px; height:18px; padding:0 6px;
+  border-radius:999px; background:#ef4444; color:#fff;
+  font-size:11px; display:none; place-items:center;
+}
 
 html,body{overflow-x:hidden}
     /* Mobil header düzeltmeleri — BUNU en sona ekle */
@@ -239,20 +247,33 @@ html,body{overflow-x:hidden}
   </section>
 
   <!-- Alt Bar -->
-  <nav class="bottom-nav" aria-label="Alt menü">
-    <button class="tab active" id="tabHome" aria-current="page" aria-label="Ana Sayfa">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
-      <span style="font-size:12px">Ana Sayfa</span>
-    </button>
-    <button class="tab" id="tabMessages" aria-label="Mesajlar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H7l-4 3 1.5-5.5A8.5 8.5 0 1 1 21 12z"/></svg>
-      <span style="font-size:12px">Mesajlar</span>
-    </button>
-    <button class="tab" id="tabNotifs" aria-label="Bildirimler">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9H3c0-4 3-2 3-9"/><path d="M9 21h6"/></svg>
-      <span style="font-size:12px">Bildirimler</span>
-    </button>
-  </nav>
+<nav class="bottom-nav" aria-label="Alt menü">
+  <button class="tab active" id="tabHome" aria-current="page" aria-label="Ana Sayfa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5"/>
+      <path d="M5 10v10h5v-6h4v6h5V10"/>
+    </svg>
+    <span style="font-size:12px">Ana Sayfa</span>
+  </button>
+
+  <button class="tab" id="tabMessages" aria-label="Mesajlar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H7l-4 3 1.5-5.5A8.5 8.5 0 1 1 21 12z"/>
+    </svg>
+    <span style="font-size:12px">Mesajlar</span>
+  </button>
+
+  <button class="tab" id="tabNotifs" aria-label="Bildirimler">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9H3c0-4 3-2 3-9"/>
+      <path d="M9 21h6"/>
+    </svg>
+    <span style="font-size:12px; position:relative">
+      Bildirimler
+      <b id="notifBadge" class="badge" aria-live="polite">0</b>
+    </span>
+  </button>
+</nav>
 
   <!-- Canlı Destek FAB + Popover -->
   <button class="support-fab" id="btnSupport" aria-label="Canlı Destek">
@@ -366,6 +387,9 @@ onAuthStateChanged(auth, async (user) => {
 });
   // === Teklif akışı + bildirim + bip ===
 
+// === Bildirim & bip yardımcıları (TEK BLOK) ===
+let notifCount = 0;
+
 // Basit bip sesi
 function beep(duration=160, freq=880){
   try{
@@ -377,9 +401,64 @@ function beep(duration=160, freq=880){
     g.gain.setValueAtTime(0.001, actx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.2, actx.currentTime + 0.01);
     o.start();
-    setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.04); o.stop(); actx.close(); }, duration);
+    setTimeout(()=>{
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.04);
+      o.stop(); actx.close();
+    }, duration);
   }catch{}
 }
+
+// Bildirim rozeti güncelle
+function updateNotifBadge(n){
+  const b = document.getElementById('notifBadge');
+  if(!b) return;
+  if(n>0){ b.style.display = 'inline-grid'; b.textContent = String(n); }
+  else   { b.style.display = 'none'; }
+}
+
+// Bana gelen teklifleri dinle (ilan sahibi isem)
+let _offerUnsubs = [];
+async function watchOffersForMe(uid){
+  // eski dinleyicileri kapat
+  _offerUnsubs.forEach(u=>{ try{u()}catch{} });
+  _offerUnsubs = [];
+
+  // rozet sıfırla
+  notifCount = 0;
+  updateNotifBadge(0);
+
+  const { collection, onSnapshot } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+  const myListings = await findMyListings(uid);
+  myListings.forEach(m=>{
+    const offRef = collection(db, 'listings', m.id, 'offers');
+    const unsub = onSnapshot(offRef, (snap)=>{
+      snap.docChanges().forEach(ch=>{
+        const d = ch.doc.data();
+        if(ch.type==='added' && d?.toUid === uid){
+          // yeni teklif → sayaç + rozet + bip + küçük toast
+          notifCount++;
+          updateNotifBadge(notifCount);
+          if(document.visibilityState !== 'hidden') beep();
+
+          const note = document.createElement('div');
+          note.style.cssText = "position:fixed;right:16px;bottom:90px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:1000";
+          note.textContent = `Yeni teklif! Gönderen: ${(d.fromUid||'').slice(0,6)}`;
+          document.body.appendChild(note);
+          setTimeout(()=>note.remove(), 2500);
+        }
+      });
+    }, (e)=>console.warn('offer watch err', e));
+    _offerUnsubs.push(unsub);
+  });
+}
+
+// 'Bildirimler' sekmesine basınca rozeti sıfırla (opsiyonel)
+document.getElementById('tabNotifs')?.addEventListener('click', ()=>{
+  notifCount = 0;
+  updateNotifBadge(0);
+});
 
 // Kullanıcının en az 1 ilanı var mı?
 async function findMyListings(uid){
@@ -471,6 +550,7 @@ adsGridEl?.addEventListener('click', (ev)=>{
 // Bana gelen teklifleri dinle (ilan sahibi isem)
 let _offerUnsubs = [];
 async function watchOffersForMe(uid){
+  
   // eski dinleyicileri kapat
   _offerUnsubs.forEach(u=>{ try{u()}catch{} });
   _offerUnsubs = [];
