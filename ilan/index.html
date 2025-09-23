@@ -4,25 +4,53 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>İlan Detayı</title>
+  <title>İlan • Takas Çemberi</title>
   <meta name="color-scheme" content="light dark" />
   <style>
     :root{
-      --line:#eee; --ink:#0f172a; --muted:#64748b;
-      --paper:#fff; --paper2:#f8fafc; --brand:#111827;
+      --bg:#ffc0cb; --bg2:#ffd6e7;
+      --paper:#ffffff; --paper2:#fff5f8; --ink:#1b1b1f; --muted:#5f5f68; --line:#ffd0dc;
+      --brandA:#6a5cff; --brandB:#00d4ff; --focus:#0ea5e9;
+      --btn:#111827; --btnInk:#fff;
+      --black:#0b0b0f; --black-ink:#e8e8f0; --black-line:#1e1e27;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#ffd6e7,#fff);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink)}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
     a,button{font:inherit}
 
-    .wrap{max-width:960px;margin:16px auto;padding:0 16px}
-    .top{display:flex;align-items:center;gap:10px;margin:8px 0 16px}
-    .back{border:1px solid var(--line);background:var(--paper2);padding:8px 12px;border-radius:10px;text-decoration:none;color:var(--ink)}
-    .h1{margin:0 0 6px;font-size:24px;font-weight:900}
-    .meta{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;color:var(--muted);font-size:14px}
+    /* Topbar */
+    .topbar{
+      position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;
+      padding:0 12px 0 16px;
+      background:linear-gradient(90deg,var(--brandA),var(--brandB)); background-size:200% 200%; animation:barShift 8s ease-in-out infinite;
+      border-bottom:1px solid rgba(0,0,0,.06); box-shadow:0 2px 12px rgba(10,20,60,.25)
+    }
+    @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+    .brand img{height:44px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+    .brand strong{letter-spacing:.2px}
+    .grow{flex:1}
+    .btn{border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.18);color:#fff;border-radius:12px;padding:8px 14px;cursor:pointer}
+    .btn.primary{background:var(--btn);border-color:#000;color:var(--btnInk)}
+    .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
 
-    /* Kare kapak görseli */
-    .media{position:relative;width:100%;background:#f1f5f9;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    /* Page layout */
+    .wrap{max-width:1100px;margin:18px auto;padding:0 16px}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 8px 28px rgba(170, 26, 80, .22)}
+    .detail{display:grid;gap:16px;grid-template-columns:1fr}
+    @media (min-width:900px){ .detail{grid-template-columns:1.1fr .9fr} }
+
+    .back{display:inline-block;margin:10px 0 12px;color:#0f172a;text-decoration:none;font-weight:800}
+    .back:hover{opacity:.8}
+
+    /* Media (square, covers) */
+    .media{position:relative;width:100%;background:#f1f5f9;border:1px solid var(--line);border-radius:14px;overflow:hidden}
     .media::before{content:"";display:block;padding-top:100%} /* kare alan */
     .media img{
       position:absolute; inset:0;
@@ -30,108 +58,248 @@
       object-fit:cover; object-position:center;
       display:block; image-orientation:from-image;
     }
+    .thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .thumb{width:70px;aspect-ratio:1/1;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f1f5f9;cursor:pointer}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 
-    .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+    /* Info */
+    .title{margin:0 0 6px;font-size:26px;font-weight:900}
+    .meta{color:#64748b;font-size:14px;margin-bottom:10px}
     .desc{white-space:pre-wrap;line-height:1.5}
 
-    .actions{display:flex;gap:10px;margin-top:12px}
-    .btn{appearance:none;border:1px solid var(--line);background:var(--paper2);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;text-decoration:none;text-align:center}
-    .btn.primary{background:var(--brand);color:#fff;border-color:#000}
+    /* Actions */
+    .detail-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .detail-actions button{
+      flex:1; min-width:140px;
+      padding:10px 12px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;
+      border-radius:12px;cursor:pointer;font-weight:800
+    }
+    #btnOffer{background:#111827;color:#fff;border-color:#000}
+    #btnOffer:disabled{opacity:.6;cursor:not-allowed}
+    #btnSeller{background:#fff}
 
-    .err{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:12px;border-radius:10px}
-    #loading{color:var(--muted)}
+    .muted{color:#94a3b8}
+    .error{color:#ef4444}
+
+    /* mobile tweaks */
+    html,body{overflow-x:hidden}
+    @media (max-width: 480px){
+      .brand strong{ display:none; }
+      .brand img{ height:36px; }
+      .topbar{ gap:8px; padding-right:8px; }
+      .btn{ padding:6px 10px; font-size:12px; }
+    }
+    @media (max-width: 380px){
+      #btnSearch{ display:none; }
+    }
   </style>
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
 <body>
+  <!-- Üst Bar -->
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/img/seffaf.png" alt="Takas Çemberi logo" />
+      <strong>Takas Çemberi</strong>
+    </a>
+    <div class="grow"></div>
+    <button id="btnSearch" class="btn" aria-label="Ara">Ara</button>
+    <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
+    <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
+    <button id="btnLogout" class="btn" aria-label="Çıkış">Çıkış</button>
+  </header>
+
   <main class="wrap">
-    <div class="top">
-      <a class="back" href="/">← Ana sayfa</a>
-      <div id="loading">Yükleniyor…</div>
-    </div>
+    <a class="back" href="/">← Ana sayfa</a>
 
-    <article id="ad" hidden>
-      <div class="media"><img id="photo" alt=""></div>
-
-      <div class="card">
-        <h1 class="h1" id="title">İlan</h1>
-        <div class="meta">
-          <span id="city"></span> • <span id="cond"></span>
+    <section class="panel detail" id="detailPanel" aria-live="polite">
+      <!-- Sol: görseller -->
+      <div>
+        <div class="media" id="media">
+          <!-- kare büyük görsel -->
+          <img id="heroImg" src="/assets/img/seffaf.png" alt="İlan görseli" loading="lazy" decoding="async">
         </div>
-        <div class="actions">
-          <a id="btnOwner" class="btn" href="#">Sahibi profili</a>
-          <!-- Teklif ver butonunu sonraki adımda aktif edeceğiz -->
-          <button id="btnOffer" class="btn primary" type="button" disabled title="Sonraki adımda açılacak">Teklif ver</button>
-        </div>
+        <div class="thumbs" id="thumbs" aria-label="Diğer görseller"></div>
       </div>
 
-      <div class="card">
-        <h2 style="margin:0 0 8px;font-size:18px">Açıklama</h2>
-        <p class="desc" id="desc">—</p>
-      </div>
-    </article>
+      <!-- Sağ: bilgi -->
+      <div>
+        <h1 class="title" id="title">Yükleniyor…</h1>
+        <div class="meta" id="meta"><span class="muted">Lütfen bekleyin</span></div>
+        <p class="desc" id="desc"></p>
 
-    <div id="error" class="err" hidden>İlan yüklenemedi.</div>
+        <div class="detail-actions">
+          <button id="btnOffer" disabled title="İlan yükleniyor">Teklif ver</button>
+          <button id="btnSeller" disabled title="İlan yükleniyor">Satıcı profili</button>
+        </div>
+
+        <p id="error" class="error" style="display:none"></p>
+      </div>
+    </section>
   </main>
 
   <!-- Firebase -->
-  <script type="module" src="../assets/js/firebase-init.js"></script>
+  <script type="module" src="/assets/js/firebase-init.js"></script>
   <script type="module">
     const { db, auth, requireAuth } = window.__fb;
-    requireAuth();
+    requireAuth(); // bu sayfa sadece girişli kullanıcı
 
-    import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const qs = new URLSearchParams(location.search);
-    const id = qs.get("id");
-
-    const elLoad = document.getElementById("loading");
-    const elErr  = document.getElementById("error");
-    const elAd   = document.getElementById("ad");
-
-    function showError(msg){
-      elLoad.hidden = true;
-      elErr.hidden = false;
-      elErr.textContent = msg || "İlan bulunamadı.";
+    // === Yardımcılar: teklif akışı ===
+    async function findMyListings(uid){
+      const { collection, query, where, limit, getDocs } =
+        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const mine = [];
+      let q1 = query(collection(db,'listings'), where('ownerId','==', uid), limit(20));
+      let s1 = await getDocs(q1); s1.forEach(d=>mine.push({id:d.id, ...d.data()}));
+      if(mine.length===0){
+        let q2 = query(collection(db,'listings'), where('uid','==', uid), limit(20));
+        let s2 = await getDocs(q2); s2.forEach(d=>mine.push({id:d.id, ...d.data()}));
+      }
+      return mine;
     }
 
-    if(!id){
-      showError("Geçersiz bağlantı (id yok).");
-    }else{
-      try{
-        await auth.currentUser?.getIdToken(true); // token tazele
-        const snap = await getDoc(doc(db, "listings", id));
-        if(!snap.exists()){
-          showError("İlan bulunamadı.");
-        }else{
-          const d = snap.data() || {};
-          // kapak
-          const cover = (d.photos && d.photos[0]) || "/assets/img/seffaf.png";
-          const img = document.getElementById("photo");
-          img.src = cover; img.alt = d.title || "İlan";
+    async function openOfferFlow(targetListingId, targetOwnerUid){
+      const user = auth.currentUser;
+      if(!user){ alert("Teklif vermek için giriş yapın."); return; }
 
-          // başlık+meta+açıklama
-          document.getElementById("title").textContent = d.title || "İlan";
-          document.getElementById("city").textContent  = d.city  || "";
-          document.getElementById("cond").textContent  = d.cond  || "";
-          document.getElementById("desc").textContent  = d.description || "—";
-
-          // sahibi profili linki (şimdilik bu sayfaya yönlendiriyoruz)
-          const owner = d.ownerId || d.uid || "";
-          const ownerBtn = document.getElementById("btnOwner");
-          if(owner){
-            ownerBtn.href = `/profile/profile.html?uid=${encodeURIComponent(owner)}`;
-          }else{
-            ownerBtn.style.display = "none";
-          }
-
-          elLoad.hidden = true;
-          elAd.hidden = false;
+      const mine = await findMyListings(user.uid);
+      if(mine.length===0){
+        if(confirm("Teklif verebilmek için en az bir ilanınız olmalı. İlan ver sayfasına gidelim mi?")){
+          location.href = "/ilan/ilan-verme.html";
         }
+        return;
+      }
+
+      let pick = 0;
+      if(mine.length>1){
+        const list = mine.map((m,i)=>`${i+1}) ${m.title||m.id}`).join('\n');
+        const ans = prompt("Hangi ilanla teklif vermek istiyorsunuz?\n" + list + "\nNumara girin:", "1");
+        const idx = Math.max(1, Math.min(mine.length, parseInt(ans||"1",10))) - 1;
+        pick = isNaN(idx) ? 0 : idx;
+      }
+      const myListingId = mine[pick].id;
+      const msg = prompt("Mesaj (opsiyonel):", "") || "";
+
+      const { collection, addDoc, serverTimestamp } =
+        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+      const offer = {
+        fromUid: user.uid,
+        toUid:   targetOwnerUid,
+        fromListingId: myListingId,
+        createdAt: serverTimestamp(),
+        message: msg
+      };
+
+      try{
+        await addDoc(collection(db,'listings', targetListingId, 'offers'), offer);
+        alert("Teklif gönderildi ✅");
       }catch(e){
-        console.error("İlan getirilemedi:", e);
-        showError(e?.code === "permission-denied" ? "Bu ilanı görme izniniz yok." : "İlan yüklenemedi.");
+        console.error("Teklif gönderilemedi:", e);
+        alert("Teklif gönderilemedi: " + (e.code||"hata"));
       }
     }
+
+    // === UI referansları ===
+    const heroImg = document.getElementById('heroImg');
+    const thumbs  = document.getElementById('thumbs');
+    const titleEl = document.getElementById('title');
+    const metaEl  = document.getElementById('meta');
+    const descEl  = document.getElementById('desc');
+    const errEl   = document.getElementById('error');
+    const btnOffer = document.getElementById('btnOffer');
+    const btnSeller = document.getElementById('btnSeller');
+
+    // URL'den id al
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    if(!id){
+      titleEl.textContent = "İlan bulunamadı";
+      metaEl.innerHTML = '<span class="error">Geçersiz bağlantı.</span>';
+      btnOffer.disabled = true; btnSeller.disabled = true;
+      throw new Error("missing id");
+    }
+
+    // İlanı yükle
+    (async () => {
+      try{
+        // token taze olsun
+        await auth.currentUser?.getIdToken(true);
+
+        const snap = await getDoc(doc(db,'listings', id));
+        if(!snap.exists()){
+          titleEl.textContent = "İlan bulunamadı";
+          metaEl.innerHTML = '<span class="error">Silinmiş veya hiç oluşturulmamış olabilir.</span>';
+          btnOffer.disabled = true; btnSeller.disabled = true;
+          return;
+        }
+
+        const d = snap.data() || {};
+        const photos = Array.isArray(d.photos) && d.photos.length ? d.photos : ["/assets/img/seffaf.png"];
+        heroImg.src = photos[0];
+        heroImg.alt = d.title || "İlan görseli";
+
+        // küçük görseller
+        thumbs.innerHTML = "";
+        photos.slice(0,8).forEach((p,i)=>{
+          const t = document.createElement('button');
+          t.type = 'button';
+          t.className = 'thumb';
+          t.innerHTML = `<img src="${p}" alt="Görsel ${i+1}">`;
+          t.addEventListener('click', ()=>{ heroImg.src = p; });
+          thumbs.appendChild(t);
+        });
+
+        const city = d.city || "";
+        const cond = d.cond || "";
+        titleEl.textContent = d.title || "İlan";
+        document.title = (d.title || "İlan") + " • Takas Çemberi";
+        metaEl.textContent = [city, cond].filter(Boolean).join(" • ");
+        descEl.textContent = d.description || "";
+
+        // Teklif ve satıcı butonları
+        const ownerUid = d.ownerId || d.uid || "";
+        if(ownerUid){
+          btnSeller.disabled = false;
+          btnSeller.removeAttribute('title');
+          btnSeller.addEventListener('click', ()=>{
+            location.href = `/profile/profile.html?uid=${encodeURIComponent(ownerUid)}`;
+          });
+        }
+
+        if(ownerUid && auth.currentUser?.uid !== ownerUid){
+          btnOffer.disabled = false;
+          btnOffer.removeAttribute('title');
+          btnOffer.addEventListener('click', ()=> openOfferFlow(id, ownerUid));
+        }else{
+          btnOffer.disabled = true;
+          if(auth.currentUser?.uid === ownerUid){
+            btnOffer.textContent = "Kendi ilanınız";
+            btnOffer.title = "Kendi ilanınıza teklif veremezsiniz";
+          }
+        }
+
+      }catch(e){
+        console.error("Detay yükleme hatası:", e);
+        errEl.style.display = 'block';
+        errEl.textContent = "İlan yüklenemedi: " + (e.code || e.message || "hata");
+        btnOffer.disabled = true; btnSeller.disabled = true;
+      }
+    })();
+
+    // Üst bar butonları
+    const $ = (s,r=document)=>r.querySelector(s);
+    $('#btnLogout')?.addEventListener('click', async ()=>{
+      const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+      try{ await signOut(auth);}catch{}
+      location.href="/";
+    });
+    $('#btnProfile')?.addEventListener('click', ()=>location.href="/profile/profile.html");
+    $('#btnPostAd')?.addEventListener('click', ()=>location.href="/ilan/ilan-verme.html");
+    $('#btnSearch')?.addEventListener('click', ()=>location.href="/ara");
   </script>
 </body>
 </html>
