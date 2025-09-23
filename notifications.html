@@ -42,7 +42,6 @@
       <h1 class="ttl">Bildirimler</h1>
       <div class="row">
         <button class="btn sm" id="btnMarkAll">Tümünü okundu işaretle</button>
-        <button class="btn sm" id="btnSound">🔔 Ses testi</button>
       </div>
     </div>
   </header>
@@ -82,7 +81,6 @@
     const elList   = document.getElementById('list');
     const elStatus = document.getElementById('status');
     const btnAll   = document.getElementById('btnMarkAll');
-    const btnSound = document.getElementById('btnSound');
     const ding     = document.getElementById('ding');
 
     // --- Beep fallback (WebAudio) ---
@@ -100,15 +98,8 @@
         setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.04); o.stop(); ac.close(); }, duration);
       }catch{}
     }
-
-    // --- Güvenli çal (dosya → olmazsa beep) ---
     async function playDing(){
-      try{
-        ding.currentTime = 0;
-        await ding.play();
-      }catch{
-        beep(); // fallback
-      }
+      try{ ding.currentTime = 0; await ding.play(); }catch{ beep(); }
     }
 
     // Alt bar linklerini .html ile sabitle
@@ -147,6 +138,8 @@
           const data = d.data()||{};
           const div = document.createElement("div");
           div.className = "item" + (data.read ? "" : " unread");
+
+          // Kart içeriği: Okundu, Git, Profil, Mesaj yaz
           div.innerHTML = `
             <div class="meta">
               <div class="row" style="display:flex;gap:8px;align-items:center">
@@ -159,13 +152,31 @@
             <div class="actions">
               ${data.read ? "" : `<button class="btn sm" data-act="read">Okundu</button>`}
               ${data.link ? `<a class="btn sm" href="${data.link}">Git</a>` : ""}
+
+              ${data.fromUid && data.fromUid !== user.uid
+                ? `<a class="btn sm" href="/profile/profile.html?uid=${encodeURIComponent(data.fromUid)}">Profil</a>
+                   <button class="btn sm" data-act="chat" data-peer="${data.fromUid}">Mesaj yaz</button>`
+                : ""}
             </div>
           `;
+
+          // Butonlar
           div.addEventListener("click", async (ev)=>{
-            const b = ev.target.closest("button[data-act='read']");
-            if(!b) return;
-            await updateDoc(doc(db,"users",user.uid,"inbox",d.id),{read:true});
+            const readBtn = ev.target.closest("button[data-act='read']");
+            const chatBtn = ev.target.closest("button[data-act='chat']");
+            if (readBtn) {
+              await updateDoc(doc(db,"users",user.uid,"inbox",d.id),{read:true});
+              div.classList.remove("unread");
+              return;
+            }
+            if (chatBtn) {
+              const peerUid = chatBtn.dataset.peer;
+              if (!peerUid || peerUid === user.uid) return;
+              await openDirectChat(user.uid, peerUid);
+              return;
+            }
           });
+
           elList.appendChild(div);
 
           // Yeni düşen ve okunmamışsa ses
@@ -185,11 +196,33 @@
         const unreadQ = query(inboxRef, where("read","==",false));
         const ss = await getDocs(unreadQ);
         await Promise.all(ss.docs.map(x=> updateDoc(doc(db,"users",user.uid,"inbox",x.id),{read:true}) ));
+        // UI anında güncellensin
+        document.querySelectorAll('.item.unread').forEach(el=>el.classList.remove('unread'));
       });
     });
 
-    // Ses testi
-    btnSound?.addEventListener("click", ()=>{ playDing(); });
+    // DM sohbet aç / oluştur
+    async function openDirectChat(myUid, peerUid){
+      try{
+        const pair = [myUid, peerUid].sort();
+        const chatId = `dm_${pair[0]}_${pair[1]}`;
+        const chatRef = doc(db, "chats", chatId);
+        const snap = await getDoc(chatRef);
+
+        if (!snap.exists()) {
+          await setDoc(chatRef, {
+            participants: pair,
+            type: "dm",
+            createdAt: serverTimestamp(),
+            lastMsgAt: serverTimestamp()
+          });
+        }
+        location.href = `/messages.html?chatId=${encodeURIComponent(chatId)}&peer=${encodeURIComponent(peerUid)}`;
+      }catch(e){
+        console.error("Sohbet açılamadı:", e);
+        alert("Sohbet açılamadı.");
+      }
+    }
   </script>
 </body>
 </html>
