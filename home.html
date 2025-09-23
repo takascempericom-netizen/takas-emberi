@@ -416,44 +416,6 @@ function updateNotifBadge(n){
   else   { b.style.display = 'none'; }
 }
 
-// Bana gelen teklifleri dinle (ilan sahibi isem)
-let _offerUnsubs = [];
-async function watchOffersForMe(uid){
-  // eski dinleyicileri kapat
-  _offerUnsubs.forEach(u=>{ try{u()}catch{} });
-  _offerUnsubs = [];
-
-  // rozet sıfırla
-  notifCount = 0;
-  updateNotifBadge(0);
-
-  const { collection, onSnapshot } =
-    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-
-  const myListings = await findMyListings(uid);
-  myListings.forEach(m=>{
-    const offRef = collection(db, 'listings', m.id, 'offers');
-    const unsub = onSnapshot(offRef, (snap)=>{
-      snap.docChanges().forEach(ch=>{
-        const d = ch.doc.data();
-        if(ch.type==='added' && d?.toUid === uid){
-          // yeni teklif → sayaç + rozet + bip + küçük toast
-          notifCount++;
-          updateNotifBadge(notifCount);
-          if(document.visibilityState !== 'hidden') beep();
-
-          const note = document.createElement('div');
-          note.style.cssText = "position:fixed;right:16px;bottom:90px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:1000";
-          note.textContent = `Yeni teklif! Gönderen: ${(d.fromUid||'').slice(0,6)}`;
-          document.body.appendChild(note);
-          setTimeout(()=>note.remove(), 2500);
-        }
-      });
-    }, (e)=>console.warn('offer watch err', e));
-    _offerUnsubs.push(unsub);
-  });
-}
-
 // 'Bildirimler' sekmesine basınca rozeti sıfırla (opsiyonel)
 document.getElementById('tabNotifs')?.addEventListener('click', ()=>{
   notifCount = 0;
@@ -504,12 +466,13 @@ async function openOfferFlow(targetListingId, targetOwnerUid){
     await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
   const offer = {
-    fromUid: user.uid,
-    toUid:   targetOwnerUid,
-    fromListingId: myListingId,
-    createdAt: serverTimestamp(),
-    message: msg
-  };
+  fromUid: user.uid,
+  toUid:   targetOwnerUid,
+  fromListingId: myListingId,
+  createdAt: serverTimestamp(),
+  message: msg,
+  status: 'pending'
+};
 
   try{
     await addDoc(collection(db,'listings', targetListingId, 'offers'), offer);
