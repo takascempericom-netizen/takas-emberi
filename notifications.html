@@ -77,7 +77,7 @@
     requireAuth(); // giriş yoksa /auth.html
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const elList   = document.getElementById('list');
     const elStatus = document.getElementById('status');
