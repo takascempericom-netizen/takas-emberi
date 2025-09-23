@@ -247,70 +247,110 @@ async function renewListing(id){
   });
 });
 
-/* ==== Auth + Profil doldurma ==== */
+/* ==== Auth + Profil doldurma (URL'den ?uid al; başkasının profili için profiles_public oku) ==== */
 onAuthStateChanged(auth, async (user)=>{
-  if (!user) { location.href = "/auth.html?next=/profile/profile.html"; return; }
+  if (!user) {
+    const next = location.pathname + location.search;
+    location.href = "/auth.html?next=" + encodeURIComponent(next);
+    return;
+  }
 
-  const displayName = user.displayName || (user.providerData?.[0]?.displayName) || "";
-  const parts = displayName.trim().split(/\s+/);
-  const first = parts.length ? parts.slice(0, -1).join(" ") || parts[0] : "";
-  const last  = parts.length > 1 ? parts.at(-1) : "";
+  // 1) URL'den ?uid= al; yoksa kendi uid'in
+  const params = new URLSearchParams(location.search);
+  const uidFromUrl = params.get('uid');
+  const targetUid = uidFromUrl || user.uid;
+  const isMe = (targetUid === user.uid);
 
-  fill(elFirst, first); fill(elLast, last);
-  fill(elMail,  user.email || user.providerData?.[0]?.email || "");
-  if (user.photoURL) setSrc(avatarImg, user.photoURL);
-
+  // 2) Veriyi oku: kendinse /users, başkasıysa /profiles_public
+  let profileSnap = null;
   try{
-    const snap = await getDoc(doc(db, "users", user.uid));
-    if (snap.exists()) {
-      const d = snap.data()||{};
-      if (d.city) fill(elCity, d.city);
-      if (!first && d.firstName) fill(elFirst, d.firstName);
-      if (!last  && d.lastName)  fill(elLast,  d.lastName);
-      if (!user.photoURL && d.photoURL) setSrc(avatarImg, d.photoURL);
-      const nameUnder = $("nameUnder");
-      if (nameUnder) nameUnder.textContent = (d.firstName && d.lastName) ? `${d.firstName} ${d.lastName}` : (displayName || "—");
-    }
-  }catch(e){ console.warn("[profile] users doc okunamadı:", e); }
+    const ref = isMe ? doc(db, "users", targetUid) : doc(db, "profiles_public", targetUid);
+    profileSnap = await getDoc(ref);
+  }catch(e){
+    console.warn("[profile] profil okunamadı:", e);
+  }
+  const pdata = profileSnap?.exists() ? (profileSnap.data()||{}) : {};
 
-  await loadListings(user.uid);
+  // 3) İsim / e-posta / şehir alanlarını doldur
+  const displayNameAuth = user.displayName || user.providerData?.[0]?.displayName || "";
+  const parts = displayNameAuth.trim().split(/\s+/);
+  const fallbackFirst = parts.length ? (parts.slice(0, -1).join(" ") || parts[0]) : "";
+  const fallbackLast  = parts.length > 1 ? parts.at(-1) : "";
 
-  // Avatar değişimi
-  btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
-  avatarFile?.addEventListener("change", async ()=>{
-    try{
-      const f = avatarFile.files?.[0]; if (!f) return;
-      const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
-      const r = sref(st, path);
-      await uploadBytes(r, f);
-      const url = await getDownloadURL(r);
-      await updateProfile(user, { photoURL: url });
-      await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
-      setSrc(avatarImg, url);
-      alert("Profil fotoğrafı güncellendi.");
-    }catch(e){
-      console.error("Avatar yükleme hatası:", e);
-      alert("Profil fotoğrafı güncellenemedi.");
-    }
-  });
+  const first = pdata.firstName || (isMe ? fallbackFirst : "");
+  const last  = pdata.lastName  || (isMe ? fallbackLast  : "");
+  const email = isMe ? (user.email || user.providerData?.[0]?.email || "") : (pdata.emailPublic || "");
+  const city  = pdata.city || "";
 
-  // Şifre değiştirme
-  window.addEventListener("change-pass-submit", async (ev)=>{
-    const { old, n1, n2 } = ev.detail||{};
-    try{
-      if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
-      if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
-      const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
-      if (!hasPasswordProvider) { await sendPasswordResetEmail(auth, user.email); alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik."); return; }
-      if (!old) throw new Error("Mevcut şifreni gir.");
-      const cred = EmailAuthProvider.credential(user.email, old);
-      await reauthenticateWithCredential(user, cred);
-      await updatePassword(user, n1);
-      alert("Şifren güncellendi.");
-      ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
-    }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
-  });
+  fill(elFirst, first);
+  fill(elLast,  last);
+  fill(elMail,  email);
+  fill(elCity,  city);
+
+  // 4) Avatar
+  const photo = pdata.photoURL || (isMe ? user.photoURL : "");
+  if (photo) setSrc(avatarImg, photo);
+
+  const nameUnder = $("nameUnder");
+  if (nameUnder) {
+    nameUnder.textContent =
+      (first || last) ? `${first} ${last}`.trim() :
+      (pdata.displayName || displayNameAuth || "—");
+  }
+
+  // 5) Başkasının profilindeysek düzenleme alanlarını gizle
+  if (!isMe) {
+    ["btnChangeAvatar","avatarFile","oldPassword","newPassword","newPassword2","btnChangePass"]
+      .forEach(id => { const el = $(id); if (el) el.style.display = "none"; });
+  }
+
+  // 6) Kendi profilinde avatar & şifre event’leri
+  if (isMe) {
+    // Avatar değişimi
+    btnChangeAvatar?.addEventListener("click", ()=> avatarFile?.click());
+    avatarFile?.addEventListener("change", async ()=>{
+      try{
+        const f = avatarFile.files?.[0]; if (!f) return;
+        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `avatars/${user.uid}/${Date.now()}_${safe}`;
+        const r = sref(st, path);
+        await uploadBytes(r, f);
+        const url = await getDownloadURL(r);
+        await updateProfile(user, { photoURL: url });
+        await setDoc(doc(db,"users",user.uid), { photoURL: url, updatedAt: new Date() }, { merge:true });
+        setSrc(avatarImg, url);
+        alert("Profil fotoğrafı güncellendi.");
+      }catch(e){
+        console.error("Avatar yükleme hatası:", e);
+        alert("Profil fotoğrafı güncellenemedi.");
+      }
+    });
+
+    // Şifre değiştirme
+    window.addEventListener("change-pass-submit", async (ev)=>{
+      const { old, n1, n2 } = ev.detail||{};
+      try{
+        if (!n1 || n1.length < 6)  throw new Error("Yeni şifre en az 6 karakter olmalı.");
+        if (n1 !== n2)             throw new Error("Yeni şifreler eşleşmiyor.");
+
+        const hasPasswordProvider = (user.providerData||[]).some(p=> (p.providerId||"").includes("password"));
+        if (!hasPasswordProvider) {
+          await sendPasswordResetEmail(auth, user.email);
+          alert("Google ile giriş yapmışsın. Mailine şifre oluşturma bağlantısı gönderdik.");
+          return;
+        }
+        if (!old) throw new Error("Mevcut şifreni gir.");
+        const cred = EmailAuthProvider.credential(user.email, old);
+        await reauthenticateWithCredential(user, cred);
+        await updatePassword(user, n1);
+        alert("Şifren güncellendi.");
+        ["oldPassword","newPassword","newPassword2"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
+      }catch(e){ console.error("Şifre değiştirme hatası:", e); alert(e?.message || "Şifre güncellenemedi."); }
+    });
+  }
+
+  // 7) Bu profilin ilanlarını yükle
+  await loadListings(targetUid);
 });
 
 /* ==== İlanları getir & çiz (uid + ownerId) ==== */
