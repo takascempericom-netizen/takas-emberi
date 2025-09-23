@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>İlan Detayı</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;margin:0;background:#fafafa;color:#0f172a}
+    .wrap{max-width:960px;margin:0 auto;padding:16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .media{position:relative;background:#f1f5f9;border-bottom:1px solid #e5e7eb}
+    .media::before{content:"";display:block;padding-top:100%}
+    .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+    .body{padding:12px 14px}
+    h1{margin:6px 0 10px;font-size:18px}
+    .meta{color:#64748b;font-size:12px;display:flex;gap:8px}
+    .desc{margin-top:10px;line-height:1.5;font-size:14px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+    .btn{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+    .btn.primary{background:#111827;color:#fff;border-color:#000}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/" style="text-decoration:none;color:#111827">&larr; Ana sayfa</a>
+    <div id="view" class="card" style="margin-top:12px">
+      <div class="media"><img id="img" alt=""></div>
+      <div class="body">
+        <h1 id="title">Yükleniyor…</h1>
+        <div class="meta"><span id="city"></span><span id="cond"></span></div>
+        <div class="desc" id="desc"></div>
+        <div class="actions">
+          <button class="btn" id="backBtn">Geri</button>
+          <button class="btn primary" id="offerBtn">Teklif ver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase init (root’tan mutlak yol) -->
+  <script type="module" src="/assets/js/firebase-init.js"></script>
+  <script type="module">
+    import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, limit, getDocs } 
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const { auth, db } = window.__fb;
+
+    // URL'den id al
+    const id = new URLSearchParams(location.search).get("id");
+    if(!id){
+      document.getElementById('title').textContent = "Geçersiz bağlantı";
+      throw new Error("id yok");
+    }
+
+    // İlanı çek ve doldur
+    async function load(){
+      const snap = await getDoc(doc(db, "listings", id));
+      if(!snap.exists()){
+        document.getElementById('title').textContent = "İlan bulunamadı";
+        return;
+      }
+      const d = snap.data();
+      document.getElementById('img').src = d.photos?.[0] || "/assets/img/seffaf.png";
+      document.getElementById('img').alt = d.title || "İlan";
+      document.getElementById('title').textContent = d.title || "İlan";
+      document.getElementById('city').textContent  = d.city  || "";
+      document.getElementById('cond').textContent  = d.cond  || "";
+      document.getElementById('desc').textContent  = d.description || "";
+      document.getElementById('offerBtn').dataset.owner = d.ownerId || d.uid || "";
+    }
+
+    // Basit bip
+    function beep(duration=160, freq=880){
+      try{
+        const actx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = actx.createOscillator(); const g = actx.createGain();
+        o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+        g.gain.setValueAtTime(0.001, actx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.2, actx.currentTime+0.01);
+        o.start(); setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.04); o.stop(); actx.close(); }, duration);
+      }catch{}
+    }
+
+    // Kullanıcının en az 1 ilanı var mı?
+    async function findMyListings(uid){
+      const mine = [];
+      let q1 = query(collection(db,'listings'), where('ownerId','==', uid), limit(20));
+      let s1 = await getDocs(q1); s1.forEach(d=>mine.push({id:d.id, ...d.data()}));
+      if(mine.length===0){
+        let q2 = query(collection(db,'listings'), where('uid','==', uid), limit(20));
+        let s2 = await getDocs(q2); s2.forEach(d=>mine.push({id:d.id, ...d.data()}));
+      }
+      return mine;
+    }
+
+    // Teklif akışı
+    async function openOfferFlow(targetListingId, targetOwnerUid){
+      const user = auth.currentUser;
+      if(!user){ alert("Teklif vermek için giriş yapın."); return; }
+
+      const mine = await findMyListings(user.uid);
+      if(mine.length===0){
+        if(confirm("Teklif verebilmek için en az bir ilanınız olmalı. İlan ver sayfasına gidelim mi?")){
+          location.href = "/ilan/ilan-verme.html";
+        }
+        return;
+      }
+      let pick = 0;
+      if(mine.length>1){
+        const list = mine.map((m,i)=>`${i+1}) ${m.title||m.id}`).join('\n');
+        const ans = prompt("Hangi ilanla teklif vereceksiniz?\n" + list + "\nNumara:", "1");
+        const idx = Math.max(1, Math.min(mine.length, parseInt(ans||"1",10))) - 1;
+        pick = isNaN(idx) ? 0 : idx;
+      }
+      const myListingId = mine[pick].id;
+      const msg = prompt("Mesaj (opsiyonel):", "") || "";
+
+      try{
+        await addDoc(collection(db,'listings', targetListingId, 'offers'), {
+          fromUid: auth.currentUser.uid,
+          toUid:   targetOwnerUid,
+          fromListingId: myListingId,
+          createdAt: serverTimestamp(),
+          message: msg
+        });
+        beep(); alert("Teklif gönderildi ✅");
+      }catch(e){
+        console.error(e); alert("Teklif gönderilemedi: " + (e.code||"hata"));
+      }
+    }
+
+    // Butonlar
+    document.getElementById('backBtn').addEventListener('click', ()=>history.back());
+    document.getElementById('offerBtn').addEventListener('click', (ev)=>{
+      const owner = ev.currentTarget.dataset.owner || "";
+      if(!owner){ alert("İlan sahibi bilgisi yok"); return; }
+      openOfferFlow(id, owner);
+    });
+
+    // Başlat
+    load().catch(console.error);
+  </script>
+</body>
+</html>
