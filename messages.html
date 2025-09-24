@@ -70,6 +70,9 @@
     </section>
   </main>
 
+  <!-- Bildirim sesi (repo kökünde: /sounds/notify.wav) -->
+  <audio id="notifySound" src="/sounds/notify.wav" preload="auto"></audio>
+
   <nav class="fixedbar">
     <div class="in">
       <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
@@ -103,9 +106,22 @@
     const peerAvatar = document.getElementById('peerAvatar');
     const peerName = document.getElementById('peerName');
     const peerEmail = document.getElementById('peerEmail');
+    const notifyEl = document.getElementById('notifySound');
 
     const $el = (html)=>{ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; };
     const fmt = (ts)=>{ try{ const d=ts?.toDate?ts.toDate(): (ts instanceof Date? ts: new Date(ts)); if(isNaN(d)) return "—"; return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return "—";} };
+
+    // Ses izni/otoplay kilidi çözümü
+    let audioUnlocked = false;
+    const tryUnlockAudio = async ()=>{
+      if (audioUnlocked) return;
+      try { await notifyEl.play(); notifyEl.pause(); notifyEl.currentTime = 0; audioUnlocked = true; }
+      catch { /* kullanıcı etkileşimi gerek */ }
+    };
+    // İlk kullanıcı etkileşiminde sesi “unlock” et
+    ['click','keydown','touchstart'].forEach(evt=>{
+      document.addEventListener(evt, tryUnlockAudio, { once:false, passive:true });
+    });
 
     const userCache = new Map();
     async function getUserBrief(uid){
@@ -165,7 +181,7 @@
                 <div class="tname"><a href="${profUrl}" data-prof="${peerUid}">${info.name||'Kullanıcı'}</a></div>
                 <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
               </div>
-              <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
+              <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toLocaleString?d.lastMsgAt: d.lastMsgAt.toMillis()).toLocaleString?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'': ''}</div>
             </div>
           `);
           row.addEventListener('click',(e)=>{
@@ -189,9 +205,11 @@
     function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
+      let firstLoad=true;
       const qy=query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
       unsubMsgs=onSnapshot(qy,(snap)=>{
-        if(snap.empty){ elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>'; return; }
+        // ——— Görünümü yenile
+        if(snap.empty){ elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>'; firstLoad=false; return; }
         elMsgs.innerHTML='';
         snap.forEach(d=>{
           const m=d.data()||{}; const mine=m.senderUid===me.uid;
@@ -200,7 +218,29 @@
           elMsgs.appendChild(div);
         });
         elMsgs.scrollTop=elMsgs.scrollHeight;
+
+        // ——— Yeni gelen mesajlar için ses (ilk yüklemede çalma)
+        const changes=snap.docChanges();
+        if(!firstLoad){
+          const hasIncoming = changes.some(ch => ch.type==='added' && ch.doc.data()?.senderUid !== me.uid);
+          if(hasIncoming) playNotify();
+        }
+        firstLoad=false;
       });
+    }
+
+    async function playNotify(){
+      try{
+        await notifyEl.play();
+      }catch{
+        // Autoplay bloklandıysa, bir sonraki kullanıcı etkileşiminde tekrar dene
+        const retry=async ()=>{ 
+          try{ await notifyEl.play(); document.removeEventListener('click',retry); document.removeEventListener('keydown',retry); }
+          catch{}
+        };
+        document.addEventListener('click',retry,{once:true});
+        document.addEventListener('keydown',retry,{once:true});
+      }
     }
 
     async function openChat(chatId,peerUid){
@@ -233,6 +273,9 @@
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ location.href="/auth.html?next=/messages.html"; return; }
       me=user;
+      // ses iznini erken açmayı dene
+      tryUnlockAudio();
+
       if(peerParam){
         try{ const chatId=await ensureDmChat(me.uid,peerParam); initialChatId=chatId; }catch(e){ console.error('DM açılamadı',e); }
       }
