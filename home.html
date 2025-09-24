@@ -131,11 +131,37 @@
 }
 .sup-close:focus{ outline:2px solid var(--focus); outline-offset:2px; }
 
+/* Canlı destek: mesaj listesi + baloncuklar (sağ/sol & iki renk) */
 .support-pop.pro .sup-body{
-  padding:10px 12px; max-height:46vh; overflow:auto;
+  padding:14px 10px;
+  max-height:46vh;
+  overflow:auto;
+  display:flex;               /* hizalama için flex sütun */
+  flex-direction:column;
+  gap:8px;
 }
+
 .support-pop.pro .msg{
-  margin:0; font-size:13px; line-height:1.45; color:#334155;
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+  color:#0f172a;
+  background:#eef2ff;         /* ADMİN (karşı taraf) için açık renk */
+  border:1px solid #e5e7eb;
+  padding:10px 12px;
+  border-radius:12px 12px 12px 4px;  /* sola kuyruk hissi */
+  max-width:80%;
+  align-self:flex-start;       /* sola yasla */
+  word-wrap:break-word;
+  white-space:pre-wrap;
+}
+
+.support-pop.pro .msg.me{
+  color:#ffffff;
+  background:#111827;          /* KULLANICI (ben) için koyu renk */
+  border-color:#111827;
+  border-radius:12px 12px 4px 12px;  /* sağa kuyruk hissi */
+  align-self:flex-end;         /* sağa yasla */
 }
 
 .support-pop.pro .sup-input{
@@ -337,9 +363,7 @@
     <strong>Canlı Destek</strong>
     <button id="supClose" class="sup-close" type="button" aria-label="Pencereyi kapat">×</button>
   </div>
-  <div class="sup-body">
-    <p class="msg">Merhaba 👋 Nasıl yardımcı olalım?</p>
-  </div>
+    <div class="sup-body"></div>
   <div class="sup-input">
     <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" />
     <button id="chatSend" class="sup-send" type="button" aria-label="Gönder">
@@ -626,108 +650,147 @@
       if(t.id==='tabNotifs') location.href="/notifications.html";
     }));
 
-    /* ===== Canlı Destek baloncuğu: aç/kapat + gönder ===== */
-const btnSupport = document.getElementById('btnSupport');
-const pop        = document.getElementById('supportPop');
-const chatIn     = document.getElementById('chatInput');
-const chatSend   = document.getElementById('chatSend');
-const supClose   = document.getElementById('supClose');
-const supBody    = pop?.querySelector('.sup-body');
+    <script type="module">
+  const { auth, db } = window.__fb;
 
-function appendMsg(text){
-  if(!supBody) return;
-  const p = document.createElement('p');
-  p.className = 'msg';
-  p.textContent = text;
-  supBody.appendChild(p);
-  supBody.scrollTop = supBody.scrollHeight;
-}
+  /* ===== Canlı Destek baloncuğu: aç/kapat + canlı dinleme + gönder ===== */
+  const btnSupport = document.getElementById('btnSupport');
+  const pop        = document.getElementById('supportPop');
+  const chatIn     = document.getElementById('chatInput');
+  const chatSend   = document.getElementById('chatSend');
+  const supClose   = document.getElementById('supClose');
+  const supBody    = pop?.querySelector('.sup-body');
 
-function openPop(){
-  if(!pop) return;
-  pop.style.display = 'block';
-  // Açılınca karşılama mesajını tazele
-  if(supBody){
-    supBody.innerHTML = '';
-    appendMsg('Merhaba 👋 Nasıl yardımcı olalım?');
-  }
-}
+  let supUnsub = null;        // Firestore canlı dinleyici
+  let autoAckShown = false;   // “Sizi canlı destek…” yalnız 1 kez
 
-async function closePop(){
-  if(!pop) return;
-  pop.style.display = 'none';
-
-  // X'e basınca: kullanıcının GÖNDERDİĞİ mesajları sil (güvenlik gereği sadece kendi mesajları)
-  try{
-    const user = auth.currentUser;
-    if(!user) return;
-    const { collection, query, where, limit, getDocs, deleteDoc } =
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-
-    const batchLimit = 50;
-    while(true){
-      const q = query(
-        collection(db,'supportThreads', user.uid, 'messages'),
-        where('senderUid','==', user.uid),
-        limit(batchLimit)
-      );
-      const snap = await getDocs(q);
-      if(snap.empty) break;
-      const deletions = [];
-      snap.forEach(d=>deletions.push(deleteDoc(d.ref)));
-      await Promise.all(deletions);
-      if(snap.size < batchLimit) break;
-    }
-  }catch(e){
-    console.warn('Support mesaj silme uyarı:', e);
+  function appendMsg(text, isMe = false){
+    if(!supBody) return;
+    const p = document.createElement('p');
+    p.className = 'msg' + (isMe ? ' me' : '');
+    p.textContent = text;
+    supBody.appendChild(p);
+    supBody.scrollTop = supBody.scrollHeight;
   }
 
-  if(supBody) supBody.innerHTML = '';
-}
+  async function startLive(uid){
+    if (!uid || !supBody) return;
+    if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-btnSupport?.addEventListener('click', openPop);
-supClose?.addEventListener('click', ()=> closePop());
-
-chatSend?.addEventListener('click', async ()=>{
-  const txt = (chatIn?.value||'').trim();
-  if(!txt) return;
-  const user = auth.currentUser;
-  if(!user){ location.href="/auth.html?next=/"; return; }
-
-  // 1) Kullanıcı mesajını UI’ya ekle (pencere açık kalır)
-  appendMsg(txt);
-
-  try{
-    const { addDoc, collection, serverTimestamp, setDoc, doc } =
+    const { collection, query, orderBy, onSnapshot } =
       await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
-    // 2a) Parent thread (liste için gerekli)
-    await setDoc(doc(db, 'supportThreads', user.uid), {
-  participants: [user.uid],
-  lastAt: serverTimestamp(),
-  lastMsg: txt,
-  lastSenderUid: user.uid
-}, { merge: true });
+    const ref = collection(db, 'supportThreads', uid, 'messages');
+    const q   = query(ref, orderBy('createdAt','asc'));
 
-    // 2b) Mesajı alt koleksiyona yaz
-    await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
-      senderUid: user.uid,
-      text: txt,
-      createdAt: serverTimestamp(),
-      page: location.pathname
+    supUnsub = onSnapshot(q, snap=>{
+      supBody.innerHTML = '';
+      if (snap.empty){
+        appendMsg('Merhaba 👋 Nasıl yardımcı olalım?');
+      } else {
+        snap.forEach(doc=>{
+          const m = doc.data() || {};
+          const me = m.senderUid === uid;
+          appendMsg(m.text || '', me);
+        });
+      }
+    }, err=>{
+      console.warn('destek mesajları okunamadı:', err);
     });
-
-    // 3) Sistem oto-yanıt (yalnızca UI)
-    appendMsg('Sizi canlı destek hattına yönlendiriyorum.');
-
-    // 4) input temizle
-    chatIn.value = '';
-    playSoundSafe();
-  }catch(e){
-    console.error('destek mesajı hatası:', e);
-    alert('Mesaj gönderilemedi: ' + (e?.code || e?.message || 'hata'));
   }
-});
+
+  function openPop(){
+    if(!pop) return;
+    pop.style.display='block';
+    autoAckShown = false; // pencere her açıldığında sıfırla
+    const u = auth.currentUser;
+    if (u) {
+      if(supBody){ supBody.innerHTML = ''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
+      startLive(u.uid);
+    } else {
+      if(supBody){ supBody.innerHTML=''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
+    }
+  }
+
+  async function closePop(){
+    if(!pop) return;
+    pop.style.display='none';
+
+    // Canlı dinlemeyi kapat
+    if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
+
+    // X’e basınca: kullanıcının gönderdiği mesajları sil (admin mesajları kalır)
+    try{
+      const user = auth.currentUser;
+      if(!user) return;
+      const { collection, query, where, limit, getDocs, deleteDoc } =
+        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+      const batchLimit = 50;
+      while(true){
+        const q = query(
+          collection(db,'supportThreads', user.uid, 'messages'),
+          where('senderUid','==', user.uid),
+          limit(batchLimit)
+        );
+        const snap = await getDocs(q);
+        if(snap.empty) break;
+        const deletions = [];
+        snap.forEach(d=> deletions.push(deleteDoc(d.ref)));
+        await Promise.all(deletions);
+        if(snap.size < batchLimit) break;
+      }
+    }catch(e){
+      console.warn('Support mesaj silme uyarı:', e);
+    }
+
+    if(supBody) supBody.innerHTML = '';
+  }
+
+  btnSupport?.addEventListener('click', openPop);
+  supClose?.addEventListener('click', ()=> closePop());
+
+  chatSend?.addEventListener('click', async ()=>{
+    const txt = (chatIn?.value||'').trim();
+    if(!txt) return;
+    const user = auth.currentUser;
+    if(!user){ location.href="/auth.html?next=/"; return; }
+
+    // Önce UI’da göster (benim mesajım)
+    appendMsg(txt, true);
+
+    try{
+      const { addDoc, collection, serverTimestamp, setDoc, doc } =
+        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+      // Thread üst belgesi: liste & yetki için gerekli
+      await setDoc(doc(db, 'supportThreads', user.uid), {
+        participants: [user.uid],
+        lastAt: serverTimestamp(),
+        lastMsg: txt,
+        lastSenderUid: user.uid
+      }, { merge: true });
+
+      // Mesajı alt koleksiyona yaz
+      await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
+        senderUid: user.uid,
+        text: txt,
+        createdAt: serverTimestamp(),
+        page: location.pathname
+      });
+
+      // Oto-yanıt — yalnız 1 kez göster
+      if (!autoAckShown){
+        appendMsg('Sizi canlı destek hattına yönlendiriyorum.');
+        autoAckShown = true;
+      }
+
+      chatIn.value = '';
+    }catch(e){
+      console.error('destek mesajı hatası:', e);
+      alert('Mesaj gönderilemedi.');
+    }
+  });
 </script>
 </body>
 </html>
