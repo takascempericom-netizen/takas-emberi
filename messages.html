@@ -6,7 +6,8 @@
   <title>Mesajlar • Takas Çemberi</title>
   <style>
     :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5)}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
+      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
     @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .hdr{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-bottom:1px solid var(--brd)}
     .hdr .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -44,15 +45,19 @@
   </style>
 </head>
 <body>
-  <header class="hdr"><div class="in"><h1 class="ttl">Mesajlar</h1></div></header>
+  <header class="hdr">
+    <div class="in"><h1 class="ttl">Mesajlar</h1></div>
+  </header>
 
   <main class="wrap">
     <section class="chat">
+      <!-- SOL: Sohbet listesi -->
       <aside class="card sidebar">
         <div class="side-head">Sohbetler</div>
         <div id="threads" class="threads"><div class="tmuted">Yükleniyor…</div></div>
       </aside>
 
+      <!-- SAĞ: Panel -->
       <section class="card panel">
         <div class="panel-head">
           <img id="peerAvatar" alt="">
@@ -70,7 +75,7 @@
     </section>
   </main>
 
-  <!-- Bildirim sesi: iki olası yol -->
+  <!-- Bildirim sesi: birkaç olası yol -->
   <audio id="notifySound" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
     <source src="/sounds/notify.wav" type="audio/wav">
@@ -78,6 +83,7 @@
     <source src="sounds/notify.wav" type="audio/wav">
   </audio>
 
+  <!-- Alt bar -->
   <nav class="fixedbar">
     <div class="in">
       <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
@@ -88,9 +94,13 @@
   </nav>
 
   <script type="module">
+    /* ==== Firebase ==== */
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, onSnapshot, orderBy, doc, getDoc, setDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getFirestore, collection, query, where, onSnapshot, orderBy,
+      doc, getDoc, setDoc, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
@@ -102,27 +112,33 @@
     };
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db   = getFirestore(app);
 
-    const elThreads = document.getElementById('threads');
-    const elMsgs = document.getElementById('msgs');
-    const elInput = document.getElementById('msgInput');
-    const btnSend = document.getElementById('btnSend');
+    /* ==== UI refs ==== */
+    const elThreads  = document.getElementById('threads');
+    const elMsgs     = document.getElementById('msgs');
+    const elInput    = document.getElementById('msgInput');
+    const btnSend    = document.getElementById('btnSend');
     const peerAvatar = document.getElementById('peerAvatar');
-    const peerName = document.getElementById('peerName');
-    const peerEmail = document.getElementById('peerEmail');
-    const notifyEl = document.getElementById('notifySound');
+    const peerName   = document.getElementById('peerName');
+    const peerEmail  = document.getElementById('peerEmail');
+    const notifyEl   = document.getElementById('notifySound');
 
+    /* ==== Helpers ==== */
     const $el = (html)=>{ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; };
-    const fmt = (ts)=>{ try{ const d=ts?.toDate?ts.toDate(): (ts instanceof Date? ts: new Date(ts)); if(isNaN(d)) return "—"; return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return "—";} };
+    const fmt = (ts)=>{ try{ const d=ts?.toDate?ts.toDate(): (ts instanceof Date? ts: new Date(ts)); if(isNaN(d)) return "—";
+      return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return "—";} };
 
-    // Ses: autoplay kilidi ve kaynak doğrulama
+    // Ses kilidi (autoplay)
     let audioUnlocked=false;
-    const tryUnlockAudio=async()=>{ if(audioUnlocked) return; try{ await notifyEl.play(); notifyEl.pause(); notifyEl.currentTime=0; audioUnlocked=true; }catch{} };
+    async function tryUnlockAudio(){
+      if(audioUnlocked) return;
+      try{ await notifyEl.play(); notifyEl.pause(); notifyEl.currentTime=0; audioUnlocked=true; }catch{}
+    }
     ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,tryUnlockAudio,{passive:true}));
-    notifyEl.addEventListener('error',()=>{ console.warn('notify.wav bulunamadı, kaynaklardan biri 404.'); });
+    notifyEl.addEventListener('error',()=>console.warn('notify.wav bulunamadı (kaynak yollarını kontrol et).'));
 
-    // Kullanıcı minik profili
+    // Küçük profil önbelleği
     const userCache=new Map();
     async function getUserBrief(uid){
       if(userCache.has(uid)) return userCache.get(uid);
@@ -133,9 +149,11 @@
           const s=await getDoc(doc(db,col,id));
           if(s.exists()){
             const p=s.data()||{};
-            data={ name:(p.firstName&&p.lastName)?(p.firstName+' '+p.lastName):(p.displayName||p.username||'Kullanıcı'),
-                   email:p.email||'',
-                   photo:p.photoURL||p.photo||'' };
+            data={
+              name:(p.firstName&&p.lastName)?(p.firstName+' '+p.lastName):(p.displayName||p.username||'Kullanıcı'),
+              email:p.email||'',
+              photo:p.photoURL||p.photo||''
+            };
             break;
           }
         }catch{}
@@ -144,11 +162,12 @@
       return data;
     }
 
-    // URL paramları
+    /* ==== URL param ==== */
     const params=new URLSearchParams(location.search);
     let initialChatId=params.get('chat')||params.get('chatId')||'';
     const peerParam=params.get('peer')||'';
 
+    /* ==== State ==== */
     let me=null, activeChatId='', activePeerUid='', unsubMsgs=null, unsubThreads=null;
 
     async function ensureDmChat(myUid,peerUid){
@@ -162,14 +181,18 @@
       return chatId;
     }
 
+    /* ==== Sohbet listesi ==== */
     function watchThreads(){
       if(unsubThreads) unsubThreads();
       elThreads.innerHTML='<div class="tmuted">Yükleniyor…</div>';
+
       const qy=query(collection(db,'chats'), where('participants','array-contains',me.uid));
       unsubThreads=onSnapshot(qy, async (snap)=>{
         if(snap.empty){ elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>'; return; }
+
         const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
         rows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
+
         elThreads.innerHTML='';
         for(const d of rows){
           const peerUid=(d.participants||[]).find(x=>x!==me.uid)||'';
@@ -185,12 +208,15 @@
               <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
             </div>
           `);
+          // Satıra tıklayınca sohbeti aç; isim linkine tıklamayı engelleme
           row.addEventListener('click',(e)=>{
             if(e.target.closest('a[data-prof]')){ e.stopPropagation(); return; }
             openChat(d.id,peerUid);
           });
           elThreads.appendChild(row);
         }
+
+        // İlk seçim
         if(!activeChatId){
           if(initialChatId){
             const ex=rows.find(x=>x.id===initialChatId);
@@ -203,14 +229,19 @@
       });
     }
 
+    /* ==== Mesajlar ==== */
     function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
+
       let firstLoad=true;
       const qy=query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
       unsubMsgs=onSnapshot(qy,(snap)=>{
-        if(snap.empty){ elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>'; firstLoad=false; return; }
-        const beforeCount = elMsgs.childElementCount;
+        if(snap.empty){
+          elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
+          firstLoad=false;
+          return;
+        }
         elMsgs.innerHTML='';
         snap.forEach(d=>{
           const m=d.data()||{}; const mine=m.senderUid===me.uid;
@@ -220,10 +251,9 @@
         });
         elMsgs.scrollTop=elMsgs.scrollHeight;
 
-        // Yeni gelen karşı mesajlar için ses
+        // Yeni gelen karşı mesaj için ses
         if(!firstLoad){
-          const changes=snap.docChanges();
-          const hasIncoming=changes.some(ch=>ch.type==='added' && ch.doc.data()?.senderUid!==me.uid);
+          const hasIncoming=snap.docChanges().some(ch=>ch.type==='added' && ch.doc.data()?.senderUid!==me.uid);
           if(hasIncoming) playNotify();
         }
         firstLoad=false;
@@ -239,43 +269,59 @@
       }
     }
 
+    /* ==== Sohbet aç ==== */
     async function openChat(chatId,peerUid){
       activeChatId=chatId; activePeerUid=peerUid||'';
       document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===chatId));
+
       if(activePeerUid){
         const info=await getUserBrief(activePeerUid);
         const profUrl=`/profile/profile.html?uid=${encodeURIComponent(activePeerUid)}`;
         peerName.innerHTML=`<a href="${profUrl}" id="peerNameLink">${info.name||'Sohbet'}</a>`;
         peerEmail.textContent=info.email||'';
-        info.photo? (peerAvatar.src=info.photo) : peerAvatar.removeAttribute('src');
+        if(info.photo) peerAvatar.src=info.photo; else peerAvatar.removeAttribute('src');
       }else{
         peerName.textContent='Sohbet'; peerEmail.textContent=''; peerAvatar.removeAttribute('src');
       }
+
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}`);
     }
 
+    /* ==== Gönder ==== */
     async function sendMessage(){
       const text=(elInput.value||'').trim();
       if(!text||!activeChatId) return;
-      await addDoc(collection(db,'chats',activeChatId,'messages'),{text, senderUid:me.uid, createdAt:serverTimestamp()});
-      await setDoc(doc(db,'chats',activeChatId),{lastMsg:text,lastMsgAt:serverTimestamp()},{merge:true});
+
+      await addDoc(collection(db,'chats',activeChatId,'messages'),{
+        text, senderUid:me.uid, createdAt:serverTimestamp()
+      });
+      await setDoc(doc(db,'chats',activeChatId),{
+        lastMsg:text, lastMsgAt:serverTimestamp(), lastSenderUid: me.uid
+      },{merge:true});
+
       elInput.value='';
     }
-
     btnSend.addEventListener('click',sendMessage);
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
 
+    /* ==== Auth ==== */
     onAuthStateChanged(auth, async (user)=>{
       if(!user){ location.href="/auth.html?next=/messages.html"; return; }
       me=user;
       tryUnlockAudio();
+
+      // ?peer= ile gelindiyse DM’yi garantile
       if(peerParam){
-        try{ const chatId=await ensureDmChat(me.uid,peerParam); initialChatId=chatId; }catch(e){ console.error('DM açılamadı',e); }
+        try{
+          const chatId=await ensureDmChat(me.uid,peerParam);
+          initialChatId=chatId;
+        }catch(e){ console.error('DM açılamadı', e); }
       }
       watchThreads();
     });
 
+    /* ==== Alt bar aktifliği ==== */
     const path=location.pathname;
     document.querySelectorAll('.fixedbar a').forEach(a=>{
       a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/messages') && a.id==='navMsgs'));
