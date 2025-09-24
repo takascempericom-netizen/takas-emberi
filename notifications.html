@@ -17,6 +17,7 @@
     .btn:hover{background:#fff}
     .btn.sm{padding:6px 10px;border-radius:10px;font-size:12px}
     .btn.danger{border-color:#fca5a5;color:#991b1b}
+
     .wrap{max-width:1100px;margin:16px auto 120px;padding:0 16px}
     .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
     .list{padding:12px;display:grid;gap:8px}
@@ -30,11 +31,20 @@
     .type.broadcast{background:#dcfce7;color:#065f46;border-color:#bbf7d0}
     .actions{display:flex;gap:6px;flex-wrap:wrap}
     .empty{padding:20px;text-align:center;color:#475569}
+
+    /* Alt sabit bar + rozetler */
     .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
     .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-    .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
+    .fixedbar a{position:relative;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
     .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
+
+    .badge{
+      position:absolute; top:4px; right:10px;
+      min-width:18px; height:18px; padding:0 6px;
+      border-radius:999px; background:#ef4444; color:#fff;
+      font-size:11px; display:none; place-items:center; line-height:18px;
+    }
   </style>
 </head>
 <body>
@@ -57,13 +67,28 @@
   <nav class="fixedbar">
     <div class="in">
       <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
-      <a href="/messages.html" id="navMsgs">💬<span>Mesajlar</span></a>
-      <a href="/notifications.html" class="active" id="navNotifs">🔔<span>Bildirimler</span></a>
+
+      <a href="/messages.html" id="navMsgs">
+        💬<span>Mesajlar</span>
+        <b id="msgBadge" class="badge" aria-live="polite">0</b>
+      </a>
+
+      <a href="/notifications.html" class="active" id="navNotifs">
+        🔔<span>Bildirimler</span>
+        <b id="notifBadge" class="badge" aria-live="polite">0</b>
+      </a>
+
       <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
     </div>
   </nav>
 
-  <!-- Ses -->
+  <!-- Global ses (ortak uyarı) -->
+  <audio id="notifySoundGlobal" preload="auto">
+    <source src="/assets/sounds/notify.wav" type="audio/wav">
+    <source src="/sounds/notify.wav" type="audio/wav">
+  </audio>
+
+  <!-- Sayfa içi (liste) ses -->
   <audio id="ding" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
   </audio>
@@ -73,13 +98,16 @@
 
   <!-- Sayfa scripti -->
   <script type="module">
-    const { auth, db, requireAuth } = window.__fb;
-    requireAuth(); // giriş yoksa /auth.html
+    const { auth, db, requireAuth, startGlobalMessagingWatcher } = window.__fb || {};
+    requireAuth && requireAuth(); // giriş yoksa /auth.html
+
+    // Bu sayfada global izleyiciyi de başlat (rozete ve sese yansısın)
+    try { typeof startGlobalMessagingWatcher === 'function' && startGlobalMessagingWatcher(); } catch {}
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where,
-      setDoc, serverTimestamp, deleteDoc   // <-- deleteDoc eklendi
+      setDoc, serverTimestamp, deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const elList   = document.getElementById('list');
@@ -143,7 +171,6 @@
           const div = document.createElement("div");
           div.className = "item" + (data.read ? "" : " unread");
 
-          // Kart içeriği: Okundu, Git, Profil, Mesaj yaz, Sil
           div.innerHTML = `
             <div class="meta">
               <div class="row" style="display:flex;gap:8px;align-items:center">
@@ -166,7 +193,6 @@
             </div>
           `;
 
-          // Butonlar
           div.addEventListener("click", async (ev)=>{
             const readBtn = ev.target.closest("button[data-act='read']");
             const chatBtn = ev.target.closest("button[data-act='chat']");
@@ -180,7 +206,7 @@
             if (chatBtn) {
               const peerUid = chatBtn.dataset.peer;
               if (!peerUid || peerUid === user.uid) return;
-              await openDirectChat(user.uid, peerUid); // izin hatası fix (read yapmadan create)
+              await openDirectChat(user.uid, peerUid);
               return;
             }
             if (delBtn) {
@@ -193,7 +219,7 @@
 
           elList.appendChild(div);
 
-          // Yeni düşen ve okunmamışsa ses
+          // Yeni düşen ve okunmamışsa ses (ilk yüklemede çalma)
           if(!firstLoad && !data.read && !known.has(d.id)){
             playDing();
           }
@@ -214,7 +240,7 @@
       });
     });
 
-    // DM sohbet aç / oluştur — getDoc YOK → direkt setDoc(merge)
+    // DM sohbet aç / oluştur — doğrudan set (mevcutsa merge)
     async function openDirectChat(myUid, peerUid){
       try{
         const pair = [myUid, peerUid].sort();
