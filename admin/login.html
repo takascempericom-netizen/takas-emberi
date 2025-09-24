@@ -40,116 +40,111 @@
       </form>
     </section>
   </main>
+     
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  // ——— Firebase init ———
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+    authDomain: "ureten-eller-v2.firebaseapp.com",
+    projectId: "ureten-eller-v2",
+    storageBucket: "ureten-eller-v2.firebasestorage.app",
+    messagingSenderId: "621494781131",
+    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+  };
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
 
-    // ——— Firebase init ———
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+  // ——— UI refs ———
+  const frm = document.getElementById('frm');
+  const btn = document.getElementById('btn');
+  const elE = document.getElementById('email');
+  const elP = document.getElementById('pass');
+  const err = document.getElementById('err');
 
-    // ——— UI refs ———
-    const frm = document.getElementById('frm');
-    const btn = document.getElementById('btn');
-    const elE = document.getElementById('email');
-    const elP = document.getElementById('pass');
-    const err = document.getElementById('err');
+  function setBusy(b){
+    btn.disabled = b;
+    btn.textContent = b ? "Giriş yapılıyor…" : "Giriş";
+  }
+  function showError(msg){
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+  function clearError(){
+    err.textContent = "";
+    err.style.display = 'none';
+  }
 
-    function setBusy(b){
-      btn.disabled = b;
-      btn.textContent = b ? "Giriş yapılıyor…" : "Giriş";
-    }
-    function showError(msg){
-      err.textContent = msg;
-      err.style.display = 'block';
-    }
-    function clearError(){
-      err.textContent = "";
-      err.style.display = 'none';
-    }
+  async function isAdminLike(user){
+    const idt = await user.getIdTokenResult(true);
+    const fromClaim =
+      idt.claims?.admin === true ||
+      ["admin","moderator","support"].includes(idt.claims?.role);
 
-    // ——— Yetki kontrolü ———
-    async function isAdminLike(user){
-      // 1) custom claim
-      const idt = await user.getIdTokenResult(true);
-      const claimOk =
-        idt.claims?.admin === true ||
-        ["admin","moderator","support"].includes(idt.claims?.role);
+    if (fromClaim) return true;
 
-      if (claimOk) return true;
-
-      // 2) users/{uid}.role (client rules: kendi kaydını okuyabilir)
-      try{
-        const s = await getDoc(doc(db, "users", user.uid));
-        if (s.exists()){
-          const role = (s.data()?.role || "").toString().toLowerCase();
-          if (["admin","moderator","support"].includes(role)) return true;
-        }
-      }catch(e){
-        // okunamasa da claim varsa zaten dönerdik; burada sessiz geç
-        console.warn("users/{uid} okunamadı:", e);
+    try{
+      const s = await getDoc(doc(db,"users",user.uid));
+      if (s.exists()){
+        const role = (s.data()?.role || "").toString().toLowerCase();
+        if (["admin","moderator","support"].includes(role)) return true;
       }
-      return false;
+    }catch(e){
+      console.warn("users/{uid} okunamadı:", e);
     }
+    return false;
+  }
 
-    // ——— Auth state (zaten girişliyse direk geçir) ———
-    onAuthStateChanged(auth, async (u)=>{
-      if(!u) return;
-      try{
-        if (await isAdminLike(u)) {
-          location.replace("/admin/index.html");
-        } else {
-          await signOut(auth);
-          showError("Bu kullanıcı yetkili değil (admin/moderator/support).");
-        }
-      }catch(e){
-        console.error("onAuthStateChanged hata:", e);
-        showError("Beklenmeyen hata. Lütfen tekrar deneyin.");
-      }finally{
-        setBusy(false);
-      }
-    });
+  let redirecting = false;
 
-    // ——— Form submit ———
-    frm.addEventListener('submit', async (ev)=>{
-      ev.preventDefault();
-      clearError();
+  // ——— Girişliyse kontrol et; admin ise yönlendir, değilse oturumu kapatma ———
+  onAuthStateChanged(auth, async (u)=>{
+    if (!u || redirecting) return;
+    try{
       setBusy(true);
-      try{
-        const email = elE.value.trim();
-        const pass  = elP.value;
-        const { user } = await signInWithEmailAndPassword(auth, email, pass);
-
-        // Yetki kontrolü
-        if (await isAdminLike(user)) {
-          location.replace("/admin/index.html");
-        } else {
-          await signOut(auth);
-          showError("Bu hesapta admin/moderator/support yetkisi yok.");
-        }
-      }catch(e){
-        console.error("Giriş hatası:", e);
-        const m = e?.code || e?.message || "Giriş başarısız.";
-        showError(m);
-      }finally{
-        setBusy(false);
+      if (await isAdminLike(u)) {
+        redirecting = true;
+        location.replace("/admin/index.html");
+      } else {
+        // Döngüyü engellemek için signOut yapmıyoruz
+        showError("Bu hesapta admin/moderator/support yetkisi yok.");
       }
-    });
+    }catch(e){
+      console.error("onAuthStateChanged hata:", e);
+      showError("Beklenmeyen hata. Lütfen tekrar deneyin.");
+    }finally{
+      setBusy(false);
+    }
+  });
 
-    // Güvenlik: uzun beklemeye karşı 15 sn emniyet kilidi (UI donmasın)
-    setTimeout(()=>{ if(btn.disabled){ setBusy(false); } }, 15000);
-  </script>
+  // ——— Form submit ———
+  frm.addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    clearError();
+    setBusy(true);
+    try{
+      const { user } = await signInWithEmailAndPassword(auth, elE.value.trim(), elP.value);
+      if (await isAdminLike(user)) {
+        redirecting = true;
+        location.replace("/admin/index.html");
+      } else {
+        showError("Bu hesapta admin/moderator/support yetkisi yok.");
+      }
+    }catch(e){
+      console.error("Giriş hatası:", e);
+      showError(e?.code || e?.message || "Giriş başarısız.");
+    }finally{
+      setBusy(false);
+    }
+  });
+
+  // Emniyet: UI kilitlenmesin
+  setTimeout(()=>{ if(btn.disabled) setBusy(false); }, 15000);
+</script>
+ 
 </body>
 </html>
