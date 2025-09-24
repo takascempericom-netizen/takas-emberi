@@ -91,22 +91,61 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:#111827}
 
-    /* Support FAB + popover */
-    .support-fab{
-      position:fixed;right:16px;bottom:calc(var(--bottomH) + 16px);width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;
-      background:#111827;color:#fff;display:grid;place-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:45
-    }
-    .support-fab:focus{outline:3px solid var(--focus);outline-offset:2px}
-    .support-pop{
-      position:fixed;right:16px;bottom:calc(var(--bottomH) + 82px);min-width:320px;max-width:90vw;border-radius:16px;text-align:center;
-      background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c5));background-size:400% 400%;
-      animation:barShift 14s ease infinite; padding:18px 14px;color:#fff;box-shadow:0 14px 40px rgba(0,0,0,.3);display:none;z-index:46
-    }
-    .support-pop .msg{margin:0;font-weight:800;font-size:16px;line-height:1.35}
-    .support-pop .input-row{display:flex;gap:8px;margin-top:12px;justify-content:center}
-    .support-pop .in{flex:1;min-width:180px;max-width:260px;padding:10px;border-radius:12px;border:0}
-    .support-pop .send{padding:10px 14px;border-radius:12px;border:0;background:#111827;color:#fff;cursor:pointer}
-    .support-pop .arrow{position:absolute;right:24px;bottom:-10px;width:18px;height:18px;transform:rotate(45deg);background:inherit;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+    /* === Support (compact & professional) === */
+.support-fab.compact{
+  position:fixed; right:16px; bottom:calc(var(--bottomH) + 16px);
+  width:48px; height:48px; border-radius:12px;
+  border:1px solid rgba(0,0,0,.18); background:#111827; color:#fff;
+  display:grid; place-items:center; box-shadow:0 10px 30px rgba(0,0,0,.28); z-index:46;
+}
+.support-fab.compact:focus{ outline:3px solid var(--focus); outline-offset:2px; }
+
+.support-pop.pro{
+  position:fixed; right:16px; bottom:calc(var(--bottomH) + 72px);
+  width:min(340px,92vw);
+  background:#fff; color:#0f172a;
+  border:1px solid #e5e7eb; border-radius:14px;
+  box-shadow:0 18px 48px rgba(0,0,0,.28);
+  display:none; z-index:47; overflow:hidden;
+  transform-origin:bottom right; animation: none;
+}
+.support-pop.pro.show{ display:block; }
+
+.support-pop.pro::after{
+  content:""; position:absolute; right:18px; bottom:-9px; width:18px; height:18px;
+  background:#fff; border-left:1px solid #e5e7eb; border-top:1px solid #e5e7eb;
+  transform:rotate(45deg);
+}
+
+.support-pop.pro .sup-head{
+  display:flex; flex-direction:column; gap:2px;
+  background:#111827; color:#fff; padding:10px 12px;
+}
+.support-pop.pro .sup-head strong{ font-size:14px; font-weight:800; }
+.support-pop.pro .sup-status{ font-size:11px; opacity:.8; }
+
+.support-pop.pro .sup-body{
+  padding:10px 12px; max-height:46vh; overflow:auto;
+}
+.support-pop.pro .msg{
+  margin:0; font-size:13px; line-height:1.45; color:#334155;
+}
+
+.support-pop.pro .sup-input{
+  display:flex; gap:8px; padding:10px 10px 12px 10px; background:#f8fafc; border-top:1px solid #e5e7eb;
+}
+.support-pop.pro .sup-in{
+  flex:1; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font:inherit;
+}
+.support-pop.pro .sup-send{
+  width:40px; height:40px; border-radius:10px; border:1px solid #111827; background:#111827; color:#fff; display:grid; place-items:center; cursor:pointer;
+}
+
+/* küçük ekran uyumu */
+@media (max-width:480px){
+  .support-fab.compact{ right:12px; }
+  .support-pop.pro{ right:12px; width:min(320px,94vw); }
+}
 
     /* Legal footer */
     .legal{background:var(--black);color:var(--black-ink);border-top:1px solid var(--black-line);margin-top:20px}
@@ -278,18 +317,31 @@
     </button>
   </nav>
 
-  <!-- Canlı Destek FAB + Popover -->
-  <button class="support-fab" id="btnSupport" aria-label="Canlı Destek">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"/></svg>
-  </button>
-  <div class="support-pop" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
-    <p class="msg">Merhaba! Yardım için mesaj bırakın. WhatsApp/telefon bağlantısını sonra ekleyeceğiz.</p>
-    <div class="input-row">
-      <input class="in" id="chatInput" placeholder="Mesajınız" />
-      <button type="button" class="send" id="chatSend">Gönder</button>
-    </div>
-    <div class="arrow" aria-hidden="true"></div>
+  <!-- Canlı Destek (compact, yukarı açılır) -->
+<button class="support-fab compact" id="btnSupport" aria-label="Canlı Destek">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="9"></circle>
+    <path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"></path>
+  </svg>
+</button>
+
+<div class="support-pop pro" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
+  <div class="sup-head">
+    <strong>Canlı Destek</strong>
+    <span class="sup-status">Genelde 1–2 saat içinde dönüş</span>
   </div>
+  <div class="sup-body">
+    <p class="msg">Merhaba 👋 Nasıl yardımcı olalım?</p>
+  </div>
+  <div class="sup-input">
+    <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" />
+    <button id="chatSend" class="sup-send" type="button" aria-label="Gönder">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7Z"></path>
+      </svg>
+    </button>
+  </div>
+</div>
 
   <!-- Alt Siyah Hukuki Alan -->
   <footer class="legal">
