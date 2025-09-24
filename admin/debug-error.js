@@ -1,31 +1,21 @@
-(function(){
-  function show(msg){
-    let box = document.getElementById('debug-error-box');
-    if(!box){
-      box = document.createElement('pre');
-      box.id = 'debug-error-box';
-      box.style.cssText = 'position:fixed;z-index:99999;left:8px;bottom:8px;max-width:90vw;max-height:60vh;overflow:auto;background:#111;color:#0f0;padding:10px;border:1px solid #0f0;font:12px/1.4 monospace;white-space:pre-wrap;';
-      document.body.appendChild(box);
-    }
-    box.textContent = msg;
-    console.error(msg);
+// Basit global hata yakalayıcı (görünür kıl)
+window.addEventListener("error", (e)=>{
+  const box = document.getElementById("debugBox");
+  if(box){
+    const pre = document.createElement("pre");
+    pre.textContent = String(e.error?.stack || e.message || e);
+    box.appendChild(pre);
+  }else{
+    console.error("AdminError:", e.error || e.message || e);
   }
-
-  window.addEventListener('error', (e)=>{
-    const err = e.error || {};
-    show(
-      'ERROR: ' + e.message +
-      '\nfile: ' + (e.filename||'?') +
-      '\nline: ' + (e.lineno||'?') + ':' + (e.colno||'?') +
-      '\nstack:\n' + (err.stack||'(no stack)')
-    );
-  });
-
-  window.addEventListener('unhandledrejection', (e)=>{
-    const r = e.reason || {};
-    show(
-      'UNHANDLED REJECTION: ' + (r.message||String(r)) +
-      '\nstack:\n' + (r.stack||'(no stack)')
-    );
-  });
-})();
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  const box = document.getElementById("debugBox");
+  if(box){
+    const pre = document.createElement("pre");
+    pre.textContent = "PromiseRejection: " + String(e.reason?.stack || e.reason || "");
+    box.appendChild(pre);
+  }else{
+    console.error("AdminRejection:", e.reason);
+  }
+});
