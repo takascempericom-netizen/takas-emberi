@@ -131,16 +131,28 @@
           <label>Şehir</label>
           <input id="city" placeholder="Şehir" disabled>
 
-          <!-- Şifre alanları: sadece KENDİ profilinde profile.js tarafından kullanılacak -->
-          <label>Mevcut Şifre</label>
-          <input id="oldPassword" type="password" placeholder="Mevcut şifre">
-          <label>Yeni Şifre</label>
-          <input id="newPassword" type="password" placeholder="Yeni şifre">
-          <label>Yeni Şifre (Tekrar)</label>
-          <input id="newPassword2" type="password" placeholder="Yeni şifre (tekrar)">
-          <div class="row end" style="grid-column: 1 / -1; margin-top:10px">
-            <button class="btn ok" id="btnChangePass">Onayla</button>
+          <!-- Şifre alanları (KENDİ profilinde gösterilecek) -->
+          <div id="passwordBox" style="grid-column:1 / -1; display:none">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+              <div>
+                <label>Mevcut Şifre</label>
+                <input id="oldPassword" type="password" placeholder="Mevcut şifre" autocomplete="current-password">
+              </div>
+              <div></div>
+              <div>
+                <label>Yeni Şifre</label>
+                <input id="newPassword" type="password" placeholder="Yeni şifre" autocomplete="new-password">
+              </div>
+              <div>
+                <label>Yeni Şifre (Tekrar)</label>
+                <input id="newPassword2" type="password" placeholder="Yeni şifre (tekrar)" autocomplete="new-password">
+              </div>
+            </div>
+            <div class="row end" style="margin-top:10px">
+              <button class="btn ok" id="btnChangePass">Onayla</button>
+            </div>
           </div>
+          <!-- /passwordBox -->
         </div>
       </div>
     </section>
