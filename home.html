@@ -673,15 +673,29 @@ function appendMsg(text, isMe = false){
   supBody.scrollTop = supBody.scrollHeight;
 }
 
+/* === Balon açılınca: en son temizlemeden SONRAKİ mesajları göster === */
 async function startLive(uid){
   if (!uid || !supBody) return;
   if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-  const { collection, query, orderBy, onSnapshot } =
+  const { doc, getDoc, collection, query, where, orderBy, onSnapshot } =
     await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
+  // Kullanıcının en son ne zaman baloncuğu temizlediği
+  let clearedAt = null;
+  try{
+    const tSnap = await getDoc(doc(db, 'supportThreads', uid));
+    if (tSnap.exists()) clearedAt = tSnap.data()?.userClearedAt || null;
+  }catch(e){ console.warn('userClearedAt okunamadı:', e); }
+
+  // clearedAt'ten sonra gelenleri dinle
   const ref = collection(db, 'supportThreads', uid, 'messages');
-  const q   = query(ref, orderBy('createdAt','asc'));
+  let q;
+  if (clearedAt) {
+    q = query(ref, where('createdAt','>', clearedAt), orderBy('createdAt','asc'));
+  } else {
+    q = query(ref, orderBy('createdAt','asc'));
+  }
 
   supUnsub = onSnapshot(q, snap=>{
     supBody.innerHTML = '';
@@ -712,15 +726,53 @@ function openPop(){
   }
 }
 
+/* === X’e basınca: UI boşalt + kullanıcı mesajlarını DB’den sil + işaret koy === */
 async function closePop(){
   if(!pop) return;
+
+  // Pencereyi kapat
   pop.style.display='none';
 
   // Canlı dinlemeyi kapat
   if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-  // SADECE kullanıcı baloncuğunu temizle (DB’ye dokunma)
+  // UI: baloncuğu anında boşalt
   if (supBody) supBody.innerHTML = '';
+
+  // DB: sadece KULLANICININ gönderdiği mesajları sil; admin mesajları kalsın
+  try{
+    const user = auth.currentUser;
+    if(user){
+      const { collection, query, where, limit, getDocs, deleteDoc, doc, setDoc, serverTimestamp } =
+        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+      const batchLimit = 50;
+      while(true){
+        const q = query(
+          collection(db,'supportThreads', user.uid, 'messages'),
+          where('senderUid','==', user.uid),
+          limit(batchLimit)
+        );
+        const snap = await getDocs(q);
+        if(snap.empty) break;
+
+        const deletions = [];
+        snap.forEach(d => deletions.push(deleteDoc(d.ref)));
+        await Promise.all(deletions);
+
+        if(snap.size < batchLimit) break;
+      }
+
+      // Yeniden açıldığında eski admin mesajları da görünmesin
+      await setDoc(
+        doc(db, 'supportThreads', user.uid),
+        { userClearedAt: serverTimestamp() },
+        { merge: true }
+      );
+    }
+  }catch(e){
+    console.warn('Kapatırken silme/işaretleme uyarı:', e);
+  }
 }
 
 btnSupport?.addEventListener('click', openPop);
@@ -767,7 +819,7 @@ chatSend?.addEventListener('click', async ()=>{
     alert('Mesaj gönderilemedi.');
   }
 });
-
 </script>
+
 </body>
 </html>
