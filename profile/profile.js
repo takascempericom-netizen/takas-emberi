@@ -1,22 +1,17 @@
-// profile/profile.js — KESİN SÜRÜM
-// Özellikler:
-// - Kendi profilini/başkasının profilini görüntüleme (query: ?uid=...)
-// - Kendi profilinde: +Yeni İlan, Avatar değiştir, ilanları yönet (incele/düzenle/sil/süre al)
-// - Başkasının profilinde: Ad/eposta/foto, aktif (live) ilanları gör, Mesaj yaz / Yıldız ver / Şikayet et
-// - Ortalama puanı (ratings/{uid}/votes/*) okur, yıldızları gösterir
-// Uyum: mevcut profile.html ile tam uyumlu (btnDM/btnRate/btnReport opsiyonel; yoksa sessizce geçer)
+// profile/profile.js — GÜNCEL SÜRÜM
+// - ?uid=... ile başka kullanıcının profiline bakma
+// - Kendi profilinde: +Yeni İlan, avatar değiştir, ilan yönet (incele/düzenle/sil/süre al)
+// - Başkasının profilinde: ad/eposta/foto, aktif ilanlar, Mesaj yaz, Şikayet et
+// - Puanlama: profil kartında yıldızlar. Başkasına 1 kez oy (doc id = rater uid).
+//   Not: Firestore rules tarafında ratings okuma + tek oy kuralı tanımlı olmalı.
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged, signOut, updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs,
-  updateDoc, deleteDoc, serverTimestamp, limit
+  updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getStorage, ref as sref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /* ==== Firebase Init ==== */
 const firebaseConfig = {
@@ -43,12 +38,12 @@ const avatarFile = $("avatarFile");
 const btnChangeAvatar = $("btnChangeAvatar");
 const btnLogout = $("btnLogout");
 
-const btnNew    = $("btnNew");      // + Yeni İlan
-const btnDM     = $("btnDM");       // Mesaj yaz (başkasının profili)
-const btnRate   = $("btnRate");     // Yıldız ver (opsiyonel)
-const btnReport = $("btnReport");   // Şikayet et (opsiyonel)
+const btnNew    = $("btnNew");    // + Yeni İlan
+const btnDM     = $("btnDM");     // Mesaj yaz
+const btnReport = $("btnReport"); // Şikayet et
+// btnRate kaldırıldı (artık kullanılmıyor)
 
-/* ==== Küçük yardımcılar ==== */
+/* ==== Helpers ==== */
 const fill = (el,val)=>{ if(el){ el.value = val||""; } };
 const setSrc = (el,src)=>{ if(el && src){ el.src = src; } };
 const fmt = (ts)=> {
@@ -62,22 +57,14 @@ const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 /* ==== Çıkış ==== */
 btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
 
-/* ==== Modal (HTML’de tek adet var) refs ==== */
+/* ==== Modal refs ==== */
 function mrefs(){
   return {
     modal: $("listingModal"),
-    mTitle: $("mTitle"),
-    mStatus: $("mStatus"),
-    mPhoto: $("mPhoto"),
-    mInputTitle: $("mInputTitle"),
-    mInputDesc: $("mInputDesc"),
-    mMeta: $("mMeta"),
-    mSave: $("mSave"),
-    mClose: $("mClose"),
-
-    liveEl: $("tab-live"),
-    pendEl: $("tab-pending"),
-    expEl:  $("tab-expired"),
+    mTitle: $("mTitle"), mStatus: $("mStatus"), mPhoto: $("mPhoto"),
+    mInputTitle: $("mInputTitle"), mInputDesc: $("mInputDesc"),
+    mMeta: $("mMeta"), mSave: $("mSave"), mClose: $("mClose"),
+    liveEl: $("tab-live"), pendEl: $("tab-pending"), expEl: $("tab-expired"),
   };
 }
 function openModal(){ mrefs().modal?.classList.add("show"); }
@@ -97,8 +84,13 @@ async function getFirstPhotoFromSub(listingId){
   return "";
 }
 
-/* ==== Ortalama puan oku ve göster ==== */
+/* ==== Rating (okuma) ==== */
 async function loadRating(uid){
+  const starsEl = $("rating");
+  const numEl   = $("ratingNum");
+  if (starsEl) starsEl.innerHTML = "";
+  if (numEl)   numEl.textContent = "—";
+
   try{
     const votesCol = collection(db, "ratings", uid, "votes");
     const snap = await getDocs(votesCol);
@@ -110,15 +102,13 @@ async function loadRating(uid){
     });
     const avg = n ? (sum/n) : 0;
 
-    const starsEl = $("rating");
-    const numEl   = $("ratingNum");
     if (starsEl){
-      starsEl.innerHTML = "";
       const full = Math.round(avg);
       for(let i=1;i<=5;i++){
         const s = document.createElement("span");
         s.textContent = i<=full ? "★" : "☆";
-        s.style.cssText="font-size:18px;color:#f59e0b";
+        // 3D görünüm için hafif gölge
+        s.style.cssText="font-size:22px;color:#f59e0b;text-shadow:0 1px 0 #fff,0 2px 0 #d1a000,0 3px 6px rgba(0,0,0,.15)";
         starsEl.appendChild(s);
       }
     }
@@ -127,19 +117,81 @@ async function loadRating(uid){
     }
   }catch(e){
     console.warn("[rating] okunamadı:", e);
+    // Yetki yoksa boş 5 yıldız göster
+    if ($("rating")){
+      for(let i=1;i<=5;i++){
+        const s = document.createElement("span");
+        s.textContent = "☆";
+        s.style.cssText="font-size:22px;color:#cbd5e1;text-shadow:0 1px 0 #fff";
+        $("rating").appendChild(s);
+      }
+    }
+    if ($("ratingNum")) $("ratingNum").textContent = "—";
+  }
+}
+
+/* ==== Rating (etkileşimli; yalnız başkasının profili ve daha önce oy vermediyse) ==== */
+async function setupInteractiveRating(viewUid, myUid){
+  const starsEl = $("rating"); const numEl = $("ratingNum");
+  if (!starsEl) return;
+
+  // Kendi profili değil + girişli olmalı
+  if (!myUid || myUid === viewUid) return;
+
+  // Daha önce oy vermiş mi?
+  let voted = false;
+  try{
+    const myVote = await getDoc(doc(db, "ratings", viewUid, "votes", myUid));
+    voted = myVote.exists();
+  }catch(e){
+    // Okuma yetkin yoksa etkileşimli yapmayalım
+    voted = true;
+  }
+  if (voted) return; // Etkileşim yok; sadece ortalama görünsün
+
+  // Etkileşimli 5 yıldız hazırlığı
+  starsEl.innerHTML = "";
+  const spans = [];
+  for (let i=1;i<=5;i++){
+    const sp = document.createElement("span");
+    sp.textContent = "☆";
+    sp.dataset.val = String(i);
+    sp.style.cssText = "font-size:26px;cursor:pointer;transition:transform .12s;text-shadow:0 1px 0 #fff,0 2px 0 #d1a000,0 3px 6px rgba(0,0,0,.15)";
+    sp.onmouseenter = ()=> highlight(i);
+    sp.onmouseleave = ()=> {/* no-op; mouseout'ta eski ortalamayı loadRating resetleyecek */};
+    sp.onclick = rate;
+    spans.push(sp); starsEl.appendChild(sp);
+  }
+  function highlight(v){
+    spans.forEach((s,idx)=> s.textContent = (idx < v) ? "★" : "☆");
+  }
+  async function rate(ev){
+    const v = parseInt(ev.currentTarget?.dataset?.val||"0",10);
+    if (!v) return;
+    try{
+      // Sadece ilk kez oy: kurallar create-only ise merge:false
+      await setDoc(
+        doc(db, "ratings", viewUid, "votes", myUid),
+        { stars: v, createdAt: serverTimestamp() }, { merge: false }
+      );
+      starsEl.style.pointerEvents = "none";
+      if (numEl) numEl.textContent = (numEl.textContent||"") + " • oyun kaydedildi";
+      await loadRating(viewUid);
+    }catch(e){
+      console.error("Oy verilemedi:", e);
+      alert("Oy verilemedi.");
+      await loadRating(viewUid);
+    }
   }
 }
 
 /* ==== Kart render ==== */
-let VIEWING_SELF = false; // onAuthStateChanged içinde set edilir
+let VIEWING_SELF = false;
 window.renderListing = (item) => {
   const { liveEl, pendEl, expEl } = mrefs();
-  // Başkasının profilinde sadece 'live' listeye bas
-  const container =
-    VIEWING_SELF
-      ? (item.status === "live" ? liveEl : item.status === "pending" ? pendEl : expEl)
-      : liveEl;
-
+  const container = VIEWING_SELF
+    ? (item.status === "live" ? liveEl : item.status === "pending" ? pendEl : expEl)
+    : liveEl;
   if (!container) return;
 
   const img = firstPhoto(item.photos) || "";
@@ -156,7 +208,7 @@ window.renderListing = (item) => {
           ? ``
           : `<button class="btn sm" data-action="renew">Süre Al</button>
              <button class="btn sm danger" data-action="delete">Sil</button>`)
-    : ``; // başkasının profilinde yönetim yok
+    : ``;
 
   card.innerHTML = `
     <div class="thumb" style="${img ? `background-image:url('${img}')` : ''}"></div>
@@ -258,7 +310,7 @@ async function renewListing(id){
     const btn = ev.target.closest("button[data-action]"); if (!btn) return;
     const card = btn.closest(".item"); const id = card?.dataset.id; const action = btn.dataset.action; if (!id) return;
     if (action === "view")  viewListing(id, false);
-    if (!VIEWING_SELF) return; // başkasında yönetim yok
+    if (!VIEWING_SELF) return;
     if (action === "edit")  viewListing(id, true);
     if (action === "delete") deleteListing(id);
     if (action === "renew") renewListing(id);
@@ -269,10 +321,9 @@ async function renewListing(id){
 async function loadListings(uid){
   const { liveEl, pendEl, expEl } = mrefs();
   if (!(liveEl && pendEl && expEl)) return;
-
   const colRef = collection(db, "listings");
 
-  // Başkasının profili → sadece 'live' olanlar
+  // Başkasının profili → sadece 'live'
   if (!VIEWING_SELF) {
     const q1 = query(colRef, where("ownerId","==",uid), where("status","==","live"));
     const q2 = query(colRef, where("uid","==",uid),      where("status","==","live"));
@@ -353,11 +404,10 @@ async function loadListings(uid){
   }
 }
 
-/* ==== Auth + Görüntülenecek kullanıcıyı belirle ==== */
+/* ==== Auth + Görüntülenecek kullanıcı ==== */
 onAuthStateChanged(auth, async (me)=>{
   if (!me) { location.href = "/auth.html?next=/profile/profile.html"; return; }
 
-  // Hangi profili görüntülüyoruz?
   const params  = new URLSearchParams(location.search);
   const urlUid  = params.get("uid");
   const myUid   = me.uid;
@@ -367,31 +417,24 @@ onAuthStateChanged(auth, async (me)=>{
   // Üst bar görünürlük
   if (VIEWING_SELF) {
     btnDM?.style.setProperty('display','none');
-    btnRate?.style.setProperty('display','none');
     btnReport?.style.setProperty('display','none');
     btnNew?.style.setProperty('display','inline-block');
     btnChangeAvatar?.style.setProperty('display','inline-block');
   } else {
     btnDM?.style.setProperty('display','inline-block');
-    btnRate?.style.setProperty('display','inline-block');
     btnReport?.style.setProperty('display','inline-block');
     btnNew?.style.setProperty('display','none');
     btnChangeAvatar?.style.setProperty('display','none');
   }
 
-  // DM: kullanıcı–kullanıcı (sadece başkasının profili)
+  // DM (sadece başkasının profili)
   btnDM?.addEventListener('click', async ()=>{
     try{
       const pair = [myUid, viewUid].sort();
       const chatId = `dm_${pair[0]}_${pair[1]}`;
       await setDoc(
         doc(db, "chats", chatId),
-        {
-          participants: pair,
-          type: "dm",
-          createdAt: serverTimestamp(),
-          lastMsgAt: serverTimestamp()
-        },
+        { participants: pair, type: "dm", createdAt: serverTimestamp(), lastMsgAt: serverTimestamp() },
         { merge: true }
       );
       location.href = `/messages.html?chatId=${encodeURIComponent(chatId)}&peer=${encodeURIComponent(viewUid)}`;
@@ -401,31 +444,11 @@ onAuthStateChanged(auth, async (me)=>{
     }
   });
 
-  // Yıldız ver (opsiyonel düğme varsa)
-  btnRate?.addEventListener('click', async ()=>{
-    const val = prompt("1-5 arası puan ver:", "5");
-    const stars = Math.min(5, Math.max(1, parseInt(val||"",10)));
-    if (!stars) return;
-    try{
-      await setDoc(
-        doc(db, "ratings", viewUid, "votes", myUid),
-        { stars, updatedAt: serverTimestamp() },
-        { merge:true }
-      );
-      alert("Puanın kaydedildi.");
-      await loadRating(viewUid);
-    }catch(e){
-      console.error("Puan verilemedi:", e);
-      alert("Puan verilemedi.");
-    }
-  });
-
-  // Şikayet et (opsiyonel düğme varsa)
+  // Şikayet et
   btnReport?.addEventListener('click', async ()=>{
     const why = prompt("Şikayet nedeniniz:", "");
     if (!why) return;
     try{
-      // Not: Firestore kurallarında /complaints create yetkisi olmalı; yoksa izin hatası verir.
       await setDoc(
         doc(collection(db, "complaints")),
         { targetUid: viewUid, fromUid: myUid, reason: why.trim(), status: "open", createdAt: serverTimestamp() }
@@ -437,7 +460,7 @@ onAuthStateChanged(auth, async (me)=>{
     }
   });
 
-  // Kendi temel bilgilerini doldur
+  // Kendi temel bilgileri doldur
   if (VIEWING_SELF) {
     const displayName = me.displayName || (me.providerData?.[0]?.displayName) || '';
     const parts = displayName.trim().split(/\s+/);
@@ -468,7 +491,7 @@ onAuthStateChanged(auth, async (me)=>{
 
       if (prof.photoURL && !VIEWING_SELF) setSrc(avatarImg, prof.photoURL);
       if (prof.city && elCity) fill(elCity, prof.city);
-      if (!VIEWING_SELF && elMail) fill(elMail, prof.email || ""); // public e-posta varsa göster
+      if (!VIEWING_SELF && elMail) fill(elMail, prof.email || "");
     }
   }catch(e){
     console.warn("[profile] profil okunamadı:", e);
@@ -496,8 +519,9 @@ onAuthStateChanged(auth, async (me)=>{
     });
   }
 
-  // Puanı yükle
+  // Puanı yükle + (başkasına bakıyorsak) etkileşimli yıldızları hazırla
   await loadRating(viewUid);
+  await setupInteractiveRating(viewUid, myUid);
 
   // İlanları yükle
   await loadListings(viewUid);
