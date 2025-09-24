@@ -1,4 +1,4 @@
-<!-- /admin/index.html — GÜNCEL, DÖNGÜSÜZ, MODÜLER ADMIN PANELİ -->
+<!-- /admin/index.html — GÜNCEL TAM DOSYA -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -46,19 +46,14 @@
     .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--brd)}
     .title{margin:0;font-size:16px}
     .tools{display:flex;gap:8px}
-    .tools .btn-ghost{background:#fff;border:1px solid var(--brd);color:var(--ink)}
+    .tools .btn-ghost{background:#fff;border:1px solid var(--brd);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+
     .body{padding:12px 14px}
     .muted{color:var(--muted);font-size:13px}
 
     /* Görünümler */
     .view{display:none}
     .view.active{display:block}
-
-    /* Tablo basic */
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px 10px;border-bottom:1px solid var(--brd);text-align:left;font-size:14px}
-    th{background:#f8fafc;color:#334155}
-    tr:hover td{background:#fafafa}
 
     /* Gate (yetki ekranı) — JS kaldırır */
     #admin-gate{
@@ -88,7 +83,7 @@
       <strong>Takas Çemberi • Yönetim</strong>
     </a>
     <div class="grow"></div>
-    <button id="btnLogout" class="btn">Çıkış</button>
+    <button id="btnLogout" class="btn" type="button">Çıkış</button>
   </header>
 
   <!-- Layout -->
@@ -115,12 +110,10 @@
         <div class="head">
           <h3 class="title">Canlı Destek</h3>
           <div class="tools">
-            <button id="supportRefresh" class="btn btn-ghost">Yenile</button>
+            <button id="supportRefresh" class="btn-ghost" type="button">Yenile</button>
           </div>
         </div>
-        <div class="body" id="supportMount">
-          <p class="muted">Solda ziyaretçiler/müşteriler listelenir; birini seçtiğinizde sağda sohbet akışı görünür.</p>
-        </div>
+        <div class="body" id="supportMount"></div>
       </section>
 
       <!-- Onay Bekleyen -->
@@ -128,7 +121,7 @@
         <div class="head">
           <h3 class="title">Onay Bekleyen İlanlar</h3>
           <div class="tools">
-            <button id="pendingRefresh" class="btn btn-ghost">Yenile</button>
+            <button id="pendingRefresh" class="btn-ghost" type="button">Yenile</button>
           </div>
         </div>
         <div class="body" id="pendingMount">
@@ -141,7 +134,7 @@
         <div class="head">
           <h3 class="title">Mesajlar (Özel DM)</h3>
           <div class="tools">
-            <button id="messagesRefresh" class="btn btn-ghost">Yenile</button>
+            <button id="messagesRefresh" class="btn-ghost" type="button">Yenile</button>
           </div>
         </div>
         <div class="body" id="messagesMount">
@@ -162,7 +155,7 @@
         <div class="head">
           <h3 class="title">Şikayetler</h3>
           <div class="tools">
-            <button id="complaintsRefresh" class="btn btn-ghost">Yenile</button>
+            <button id="complaintsRefresh" class="btn-ghost" type="button">Yenile</button>
           </div>
         </div>
         <div class="body" id="complaintsMount">
@@ -262,36 +255,44 @@
       const target = views[view] || views.support;
       target?.classList.add("active");
       document.querySelectorAll('.nav button').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
-      location.hash = view;
-      // ilgili modülü yükle
+      if (location.hash.replace("#","") !== view) location.hash = view;
       mountModule(view);
     }
+
     async function mountModule(view){
       try{
         if(view==="support"){
           const mod = await import("./support.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("supportMount"), badgeEl: document.getElementById("b-support")} );
-        }else if(view==="pending"){
+          if (mod?.mount) mod.mount({
+            auth,
+            db,
+            el: document.getElementById("supportMount"),
+            badgeEl: document.getElementById("b-support")
+          });
+        } else if(view==="pending"){
           const mod = await import("./pending.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("pendingMount"), badgeEl: document.getElementById("b-pending")} );
-        }else if(view==="messages"){
+          mod?.mount?.({auth, db, el: document.getElementById("pendingMount"), badgeEl: document.getElementById("b-pending")});
+        } else if(view==="messages"){
           const mod = await import("./messages.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("messagesMount")} );
-        }else if(view==="users"){
-          const mod = await import("./main.js"); // örn: kullanıcı listesi burada
-          mod?.mountUsers?.( {auth, db, el: document.getElementById("usersMount")} );
-        }else if(view==="complaints"){
+          mod?.mount?.({auth, db, el: document.getElementById("messagesMount")});
+        } else if(view==="users"){
+          // users.js tercih; yoksa main.js'e düş
+          let mod = null;
+          try{ mod = await import("./users.js"); }
+          catch{ mod = await import("./main.js"); }
+          (mod?.mountUsers || mod?.mount || function noop(){})({auth, db, el: document.getElementById("usersMount")});
+        } else if(view==="complaints"){
           const mod = await import("./complaints.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("complaintsMount"), badgeEl: document.getElementById("b-complaints")} );
-        }else if(view==="broadcast"){
+          mod?.mount?.({auth, db, el: document.getElementById("complaintsMount"), badgeEl: document.getElementById("b-complaints")});
+        } else if(view==="broadcast"){
           const mod = await import("./broadcast.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("broadcastMount")} );
-        }else if(view==="settings"){
+          mod?.mount?.({auth, db, el: document.getElementById("broadcastMount")});
+        } else if(view==="settings"){
           const mod = await import("./settings.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("settingsMount")} );
-        }else if(view==="debug"){
+          mod?.mount?.({auth, db, el: document.getElementById("settingsMount")});
+        } else if(view==="debug"){
           const mod = await import("./debug-error.js");
-          mod?.mount?.( {auth, db, el: document.getElementById("debugMount")} );
+          mod?.mount?.({auth, db, el: document.getElementById("debugMount")});
         }
       }catch(e){
         console.error("Modül yükleme hatası:", e);
@@ -304,6 +305,12 @@
     document.getElementById("nav")?.addEventListener("click",(ev)=>{
       const btn = ev.target.closest("button[data-view]"); if(!btn) return;
       activate(btn.dataset.view);
+    });
+
+    // Hash route
+    window.addEventListener("hashchange", ()=>{
+      const v = (location.hash||"#support").replace("#","");
+      activate(v);
     });
 
     // Çıkış
