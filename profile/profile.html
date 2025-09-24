@@ -94,17 +94,21 @@
 </head>
 
 <body class="wave">
+  <!-- ÜST BAR (TEK ADET) -->
   <header class="hdr">
-  <div class="in">
-    <h1 class="ttl">Profil</h1>
-    <div class="row">
-      <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ Yeni İlan</a>
-      <button class="btn" id="btnDM" style="display:none">Mesaj yaz</button>
-      <button class="btn" id="btnSupport">Destek</button> <!-- EKLEDİĞİN -->
-      <button class="btn danger" id="btnLogout">Çıkış</button>
+    <div class="in">
+      <h1 class="ttl">Profil</h1>
+      <div class="row">
+        <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ Yeni İlan</a>
+        <!-- Başkasının profiline bakarken görünecek -->
+        <button class="btn" id="btnDM" style="display:none">Mesaj yaz</button>
+        <button class="btn" id="btnRate" style="display:none">Yıldız ver</button>
+        <button class="btn" id="btnReport" style="display:none">Şikayet et</button>
+        <!-- Çıkış -->
+        <button class="btn danger" id="btnLogout">Çıkış</button>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
   <div class="wrap">
     <!-- PROFİL PANELİ -->
@@ -128,6 +132,7 @@
           <label>Şehir</label>
           <input id="city" placeholder="Şehir" disabled>
 
+          <!-- Şifre alanları: sadece KENDİ profilinde profile.js tarafından kullanılacak -->
           <label>Mevcut Şifre</label>
           <input id="oldPassword" type="password" placeholder="Mevcut şifre">
           <label>Yeni Şifre</label>
@@ -190,55 +195,50 @@
   </nav>
 
   <!-- Basit UI (sekme geçişi, modal kapat, şifre event) -->
-<script type="module">
-  // Sekmeler
-  const tabs = document.querySelectorAll('.tab');
-  const panes = {
-    live:    document.getElementById('tab-live'),
-    pending: document.getElementById('tab-pending'),
-    expired: document.getElementById('tab-expired')
-  };
-  tabs.forEach(t => t.addEventListener('click', () => {
-    tabs.forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    const k = t.dataset.tab;
-    Object.entries(panes).forEach(([key, el]) => {
-      if (!el) return;
-      el.style.display = (key === k) ? 'grid' : 'none';
+  <script type="module">
+    // Sekmeler
+    const tabs = document.querySelectorAll('.tab');
+    const panes = {
+      live:    document.getElementById('tab-live'),
+      pending: document.getElementById('tab-pending'),
+      expired: document.getElementById('tab-expired')
+    };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const k = t.dataset.tab;
+      Object.entries(panes).forEach(([key, el]) => { if (!el) return; el.style.display = (key === k) ? 'grid' : 'none'; });
+    }));
+
+    // Şifre formu → profile.js'e event
+    document.getElementById('btnChangePass')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const ev = new CustomEvent('change-pass-submit', {detail:{
+        old: document.getElementById('oldPassword')?.value || '',
+        n1:  document.getElementById('newPassword')?.value || '',
+        n2:  document.getElementById('newPassword2')?.value || ''
+      }});
+      window.dispatchEvent(ev);
     });
-  }));
 
-  // Şifre formu → profile.js'e event
-  document.getElementById('btnChangePass')?.addEventListener('click', (e)=>{
-    e.preventDefault();
-    const ev = new CustomEvent('change-pass-submit', {detail:{
-      old: document.getElementById('oldPassword')?.value || '',
-      n1:  document.getElementById('newPassword')?.value || '',
-      n2:  document.getElementById('newPassword2')?.value || ''
-    }});
-    window.dispatchEvent(ev);
-  });
-
-  // Avatar trigger (UI)
-  document.getElementById('btnChangeAvatar')?.addEventListener('click', () =>
-    document.getElementById('avatarFile')?.click()
-  );
-
-  // Modal kapat
-  document.getElementById('mClose')?.addEventListener('click', () =>
-    document.getElementById('listingModal')?.classList.remove('show')
-  );
-
-  // Alt bar aktifliği
-  const path = location.pathname;
-  document.querySelectorAll('.fixedbar a').forEach(a=>{
-    a.classList.toggle('active',
-      a.getAttribute('href')===path || (path.startsWith('/profile') && a.id==='navProfile')
+    // Avatar trigger (UI)
+    document.getElementById('btnChangeAvatar')?.addEventListener('click',()=> 
+      document.getElementById('avatarFile')?.click()
     );
-  });
-</script>
 
-<!-- İş mantığı (Firebase & render) -->
-<script type="module" src="./profile.js"></script>
+    // Modal kapat
+    document.getElementById('mClose')?.addEventListener('click',()=> 
+      document.getElementById('listingModal')?.classList.remove('show')
+    );
+
+    // Alt bar aktifliği
+    const path = location.pathname;
+    document.querySelectorAll('.fixedbar a').forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/profile') && a.id==='navProfile'));
+    });
+  </script>
+
+  <!-- İş mantığı (Firebase & render): profile.js bu HTML ile uyumlu -->
+  <script type="module" src="./profile.js"></script>
 </body>
 </html>
