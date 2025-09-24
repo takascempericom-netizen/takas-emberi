@@ -139,5 +139,74 @@ function startGlobalMessagingWatcher(){
 window.__fb = { app, auth, db, requireAuth, startGlobalMessagingWatcher };
 console.log("[fb] ready:", app?.options?.projectId);
 
+/* Global export */
+window.__fb = { app, auth, db, requireAuth, startGlobalMessagingWatcher };
+console.log("[fb] ready:", app?.options?.projectId);
+
+/* ESM uyumu */
+
+/* ---- Public profile upsert (Google/E-posta girişleri) ---- */
+import {
+  getFirestore, doc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+function splitName(displayName) {
+  if (!displayName || typeof displayName !== 'string') return { firstName: '', lastName: '' };
+  const parts = displayName.trim().split(/\s+/);
+  if (parts.length === 1) return { firstName: parts[0], lastName: '' };
+  return { firstName: parts.slice(0, -1).join(' '), lastName: parts.slice(-1).join(' ') };
+}
+
+async function upsertPublicProfile(user) {
+  try {
+    const db = window.__fb?.db || getFirestore();
+
+    const displayName = user.displayName || user.providerData?.[0]?.displayName || '';
+    const photoURL    = user.photoURL    || user.providerData?.[0]?.photoURL    || '';
+    const email       = user.email       || user.providerData?.[0]?.email       || '';
+    const providerId  = user.providerData?.[0]?.providerId || 'password';
+
+    const { firstName, lastName } = splitName(displayName);
+
+    await setDoc(
+      doc(db, 'profiles_public', user.uid),
+      {
+        uid: user.uid,
+        displayName: displayName || (email ? email.split('@')[0] : 'Kullanıcı'),
+        firstName: firstName || '',
+        lastName: lastName || '',
+        photoURL: photoURL || '',
+        email: email || '',
+        provider: providerId,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+
+    await setDoc(
+      doc(db, 'users', user.uid),
+      {
+        uid: user.uid,
+        displayName: displayName || (email ? email.split('@')[0] : 'Kullanıcı'),
+        firstName: firstName || '',
+        lastName: lastName || '',
+        photoURL: photoURL || '',
+        email: email || '',
+        provider: providerId,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+  } catch (e) {
+    console.warn('upsertPublicProfile hata:', e);
+  }
+}
+
+/* global objeye ekle (mevcut anahtarları bozmadan) */
+Object.assign(window.__fb, { upsertPublicProfile });
+
+
 /* ESM uyumu */
 export {};
