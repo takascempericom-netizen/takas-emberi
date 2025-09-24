@@ -102,7 +102,6 @@
         <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ Yeni İlan</a>
         <!-- Başkasının profiline bakarken görünecek -->
         <button class="btn" id="btnDM" style="display:none">Mesaj yaz</button>
-        <button class="btn" id="btnRate" style="display:none">Yıldız ver</button>
         <button class="btn" id="btnReport" style="display:none">Şikayet et</button>
         <!-- Çıkış -->
         <button class="btn danger" id="btnLogout">Çıkış</button>
@@ -150,9 +149,8 @@
     <section class="card" id="tabsCard" style="margin-top:12px">
       <div class="tabs" id="tabs">
         <div class="tab active" data-tab="live">Yayındaki İlanlar</div>
-        <!-- Aşağıdaki iki başlığı kullanıcıya göstermiyoruz -->
-        <div class="tab" data-tab="pending" style="display:none">Onay Bekleyen</div>
-        <div class="tab" data-tab="expired" style="display:none">Süresi Dolan</div>
+        <div class="tab" data-tab="pending">Onay Bekleyen</div>
+        <div class="tab" data-tab="expired">Süresi Dolan</div>
       </div>
       <div id="tab-live" class="list"></div>
       <div id="tab-pending" class="list" style="display:none"></div>
