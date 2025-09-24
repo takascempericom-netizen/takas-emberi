@@ -710,14 +710,17 @@
   }
 
   async function closePop(){
-    if(!pop) return;
-    pop.style.display='none';
+  if(!pop) return;
 
-    // Canlı dinlemeyi kapat
-    if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
+  // Pencereyi kapat
+  pop.style.display = 'none';
 
-    // X’e basınca: kullanıcının gönderdiği mesajları sil (admin mesajları kalır)
-    try{
+  // Canlı dinlemeyi kapat
+  if (supUnsub) { try { supUnsub(); } catch {} supUnsub = null; }
+
+  // Sadece kullanıcının baloncuğunu temizle (UI)
+  if (supBody) supBody.innerHTML = '';
+}
       const user = auth.currentUser;
       if(!user) return;
       const { collection, query, where, limit, getDocs, deleteDoc } =
