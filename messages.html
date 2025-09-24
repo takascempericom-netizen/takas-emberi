@@ -12,24 +12,38 @@
     .hdr{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-bottom:1px solid var(--brd)}
     .hdr .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
     .ttl{margin:0;font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .row{display:flex;gap:8px;align-items:center}
+    .btn{appearance:none;border:1px solid var(--brd);background:var(--glass);color:#111827;font-weight:600;padding:8px 12px;border-radius:12px;cursor:pointer}
+    .btn:hover{background:#fff}
+    .btn.sm{padding:6px 10px;border-radius:10px;font-size:12px}
+
     .wrap{max-width:1100px;margin:16px auto 120px;padding:0 16px}
-    .grid{display:grid;grid-template-columns:280px 1fr;gap:12px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .chat{display:grid;grid-template-columns:300px 1fr;gap:12px}
+    @media (max-width: 900px){ .chat{grid-template-columns:1fr} .sidebar{order:2} .panel{order:1} }
+
     .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
-    .left{display:flex;flex-direction:column;height:70vh}
-    .left .search{padding:10px;border-bottom:1px solid var(--brd)}
-    .left input{width:100%;border:1px solid var(--brd);border-radius:10px;padding:10px;background:#fff}
-    .threads{overflow:auto}
-    .thread{padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;display:grid;gap:2px}
-    .thread.active{background:#111827;color:#fff}
-    .thread small{color:#475569}
-    .right{display:flex;flex-direction:column;height:70vh}
-    .msgs{flex:1;overflow:auto;padding:12px;display:grid;gap:8px}
-    .msg{max-width:70%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff}
-    .msg.me{margin-left:auto;background:#eef2ff;border-color:#c7d2fe}
-    .composer{border-top:1px solid var(--brd);display:flex;gap:8px;padding:10px}
-    .composer input{flex:1;border:1px solid var(--brd);border-radius:10px;padding:10px;background:#fff}
-    .composer button{border:1px solid var(--brd);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .sidebar{display:flex;flex-direction:column;min-height:420px}
+    .side-head{padding:10px 12px;border-bottom:1px solid var(--brd);font-weight:700}
+    .threads{display:flex;flex-direction:column;gap:6px;padding:10px;max-height:60vh;overflow:auto}
+    .thread{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:8px;cursor:pointer}
+    .thread.active{border-color:#94a3b8;box-shadow:0 4px 12px rgba(15,23,42,.08)}
+    .avatar{width:44px;height:44px;border-radius:999px;object-fit:cover;background:#f1f5f9;border:1px solid #e5e7eb}
+    .tname{font-weight:700}
+    .tmuted{font-size:12px;color:#64748b}
+
+    .panel{display:grid;grid-template-rows:auto 1fr auto;min-height:420px}
+    .panel-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--brd);background:rgba(255,255,255,.5)}
+    .panel-head img{width:40px;height:40px;border-radius:999px;border:1px solid #e5e7eb;background:#f1f5f9}
+    .panel-head .name{font-weight:700}
+
+    .msgs{padding:12px;display:flex;flex-direction:column;gap:8px;overflow:auto;background:#fff}
+    .msg{max-width:70%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc}
+    .msg.me{margin-left:auto;background:#111827;color:#fff;border-color:#111827}
+    .msg .time{display:block;margin-top:4px;font-size:11px;opacity:.7}
+    .input{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-top:1px solid var(--brd);background:rgba(255,255,255,.6)}
+    .input input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff}
+
+    /* Alt sabit bar */
     .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
     .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
     .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
@@ -38,29 +52,50 @@
   </style>
 </head>
 <body>
+
   <header class="hdr">
     <div class="in">
       <h1 class="ttl">Mesajlar</h1>
+      <div class="row">
+        <!-- Bu sayfada yeni sohbet başlatma UI'si zorunlu değil.
+             Profilden “Mesaj yaz” ile yönlendirme beklenir. -->
+      </div>
     </div>
   </header>
 
   <main class="wrap">
-    <div class="grid">
-      <section class="card left">
-        <div class="search"><input id="srch" placeholder="Sohbet ara…"></div>
-        <div id="threads" class="threads"></div>
-      </section>
+    <section class="chat">
+      <!-- SOL: Sohbet listesi (sadece DM) -->
+      <aside class="card sidebar">
+        <div class="side-head">Sohbetler</div>
+        <div id="threads" class="threads">
+          <div class="tmuted">Yükleniyor…</div>
+        </div>
+      </aside>
 
-      <section class="card right">
-        <div id="msgs" class="msgs"><div style="color:#475569">Sohbet seçin veya yeni bir sohbet başlatın.</div></div>
-        <div class="composer">
-          <input id="text" placeholder="Mesaj yazın…" />
-          <button id="send">Gönder</button>
+      <!-- SAĞ: Mesaj paneli -->
+      <section class="card panel">
+        <div class="panel-head">
+          <img id="peerAvatar" alt="">
+          <div>
+            <div class="name" id="peerName">Sohbet seç</div>
+            <div class="tmuted" id="peerEmail"></div>
+          </div>
+        </div>
+
+        <div id="msgs" class="msgs">
+          <div class="tmuted">Sol taraftan bir sohbet seçin.</div>
+        </div>
+
+        <div class="input">
+          <input id="msgInput" placeholder="Mesaj yaz…" autocomplete="off" />
+          <button id="btnSend" class="btn">Gönder</button>
         </div>
       </section>
-    </div>
+    </section>
   </main>
 
+  <!-- ALT BAR -->
   <nav class="fixedbar">
     <div class="in">
       <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
@@ -70,142 +105,258 @@
     </div>
   </nav>
 
-  <audio id="ding" preload="auto">
-    <source src="/assets/sounds/notify.wav" type="audio/wav">
-  </audio>
-
-  <!-- Firebase init (ortak) -->
-  <script type="module" src="assets/js/firebase-init.js"></script>
-
-  <!-- Sayfa scripti -->
   <script type="module">
-    const { auth, db, requireAuth } = window.__fb;
-    requireAuth(); // giriş yoksa /auth.html
-
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // ==== Firebase (CDN) ====
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      collection, query, where, orderBy, onSnapshot, addDoc, doc, getDocs,
-      serverTimestamp, updateDoc
+      getFirestore, collection, query, where, onSnapshot, orderBy,
+      doc, getDoc, setDoc, addDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ==== UI Refs ====
     const elThreads = document.getElementById('threads');
     const elMsgs    = document.getElementById('msgs');
-    const elText    = document.getElementById('text');
-    const btnSend   = document.getElementById('send');
-    const ding      = document.getElementById('ding');
+    const elInput   = document.getElementById('msgInput');
+    const btnSend   = document.getElementById('btnSend');
+    const peerAvatar= document.getElementById('peerAvatar');
+    const peerName  = document.getElementById('peerName');
+    const peerEmail = document.getElementById('peerEmail');
 
-    const $ = (s, r=document)=>r.querySelector(s);
-
-    // Alt bar linklerini .html ile sabitle
-    $('#navHome')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/"; });
-    $('#navMsgs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/messages.html"; });
-    $('#navNotifs')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/notifications.html"; });
-    $('#navProfile')?.addEventListener('click', (e)=>{ e.preventDefault(); location.href = "/profile/profile.html"; });
-
-    let me = null;
-    let activeChatId = null;
-    let unsubMsgs = null;
-
+    // ==== Helpers ====
+    const $el = (html)=> {
+      const t = document.createElement('template');
+      t.innerHTML = html.trim();
+      return t.content.firstElementChild;
+    };
     const fmt = (ts)=>{
       try{
         const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
-        return isNaN(d) ? "—" : d.toLocaleString("tr-TR",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});
+        if (isNaN(d)) return "—";
+        return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       }catch{ return "—"; }
     };
 
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ location.href="/auth.html"; return; }
-      me = user;
-
-      // Sohbet listesi
-      const qThreads = query(
-        collection(db,"chats"),
-        where("participants","array-contains", me.uid),
-        orderBy("updatedAt","desc")
-      );
-      onSnapshot(qThreads, (snap)=>{
-        elThreads.innerHTML = "";
-        snap.forEach(d=>{
-          const c = d.data()||{};
-          const div = document.createElement("div");
-          div.className = "thread" + (d.id===activeChatId ? " active": "");
-          const title = c.title || (Array.isArray(c.participants) ? c.participants.filter(x=>x!==me.uid).join(", ") : "Sohbet");
-          div.innerHTML = `<strong>${title}</strong><small>${c.lastMsg||""}</small>`;
-          div.onclick = ()=> openChat(d.id);
-          elThreads.appendChild(div);
-        });
-      });
-
-      // URL hedefi (messages.html?to=<uid>)
-      const params = new URLSearchParams(location.search);
-      const toUid = params.get("to");
-      if(toUid) {
-        const id = await ensureDirectChat(me.uid, toUid);
-        openChat(id);
-      }
-    });
-
-    // İkili sohbeti bul/oluştur
-    async function ensureDirectChat(a,b){
-      const qMine = query(collection(db,"chats"), where("participants","array-contains", a));
-      const ss = await getDocs(qMine);
-      const found = ss.docs.find(docu=>{
-        const p = docu.data()?.participants||[];
-        return p.length===2 && p.includes(a) && p.includes(b);
-      });
-      if(found) return found.id;
-      const ref = await addDoc(collection(db,"chats"), {
-        participants:[a,b],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastMsg: ""
-      });
-      return ref.id;
+    // Peer bilgisi önbellek
+    const userCache = new Map();
+    async function getUserBrief(uid){
+      if (userCache.has(uid)) return userCache.get(uid);
+      let data = {name:'Kullanıcı', email:'', photo:''};
+      try{
+        const s = await getDoc(doc(db,'profiles_public',uid));
+        if (s.exists()){
+          const p = s.data()||{};
+          data.name = (p.firstName && p.lastName) ? (p.firstName+' '+p.lastName) : (p.displayName || p.username || 'Kullanıcı');
+          data.email = p.email || '';
+          data.photo = p.photoURL || '';
+        }
+      }catch{}
+      userCache.set(uid, data);
+      return data;
     }
 
-    // Sohbeti aç
-    function openChat(chatId){
-      if(unsubMsgs) { unsubMsgs(); unsubMsgs=null; }
-      activeChatId = chatId;
-      elMsgs.innerHTML = "";
+    // URL param
+    const params = new URLSearchParams(location.search);
+    let initialChatId = params.get('chat') || params.get('chatId') || '';
+    const peerParam   = params.get('peer') || '';
 
-      const msgsRef = collection(db,"chats",chatId,"messages");
-      const qMsgs = query(msgsRef, orderBy("createdAt","asc"));
-      let firstLoad = true;
-      unsubMsgs = onSnapshot(qMsgs, (snap)=>{
-        if(firstLoad) elMsgs.innerHTML = "";
-        snap.docChanges().forEach(ch=>{
-          const d = ch.doc.data()||{};
-          if(ch.type==="added"){
-            const div = document.createElement("div");
-            div.className = "msg" + (d.senderUid===me.uid ? " me": "");
-            div.innerHTML = `<div>${d.text||""}</div><small style="display:block;color:#64748b">${fmt(d.createdAt)}</small>`;
-            elMsgs.appendChild(div);
-            elMsgs.scrollTop = elMsgs.scrollHeight;
-            if(!firstLoad && d.senderUid!==me.uid){ try{ ding.play(); }catch{} }
-          }
+    let me = null;
+    let activeChatId = '';
+    let activePeerUid = '';
+    let unsubMsgs = null;
+
+    // DM chat garantile (yoksa oluştur)
+    async function ensureDmChat(myUid, peerUid){
+      const pair = [myUid, peerUid].sort();
+      const chatId = `dm_${pair[0]}_${pair[1]}`;
+      const ref = doc(db, 'chats', chatId);
+      const snap = await getDoc(ref);
+      if (!snap.exists()){
+        await setDoc(ref, {
+          participants: pair,
+          type: 'dm',
+          createdAt: serverTimestamp(),
+          lastMsgAt: serverTimestamp()
+        }, { merge: true });
+      }
+      return chatId;
+    }
+
+    // Sohbet listesi (yalnız DM)
+    let unsubThreads = null;
+    function watchThreads(){
+      if (unsubThreads) unsubThreads();
+      elThreads.innerHTML = '<div class="tmuted">Yükleniyor…</div>';
+
+      const q = query(
+        collection(db,'chats'),
+        where('participants','array-contains', me.uid)
+        // Not: type == 'dm' filtresini istemci tarafında da ayıklayacağız
+      );
+      unsubThreads = onSnapshot(q, async (snap)=>{
+        if (snap.empty){
+          elThreads.innerHTML = '<div class="tmuted">Sohbet yok.</div>';
+          return;
+        }
+        // İstemci sıralama (lastMsgAt desc)
+        const docs = snap.docs
+          .map(d=>({id:d.id, ...d.data()}))
+          .filter(d=> (d.type||'dm') === 'dm');
+        docs.sort((a,b)=>{
+          const ta = a.lastMsgAt?.toMillis?.() || 0;
+          const tb = b.lastMsgAt?.toMillis?.() || 0;
+          return tb - ta;
         });
-        firstLoad = false;
+
+        elThreads.innerHTML = '';
+        for (const d of docs){
+          const peerUid = (d.participants||[]).find(x=>x!==me.uid) || '';
+          const info = peerUid ? await getUserBrief(peerUid) : {name:'—',email:'',photo:''};
+
+          const row = $el(`
+            <div class="thread ${d.id===activeChatId?'active':''}" data-id="${d.id}" data-peer="${peerUid}">
+              <img class="avatar" src="${info.photo||''}" alt="">
+              <div>
+                <div class="tname">${info.name||'Kullanıcı'}</div>
+                <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
+              </div>
+              <div class="tmuted">${d.lastMsgAt ? new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) : ''}</div>
+            </div>
+          `);
+          row.addEventListener('click', ()=> openChat(d.id, peerUid));
+          elThreads.appendChild(row);
+        }
+
+        // İlk açılışta belirli bir sohbet istenmişse
+        if (!activeChatId){
+          if (initialChatId){
+            const exist = docs.find(x=>x.id===initialChatId);
+            if (exist){
+              const peerUid = exist.participants.find(x=>x!==me.uid) || '';
+              openChat(initialChatId, peerUid);
+            }
+            initialChatId = ''; // bir kere dene
+          } else if (docs.length){
+            const d = docs[0];
+            const peerUid = d.participants.find(x=>x!==me.uid) || '';
+            openChat(d.id, peerUid);
+          }
+        }
       });
+    }
+
+    // Mesajları izle
+    function watchMessages(chatId){
+      if (unsubMsgs) { unsubMsgs(); unsubMsgs = null; }
+      elMsgs.innerHTML = '<div class="tmuted">Yükleniyor…</div>';
+
+      const q = query(
+        collection(db,'chats', chatId, 'messages'),
+        orderBy('createdAt','asc')
+      );
+      unsubMsgs = onSnapshot(q, (snap)=>{
+        if (snap.empty){
+          elMsgs.innerHTML = '<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
+          return;
+        }
+        elMsgs.innerHTML = '';
+        snap.forEach(d=>{
+          const m = d.data()||{};
+          const mine = m.senderUid === me.uid;
+          const div = $el(`
+            <div class="msg ${mine?'me':''}">
+              <div class="text"></div>
+              <span class="time">${fmt(m.createdAt)}</span>
+            </div>
+          `);
+          div.querySelector('.text').textContent = m.text || '';
+          elMsgs.appendChild(div);
+        });
+        elMsgs.scrollTop = elMsgs.scrollHeight;
+      });
+    }
+
+    // Sohbet aç
+    async function openChat(chatId, peerUid){
+      activeChatId = chatId;
+      activePeerUid = peerUid||'';
+
+      // Sidebar active
+      document.querySelectorAll('.thread').forEach(t=>{
+        t.classList.toggle('active', t.dataset.id === chatId);
+      });
+
+      // Peer başlık
+      if (activePeerUid){
+        const info = await getUserBrief(activePeerUid);
+        peerName.textContent = info.name || 'Sohbet';
+        peerEmail.textContent = info.email || '';
+        peerAvatar.src = info.photo || '';
+      } else {
+        peerName.textContent = 'Sohbet';
+        peerEmail.textContent = '';
+        peerAvatar.removeAttribute('src');
+      }
+
+      watchMessages(chatId);
+      history.replaceState(null, '', `/messages.html?chatId=${encodeURIComponent(chatId)}`);
     }
 
     // Mesaj gönder
-    async function sendMsg(){
-      const txt = (elText.value||"").trim(); if(!txt || !activeChatId) return;
-      elText.value = "";
-      await addDoc(collection(db,"chats",activeChatId,"messages"), {
+    async function sendMessage(){
+      const text = (elInput.value||'').trim();
+      if (!text || !activeChatId) return;
+
+      const msgRef = collection(db,'chats', activeChatId, 'messages');
+      await addDoc(msgRef, {
+        text,
         senderUid: me.uid,
-        text: txt,
         createdAt: serverTimestamp()
       });
-      await updateDoc(doc(db,"chats",activeChatId), {
-        updatedAt: serverTimestamp(),
-        lastMsg: txt
-      });
-    }
+      // chat özetini güncelle
+      await setDoc(doc(db,'chats', activeChatId), {
+        lastMsg: text,
+        lastMsgAt: serverTimestamp()
+      }, { merge:true });
 
-    btnSend?.addEventListener('click', sendMsg);
-    elText?.addEventListener('keydown',(e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); } });
+      elInput.value = '';
+    }
+    btnSend.addEventListener('click', sendMessage);
+    elInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }});
+
+    // Auth + başlangıç
+    onAuthStateChanged(auth, async (user)=>{
+      if (!user){ location.href = "/auth.html?next=/messages.html"; return; }
+      me = user;
+
+      // Eğer URL'de ?peer=... geldiyse, DM chatini garantile ve onu aç
+      if (peerParam){
+        try{
+          const chatId = await ensureDmChat(me.uid, peerParam);
+          initialChatId = chatId;
+        }catch(e){ console.error("DM açılamadı:", e); }
+      }
+
+      watchThreads();
+    });
+
+    // Alt bar aktifliği
+    const path = location.pathname;
+    document.querySelectorAll('.fixedbar a').forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/messages') && a.id==='navMsgs'));
+    });
   </script>
 </body>
 </html>
