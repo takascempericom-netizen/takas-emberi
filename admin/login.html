@@ -1,54 +1,155 @@
+<!-- /admin/login.html (GÜNCEL & DÜZELTİLMİŞ) -->
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin Giriş</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Girişi</title>
   <style>
-    body{margin:0;display:grid;place-items:center;height:100dvh;font-family:Inter,system-ui}
-    .card{width:min(380px,92vw);border:1px solid #e5e7eb;border-radius:14px;padding:16px}
-    .row{display:grid;gap:8px}
-    input,button{font:inherit;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
-    button{cursor:pointer;background:#111827;color:#fff;border-color:#111827}
-    .muted{color:#64748b;font-size:12px}
+    :root{--ink:#0f172a;--muted:#6b7280;--brd:#e5e7eb;--focus:#0ea5e9}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#f8fafc;color:var(--ink)}
+    .wrap{min-height:100vh;display:grid;place-items:center;padding:16px}
+    .card{width:min(420px,94vw);background:#fff;border:1px solid var(--brd);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:18px}
+    h1{margin:0 0 12px;font-size:20px}
+    .f{display:grid;gap:10px}
+    .row{display:grid;gap:6px}
+    label{font-size:12px;color:var(--muted)}
+    input{border:1px solid var(--brd);border-radius:12px;padding:10px 12px;font:inherit}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid #111827;background:#111827;color:#fff;cursor:pointer}
+    .btn[disabled]{opacity:.7;cursor:wait}
+    .msg{margin-top:10px;font-size:13px;color:#b91c1c;display:none}
+    .small{font-size:12px;color:var(--muted);margin-top:6px}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Admin Girişi</h2>
-    <div class="row">
-      <input id="email" placeholder="admin@example.com" type="email"/>
-      <input id="pass" placeholder="Şifre" type="password"/>
-      <button id="btn">Giriş</button>
-      <div id="msg" class="muted"></div>
-    </div>
-  </div>
+  <main class="wrap">
+    <section class="card">
+      <h1>Admin Girişi</h1>
+      <form id="frm" class="f" autocomplete="on">
+        <div class="row">
+          <label for="email">E-posta</label>
+          <input id="email" type="email" required autocomplete="email" value="" />
+        </div>
+        <div class="row">
+          <label for="pass">Şifre</label>
+          <input id="pass" type="password" required autocomplete="current-password" />
+        </div>
+        <button id="btn" class="btn" type="submit">Giriş</button>
+        <div id="err" class="msg" role="alert"></div>
+        <div class="small">Yalnızca <strong>admin/moderator/support</strong> yetkisine sahip hesaplar giriş yapabilir.</div>
+      </form>
+    </section>
+  </main>
 
+  <!-- Firebase -->
   <script type="module">
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import "/assets/js/firebase-init.js";
-    const { auth } = window.__fb || { auth: getAuth() };
-    const msg = document.getElementById('msg');
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    onAuthStateChanged(auth, async (u)=>{
-      if(u){
-        await u.getIdTokenResult(true);
-        const claim = u.getIdTokenResult ? await u.getIdTokenResult() : {claims:{}};
-        if(claim.claims?.admin || ['admin','moderator','support'].includes(claim.claims?.role)){
-          location.href="/admin/";
-        }else{
-          msg.textContent = "Bu kullanıcı admin değil.";
+    // ——— Firebase init ———
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // ——— UI refs ———
+    const frm = document.getElementById('frm');
+    const btn = document.getElementById('btn');
+    const elE = document.getElementById('email');
+    const elP = document.getElementById('pass');
+    const err = document.getElementById('err');
+
+    function setBusy(b){
+      btn.disabled = b;
+      btn.textContent = b ? "Giriş yapılıyor…" : "Giriş";
+    }
+    function showError(msg){
+      err.textContent = msg;
+      err.style.display = 'block';
+    }
+    function clearError(){
+      err.textContent = "";
+      err.style.display = 'none';
+    }
+
+    // ——— Yetki kontrolü ———
+    async function isAdminLike(user){
+      // 1) custom claim
+      const idt = await user.getIdTokenResult(true);
+      const claimOk =
+        idt.claims?.admin === true ||
+        ["admin","moderator","support"].includes(idt.claims?.role);
+
+      if (claimOk) return true;
+
+      // 2) users/{uid}.role (client rules: kendi kaydını okuyabilir)
+      try{
+        const s = await getDoc(doc(db, "users", user.uid));
+        if (s.exists()){
+          const role = (s.data()?.role || "").toString().toLowerCase();
+          if (["admin","moderator","support"].includes(role)) return true;
         }
+      }catch(e){
+        // okunamasa da claim varsa zaten dönerdik; burada sessiz geç
+        console.warn("users/{uid} okunamadı:", e);
+      }
+      return false;
+    }
+
+    // ——— Auth state (zaten girişliyse direk geçir) ———
+    onAuthStateChanged(auth, async (u)=>{
+      if(!u) return;
+      try{
+        if (await isAdminLike(u)) {
+          location.replace("/admin/index.html");
+        } else {
+          await signOut(auth);
+          showError("Bu kullanıcı yetkili değil (admin/moderator/support).");
+        }
+      }catch(e){
+        console.error("onAuthStateChanged hata:", e);
+        showError("Beklenmeyen hata. Lütfen tekrar deneyin.");
+      }finally{
+        setBusy(false);
       }
     });
 
-    document.getElementById('btn').onclick = async ()=>{
-      msg.textContent = "Giriş yapılıyor…";
+    // ——— Form submit ———
+    frm.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      clearError();
+      setBusy(true);
       try{
-        const email = document.getElementById('email').value.trim();
-        const pass  = document.getElementById('pass').value;
-        await signInWithEmailAndPassword(auth, email, pass);
-      }catch(e){ msg.textContent = e.code || e.message; }
-    };
+        const email = elE.value.trim();
+        const pass  = elP.value;
+        const { user } = await signInWithEmailAndPassword(auth, email, pass);
+
+        // Yetki kontrolü
+        if (await isAdminLike(user)) {
+          location.replace("/admin/index.html");
+        } else {
+          await signOut(auth);
+          showError("Bu hesapta admin/moderator/support yetkisi yok.");
+        }
+      }catch(e){
+        console.error("Giriş hatası:", e);
+        const m = e?.code || e?.message || "Giriş başarısız.";
+        showError(m);
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    // Güvenlik: uzun beklemeye karşı 15 sn emniyet kilidi (UI donmasın)
+    setTimeout(()=>{ if(btn.disabled){ setBusy(false); } }, 15000);
   </script>
 </body>
 </html>
