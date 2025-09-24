@@ -633,164 +633,141 @@
 
     onAuthStateChanged(auth, (u)=>{ if(u) watchOffersForMe(u.uid); });
 
-    /* ===== Üst bar butonları ===== */
-    const $ = (s,r=document)=>r.querySelector(s);
-    $('#btnLogout')?.addEventListener('click', async ()=>{ try{ await signOut(auth);}catch{} location.href="/"; });
-    $('#btnProfile')?.addEventListener('click', ()=>location.href="/profile/profile.html");
-    $('#btnPostAd')?.addEventListener('click', ()=>location.href="/ilan/ilan-verme.html");
-    $('#btnSearch')?.addEventListener('click', ()=>location.href="/ara");
+/* ===== Üst bar + Alt bar (TEK KERE) ===== */
+const $ = (s,r=document)=>r.querySelector(s);
 
-    /* ===== Alt bar ===== */
-    const tabs=[$('#tabHome'),$('#tabMessages'),$('#tabNotifs')].filter(Boolean);
-    tabs.forEach(t=>t.addEventListener('click',()=>{
-      tabs.forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      if(t.id==='tabHome') location.href="/";
-      if(t.id==='tabMessages') location.href="/messages.html";
-      if(t.id==='tabNotifs') location.href="/notifications.html";
-    }));
+$('#btnLogout')?.addEventListener('click', async ()=>{ 
+  try{ await signOut(auth);}catch{} 
+  location.href="/"; 
+});
+$('#btnProfile')?.addEventListener('click', ()=>location.href="/profile/profile.html");
+$('#btnPostAd')?.addEventListener('click', ()=>location.href="/ilan/ilan-verme.html");
+$('#btnSearch')?.addEventListener('click', ()=>location.href="/ara");
 
-  /* ===== Canlı Destek baloncuğu: aç/kapat + canlı dinleme + gönder ===== */
-  const btnSupport = document.getElementById('btnSupport');
-  const pop        = document.getElementById('supportPop');
-  const chatIn     = document.getElementById('chatInput');
-  const chatSend   = document.getElementById('chatSend');
-  const supClose   = document.getElementById('supClose');
-  const supBody    = pop?.querySelector('.sup-body');
+const tabs=[$('#tabHome'),$('#tabMessages'),$('#tabNotifs')].filter(Boolean);
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  if(t.id==='tabHome') location.href="/";
+  if(t.id==='tabMessages') location.href="/messages.html";
+  if(t.id==='tabNotifs') location.href="/notifications.html";
+}));
 
-  let supUnsub = null;        // Firestore canlı dinleyici
-  let autoAckShown = false;   // “Sizi canlı destek…” yalnız 1 kez
+/* ===== Canlı Destek baloncuğu: aç/kapat + canlı dinleme + gönder ===== */
+const btnSupport = document.getElementById('btnSupport');
+const pop        = document.getElementById('supportPop');
+const chatIn     = document.getElementById('chatInput');
+const chatSend   = document.getElementById('chatSend');
+const supClose   = document.getElementById('supClose');
+const supBody    = pop?.querySelector('.sup-body');
 
-  function appendMsg(text, isMe = false){
-    if(!supBody) return;
-    const p = document.createElement('p');
-    p.className = 'msg' + (isMe ? ' me' : '');
-    p.textContent = text;
-    supBody.appendChild(p);
-    supBody.scrollTop = supBody.scrollHeight;
-  }
+let supUnsub = null;        // Firestore canlı dinleyici
+let autoAckShown = false;   // “Sizi canlı destek…” yalnız 1 kez
 
-  async function startLive(uid){
-    if (!uid || !supBody) return;
-    if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
+function appendMsg(text, isMe = false){
+  if(!supBody) return;
+  const p = document.createElement('p');
+  p.className = 'msg' + (isMe ? ' me' : '');
+  p.textContent = text;
+  supBody.appendChild(p);
+  supBody.scrollTop = supBody.scrollHeight;
+}
 
-    const { collection, query, orderBy, onSnapshot } =
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+async function startLive(uid){
+  if (!uid || !supBody) return;
+  if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-    const ref = collection(db, 'supportThreads', uid, 'messages');
-    const q   = query(ref, orderBy('createdAt','asc'));
+  const { collection, query, orderBy, onSnapshot } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
-    supUnsub = onSnapshot(q, snap=>{
-      supBody.innerHTML = '';
-      if (snap.empty){
-        appendMsg('Merhaba 👋 Nasıl yardımcı olalım?');
-      } else {
-        snap.forEach(doc=>{
-          const m = doc.data() || {};
-          const me = m.senderUid === uid;
-          appendMsg(m.text || '', me);
-        });
-      }
-    }, err=>{
-      console.warn('destek mesajları okunamadı:', err);
-    });
-  }
+  const ref = collection(db, 'supportThreads', uid, 'messages');
+  const q   = query(ref, orderBy('createdAt','asc'));
 
-  function openPop(){
-    if(!pop) return;
-    pop.style.display='block';
-    autoAckShown = false; // pencere her açıldığında sıfırla
-    const u = auth.currentUser;
-    if (u) {
-      if(supBody){ supBody.innerHTML = ''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
-      startLive(u.uid);
+  supUnsub = onSnapshot(q, snap=>{
+    supBody.innerHTML = '';
+    if (snap.empty){
+      appendMsg('Merhaba 👋 Nasıl yardımcı olalım?');
     } else {
-      if(supBody){ supBody.innerHTML=''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
+      snap.forEach(doc=>{
+        const m = doc.data() || {};
+        const me = m.senderUid === uid; // benim mesajım sağda (me)
+        appendMsg(m.text || '', me);
+      });
     }
-  }
+  }, err=>{
+    console.warn('destek mesajları okunamadı:', err);
+  });
+}
 
-  async function closePop(){
+function openPop(){
   if(!pop) return;
+  pop.style.display='block';
+  autoAckShown = false; // her açılışta sıfırla
+  const u = auth.currentUser;
+  if (u) {
+    if(supBody){ supBody.innerHTML = ''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
+    startLive(u.uid);
+  } else {
+    if(supBody){ supBody.innerHTML=''; appendMsg('Merhaba 👋 Nasıl yardımcı olalım?'); }
+  }
+}
 
-  // Pencereyi kapat
-  pop.style.display = 'none';
+async function closePop(){
+  if(!pop) return;
+  pop.style.display='none';
 
   // Canlı dinlemeyi kapat
-  if (supUnsub) { try { supUnsub(); } catch {} supUnsub = null; }
+  if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-  // Sadece kullanıcının baloncuğunu temizle (UI)
+  // SADECE kullanıcı baloncuğunu temizle (DB’ye dokunma)
   if (supBody) supBody.innerHTML = '';
 }
-      const user = auth.currentUser;
-      if(!user) return;
-      const { collection, query, where, limit, getDocs, deleteDoc } =
-        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
-      const batchLimit = 50;
-      while(true){
-        const q = query(
-          collection(db,'supportThreads', user.uid, 'messages'),
-          where('senderUid','==', user.uid),
-          limit(batchLimit)
-        );
-        const snap = await getDocs(q);
-        if(snap.empty) break;
-        const deletions = [];
-        snap.forEach(d=> deletions.push(deleteDoc(d.ref)));
-        await Promise.all(deletions);
-        if(snap.size < batchLimit) break;
-      }
-    }catch(e){
-      console.warn('Support mesaj silme uyarı:', e);
+btnSupport?.addEventListener('click', openPop);
+supClose?.addEventListener('click', ()=> closePop());
+
+chatSend?.addEventListener('click', async ()=>{
+  const txt = (chatIn?.value||'').trim();
+  if(!txt) return;
+  const user = auth.currentUser;
+  if(!user){ location.href="/auth.html?next=/"; return; }
+
+  // Benim mesajımı anında göster
+  appendMsg(txt, true);
+
+  try{
+    const { addDoc, collection, serverTimestamp, setDoc, doc } =
+      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+    // Thread üst belgesi: liste & yetki için gerekli
+    await setDoc(doc(db, 'supportThreads', user.uid), {
+      participants: [user.uid],
+      lastAt: serverTimestamp(),
+      lastMsg: txt,
+      lastSenderUid: user.uid
+    }, { merge: true });
+
+    // Mesajı alt koleksiyona yaz
+    await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
+      senderUid: user.uid,
+      text: txt,
+      createdAt: serverTimestamp(),
+      page: location.pathname
+    });
+
+    // Oto-yanıt — yalnız 1 kez göster
+    if (!autoAckShown){
+      appendMsg('Sizi canlı destek hattına yönlendiriyorum.');
+      autoAckShown = true;
     }
 
-    if(supBody) supBody.innerHTML = '';
+    chatIn.value = '';
+  }catch(e){
+    console.error('destek mesajı hatası:', e);
+    alert('Mesaj gönderilemedi.');
   }
+});
 
-  btnSupport?.addEventListener('click', openPop);
-  supClose?.addEventListener('click', ()=> closePop());
-
-  chatSend?.addEventListener('click', async ()=>{
-    const txt = (chatIn?.value||'').trim();
-    if(!txt) return;
-    const user = auth.currentUser;
-    if(!user){ location.href="/auth.html?next=/"; return; }
-
-    // Önce UI’da göster (benim mesajım)
-    appendMsg(txt, true);
-
-    try{
-      const { addDoc, collection, serverTimestamp, setDoc, doc } =
-        await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-
-      // Thread üst belgesi: liste & yetki için gerekli
-      await setDoc(doc(db, 'supportThreads', user.uid), {
-        participants: [user.uid],
-        lastAt: serverTimestamp(),
-        lastMsg: txt,
-        lastSenderUid: user.uid
-      }, { merge: true });
-
-      // Mesajı alt koleksiyona yaz
-      await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
-        senderUid: user.uid,
-        text: txt,
-        createdAt: serverTimestamp(),
-        page: location.pathname
-      });
-
-      // Oto-yanıt — yalnız 1 kez göster
-      if (!autoAckShown){
-        appendMsg('Sizi canlı destek hattına yönlendiriyorum.');
-        autoAckShown = true;
-      }
-
-      chatIn.value = '';
-    }catch(e){
-      console.error('destek mesajı hatası:', e);
-      alert('Mesaj gönderilemedi.');
-    }
-  });
 </script>
 </body>
 </html>
