@@ -1,36 +1,26 @@
-// /admin/support.js — Canlı Destek (admin) • tam güncel ES module
-// Özellikler:
-// - Sol listede tüm destek thread’leri (supportThreads/{uid}/messages) en yeni mesaja göre
-// - Sağda canlı akış (onSnapshot) ve admin tarafından yanıt gönderme
-// - "Yenile" butonu destekli (index.html'de #supportRefresh)
-// Not: Parent doc (supportThreads/{uid}) olmayabilir; bu yüzden liste için collectionGroup('messages') kullanıyoruz
-// ve sadece '.../supportThreads/{uid}/messages/{mid}' yollarını filtreliyoruz.
-
+// /admin/support.js — Canlı Destek (admin) • v2 (collectionGroup KALDIRILDI)
 import {
   collection,
-  collectionGroup,
+  doc,
   query,
   orderBy,
   limit,
   onSnapshot,
   addDoc,
+  setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Modül içi durum
 let _ctx = null;
 let _unsubList = null;
 let _unsubMsgs = null;
 let _activeUid = null;
 
-/** Basit HTML kaçış (UI güvenliği) */
 const esc = (s) => (s||"").replace(/[<>&]/g, (c)=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
 
-/** Tek seferlik stil enjekte et */
 function injectCSS(){
   if (document.getElementById("admin-support-css")) return;
   const css = `
-  /* ————— admin/support.js ————— */
   .sup-wrap{display:block}
   .sup-cols{display:grid;grid-template-columns:320px 1fr;gap:12px}
   @media (max-width: 920px){ .sup-cols{grid-template-columns:1fr} }
@@ -61,7 +51,6 @@ function injectCSS(){
   document.head.appendChild(tag);
 }
 
-/** Sol liste + sağ alan kabuğunu render et */
 function renderShell(el){
   el.innerHTML = `
     <div class="sup-wrap">
@@ -85,7 +74,7 @@ function renderShell(el){
   `;
 }
 
-/** Listeyi canlı dinle (collectionGroup), sadece supportThreads yollarını al */
+/** Sol liste: SADECE /supportThreads (parent) üzerinden */
 function subscribeList(){
   const { db, badgeEl } = _ctx;
   const listEl = document.getElementById("supList");
@@ -93,36 +82,23 @@ function subscribeList(){
 
   if (_unsubList) { try{ _unsubList(); }catch{} _unsubList = null; }
 
-  const cg = query(
-    collectionGroup(db, "messages"),
-    orderBy("createdAt","desc"),
-    limit(400)
+  const qThreads = query(
+    collection(db, "supportThreads"),
+    orderBy("lastAt","desc"),
+    limit(500)
   );
 
-  _unsubList = onSnapshot(cg, (snap)=>{
-    // supportThreads dışındaki 'messages' alt koleksiyonlarını filtrele
-    const byUid = new Map(); // uid -> {lastAt, lastTxt}
-    snap.forEach(docSnap=>{
-      const p = docSnap.ref.path; // ".../supportThreads/{uid}/messages/{mid}" veya başka yollar
-      const idx = p.indexOf("/supportThreads/");
-      if (idx === -1) return;
-      // Path'i parçala ve supportThreads sonrasındaki segmenti uid olarak al
-      const parts = p.split("/");
-      const stI = parts.indexOf("supportThreads");
-      if (stI === -1 || stI+1 >= parts.length) return;
-      const uid = parts[stI+1];
-      const d = docSnap.data() || {};
-      const at = d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : 0;
-      if (!byUid.has(uid)) {
-        byUid.set(uid, { lastAt: at, lastTxt: d.text || "" });
-      }
+  _unsubList = onSnapshot(qThreads, (snap)=>{
+    const rows = [];
+    snap.forEach(d=>{
+      const uid = d.id;
+      const data = d.data() || {};
+      const lastAt = data.lastAt && data.lastAt.toMillis ? data.lastAt.toMillis() : 0;
+      const lastTxt = data.lastMsg || "";
+      rows.push({ uid, lastAt, lastTxt });
     });
+    rows.sort((a,b)=> (b.lastAt||0) - (a.lastAt||0));
 
-    // Diziye çevir ve sırala
-    const rows = Array.from(byUid, ([uid, v]) => ({ uid, ...v }))
-      .sort((a,b)=> (b.lastAt||0) - (a.lastAt||0));
-
-    // Render
     listEl.innerHTML = "";
     if (rows.length === 0) {
       listEl.innerHTML = `<div class="sup-item"><div class="sup-empty">Henüz destek mesajı yok.</div></div>`;
@@ -144,7 +120,7 @@ function subscribeList(){
       });
     }
 
-    // Badge: thread sayısı
+    // Badge
     if (badgeEl) {
       if (rows.length > 0) {
         badgeEl.textContent = String(rows.length);
@@ -154,7 +130,7 @@ function subscribeList(){
       }
     }
 
-    // Aktif seçimi vurgula
+    // Aktif vurgula
     if (_activeUid) {
       document.querySelectorAll("#supList .sup-item").forEach(x=>{
         x.classList.toggle("active", x.dataset.uid === _activeUid);
@@ -166,7 +142,6 @@ function subscribeList(){
   });
 }
 
-/** Bir thread’i aç ve canlı izle */
 function openThread(uid){
   _activeUid = uid;
   const { db, auth } = _ctx;
@@ -174,19 +149,18 @@ function openThread(uid){
   if (!box) return;
   box.innerHTML = `<div class="sup-empty">Yükleniyor…</div>`;
 
-  // Solda highlight
   document.querySelectorAll("#supList .sup-item").forEach(x=>{
     x.classList.toggle("active", x.dataset.uid === uid);
   });
 
   if (_unsubMsgs) { try{ _unsubMsgs(); }catch{} _unsubMsgs = null; }
 
-  const q = query(
+  const qMsgs = query(
     collection(db, "supportThreads", uid, "messages"),
     orderBy("createdAt","asc")
   );
 
-  _unsubMsgs = onSnapshot(q, (snap)=>{
+  _unsubMsgs = onSnapshot(qMsgs, (snap)=>{
     box.innerHTML = "";
     if (snap.empty) {
       box.innerHTML = `<div class="sup-empty">Bu kullanıcıdan mesaj yok.</div>`;
@@ -207,7 +181,6 @@ function openThread(uid){
   });
 }
 
-/** Admin yanıt gönder */
 async function sendReply(){
   const { db, auth } = _ctx;
   const input = document.getElementById("supInput");
@@ -218,11 +191,18 @@ async function sendReply(){
   if (!me) return;
 
   try{
+    // Mesajı yaz
     await addDoc(collection(db, "supportThreads", _activeUid, "messages"), {
       text: txt,
       senderUid: me.uid,
       createdAt: serverTimestamp()
     });
+    // Parent doc üzerinde lastAt/lastMsg güncelle (admin'e kurallarda izin verdik)
+    await setDoc(doc(db, "supportThreads", _activeUid), {
+      lastAt: serverTimestamp(),
+      lastMsg: txt
+    }, { merge: true });
+
     input.value = "";
     input.focus();
   }catch(err){
@@ -231,34 +211,21 @@ async function sendReply(){
   }
 }
 
-/** Dış arayüzden çağrılan mount */
 export async function mount(ctx){
-  // ctx: { auth, db, el, badgeEl }
   _ctx = ctx;
-
   injectCSS();
   renderShell(ctx.el);
 
-  // Buton ve Enter göndermek
-  const btn = document.getElementById("supSend");
-  const input = document.getElementById("supInput");
-  btn?.addEventListener("click", sendReply);
-  input?.addEventListener("keydown", (e)=>{
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendReply();
-    }
+  document.getElementById("supSend")?.addEventListener("click", sendReply);
+  document.getElementById("supInput")?.addEventListener("keydown", (e)=>{
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); }
   });
 
-  // Sol listeyi canlı dinle
   subscribeList();
 
-  // Admin "Yenile" (opsiyonel): sadece listeyi yeniden abone etmeye zorlar
-  const btnRefresh = document.getElementById("supportRefresh");
-  btnRefresh?.addEventListener("click", ()=>{
+  document.getElementById("supportRefresh")?.addEventListener("click", ()=>{
     subscribeList();
   });
 }
 
-// (İsteğe bağlı) default export, bazı ortamlarda kolaylık olur
 export default { mount };
