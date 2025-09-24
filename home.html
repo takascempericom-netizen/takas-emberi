@@ -703,10 +703,11 @@ chatSend?.addEventListener('click', async ()=>{
 
     // 2a) Parent thread (liste için gerekli)
     await setDoc(doc(db, 'supportThreads', user.uid), {
-      participants: [user.uid],
-      lastAt: serverTimestamp(),
-      lastMsg: txt
-    }, { merge: true });
+  participants: [user.uid],
+  lastAt: serverTimestamp(),
+  lastMsg: txt,
+  lastSenderUid: user.uid
+}, { merge: true });
 
     // 2b) Mesajı alt koleksiyona yaz
     await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
