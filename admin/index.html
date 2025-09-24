@@ -1,76 +1,349 @@
+<!-- /admin/index.html — GÜNCEL, DÖNGÜSÜZ, MODÜLER ADMIN PANELİ -->
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin • Takas Çemberi</title>
-  <link rel="icon" href="/favicon.png" type="image/png"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Yönetim Paneli • Takas Çemberi</title>
+  <meta name="color-scheme" content="light" />
   <style>
-    :root{--ink:#0f172a;--muted:#64748b;--line:#e5e7eb;--bg:#f8fafc;--panel:#fff;--brand:#111827}
-    *{box-sizing:border-box}html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .bar{height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:30}
-    .bar strong{font-weight:900}
-    .wrap{display:grid;grid-template-columns:260px 1fr;min-height:calc(100dvh - 56px)}
-    .side{border-right:1px solid var(--line);background:#fff}
-    .side .logo{padding:14px;border-bottom:1px solid var(--line);font-weight:800}
-    .nav{display:flex;flex-direction:column;padding:8px}
-    .nav a{padding:10px 12px;border-radius:10px;color:inherit;text-decoration:none;display:flex;justify-content:space-between;align-items:center}
-    .nav a.active{background:#111827;color:#fff}
-    .cnt{padding:14px}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .grid{display:grid;gap:10px}
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{border-bottom:1px solid var(--line);text-align:left;padding:8px}
-    .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
-    .btn.primary{background:#111827;color:#fff;border-color:#111827}
-    .btn.danger{border-color:#fecaca;color:#991b1b;background:#fee2e2}
-    .muted{color:var(--muted);font-size:12px}
-    .cols{display:grid;grid-template-columns:280px 1fr;gap:12px}
-    @media (max-width:960px){.wrap{grid-template-columns:1fr}.cols{grid-template-columns:1fr}}
-    .list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:70vh;background:#fff}
-    .item{padding:10px 12px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px;cursor:pointer}
-    .item.active{background:#1118270d}
-    .msgs{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:320px;background:#fff;max-height:70vh;overflow:auto}
-    .bubble{max-width:72%;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:#f8fafc}
-    .bubble.me{margin-left:auto;background:#111827;color:#fff;border-color:#111827}
-    .send{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
-    input,textarea,select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;background:#fff}
+    :root{
+      --ink:#0f172a; --muted:#64748b; --bg:#f8fafc; --paper:#fff; --brd:#e5e7eb;
+      --pri:#111827; --pri-ink:#fff; --accent:#0ea5e9; --warn:#ef4444; --ok:#10b981;
+      --sideW: 260px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+
+    /* Topbar */
+    .topbar{
+      position:sticky;top:0;z-index:50;height:56px;display:flex;align-items:center;gap:10px;
+      padding:0 12px;border-bottom:1px solid var(--brd);background:linear-gradient(90deg,#6a5cff,#00d4ff);color:#fff
+    }
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+    .brand img{height:36px}
+    .grow{flex:1}
+    .btn{border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:focus{outline:2px solid #fff;outline-offset:2px}
+
+    /* Layout */
+    .wrap{display:grid;grid-template-columns:var(--sideW) 1fr;min-height:calc(100vh - 56px)}
+    .side{
+      border-right:1px solid var(--brd);background:#ffffff;position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto
+    }
+    .side h2{margin:14px 12px 8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+    .nav{padding:8px;display:grid;gap:6px}
+    .nav button{
+      appearance:none;border:1px solid var(--brd);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;
+      display:flex;align-items:center;gap:10px;color:var(--ink)
+    }
+    .nav button.active{border-color:#cbd5e1;background:#f8fafc;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .nav .badge{margin-left:auto;font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
+
+    .main{padding:14px}
+    .card{background:var(--paper);border:1px solid var(--brd);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--brd)}
+    .title{margin:0;font-size:16px}
+    .tools{display:flex;gap:8px}
+    .tools .btn-ghost{background:#fff;border:1px solid var(--brd);color:var(--ink)}
+    .body{padding:12px 14px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Görünümler */
+    .view{display:none}
+    .view.active{display:block}
+
+    /* Tablo basic */
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;border-bottom:1px solid var(--brd);text-align:left;font-size:14px}
+    th{background:#f8fafc;color:#334155}
+    tr:hover td{background:#fafafa}
+
+    /* Gate (yetki ekranı) — JS kaldırır */
+    #admin-gate{
+      position:fixed;inset:0;display:grid;place-items:center;background:#0b1220;color:#e5e7eb;z-index:99999
+    }
+    #admin-gate .box{
+      background:#0f172a;border:1px solid #1f2a44;border-radius:14px;padding:18px;width:min(460px,92vw);
+      box-shadow:0 20px 60px rgba(0,0,0,.35)
+    }
+    #admin-gate .row{display:flex;gap:8px;margin-top:12px}
+
+    @media (max-width: 920px){
+      :root{ --sideW: 210px; }
+    }
+    @media (max-width: 760px){
+      .wrap{grid-template-columns:1fr}
+      .side{position:static;height:auto}
+    }
   </style>
 </head>
 <body>
-  <header class="bar">
-    <strong>Admin Panel</strong>
-    <span class="muted" id="who"></span>
-    <div class="row" style="margin-left:auto">
-      <button class="btn" id="btnGotoSite">Site</button>
-      <button class="btn" id="btnLogout">Çıkış</button>
-    </div>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/img/seffaf.png" alt="logo">
+      <strong>Takas Çemberi • Yönetim</strong>
+    </a>
+    <div class="grow"></div>
+    <button id="btnLogout" class="btn">Çıkış</button>
   </header>
 
+  <!-- Layout -->
   <div class="wrap">
+    <!-- Sidebar -->
     <aside class="side">
-      <div class="logo">Takas Çemberi</div>
+      <h2>Menü</h2>
       <nav class="nav" id="nav">
-        <a href="#/support"      data-route="support">Canlı Destek <b id="badgeSupport" class="muted">0</b></a>
-        <a href="#/messages"     data-route="messages">Mesajlar <b id="badgeMsgs" class="muted">0</b></a>
-        <a href="#/pending"      data-route="pending">Onay Bekleyen <b id="badgePending" class="muted">0</b></a>
-        <a href="#/complaints"   data-route="complaints">Şikayetler <b id="badgeComplaints" class="muted">0</b></a>
-        <a href="#/broadcast"    data-route="broadcast">Bildiri</a>
-        <a href="#/settings"     data-route="settings">Ayarlar</a>
-        <a href="#/debug"        data-route="debug">Hata Günlükleri</a>
+        <button data-view="support"   class="active">💬 Canlı Destek <span class="badge" id="b-support" style="display:none">0</span></button>
+        <button data-view="pending">📝 Onay Bekleyen <span class="badge" id="b-pending" style="display:none">0</span></button>
+        <button data-view="messages">📨 Mesajlar</button>
+        <button data-view="users">👥 Kullanıcılar</button>
+        <button data-view="complaints">🚩 Şikayetler <span class="badge" id="b-complaints" style="display:none">0</span></button>
+        <button data-view="broadcast">📢 Duyuru/Bildiri</button>
+        <button data-view="settings">⚙️ Ayarlar</button>
+        <button data-view="debug">🧪 Hata/Debug</button>
       </nav>
     </aside>
 
-    <main class="cnt">
-      <div id="view" class="panel">
-        <!-- router içerik -->
-      </div>
+    <!-- Main -->
+    <main class="main">
+      <!-- Canlı Destek -->
+      <section id="view-support" class="view active card">
+        <div class="head">
+          <h3 class="title">Canlı Destek</h3>
+          <div class="tools">
+            <button id="supportRefresh" class="btn btn-ghost">Yenile</button>
+          </div>
+        </div>
+        <div class="body" id="supportMount">
+          <p class="muted">Solda ziyaretçiler/müşteriler listelenir; birini seçtiğinizde sağda sohbet akışı görünür.</p>
+        </div>
+      </section>
+
+      <!-- Onay Bekleyen -->
+      <section id="view-pending" class="view card">
+        <div class="head">
+          <h3 class="title">Onay Bekleyen İlanlar</h3>
+          <div class="tools">
+            <button id="pendingRefresh" class="btn btn-ghost">Yenile</button>
+          </div>
+        </div>
+        <div class="body" id="pendingMount">
+          <p class="muted">Bekleyen ilanlar burada listelenir. Onayla/Reddet işlemlerini yapabilirsiniz.</p>
+        </div>
+      </section>
+
+      <!-- Mesajlar -->
+      <section id="view-messages" class="view card">
+        <div class="head">
+          <h3 class="title">Mesajlar (Özel DM)</h3>
+          <div class="tools">
+            <button id="messagesRefresh" class="btn btn-ghost">Yenile</button>
+          </div>
+        </div>
+        <div class="body" id="messagesMount">
+          <p class="muted">Kullanıcı–kullanıcı DM konuşmalarını burada görüntüleyip yanıtlayabilirsiniz.</p>
+        </div>
+      </section>
+
+      <!-- Kullanıcılar -->
+      <section id="view-users" class="view card">
+        <div class="head"><h3 class="title">Kullanıcılar</h3></div>
+        <div class="body" id="usersMount">
+          <p class="muted">Temel kullanıcı listesi ve roller.</p>
+        </div>
+      </section>
+
+      <!-- Şikayetler -->
+      <section id="view-complaints" class="view card">
+        <div class="head">
+          <h3 class="title">Şikayetler</h3>
+          <div class="tools">
+            <button id="complaintsRefresh" class="btn btn-ghost">Yenile</button>
+          </div>
+        </div>
+        <div class="body" id="complaintsMount">
+          <p class="muted">Açık şikayetler burada görünür.</p>
+        </div>
+      </section>
+
+      <!-- Duyuru -->
+      <section id="view-broadcast" class="view card">
+        <div class="head"><h3 class="title">Duyuru / Bildiri</h3></div>
+        <div class="body" id="broadcastMount">
+          <p class="muted">Tüm kullanıcılara bildirim göndermek için form.</p>
+        </div>
+      </section>
+
+      <!-- Ayarlar -->
+      <section id="view-settings" class="view card">
+        <div class="head"><h3 class="title">Ayarlar</h3></div>
+        <div class="body" id="settingsMount"></div>
+      </section>
+
+      <!-- Debug -->
+      <section id="view-debug" class="view card">
+        <div class="head"><h3 class="title">Hata/Debug</h3></div>
+        <div class="body" id="debugMount"></div>
+      </section>
     </main>
   </div>
 
-  <script type="module" src="/assets/js/firebase-init.js"></script>
-  <script type="module" src="./main.js"></script>
+  <!-- YETKİ GATE (admin değilse burada kalır; JS kaldırır) -->
+  <div id="admin-gate" aria-live="polite">
+    <div class="box">
+      <h2 style="margin:0 0 8px;font:800 18px/1.2 system-ui">Yükleniyor…</h2>
+      <div id="gate-msg" class="muted">Yetki kontrolü yapılıyor.</div>
+      <div id="gate-actions" class="row" style="display:none">
+        <button id="go-home"  class="btn-ghost" style="border:1px solid #334155;background:#0b1220;color:#e5e7eb;border-radius:10px;padding:8px 12px">Ana sayfa</button>
+        <button id="go-login" class="btn"        style="background:#111827;border-color:#111827;color:#fff;border-radius:10px;padding:8px 12px">Admin girişi</button>
+        <button id="do-logout"class="btn"        style="background:#ef4444;border-color:#ef4444;color:#fff;border-radius:10px;padding:8px 12px">Oturumu kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN BOOTSTRAP (Firebase + Gate + Router + Modül Yükleme) -->
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ——— Firebase ———
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // ——— Gate helpers ———
+    const $ = (s,r=document)=>r.querySelector(s);
+    const gate = $("#admin-gate");
+    const gateMsg = $("#gate-msg");
+    const gateActions = $("#gate-actions");
+    $("#go-home")?.addEventListener("click", ()=> location.href = "/");
+    $("#go-login")?.addEventListener("click", ()=> location.href = "/admin/login.html");
+    $("#do-logout")?.addEventListener("click", async ()=>{ try{ await signOut(auth);}catch{} location.href="/admin/login.html"; });
+
+    async function isAdminLike(user){
+      const idt = await user.getIdTokenResult(true);
+      const claimOK =
+        idt.claims?.admin === true ||
+        ["admin","moderator","support"].includes(idt.claims?.role);
+      if (claimOK) return true;
+      try{
+        const s = await getDoc(doc(db,"users",user.uid));
+        const role = (s.data()?.role || "").toString().toLowerCase();
+        return ["admin","moderator","support"].includes(role);
+      }catch{ return false; }
+    }
+
+    // ——— Basit router (sidebar & hash) ———
+    const views = {
+      support:    $("#view-support"),
+      pending:    $("#view-pending"),
+      messages:   $("#view-messages"),
+      users:      $("#view-users"),
+      complaints: $("#view-complaints"),
+      broadcast:  $("#view-broadcast"),
+      settings:   $("#view-settings"),
+      debug:      $("#view-debug")
+    };
+    function activate(view){
+      Object.values(views).forEach(v=>v?.classList.remove("active"));
+      const target = views[view] || views.support;
+      target?.classList.add("active");
+      document.querySelectorAll('.nav button').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
+      location.hash = view;
+      // ilgili modülü yükle
+      mountModule(view);
+    }
+    async function mountModule(view){
+      try{
+        if(view==="support"){
+          const mod = await import("./support.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("supportMount"), badgeEl: document.getElementById("b-support")} );
+        }else if(view==="pending"){
+          const mod = await import("./pending.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("pendingMount"), badgeEl: document.getElementById("b-pending")} );
+        }else if(view==="messages"){
+          const mod = await import("./messages.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("messagesMount")} );
+        }else if(view==="users"){
+          const mod = await import("./main.js"); // örn: kullanıcı listesi burada
+          mod?.mountUsers?.( {auth, db, el: document.getElementById("usersMount")} );
+        }else if(view==="complaints"){
+          const mod = await import("./complaints.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("complaintsMount"), badgeEl: document.getElementById("b-complaints")} );
+        }else if(view==="broadcast"){
+          const mod = await import("./broadcast.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("broadcastMount")} );
+        }else if(view==="settings"){
+          const mod = await import("./settings.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("settingsMount")} );
+        }else if(view==="debug"){
+          const mod = await import("./debug-error.js");
+          mod?.mount?.( {auth, db, el: document.getElementById("debugMount")} );
+        }
+      }catch(e){
+        console.error("Modül yükleme hatası:", e);
+        const el = views[view]?.querySelector(".body");
+        if(el){ el.innerHTML = `<div style="color:#b91c1c">Modül yüklenemedi: ${e?.message||e}</div>`; }
+      }
+    }
+
+    // Sidebar click → view
+    document.getElementById("nav")?.addEventListener("click",(ev)=>{
+      const btn = ev.target.closest("button[data-view]"); if(!btn) return;
+      activate(btn.dataset.view);
+    });
+
+    // Çıkış
+    document.getElementById("btnLogout")?.addEventListener("click", async ()=>{
+      try{ await signOut(auth);}catch{}
+      location.href="/admin/login.html";
+    });
+
+    // Gate akışı
+    onAuthStateChanged(auth, async (u)=>{
+      if(!u){
+        gateMsg.textContent = "Oturum bulunamadı. Lütfen giriş yapın.";
+        gateActions.style.display = "flex";
+        $("#go-login").style.display = "inline-block";
+        $("#do-logout").style.display = "none";
+        return;
+      }
+      gateMsg.textContent = "Yetkiler doğrulanıyor…";
+      const ok = await isAdminLike(u);
+      if(!ok){
+        gateMsg.textContent = "Bu hesapta admin/moderator/support yetkisi yok.";
+        gateActions.style.display = "flex";
+        $("#go-login").style.display = "inline-block";
+        $("#do-logout").style.display = "inline-block";
+        return;
+      }
+      // yetkili → gate’i kaldır ve başlangıç görünümünü yükle
+      gate.remove();
+      const start = (location.hash||"#support").replace("#","");
+      activate(start);
+    });
+
+    // Emniyet: 15 sn sonra hala gate açıksa bilgilendir
+    setTimeout(()=>{
+      if(document.getElementById("admin-gate")){
+        gateMsg.textContent = "Bağlantı yavaş görünüyor. Yenilemeyi deneyin.";
+        gateActions.style.display = "flex";
+        $("#go-login").style.display = "inline-block";
+      }
+    }, 15000);
+  </script>
 </body>
 </html>
