@@ -726,7 +726,7 @@ function openPop(){
   }
 }
 
-/* === X’e basınca: UI boşalt + kullanıcı mesajlarını DB’den sil + işaret koy === */
+/* === X’e basınca: sadece UI tarafını temizle (DB’ye dokunma) === */
 async function closePop(){
   if(!pop) return;
 
@@ -736,7 +736,7 @@ async function closePop(){
   // Canlı dinlemeyi kapat
   if (supUnsub) { try{ supUnsub(); }catch{} supUnsub = null; }
 
-  // UI: baloncuğu anında boşalt
+  // UI: baloncuğu anında boşalt (admin + kullanıcı mesajları)
   if (supBody) supBody.innerHTML = '';
 
   // DB: sadece KULLANICININ gönderdiği mesajları sil; admin mesajları kalsın
