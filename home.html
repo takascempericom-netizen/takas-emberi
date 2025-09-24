@@ -646,9 +646,9 @@
       try{
         const { addDoc, collection, serverTimestamp } =
           await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-        await addDoc(collection(db,'support_messages'), {
-          uid: user.uid, text: txt, createdAt: serverTimestamp(), page: location.pathname
-        });
+        await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
+  senderUid: user.uid, text: txt, createdAt: serverTimestamp(), page: location.pathname
+});
         if(pop.querySelector('.msg')) pop.querySelector('.msg').textContent = 'Mesajın alındı. En kısa sürede dönüyoruz.';
         chatIn.value = '';
         playSoundSafe();
