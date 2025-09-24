@@ -1,9 +1,11 @@
-// profile/profile.js — GÜNCEL SÜRÜM
-// - ?uid=... ile başka kullanıcının profiline bakma
-// - Kendi profilinde: +Yeni İlan, avatar değiştir, ilan yönet (incele/düzenle/sil/süre al)
-// - Başkasının profilinde: ad/eposta/foto, aktif ilanlar, Mesaj yaz, Şikayet et
-// - Puanlama: profil kartında yıldızlar. Başkasına 1 kez oy (doc id = rater uid).
-//   Not: Firestore rules tarafında ratings okuma + tek oy kuralı tanımlı olmalı.
+// profile/profile.js — GÜNCEL SÜRÜM (misafir destekli)
+// - ?uid=... ile başka kullanıcının profiline bakma (misafir dahil)
+// - Misafir (girişsiz): başka kullanıcının adı/foto/yıldız ve SADECE 'live' ilanları görür.
+//   Mesaj yaz & Şikayet et butonları görünür; tıklarsa /auth.html’a yönlendirilir.
+// - Girişli kendi profilinde: +Yeni İlan, Avatar değiştir, ilan yönet (incele/düzenle/sil/süre al)
+// - Başkasının profilinde (girişli): aktif ilanlar + Mesaj yaz, Şikayet et
+// - Puanlama: profil kartında 3D yıldızlar. Başkasına SADECE 1 kez oy (doc id = rater uid).
+//   (Kurallar: /ratings read=true, votes create-only; update/delete=admin)
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -41,7 +43,6 @@ const btnLogout = $("btnLogout");
 const btnNew    = $("btnNew");    // + Yeni İlan
 const btnDM     = $("btnDM");     // Mesaj yaz
 const btnReport = $("btnReport"); // Şikayet et
-// btnRate kaldırıldı (artık kullanılmıyor)
 
 /* ==== Helpers ==== */
 const fill = (el,val)=>{ if(el){ el.value = val||""; } };
@@ -107,7 +108,7 @@ async function loadRating(uid){
       for(let i=1;i<=5;i++){
         const s = document.createElement("span");
         s.textContent = i<=full ? "★" : "☆";
-        // 3D görünüm için hafif gölge
+        // 3D görünüm
         s.style.cssText="font-size:22px;color:#f59e0b;text-shadow:0 1px 0 #fff,0 2px 0 #d1a000,0 3px 6px rgba(0,0,0,.15)";
         starsEl.appendChild(s);
       }
@@ -130,26 +131,20 @@ async function loadRating(uid){
   }
 }
 
-/* ==== Rating (etkileşimli; yalnız başkasının profili ve daha önce oy vermediyse) ==== */
+/* ==== Rating (etkileşimli; sadece girişli + başkasının profili + hiç oy vermemişse) ==== */
 async function setupInteractiveRating(viewUid, myUid){
   const starsEl = $("rating"); const numEl = $("ratingNum");
   if (!starsEl) return;
+  if (!myUid || myUid === viewUid) return; // misafir veya kendi profili
 
-  // Kendi profili değil + girişli olmalı
-  if (!myUid || myUid === viewUid) return;
-
-  // Daha önce oy vermiş mi?
+  // Oy var mı?
   let voted = false;
   try{
     const myVote = await getDoc(doc(db, "ratings", viewUid, "votes", myUid));
     voted = myVote.exists();
-  }catch(e){
-    // Okuma yetkin yoksa etkileşimli yapmayalım
-    voted = true;
-  }
-  if (voted) return; // Etkileşim yok; sadece ortalama görünsün
+  }catch{ voted = true; }
+  if (voted) return;
 
-  // Etkileşimli 5 yıldız hazırlığı
   starsEl.innerHTML = "";
   const spans = [];
   for (let i=1;i<=5;i++){
@@ -158,21 +153,16 @@ async function setupInteractiveRating(viewUid, myUid){
     sp.dataset.val = String(i);
     sp.style.cssText = "font-size:26px;cursor:pointer;transition:transform .12s;text-shadow:0 1px 0 #fff,0 2px 0 #d1a000,0 3px 6px rgba(0,0,0,.15)";
     sp.onmouseenter = ()=> highlight(i);
-    sp.onmouseleave = ()=> {/* no-op; mouseout'ta eski ortalamayı loadRating resetleyecek */};
     sp.onclick = rate;
     spans.push(sp); starsEl.appendChild(sp);
   }
-  function highlight(v){
-    spans.forEach((s,idx)=> s.textContent = (idx < v) ? "★" : "☆");
-  }
+  function highlight(v){ spans.forEach((s,idx)=> s.textContent = (idx < v) ? "★" : "☆"); }
   async function rate(ev){
-    const v = parseInt(ev.currentTarget?.dataset?.val||"0",10);
-    if (!v) return;
+    const v = parseInt(ev.currentTarget?.dataset?.val||"0",10); if (!v) return;
     try{
-      // Sadece ilk kez oy: kurallar create-only ise merge:false
       await setDoc(
         doc(db, "ratings", viewUid, "votes", myUid),
-        { stars: v, createdAt: serverTimestamp() }, { merge: false }
+        { stars: v, createdAt: serverTimestamp() }, { merge: false } // create-only
       );
       starsEl.style.pointerEvents = "none";
       if (numEl) numEl.textContent = (numEl.textContent||"") + " • oyun kaydedildi";
@@ -323,8 +313,8 @@ async function loadListings(uid){
   if (!(liveEl && pendEl && expEl)) return;
   const colRef = collection(db, "listings");
 
-  // Başkasının profili → sadece 'live'
   if (!VIEWING_SELF) {
+    // SADECE 'live'
     const q1 = query(colRef, where("ownerId","==",uid), where("status","==","live"));
     const q2 = query(colRef, where("uid","==",uid),      where("status","==","live"));
     const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
@@ -404,15 +394,20 @@ async function loadListings(uid){
   }
 }
 
-/* ==== Auth + Görüntülenecek kullanıcı ==== */
+/* ==== Auth + Görüntülenecek kullanıcı (misafir destekli) ==== */
 onAuthStateChanged(auth, async (me)=>{
-  if (!me) { location.href = "/auth.html?next=/profile/profile.html"; return; }
-
   const params  = new URLSearchParams(location.search);
   const urlUid  = params.get("uid");
-  const myUid   = me.uid;
-  const viewUid = (urlUid && urlUid !== myUid) ? urlUid : myUid;
-  VIEWING_SELF  = (viewUid === myUid);
+  const myUid   = me?.uid || null;
+
+  // Misafir ve ?uid yoksa → kendi profilini göremez, login'e yönlendirelim
+  if (!myUid && !urlUid) {
+    location.href = "/auth.html?next=/profile/profile.html";
+    return;
+  }
+
+  const viewUid = (urlUid && urlUid !== myUid) ? urlUid : (myUid || urlUid);
+  VIEWING_SELF  = (!!myUid && viewUid === myUid);
 
   // Üst bar görünürlük
   if (VIEWING_SELF) {
@@ -421,14 +416,25 @@ onAuthStateChanged(auth, async (me)=>{
     btnNew?.style.setProperty('display','inline-block');
     btnChangeAvatar?.style.setProperty('display','inline-block');
   } else {
-    btnDM?.style.setProperty('display','inline-block');
-    btnReport?.style.setProperty('display','inline-block');
+    btnDM?.style.setProperty('display','inline-block');     // misafire de göster
+    btnReport?.style.setProperty('display','inline-block'); // misafire de göster
     btnNew?.style.setProperty('display','none');
     btnChangeAvatar?.style.setProperty('display','none');
   }
 
-  // DM (sadece başkasının profili)
+  // Başkasını izlerken "Pending/Expired" sekmelerini gizle
+  if (!VIEWING_SELF) {
+    document.querySelector('.tab[data-tab="pending"]')?.style.setProperty('display','none');
+    document.querySelector('.tab[data-tab="expired"]')?.style.setProperty('display','none');
+    $("tab-pending")?.style.setProperty('display','none');
+    $("tab-expired")?.style.setProperty('display','none');
+    document.querySelector('.tab[data-tab="live"]')?.classList.add('active');
+    $("tab-live")?.style.setProperty('display','grid');
+  }
+
+  // DM (başkasının profili) → misafir ise auth'a
   btnDM?.addEventListener('click', async ()=>{
+    if (!myUid) { location.href = `/auth.html?next=${encodeURIComponent(location.pathname + location.search)}`; return; }
     try{
       const pair = [myUid, viewUid].sort();
       const chatId = `dm_${pair[0]}_${pair[1]}`;
@@ -444,10 +450,10 @@ onAuthStateChanged(auth, async (me)=>{
     }
   });
 
-  // Şikayet et
+  // Şikayet et → misafir ise auth'a
   btnReport?.addEventListener('click', async ()=>{
-    const why = prompt("Şikayet nedeniniz:", "");
-    if (!why) return;
+    if (!myUid) { location.href = `/auth.html?next=${encodeURIComponent(location.pathname + location.search)}`; return; }
+    const why = prompt("Şikayet nedeniniz:", ""); if (!why) return;
     try{
       await setDoc(
         doc(collection(db, "complaints")),
@@ -460,7 +466,7 @@ onAuthStateChanged(auth, async (me)=>{
     }
   });
 
-  // Kendi temel bilgileri doldur
+  // Kendi temel bilgileri (sadece girişli + kendi profili)
   if (VIEWING_SELF) {
     const displayName = me.displayName || (me.providerData?.[0]?.displayName) || '';
     const parts = displayName.trim().split(/\s+/);
@@ -472,7 +478,7 @@ onAuthStateChanged(auth, async (me)=>{
     if (me.photoURL) setSrc(avatarImg, me.photoURL);
   }
 
-  // Profil verisi (public → users fallback)
+  // Profil verisi (public → users fallback (sadece kendi profilinde))
   try{
     let prof = null;
     const pubSnap = await getDoc(doc(db, "profiles_public", viewUid));
@@ -491,6 +497,7 @@ onAuthStateChanged(auth, async (me)=>{
 
       if (prof.photoURL && !VIEWING_SELF) setSrc(avatarImg, prof.photoURL);
       if (prof.city && elCity) fill(elCity, prof.city);
+      // başka kullanıcının profilinde (misafir dahil) e-posta gösterimi varsa yaz
       if (!VIEWING_SELF && elMail) fill(elMail, prof.email || "");
     }
   }catch(e){
@@ -519,7 +526,7 @@ onAuthStateChanged(auth, async (me)=>{
     });
   }
 
-  // Puanı yükle + (başkasına bakıyorsak) etkileşimli yıldızları hazırla
+  // Puanı yükle + (başkasına bakıyorsak ve girişliysek) etkileşimli yıldızlar
   await loadRating(viewUid);
   await setupInteractiveRating(viewUid, myUid);
 
