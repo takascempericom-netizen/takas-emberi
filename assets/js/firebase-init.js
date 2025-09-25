@@ -10,7 +10,7 @@ import {
 /* Proje config (bucket: appspot.com olmalı) */
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-  authDomain: "ureten-eller-v2.firebaseapp.com",
+  authDomain: "auth.takascemberi.com",
   projectId: "ureten-eller-v2",
   storageBucket: "ureten-eller-v2.appspot.com", // DÜZELTİLDİ
   messagingSenderId: "621494781131",
