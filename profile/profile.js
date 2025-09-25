@@ -56,7 +56,10 @@ const fmt = (ts)=> {
 const firstPhoto = (arr)=> Array.isArray(arr) && arr.length ? arr[0] : "";
 
 /* ==== Çıkış ==== */
-btnLogout?.addEventListener("click", ()=> signOut(auth).then(()=>location.href="/auth.html"));
+btnLogout?.addEventListener('click', async () => {
+  try { await signOut(auth); } catch {}
+  location.href = "https://takascemberi.com/";
+});
 
 /* ==== Modal refs ==== */
 function mrefs(){
