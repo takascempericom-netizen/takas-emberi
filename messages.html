@@ -377,20 +377,28 @@
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
 
     /* ==== Auth ==== */
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ location.href="/auth.html?next=/messages.html"; return; }
-      me=user;
-      tryUnlockAudio();
+onAuthStateChanged(auth, async (user)=> {
+  if (!user) {
+    location.href="/auth.html?next=/messages.html";
+    return;
+  }
 
-      // ?peer= ile gelindiyse DM’yi garantile
-      if(peerParam){
-        try{
-          const chatId=await ensureDmChat(me.uid,peerParam);
-          initialChatId=chatId;
-        }catch(e){ console.error('DM açılamadı', e); }
-      }
-      watchThreads();
-    });
+  // Public profilini garantiye al (firebase-init.js içinde tanımlıysa)
+  try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
+
+  me = user;
+  tryUnlockAudio();
+
+  // ?peer= ile geldiyse DM oluştur/aç
+  if (peerParam) {
+    try {
+      const chatId = await ensureDmChat(me.uid, peerParam);
+      initialChatId = chatId;
+    } catch (e) { console.error('DM açılamadı', e); }
+  }
+
+  watchThreads();
+});
 
     /* ==== Alt bar aktifliği ==== */
     const path=location.pathname;
