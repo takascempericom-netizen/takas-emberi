@@ -14,27 +14,71 @@
       --accent:#6a5cff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .wrap{max-width:900px;margin:24px auto;padding:0 16px}
-    .logo{display:flex;align-items:center;gap:10px;margin:12px 0 18px}
-    .logo img{height:40px}
-    .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px}
-    h1{margin:0 0 8px;font-size:28px}
-    h2{margin:18px 0 8px;font-size:18px}
+
+    /* Kayma/taşma engeli + tipografi */
+    html,body{height:100%; margin:0; padding:0; max-width:100vw; overflow-x:hidden}
+    body{
+      background:var(--bg); color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:16px; line-height:1.65;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      -webkit-text-size-adjust:100%; text-size-adjust:100%;
+    }
+
+    /* Medya taşmasın, uzun kelimeler kırılır */
+    img,svg,video,iframe{max-width:100%; height:auto; display:block}
+    a, p, h1, h2, li, td, th, div, span{overflow-wrap:anywhere; word-break:break-word}
+
+    .wrap{max-width:900px; width:100%; margin:24px auto; padding:0 16px}
+
+    .logo{display:flex; align-items:center; gap:10px; margin:12px 0 18px; flex-wrap:wrap; min-width:0}
+    .logo img{height:auto; max-height:36px; width:auto; max-width:100%}
+
+    .card{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:20px}
+    h1{margin:0 0 8px; font-size:clamp(22px,4.5vw,28px)}
+    h2{margin:18px 0 8px; font-size:clamp(18px,3.6vw,20px)}
     p,li{line-height:1.65}
+    ul{margin-top:6px; padding-left:20px}
+    ol{padding-left:20px}
+
     .muted{color:var(--muted)}
-    .back{display:inline-block;margin:10px 0 18px;text-decoration:none;color:var(--brand);font-weight:700}
-    .badge{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px;margin-left:6px}
-    .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-    .links a{display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--brand)}
-    footer{margin:24px 0;color:var(--muted);font-size:13px}
-    .contact{margin-top:16px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f1f5f9}
-    .contact a{color:var(--brand);text-decoration:none}
-    .note{font-size:13px;color:#64748b}
-    table{width:100%;border-collapse:collapse;margin:6px 0 10px}
-    th,td{border:1px solid var(--line);padding:10px;vertical-align:top}
-    th{background:#f1f5f9;text-align:left}
+    .back{display:inline-block; margin:10px 0 18px; text-decoration:none; color:var(--brand); font-weight:700}
+    .badge{display:inline-block; background:var(--accent); color:#fff; border-radius:999px; padding:2px 8px; font-size:12px; margin-left:6px}
+
+    .links{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+    .links a{display:inline-block; padding:8px 10px; border:1px solid var(--line); border-radius:10px; text-decoration:none; color:var(--brand)}
+
+    footer{margin:24px 0; color:var(--muted); font-size:13px; text-align:center}
+    .contact{margin-top:16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#f1f5f9}
+    .contact a{color:var(--brand); text-decoration:none}
+    .note{font-size:13px; color:#64748b}
+
+    /* Tablo — tamamen responsive, kayma yok */
+    table{width:100%; border-collapse:collapse; margin:6px 0 10px; table-layout:fixed}
+    th,td{border:1px solid var(--line); padding:10px; vertical-align:top}
+    th{background:#f1f5f9; text-align:left; width:40%}
+
+    /* Küçük ekran optimizasyonları */
+    @media (max-width:600px){
+      .wrap{padding:0 12px}
+      .card{padding:16px}
+      .logo img{max-height:32px}
+      .logo strong{font-size:16px}
+      h1{font-size:22px}
+      h2{font-size:18px}
+      table{font-size:14px}
+      th{width:42%}
+    }
+
+    /* Dark mode (kullanıcı tercihi) */
+    @media (prefers-color-scheme: dark){
+      :root{--paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; --bg:#0a0d17; --brand:#e8ecf8}
+      body{background:var(--bg)}
+      .card{background:var(--paper); border-color:var(--line)}
+      th{background:#0f1a34}
+      .contact{background:#1a2238; border-color:var(--line)}
+      .links a{color:var(--ink); border-color:var(--line)}
+    }
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
