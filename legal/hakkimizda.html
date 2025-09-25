@@ -13,8 +13,18 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--ink)}
-    a{color:#0ea5e9;text-decoration:none}
+    /* 👉 Taşma kökten kapatıldı */
+    html,body{overflow-x:hidden}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:#f8fafc;color:var(--ink)
+    }
+    /* medya elemanları taşmasın */
+    img,svg,video,iframe{max-width:100%;height:auto;display:block}
+    /* uzun linkler satıra sığsın */
+    a{color:#0ea5e9;text-decoration:none;overflow-wrap:anywhere;word-break:break-word}
 
     /* Header */
     header{position:sticky;top:0;z-index:10;background:#f9fafb;color:#0f172a;border-bottom:1px solid var(--line)}
@@ -35,9 +45,18 @@
     @media (min-width:800px){ .grid{grid-template-columns:1.4fr .9fr} }
 
     /* Legal table */
-    .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;           /* sadece tabloya yatay kaydırma */
+      -webkit-overflow-scrolling:touch;
+      /* iOS’ta body’e taşma yayılmasın diye blok zorlaması */
+      display:block;
+    }
     .legal-table{width:100%;border-collapse:collapse;min-width:520px}
-    .legal-table th,.legal-table td{border:1px solid var(--line);padding:10px;vertical-align:top}
+    .legal-table th,.legal-table td{
+      border:1px solid var(--line);padding:10px;vertical-align:top;
+      overflow-wrap:anywhere;word-break:break-word; /* hücre içi uzun içerik sarılsın */
+    }
     .legal-table th{width:260px;background:#f1f5f9;text-align:left}
 
     /* Footer */
@@ -48,11 +67,11 @@
       .wrap{padding:14px 12px}
       main{padding:0 12px 32px}
       .panel{padding:16px}
-      .legal-table{font-size:14px}
+      .legal-table{font-size:14px;min-width:500px} /* biraz daha dar min-width */
       .legal-table th{width:180px}
     }
 
-    /* Dark mode auto (optional, respects user pref) */
+    /* Dark mode */
     @media (prefers-color-scheme: dark){
       :root{ --paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; }
       body{background:#0a0d17}
@@ -72,15 +91,7 @@
     "vatID":"9530226667",
     "foundingDate":"2025-09-17",
     "logo":"https://takascemberi.com/assets/img/legallogo.png",
-    "contactPoint":[
-      {
-        "@type":"ContactPoint",
-        "contactType":"customer support",
-        "telephone":"+905057279143",
-        "email":"takascemberi@gmail.com",
-        "availableLanguage":["tr"]
-      }
-    ]
+    "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","telephone":"+905057279143","email":"takascemberi@gmail.com","availableLanguage":["tr"]}]
   }
   </script>
 </head>
