@@ -9,24 +9,67 @@
   <style>
     :root{ --paper:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; --brand:#111827; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--ink)}
-    header{position:sticky; top:0; z-index:10; background:#fff; color:#0f172a; border-bottom:1px solid var(--line);}
-    .wrap{max-width:1100px;margin:0 auto;padding:14px 16px}
-    .brand{display:flex;gap:10px;align-items:center;text-decoration:none;color:inherit}
-    .brand img{height:42px}
-    main{max-width:1100px;margin:18px auto;padding:0 16px 40px}
-    .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
-    h1{margin:0 0 6px;font-size:28px}
-    h2{margin:12px 0 10px;font-size:20px}
-    p{margin:0 0 10px;line-height:1.65}
+    html,body{height:100%; margin:0; padding:0; max-width:100vw; overflow-x:hidden}
+
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:#f8fafc; color:var(--ink);
+      font-size:16px; line-height:1.65;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      -webkit-text-size-adjust:100%; text-size-adjust:100%;
+    }
+
+    /* medya taşmasın */
+    img,svg,video,iframe{max-width:100%; height:auto; display:block}
+    /* uzun kelime/linkler kırılır */
+    a, p, h1, h2, li, td, th, div, span{overflow-wrap:anywhere; word-break:break-word}
+
+    /* header */
+    header{position:sticky; top:0; z-index:10; background:#fff; color:#0f172a; border-bottom:1px solid var(--line)}
+    .wrap{max-width:1100px; width:100%; margin:0 auto; padding:12px 14px}
+    .brand{display:flex; gap:10px; align-items:center; text-decoration:none; color:inherit; min-width:0}
+    .brand img{height:auto; max-height:32px; width:auto; max-width:100%}
+    .brand strong{font-size:17px; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+    /* main */
+    main{max-width:1100px; width:100%; margin:18px auto; padding:0 14px 40px}
+    .panel{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:14px}
+    h1{margin:0 0 8px; font-size:clamp(22px,4.5vw,28px)}
+    h2{margin:12px 0 10px; font-size:clamp(18px,3.6vw,20px)}
+    p{margin:0 0 10px}
     ul{margin:6px 0 12px 18px}
-    table{width:100%;border-collapse:collapse;margin:8px 0 12px}
-    th,td{border:1px solid var(--line);padding:10px;vertical-align:top}
-    th{background:#f1f5f9;text-align:left}
-    .logoRow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-    .logoRow img{height:40px}
-    .note{color:#64748b;font-size:14px}
-    footer{border-top:1px solid var(--line);color:var(--muted)}
+
+    /* tablo — tamamen responsive, kayma yok */
+    table{width:100%; border-collapse:collapse; margin:8px 0 12px; table-layout:fixed}
+    th,td{border:1px solid var(--line); padding:10px; vertical-align:top}
+    th{background:#f1f5f9; text-align:left; width:40%}
+
+    /* logo satırı */
+    .logoRow{display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; min-width:0}
+    .logoRow img{height:auto; max-height:40px; width:auto; max-width:100%}
+
+    .note{color:#64748b; font-size:14px}
+    footer{border-top:1px solid var(--line); color:var(--muted)}
+
+    /* küçük ekran */
+    @media (max-width:600px){
+      .wrap{padding:10px 12px}
+      main{padding:0 12px 32px}
+      .panel{padding:16px}
+      .brand img{max-height:30px}
+      .brand strong{font-size:16px}
+      table{font-size:14px}
+      th{width:42%}
+    }
+
+    /* dark mode */
+    @media (prefers-color-scheme: dark){
+      :root{ --paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; }
+      body{background:#0a0d17}
+      header{background:#0b1020; color:var(--ink); border-bottom-color:var(--line)}
+      th{background:#0f1a34}
+      .panel{background:var(--paper); border-color:var(--line)}
+    }
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
 </head>
