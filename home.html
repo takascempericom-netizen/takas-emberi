@@ -482,14 +482,18 @@
     window.loadAds = loadAds;
 
     onAuthStateChanged(auth, async (user) => {
-      const grid = document.getElementById("adsGrid");
-      if (!user) {
-        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">İlanları görmek için giriş yapın</div>';
-        return;
-      }
-      await user.getIdToken(true);
-      await loadAds();
-    });
+  const grid = document.getElementById("adsGrid");
+  if (!user) {
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">İlanları görmek için giriş yapın</div>';
+    return;
+  }
+
+  // Public profilini garantiye al
+  try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
+
+  await user.getIdToken(true);
+  await loadAds();
+});
 
     /* ===== Kart tıklama + butonlar ===== */
     const adsGridEl = document.getElementById("adsGrid");
