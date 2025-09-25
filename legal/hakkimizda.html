@@ -12,89 +12,59 @@
       --brandA:#6a5cff; --brandB:#00d4ff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%; width:100%}
+    html,body{height:100%; margin:0; padding:0; max-width:100vw; overflow-x:hidden}
+
     body{
-      margin:0;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:#f8fafc; color:var(--ink);
       font-size:16px; line-height:1.6;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-      overflow-x:hidden; /* Sayfa asla yana kaymaz */
     }
-    /* Her şey satıra sığsın */
+
     img,svg,video,iframe{max-width:100%;height:auto;display:block}
     a, p, h1, h2, td, th, div, span{overflow-wrap:anywhere;word-break:break-word}
 
-    /* Header (kompakt, sabit) */
-    header{position:sticky; top:0; z-index:100; background:#f9fafb; color:#0f172a; border-bottom:1px solid var(--line)}
-    .wrap{max-width:1100px; width:100%; margin:0 auto; padding:14px 12px}
-    .brand{display:flex; gap:10px; align-items:center; min-width:0; color:inherit; text-decoration:none}
-    .brand img{display:block; height:auto; max-height:36px; width:auto; max-width:100%}
-    .brand strong{font-size:17px; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    header{position:sticky;top:0;z-index:100;background:#f9fafb;color:#0f172a;border-bottom:1px solid var(--line)}
+    .wrap{max-width:1100px;width:100%;margin:0 auto;padding:14px 12px}
+    .brand{display:flex;gap:10px;align-items:center;min-width:0;text-decoration:none;color:inherit}
+    .brand img{max-height:36px;width:auto}
+    .brand strong{font-size:17px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* Main */
-    main{max-width:1100px; width:100%; margin:18px auto; padding:0 12px 40px}
-    .panel{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:14px}
-    h1{margin:0 0 6px; font-size:clamp(22px,4.5vw,28px)}
-    h2{margin:8px 0 10px; font-size:clamp(18px,3.6vw,20px)}
+    main{max-width:1100px;width:100%;margin:18px auto;padding:0 12px 40px}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
+    h1{margin:0 0 6px;font-size:clamp(22px,4.5vw,28px)}
+    h2{margin:8px 0 10px;font-size:clamp(18px,3.6vw,20px)}
     p{margin:0 0 10px}
 
-    /* Grid */
-    .grid{display:grid; gap:12px; min-width:0}
-    .grid > *{min-width:0} /* grid çocukları taşma yapmasın */
+    .grid{display:grid;gap:12px;min-width:0}
+    .grid > *{min-width:0}
     @media (min-width:800px){ .grid{grid-template-columns:1.4fr .9fr} }
 
-    /* TABLO — tamamen responsive, kayma yok */
-    .table-wrap{width:100%}
     .legal-table{
       width:100%;
       border-collapse:collapse;
-      table-layout:fixed;   /* hücreler kırılarak sığar */
+      table-layout:fixed; /* kırma yapar */
     }
-    .legal-table th, .legal-table td{
-      border:1px solid var(--line);
-      padding:10px;
-      vertical-align:top;
-    }
-    .legal-table th{background:#f1f5f9; text-align:left}
-    /* Başlık kolonu geniş ama esnek */
-    .legal-table th{width:40%}
+    .legal-table th,.legal-table td{border:1px solid var(--line);padding:10px;vertical-align:top}
+    .legal-table th{background:#f1f5f9;text-align:left;width:40%}
 
-    /* Footer */
-    footer{border-top:1px solid var(--line); color:var(--muted)}
+    footer{border-top:1px solid var(--line);color:var(--muted)}
 
-    /* Mobile ince ayar */
     @media (max-width:600px){
       .panel{padding:16px}
       .brand img{max-height:32px}
       .brand strong{font-size:16px}
       .legal-table{font-size:14px}
-      .legal-table th{width:42%} /* küçük ekranda başlık biraz geniş */
+      .legal-table th{width:42%}
     }
 
-    /* Dark mode (tercihe saygılı) */
     @media (prefers-color-scheme: dark){
-      :root{ --paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; }
+      :root{--paper:#0f1422;--ink:#e8ecf8;--muted:#a3acc7;--line:#1f273d}
       body{background:#0a0d17}
-      header{background:#0b1020; color:var(--ink); border-bottom-color:var(--line)}
+      header{background:#0b1020;color:var(--ink);border-bottom-color:var(--line)}
       .legal-table th{background:#0f1a34}
     }
   </style>
-  <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "name":"Takas Çemberi",
-    "url":"https://takascemberi.com/",
-    "brand":"Takas Çemberi",
-    "legalName":"Takas Çemberi",
-    "vatID":"9530226667",
-    "foundingDate":"2025-09-17",
-    "logo":"https://takascemberi.com/assets/img/legallogo.png",
-    "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","telephone":"+905057279143","email":"takascemberi@gmail.com","availableLanguage":["tr"]}]
-  }
-  </script>
 </head>
 <body>
   <header>
@@ -134,18 +104,16 @@
 
       <aside class="panel" aria-labelledby="legal-info">
         <h2 id="legal-info">Ticari &amp; Hukuki Bilgiler</h2>
-        <div class="table-wrap">
-          <table class="legal-table">
-            <tr><th>Marka / Site</th><td>Takas Çemberi — <a href="https://takascemberi.com/">takascemberi.com</a></td></tr>
-            <tr><th>İşletme Türü</th><td>Gerçek kişi işletmesi</td></tr>
-            <tr><th>Vergi Dairesi</th><td>Silivri Vergi Dairesi Müdürlüğü</td></tr>
-            <tr><th>Vergi Kimlik No (VKN)</th><td>9530226667</td></tr>
-            <tr><th>Faaliyet Kodu (NACE)</th><td>479114 — Radyo, TV, posta yoluyla veya internet üzerinden yapılan perakende ticaret</td></tr>
-            <tr><th>Vergi Türü</th><td>Yıllık Gelir Vergisi</td></tr>
-            <tr><th>İşe Başlama Tarihi</th><td>17.09.2025</td></tr>
-            <tr><th>İletişim</th><td>WhatsApp: 05057279143 • E-posta: <a href="mailto:takascemberi@gmail.com">takascemberi@gmail.com</a></td></tr>
-          </table>
-        </div>
+        <table class="legal-table">
+          <tr><th>Marka / Site</th><td>Takas Çemberi — <a href="https://takascemberi.com/">takascemberi.com</a></td></tr>
+          <tr><th>İşletme Türü</th><td>Gerçek kişi işletmesi</td></tr>
+          <tr><th>Vergi Dairesi</th><td>Silivri Vergi Dairesi Müdürlüğü</td></tr>
+          <tr><th>Vergi Kimlik No (VKN)</th><td>9530226667</td></tr>
+          <tr><th>Faaliyet Kodu (NACE)</th><td>479114 — Radyo, TV, posta yoluyla veya internet üzerinden yapılan perakende ticaret</td></tr>
+          <tr><th>Vergi Türü</th><td>Yıllık Gelir Vergisi</td></tr>
+          <tr><th>İşe Başlama Tarihi</th><td>17.09.2025</td></tr>
+          <tr><th>İletişim</th><td>WhatsApp: 05057279143 • E-posta: <a href="mailto:takascemberi@gmail.com">takascemberi@gmail.com</a></td></tr>
+        </table>
 
         <h2 style="margin-top:14px">Yasal Metinler</h2>
         <p><a href="/legal/gizlilik.html">Gizlilik Sözleşmesi</a></p>
