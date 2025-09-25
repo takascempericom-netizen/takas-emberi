@@ -1,18 +1,18 @@
-/* firebase-init.js — GÜNCEL (Global mesaj/bildirim izleyici + ses ping) */
+/* firebase-init.js — GÜNCEL (tek import, tek export, güvenli init) */
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, collection, query, where, onSnapshot
+  getFirestore, collection, query, where, onSnapshot, doc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ⚠️ App Check İMPORT YOK (bilerek kapalı) */
 
-/* Proje config */
+/* Proje config (bucket: appspot.com olmalı) */
 const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "ureten-eller-v2.firebaseapp.com",
   projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.firebasestorage.app",
+  storageBucket: "ureten-eller-v2.appspot.com", // DÜZELTİLDİ
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
@@ -135,21 +135,7 @@ function startGlobalMessagingWatcher(){
   });
 }
 
-/* Global export */
-window.__fb = { app, auth, db, requireAuth, startGlobalMessagingWatcher };
-console.log("[fb] ready:", app?.options?.projectId);
-
-/* Global export */
-window.__fb = { app, auth, db, requireAuth, startGlobalMessagingWatcher };
-console.log("[fb] ready:", app?.options?.projectId);
-
-/* ESM uyumu */
-
 /* ---- Public profile upsert (Google/E-posta girişleri) ---- */
-import {
-  getFirestore, doc, setDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 function splitName(displayName) {
   if (!displayName || typeof displayName !== 'string') return { firstName: '', lastName: '' };
   const parts = displayName.trim().split(/\s+/);
@@ -159,7 +145,7 @@ function splitName(displayName) {
 
 async function upsertPublicProfile(user) {
   try {
-    const db = window.__fb?.db || getFirestore();
+    const _db = db || getFirestore();
 
     const displayName = user.displayName || user.providerData?.[0]?.displayName || '';
     const photoURL    = user.photoURL    || user.providerData?.[0]?.photoURL    || '';
@@ -169,7 +155,7 @@ async function upsertPublicProfile(user) {
     const { firstName, lastName } = splitName(displayName);
 
     await setDoc(
-      doc(db, 'profiles_public', user.uid),
+      doc(_db, 'profiles_public', user.uid),
       {
         uid: user.uid,
         displayName: displayName || (email ? email.split('@')[0] : 'Kullanıcı'),
@@ -185,7 +171,7 @@ async function upsertPublicProfile(user) {
     );
 
     await setDoc(
-      doc(db, 'users', user.uid),
+      doc(_db, 'users', user.uid),
       {
         uid: user.uid,
         displayName: displayName || (email ? email.split('@')[0] : 'Kullanıcı'),
@@ -204,9 +190,10 @@ async function upsertPublicProfile(user) {
   }
 }
 
-/* global objeye ekle (mevcut anahtarları bozmadan) */
-Object.assign(window.__fb, { upsertPublicProfile });
-
+/* Global export — tek sefer, tekrar eden atamalar kaldırıldı */
+if (!window.__fb) window.__fb = {};
+Object.assign(window.__fb, { app, auth, db, requireAuth, startGlobalMessagingWatcher, upsertPublicProfile });
+console.log("[fb] ready:", app?.options?.projectId);
 
 /* ESM uyumu */
 export {};
