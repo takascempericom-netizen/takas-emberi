@@ -8,24 +8,44 @@
   <meta name="description" content="Takas Çemberi gizlilik politikası ve kişisel verilerin korunması." />
   <meta name="color-scheme" content="light dark" />
   <style>
-    :root{ --paper:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; --brandA:#6a5cff; --brandB:#00d4ff; }
+    :root{
+      --paper:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
+      --brandA:#6a5cff; --brandB:#00d4ff;
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--ink)}
-    a{color:#0ea5e9;text-decoration:none}
-    header{position:sticky;top:0;z-index:10;background:#f9fafb;color:#0f172a;border-bottom:1px solid var(--line)}
+    html,body{height:100%}
+    body{
+      margin:0; background:#f8fafc; color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      overflow-x:hidden; /* yatay taşmayı tamamen kapat */
+    }
+    img,svg,video,iframe{max-width:100%; height:auto; display:block}
+    a{color:#0ea5e9;text-decoration:none; word-break:break-word}
+    header{
+      position:sticky; top:0; z-index:10;
+      background:#f9fafb; color:#0f172a; border-bottom:1px solid var(--line)
+    }
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px}
-    .brand{display:flex;gap:10px;align-items:center}
-    .brand img{height:40px}
+    .brand{display:flex;gap:10px;align-items:center;color:inherit;text-decoration:none}
+    .brand img{height:clamp(32px,5.5vw,44px)}
     main{max-width:1100px;margin:18px auto;padding:0 16px 40px}
     .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
-    h1{margin:0 0 6px;font-size:28px}
-    h2{margin:12px 0 10px;font-size:20px}
+    h1{margin:0 0 6px;font-size:clamp(22px,3.6vw,28px)}
+    h2{margin:12px 0 10px;font-size:clamp(18px,3vw,20px)}
     p{margin:0 0 10px;line-height:1.65}
     ul{margin:6px 0 12px 18px}
-    code{background:#f1f5f9;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
-    table{width:100%;border-collapse:collapse;margin:8px 0 12px}
+    code{
+      background:#f1f5f9;border:1px solid var(--line);padding:2px 6px;border-radius:6px;
+      word-break:break-word
+    }
+
+    /* Tablolar küçük ekranda yatay kaydırma alır */
+    .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+    table{width:100%;border-collapse:collapse;min-width:560px}
     th,td{border:1px solid var(--line);padding:10px;vertical-align:top}
     th{background:#f1f5f9;text-align:left}
+    th,td{word-break:break-word}
+
     footer{border-top:1px solid var(--line);color:var(--muted)}
     .note{color:#64748b;font-size:14px}
   </style>
@@ -33,7 +53,7 @@
 </head>
 <body>
   <header>
-    <div class="wrap brand">
+    <div class="wrap">
       <a href="/" class="brand" aria-label="Anasayfa">
         <img src="/assets/img/legallogo.png" alt="Takas Çemberi">
         <strong>Takas Çemberi</strong>
@@ -54,29 +74,31 @@
 
     <section class="panel">
       <h2>1) Hangi Verileri İşliyoruz?</h2>
-      <table>
-        <tr><th>Kategori</th><th>Örnek Veriler</th></tr>
-        <tr>
-          <td>Kimlik / Hesap</td>
-          <td>Ad-soyad, kullanıcı adı, hesap/profil bilgileri</td>
-        </tr>
-        <tr>
-          <td>İletişim</td>
-          <td>E-posta, telefon, Platform içi mesajlar ve destek yazışmaları</td>
-        </tr>
-        <tr>
-          <td>İşlem / İlan</td>
-          <td>İlan içerikleri, fotoğraflar, teklif ve takas kayıtları, işlem tarihçesi</td>
-        </tr>
-        <tr>
-          <td>Teknik</td>
-          <td>IP adresi, cihaz/tarayıcı bilgisi, çerez verileri, oturum kayıtları, hata günlükleri</td>
-        </tr>
-        <tr>
-          <td>Ödeme</td>
-          <td>iyzico üzerinden tahsilat/ödeme bilgileri; <strong>kart verileri Platform’da tutulmaz</strong></td>
-        </tr>
-      </table>
+      <div class="table-scroll">
+        <table role="table" aria-label="İşlenen veri kategorileri">
+          <tr><th>Kategori</th><th>Örnek Veriler</th></tr>
+          <tr>
+            <td>Kimlik / Hesap</td>
+            <td>Ad-soyad, kullanıcı adı, hesap/profil bilgileri</td>
+          </tr>
+          <tr>
+            <td>İletişim</td>
+            <td>E-posta, telefon, Platform içi mesajlar ve destek yazışmaları</td>
+          </tr>
+          <tr>
+            <td>İşlem / İlan</td>
+            <td>İlan içerikleri, fotoğraflar, teklif ve takas kayıtları, işlem tarihçesi</td>
+          </tr>
+          <tr>
+            <td>Teknik</td>
+            <td>IP adresi, cihaz/tarayıcı bilgisi, çerez verileri, oturum kayıtları, hata günlükleri</td>
+          </tr>
+          <tr>
+            <td>Ödeme</td>
+            <td>iyzico üzerinden tahsilat/ödeme bilgileri; <strong>kart verileri Platform’da tutulmaz</strong></td>
+          </tr>
+        </table>
+      </div>
     </section>
 
     <section class="panel">
@@ -105,13 +127,15 @@
       <h2>4) Çerezler (Cookies)</h2>
       <p>Çerezler; oturumunuzu sürdürmek, güvenliği sağlamak ve deneyimi iyileştirmek için kullanılır.
         Tarayıcınızdan çerez ayarlarını yönetebilirsiniz.</p>
-      <table>
-        <tr><th>Tür</th><th>Açıklama</th><th>Saklama</th></tr>
-        <tr><td>Zorunlu</td><td>Giriş ve güvenlik çerezleri</td><td>Oturum süresi / en fazla 12 ay</td></tr>
-        <tr><td>Tercihsel</td><td>Dil, tema gibi ayarlar</td><td>6–12 ay</td></tr>
-        <tr><td>Performans</td><td>Hata/performans ölçümü (varsa)</td><td>6–12 ay</td></tr>
-        <tr><td>Pazarlama</td><td>Yalnızca açık rızanız varsa</td><td>6–12 ay</td></tr>
-      </table>
+      <div class="table-scroll">
+        <table role="table" aria-label="Çerez türleri">
+          <tr><th>Tür</th><th>Açıklama</th><th>Saklama</th></tr>
+          <tr><td>Zorunlu</td><td>Giriş ve güvenlik çerezleri</td><td>Oturum süresi / en fazla 12 ay</td></tr>
+          <tr><td>Tercihsel</td><td>Dil, tema gibi ayarlar</td><td>6–12 ay</td></tr>
+          <tr><td>Performans</td><td>Hata/performans ölçümü (varsa)</td><td>6–12 ay</td></tr>
+          <tr><td>Pazarlama</td><td>Yalnızca açık rızanız varsa</td><td>6–12 ay</td></tr>
+        </table>
+      </div>
     </section>
 
     <section class="panel">
