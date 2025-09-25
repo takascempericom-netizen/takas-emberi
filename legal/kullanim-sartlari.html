@@ -1,3 +1,4 @@
+<!-- /legal/kullanim-sartlari.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -13,18 +14,21 @@
       --accent:#6a5cff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0; padding:0; max-width:100vw; overflow-x:hidden}
 
+    /* Kayma/taşma engeli + tipografi */
+    html,body{height:100%; margin:0; padding:0; max-width:100vw; overflow-x:hidden}
     body{
       background:var(--bg); color:var(--ink);
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      font-size:16px; line-height:1.6;
+      font-size:16px; line-height:1.65;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
       -webkit-text-size-adjust:100%; text-size-adjust:100%;
     }
 
+    /* Medya öğeleri taşmasın */
     img,svg,video,iframe{max-width:100%; height:auto; display:block}
-    a, p, h1, h2, li, td, th, div, span{overflow-wrap:anywhere; word-break:break-word}
+    /* Uzun kelime/linkler kırılır */
+    a, p, h1, h2, li, div, span{overflow-wrap:anywhere; word-break:break-word}
 
     .wrap{max-width:900px; width:100%; margin:24px auto; padding:0 16px}
 
@@ -42,7 +46,7 @@
     .badge{display:inline-block; background:var(--accent); color:#fff; border-radius:999px; padding:2px 8px; font-size:12px; margin-left:6px}
 
     .links{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
-    .links a{padding:8px 10px; border:1px solid var(--line); border-radius:10px; text-decoration:none; color:var(--brand)}
+    .links a{display:inline-block; padding:8px 10px; border:1px solid var(--line); border-radius:10px; text-decoration:none; color:var(--brand)}
 
     footer{margin:24px 0; color:var(--muted); font-size:13px; text-align:center}
     .note{font-size:13px; color:#64748b}
@@ -50,7 +54,7 @@
     .contact{margin-top:16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#f1f5f9}
     .contact a{color:var(--brand); text-decoration:none}
 
-    /* küçük ekran optimizasyonları */
+    /* Küçük ekran optimizasyonları */
     @media (max-width:600px){
       .wrap{padding:0 12px}
       .card{padding:16px}
@@ -58,9 +62,10 @@
       .logo strong{font-size:16px}
       h1{font-size:22px}
       h2{font-size:18px}
+      .links a{padding:8px 10px}
     }
 
-    /* dark mode */
+    /* Dark mode (kullanıcı tercihi) */
     @media (prefers-color-scheme: dark){
       :root{--paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; --bg:#0a0d17; --brand:#e8ecf8}
       body{background:var(--bg)}
@@ -82,15 +87,111 @@
     </div>
 
     <article class="card" role="article">
-      <!-- içerik aynı, responsive hale getirildi -->
       <h1>Kullanım Şartları</h1>
       <p class="muted">
         Bu Kullanım Şartları (“Şartlar”), <strong>takascemberi.com</strong> alan adlı web sitesi ve ilişkili
-        mobil/web uygulamalarını (“Platform”) kullanımınıza ilişkin koşulları düzenler...
+        mobil/web uygulamalarını (“Platform”) kullanımınıza ilişkin koşulları düzenler. Platformu kullanan herkes,
+        bu Şartları ve bağlantılı tüm politikaları (Gizlilik, KVKK, Teslimat &amp; İade, Mesafeli Satış Sözleşmesi)
+        kabul etmiş sayılır. Platform, kullanıcıların ilan yayınlayıp takas/ödemeli işlem yapabildiği bir
+        <strong>aracı hizmet sağlayıcı</strong>dır.
       </p>
 
-      <!-- Buradan itibaren tüm başlık ve listeler orijinal metinden aynı şekilde devam ediyor -->
-      <!-- ... -->
+      <h2>1) Tanımlar</h2>
+      <ul>
+        <li><strong>Üye/Kullanıcı:</strong> Platforma kayıt olan veya Platformu kullanan gerçek kişi.</li>
+        <li><strong>İlan Sahibi/Satıcı:</strong> Ürünü ilâna koyan kullanıcı.</li>
+        <li><strong>Alıcı:</strong> Ürünü teslim alan kullanıcı.</li>
+        <li><strong>Takas:</strong> Bedelsiz/karşılıklı değiş-tokuş işlemi.</li>
+        <li><strong>Ödemeli İşlem:</strong> Bedel tahsilatı içeren satış işlemi (iyzico altyapısıyla).</li>
+      </ul>
+
+      <h2>2) Üyelik ve Hesap Güvenliği</h2>
+      <ul>
+        <li>Platform 18 yaş ve üzeri kişilere yöneliktir. Hesap bilgilerinizin doğruluğundan ve güncelliğinden siz sorumlusunuz.</li>
+        <li>Hesap erişim bilgilerinizi üçüncü kişilerle paylaşmayınız. Hesabınız üzerinden yapılan işlemler size aittir.</li>
+        <li>Platform; doğrulama, moderasyon ve güvenlik amaçlarıyla ek bilgi/belge talep edebilir, hesabı geçici/kalıcı olarak kısıtlayabilir.</li>
+      </ul>
+
+      <h2>3) Platformun Rolü</h2>
+      <p>Platform, ilanların yayınlanması, kullanıcıların iletişimi ve gerekirse ödemeli işlemlerde <strong>iyzico</strong> ile
+        ödeme tahsilatının sağlanması için teknik altyapı sunar. Ürünlerin mülkiyeti, nitelikleri, teslimat ve iade süreçleri
+        kural olarak <strong>ilan sahibi ve alıcı</strong> arasındadır. Platform, kullanıcılar arası sözleşmenin tarafı değildir.</p>
+
+      <h2>4) İlan Kuralları</h2>
+      <ul>
+        <li>İlanlar; doğru, güncel ve yanıltıcı olmayan bilgi/fotoğraflar içermelidir.</li>
+        <li>Başkasına ait fotoğraf, metin veya telifli içerik izinsiz kullanılamaz.</li>
+        <li>Yanlış kategori, spam, sahte/misleading ilanlar kaldırılabilir; hesaplar kısıtlanabilir.</li>
+      </ul>
+
+      <h2>5) Yasaklı Ürün/Hizmetler</h2>
+      <p>Mevzuata aykırı ya da riskli görülen ilanlar yayından kaldırılır. Örnek yasaklılar:</p>
+      <ul>
+        <li>Silah, mühimmat, patlayıcı, bıçak vb. <em>regüle/tehlikeli</em> ürünler;</li>
+        <li>Uyuşturucu, uyarıcı, tıbbi reçeteli ilaç, doping, CBRN materyalleri;</li>
+        <li>Sahte/kaçak/çalıntı mallar; fikri mülkiyeti ihlâl eden ürünler (kopya yazılım, taklit marka vb.);</li>
+        <li>Müstehcen/porno içerikler ve cinsel hizmet; çocuk istismarı içerikleri;</li>
+        <li>Canlı hayvan, koruma altındaki türler, insan organı/kalıntısı;</li>
+        <li>Kişisel veri, toplu e-posta/telefon listeleri ve her türlü gizlilik ihlali doğuracak materyal;</li>
+        <li>Mevzuatça satış/takasına sınırlama getirilen diğer ürün/hizmetler.</li>
+      </ul>
+
+      <h2>6) İşlem Kuralları (Takas &amp; Ödemeli)</h2>
+      <ul>
+        <li><strong>Takas:</strong> Taraflar karşılıklı anlaşır; gönderim ve iade süreçleri için
+          <a href="/legal/teslimat-iade.html">Teslimat &amp; İade Şartları</a> uygulanır.</li>
+        <li><strong>Ödemeli İşlem:</strong> Tahsilat <strong>iyzico</strong> güvenli sayfası üzerinden yapılır;
+          kart verileri Platformda <strong>tutulmaz/saklanmaz</strong>. Ayrıntılar için
+          <a href="/legal/mesafeli-satis-sozlesmesi.html">Mesafeli Satış Sözleşmesi</a> geçerlidir.</li>
+        <li>Taraflar öncelikle Platform içi mesajlaşma ile iletişim kurmalı; kayıtlar uyuşmazlık çözümünde esas alınabilir.</li>
+      </ul>
+
+      <h2>7) Ücretler, Komisyon ve Vergiler</h2>
+      <ul>
+        <li>Platform, ilan, hizmet veya işlem bazlı ücret/komisyon alabilir; tutarlar ve kesinti zamanları ekranda gösterilir.</li>
+        <li>Kullanıcılar kendi vergi ve yasal yükümlülüklerinden sorumludur.</li>
+      </ul>
+
+      <h2>8) Fikri Mülkiyet</h2>
+      <ul>
+        <li>“Takas Çemberi” markası, arayüz, tasarım ve yazılım unsurları Platforma aittir veya lisanslıdır; izinsiz çoğaltılamaz.</li>
+        <li>Kullanıcı içerikleri kullanıcıya aittir; Platforma yüklenen içerikler için, hizmetin sunulması ve tanıtımı amacıyla
+            <strong>dünya çapında, devredilebilir, münhasır olmayan</strong> bir kullanım lisansı verilmiş sayılır.</li>
+      </ul>
+
+      <h2>9) Davranış Kuralları ve Mesajlaşma</h2>
+      <ul>
+        <li>Hakaret, tehdit, ayrımcılık, spam, dolandırıcılık, kişisel veri paylaşımı gibi davranışlar yasaktır.</li>
+        <li>Güvenlik şüphesi veya şikâyet hâlinde Platform inceleme yapabilir, içeriği kaldırabilir, hesabı kısıtlayabilir.</li>
+      </ul>
+
+      <h2>10) Bildirimler ve Elektronik İletiler</h2>
+      <p>Hesabınızla ilişkili bildirimler (e-posta, SMS, platform içi bildirim) elektronik ortamda yapılabilir.
+        Ticari iletiler yalnızca açık rızanızla gönderilir; dilediğiniz zaman reddedebilirsiniz.</p>
+
+      <h2>11) Askıya Alma ve Fesih</h2>
+      <p>Şartların ihlâli, hukuka aykırılık şüphesi, güvenlik riski veya teknik bakım nedenleriyle, hesap/ilan geçici ya da kalıcı
+        olarak kısıtlanabilir veya feshedilebilir. Kullanıcı, hesabını dilediğinde kapatma talebi oluşturabilir.</p>
+
+      <h2>12) Sorumluluğun Sınırlandırılması</h2>
+      <p>Platform; kullanıcılar arasındaki işlemlerin tarafı değildir. Ürün ayıpları, teslimat gecikmeleri, iade süreçleri ve
+        kullanıcı beyanlarının doğruluğu Satıcı/Alıcıya aittir. Zorunlu mevzuat hükümleri saklı kalmak kaydıyla Platform,
+        dolaylı/sonuçsal zararlardan sorumlu tutulamaz.</p>
+
+      <h2>13) Mücbir Sebep</h2>
+      <p>Doğal afet, salgın, savaş, grev, altyapı kesintisi, resmi kararlar gibi öngörülemeyen ve tarafların kontrolü dışındaki
+        hâllerde yükümlülüklerin ifası askıya alınır; sorumluluk doğmaz.</p>
+
+      <h2>14) Değişiklikler</h2>
+      <p>Şartlar zaman zaman güncellenebilir. Güncel sürüm her zaman
+        <code>https://takascemberi.com/legal/kullanim-sartlari.html</code> adresinde yayımlanır.</p>
+      <p class="note">Son güncelleme: 25.09.2025</p>
+
+      <h2>15) Uygulanacak Hukuk ve Yetki</h2>
+      <p>Türkiye Cumhuriyeti hukuku uygulanır. Tüketici işlemlerinde yerleşim yerindeki <strong>Tüketici Hakem Heyetleri</strong> ve
+        <strong>Tüketici Mahkemeleri</strong> yetkilidir. Tacirler arasındaki uyuşmazlıklarda İstanbul (Merkez) mahkemeleri ve
+        icra daireleri yetkilidir.</p>
+
       <h2>İletişim</h2>
       <div class="contact" aria-label="İletişim">
         <div>WhatsApp Danışma Hattı: <a href="tel:+905057279143">0505 727 91 43</a></div>
