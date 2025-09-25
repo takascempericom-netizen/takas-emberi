@@ -1,33 +1,30 @@
 // /admin/users.js — Kullanıcı Listesi (arama, rol filtresi, sayfalama, rol/ban güncelleme)
-
 import {
   collection, query, where, orderBy, limit, startAfter, getDocs,
   updateDoc, doc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/** Basit yardımcılar */
 const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 const fmtDate = (ts)=>{
   try{
     if(!ts) return "-";
-    // Firestore Timestamp veya ISO/string desteği
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     if(isNaN(d)) return "-";
     const pad = n=> String(n).padStart(2,"0");
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }catch{ return "-"; }
 };
+const debounce = (fn, ms)=>{ let t=null; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
 
-/** Ana giriş noktası — index.html mountModule('users') burayı çağırır */
 export async function mountUsers({ auth, db, el }){
-  if(!el){ return; }
+  if(!el) return;
 
-  // State
+  // ---- STATE ----
   let lastDoc = null;
-  let currentQuery = { text:"", role:"all", pageSize: 20 };
   let loading = false;
+  const state = { text:"", role:"all", pageSize:20 };
 
-  // UI
+  // ---- UI ----
   el.innerHTML = `
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
       <input id="u-q" type="search" placeholder="Ad/E-posta ara…" style="flex:1;min-width:220px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px" />
@@ -45,7 +42,7 @@ export async function mountUsers({ auth, db, el }){
         <option value="50">50</option>
       </select>
       <button id="u-refresh" class="btn-ghost" type="button">Yenile</button>
-      <button id="u-next" class="btn-ghost" type="button">Sonraki &rsaquo;</button>
+      <button id="u-next" class="btn-ghost" type="button">Sonraki ›</button>
     </div>
 
     <div class="card" style="border:none">
@@ -80,21 +77,14 @@ export async function mountUsers({ auth, db, el }){
   const btnNext  = $("#u-next");
   const tbody    = $("#u-tbody");
 
-  // Etkileşimler
-  qInput.addEventListener("input", debounce(()=> reload(true), 450));
+  qInput.addEventListener("input", debounce(()=> reload(true), 400));
   roleSel.addEventListener("change", ()=> reload(true));
-  sizeSel.addEventListener("change", ()=> { currentQuery.pageSize = Number(sizeSel.value)||20; reload(true); });
+  sizeSel.addEventListener("change", ()=>{ state.pageSize = Number(sizeSel.value)||20; reload(true); });
   btnRef.addEventListener("click", ()=> reload(true));
   btnNext.addEventListener("click", ()=> reload(false));
+  tbody.addEventListener("click", onActionClick);
 
-  // İlk yükleme
   await reload(true);
-
-  /** ----------------- İç Fonksiyonlar ----------------- */
-
-  function debounce(fn, ms){
-    let t=null; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); };
-  }
 
   async function reload(reset){
     if(loading) return;
@@ -104,41 +94,31 @@ export async function mountUsers({ auth, db, el }){
         lastDoc = null;
         tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:#64748b">Yükleniyor…</td></tr>`;
       }
-      currentQuery.text = qInput.value.trim().toLowerCase();
-      currentQuery.role = roleSel.value;
+      state.text = qInput.value.trim().toLowerCase();
+      state.role = roleSel.value;
 
-      // Sorgu kur
       const col = collection(db, "users");
-      let q = null;
-
-      // Not: Tam metin arama yok; basit istemci tarafı filtre ile çözüyoruz.
-      // Sunucu tarafı filtre: role / banned
       const whereParts = [];
-      if(currentQuery.role === "banned"){
+      if(state.role === "banned"){
         whereParts.push(where("banned","==",true));
-      }else if(currentQuery.role !== "all"){
-        whereParts.push(where("role","==",currentQuery.role));
+      }else if(state.role !== "all"){
+        whereParts.push(where("role","==",state.role));
       }
 
-      // Varsayılan sıralama: createdAt desc, yoksa fallback: displayName
-      // createdAt yoksa orderBy hatası olmasın diye try/catch ile iki deneme yapacağız
-      const pageLim = limit(currentQuery.pageSize || 20);
+      const pageLim = limit(state.pageSize || 20);
 
-      // İlk deneme: createdAt ile
+      let q;
       try{
-        q = query(col, ...whereParts, orderBy("createdAt", "desc"), pageLim);
-        if(lastDoc) q = query(col, ...whereParts, orderBy("createdAt","desc"), startAfter(lastDoc), pageLim);
+        q = query(col, ...whereParts, orderBy("createdAt","desc"), ...(lastDoc?[startAfter(lastDoc)]:[]), pageLim);
       }catch{
-        // Fallback: displayName
-        q = query(col, ...whereParts, orderBy("displayName"), pageLim);
-        if(lastDoc) q = query(col, ...whereParts, orderBy("displayName"), startAfter(lastDoc), pageLim);
+        q = query(col, ...whereParts, orderBy("displayName"), ...(lastDoc?[startAfter(lastDoc)]:[]), pageLim);
       }
 
       const snap = await getDocs(q);
       const rows = [];
-      let cnt = 0;
+      let used = 0;
+
       snap.forEach(d=>{
-        cnt++;
         const x = d.data() || {};
         const uid   = d.id;
         const name  = x.displayName || x.name || "(adsız)";
@@ -149,11 +129,11 @@ export async function mountUsers({ auth, db, el }){
         const createdAt = x.createdAt || x.created_at || x._created || null;
         const lastLogin = x.lastLoginAt || x.lastLogin || x._lastLogin || x.lastSignInTime || null;
 
-        // Basit istemci araması (ad veya e-posta)
-        const needle = currentQuery.text;
+        const needle = state.text;
         const hay = `${name} ${email}`.toLowerCase();
-        if(needle && !hay.includes(needle)) return; // eşleşmiyorsa pas
+        if(needle && !hay.includes(needle)) return;
 
+        used++;
         rows.push(`
           <tr style="border-top:1px solid #e5e7eb">
             <td style="padding:10px 12px;display:flex;gap:10px;align-items:center;min-width:220px">
@@ -181,21 +161,17 @@ export async function mountUsers({ auth, db, el }){
         `);
       });
 
-      // Sayfalama için lastDoc
       lastDoc = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
 
-      if(rows.length===0){
+      if(used===0){
         tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:#64748b">Kayıt bulunamadı.</td></tr>`;
       }else{
         tbody.innerHTML = rows.join("");
       }
-
-      // İşlem butonları (delegation)
-      tbody.addEventListener("click", onActionClick);
-    } catch(e){
+    }catch(e){
       console.error("Kullanıcı listesi hata:", e);
       tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:#b91c1c">Hata: ${esc(e?.message||e)}</td></tr>`;
-    } finally{
+    }finally{
       loading = false;
     }
   }
@@ -206,7 +182,6 @@ export async function mountUsers({ auth, db, el }){
     const uid = btn.getAttribute("data-uid");
     const act = btn.getAttribute("data-act");
 
-    // Kendi hesabına tehlikeli işlem koruması
     const me = auth?.currentUser?.uid;
     if(uid && me && uid===me && (act==="ban" || act==="role")){
       const ok = confirm("Kendi hesabınız üzerinde işlem yapıyorsunuz. Devam edilsin mi?");
@@ -215,24 +190,21 @@ export async function mountUsers({ auth, db, el }){
 
     if(act==="role"){
       const current = btn.getAttribute("data-role") || "user";
-      const next = prompt("Yeni rolü girin (admin / moderator / support / user):", current);
+      const next = prompt("Yeni rol (admin/moderator/support/user):", current);
       if(!next) return;
       const role = (next||"").toString().trim().toLowerCase();
-      if(!["admin","moderator","support","user"].includes(role)){
-        alert("Geçersiz rol.");
-        return;
-      }
+      if(!["admin","moderator","support","user"].includes(role)){ alert("Geçersiz rol."); return; }
       try{
         btn.disabled = true;
         await updateDoc(doc(db,"users", uid), { role, roleUpdatedAt: serverTimestamp() });
         btn.setAttribute("data-role", role);
-        // Görsel etiketi de güncelle
         const pill = btn.closest("tr")?.querySelector(".role-pill");
         if(pill) pill.textContent = role;
         alert("Rol güncellendi.");
       }catch(e){
         console.error(e); alert("Rol güncellenemedi: " + (e?.message||e));
       }finally{ btn.disabled = false; }
+      return;
     }
 
     if(act==="ban"){
@@ -242,7 +214,6 @@ export async function mountUsers({ auth, db, el }){
       try{
         btn.disabled = true;
         await updateDoc(doc(db,"users", uid), banned ? { banned:false, unbannedAt: serverTimestamp() } : { banned:true, bannedAt: serverTimestamp() });
-        // UI güncelle
         const cell = btn.closest("tr")?.children?.[3];
         if(cell) cell.innerHTML = banned
           ? `<span style="color:#16a34a">Aktif</span>`
@@ -254,9 +225,10 @@ export async function mountUsers({ auth, db, el }){
       }catch(e){
         console.error(e); alert("İşlem başarısız: " + (e?.message||e));
       }finally{ btn.disabled = false; }
+      return;
     }
   }
 }
 
-// Geriye dönük uyumluluk: index.html olası fallback için
+// Fallback uyumluluk: index.html 'mod?.mountUsers || mod?.mount' çağırıyor
 export function mount(ctx){ return mountUsers(ctx); }
