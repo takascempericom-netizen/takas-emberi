@@ -824,6 +824,37 @@ chatSend?.addEventListener('click', async ()=>{
   }
 });
 </script>
+  
+  <script>
+  // Hukuki akordeon (KVKK / Gizlilik / Güvenlik / SSL Bilgisi / Kullanım Şartları)
+  (function () {
+    const acc = document.getElementById('acc');
+    if (!acc) return;
+
+    // Başlangıç ARIA durumları
+    acc.querySelectorAll('.acc-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+
+    acc.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.acc-btn');
+      if (!btn || !acc.contains(btn)) return;
+
+      const item = btn.closest('.acc-item');
+      const willOpen = !item.classList.contains('open');
+
+      // İstersen tek tek açılsın: önce açık olanları kapat
+      acc.querySelectorAll('.acc-item.open').forEach(it => {
+        if (it !== item) {
+          it.classList.remove('open');
+          it.querySelector('.acc-btn')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Tıklananı aç/kapat
+      item.classList.toggle('open', willOpen);
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+  })();
+</script>
 
 </body>
 </html>
