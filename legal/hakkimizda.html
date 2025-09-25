@@ -12,24 +12,25 @@
       --brandA:#6a5cff; --brandB:#00d4ff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%; overflow-x:hidden}
+    html,body{height:100%}
 
-    /* Tipografi: ezik görünmesin */
+    /* Tipografi ve genel görünüm */
     body{
       margin:0;
       background:#f8fafc;
       color:var(--ink);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size:16px; line-height:1.6; font-weight:400;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:16px; line-height:1.6;
       -webkit-text-size-adjust:100%; text-size-adjust:100%;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      overflow-x:auto; /* GİZLEME YOK: gerekirse yatay kaydırma göster */
     }
-
-    /* medya elemanları taşmasın */
+    /* Medya taşmasın */
     img,svg,video,iframe{max-width:100%; height:auto; display:block}
-    a{color:#0ea5e9;text-decoration:none; word-break:break-word}
+    /* Uzun kelimeler/kısaltmalar taşırmasın */
+    a, p, h1, h2, td, th, div, span{overflow-wrap:anywhere; word-break:break-word}
 
-    /* Header (kompakt + sabit) */
+    /* Header (kompakt ve sabit) */
     header{
       position:sticky; top:0; z-index:100;
       background:#f9fafb; color:#0f172a; border-bottom:1px solid var(--line);
@@ -41,34 +42,35 @@
 
     /* Main */
     main{max-width:1100px;margin:18px auto;padding:0 12px 40px}
-    .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
-    h1{margin:0 0 6px;font-size:clamp(22px,4.5vw,28px)}
-    h2{margin:8px 0 10px;font-size:clamp(18px,3.6vw,20px)}
+    .panel{
+      background:var(--paper); border:1px solid var(--line); border-radius:16px;
+      padding:20px; margin-bottom:14px;
+    }
+    h1{margin:0 0 6px; font-size:clamp(22px,4.5vw,28px)}
+    h2{margin:8px 0 10px; font-size:clamp(18px,3.6vw,20px)}
     p{margin:0 0 10px}
 
     /* Grid */
-    .grid{display:grid;gap:12px}
+    .grid{display:grid;gap:12px; min-width:0}
     @media (min-width:800px){ .grid{grid-template-columns:1.4fr .9fr} }
 
-    /* Legal table — sadece tablo kayar */
-    .table-wrap{
-      width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;
-    }
-    .legal-table{width:100%;border-collapse:collapse;min-width:520px}
+    /* Tablo: sadece kendi içinde kayar (sayfa gizlemez) */
+    .table-wrap{width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block}
+    .legal-table{width:100%; border-collapse:collapse; min-width:520px}
     .legal-table th,.legal-table td{
-      border:1px solid var(--line);padding:10px;vertical-align:top;word-break:break-word
+      border:1px solid var(--line); padding:10px; vertical-align:top;
     }
-    .legal-table th{width:260px;background:#f1f5f9;text-align:left}
+    .legal-table th{width:260px; background:#f1f5f9; text-align:left}
 
     /* Footer */
-    footer{border-top:1px solid var(--line);color:var(--muted)}
+    footer{border-top:1px solid var(--line); color:var(--muted)}
 
-    /* Mobile ince ayarlar */
+    /* Küçük ekran iyileştirmeleri */
     @media (max-width:600px){
       .panel{padding:16px}
       .brand img{max-height:32px}
       .brand strong{font-size:16px}
-      .legal-table{font-size:14px;min-width:500px}
+      .legal-table{font-size:14px; min-width:480px}
       .legal-table th{width:180px}
     }
 
@@ -92,9 +94,7 @@
     "vatID":"9530226667",
     "foundingDate":"2025-09-17",
     "logo":"https://takascemberi.com/assets/img/legallogo.png",
-    "contactPoint":[
-      {"@type":"ContactPoint","contactType":"customer support","telephone":"+905057279143","email":"takascemberi@gmail.com","availableLanguage":["tr"]}
-    ]
+    "contactPoint":[{"@type":"ContactPoint","contactType":"customer support","telephone":"+905057279143","email":"takascemberi@gmail.com","availableLanguage":["tr"]}]
   }
   </script>
 </head>
@@ -165,9 +165,7 @@
   </main>
 
   <footer>
-    <div class="wrap">
-      © 2025 Takas Çemberi
-    </div>
+    <div class="wrap">© 2025 Takas Çemberi</div>
   </footer>
 </body>
 </html>
