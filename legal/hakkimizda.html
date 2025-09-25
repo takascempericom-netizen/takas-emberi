@@ -1,4 +1,3 @@
-<!-- /legal/hakkimizda.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -13,23 +12,53 @@
       --brandA:#6a5cff; --brandB:#00d4ff;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--ink)}
     a{color:#0ea5e9;text-decoration:none}
+
+    /* Header */
     header{position:sticky;top:0;z-index:10;background:#f9fafb;color:#0f172a;border-bottom:1px solid var(--line)}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px}
-    .brand{display:flex;gap:10px;align-items:center}
-    .brand img{height:40px}
+    .brand{display:flex;gap:10px;align-items:center;min-width:0}
+    .brand img{display:block;height:auto;max-height:40px;width:auto;max-width:100%}
+    .brand strong{font-size:18px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Main */
     main{max-width:1100px;margin:18px auto;padding:0 16px 40px}
     .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
-    h1{margin:0 0 6px;font-size:28px}
-    h2{margin:8px 0 10px;font-size:20px}
+    h1{margin:0 0 6px;font-size:clamp(22px,4.5vw,28px)}
+    h2{margin:8px 0 10px;font-size:clamp(18px,3.8vw,20px)}
     p{margin:0 0 10px;line-height:1.6}
+
+    /* Grid */
     .grid{display:grid;gap:12px}
     @media (min-width:800px){ .grid{grid-template-columns:1.4fr .9fr} }
-    .legal-table{width:100%;border-collapse:collapse}
+
+    /* Legal table */
+    .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .legal-table{width:100%;border-collapse:collapse;min-width:520px}
     .legal-table th,.legal-table td{border:1px solid var(--line);padding:10px;vertical-align:top}
     .legal-table th{width:260px;background:#f1f5f9;text-align:left}
+
+    /* Footer */
     footer{border-top:1px solid var(--line);color:var(--muted)}
+
+    /* Small screens tweaks */
+    @media (max-width:600px){
+      .wrap{padding:14px 12px}
+      main{padding:0 12px 32px}
+      .panel{padding:16px}
+      .legal-table{font-size:14px}
+      .legal-table th{width:180px}
+    }
+
+    /* Dark mode auto (optional, respects user pref) */
+    @media (prefers-color-scheme: dark){
+      :root{ --paper:#0f1422; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d; }
+      body{background:#0a0d17}
+      header{background:#0b1020;color:var(--ink);border-bottom-color:var(--line)}
+      .legal-table th{background:#0f1a34}
+    }
   </style>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32"/>
   <script type="application/ld+json">
@@ -93,16 +122,18 @@
 
       <aside class="panel" aria-labelledby="legal-info">
         <h2 id="legal-info">Ticari &amp; Hukuki Bilgiler</h2>
-        <table class="legal-table">
-          <tr><th>Marka / Site</th><td>Takas Çemberi — <a href="https://takascemberi.com/">takascemberi.com</a></td></tr>
-          <tr><th>İşletme Türü</th><td>Gerçek kişi işletmesi</td></tr>
-          <tr><th>Vergi Dairesi</th><td>Silivri Vergi Dairesi Müdürlüğü</td></tr>
-          <tr><th>Vergi Kimlik No (VKN)</th><td>9530226667</td></tr>
-          <tr><th>Faaliyet Kodu (NACE)</th><td>479114 — Radyo, TV, posta yoluyla veya internet üzerinden yapılan perakende ticaret</td></tr>
-          <tr><th>Vergi Türü</th><td>Yıllık Gelir Vergisi</td></tr>
-          <tr><th>İşe Başlama Tarihi</th><td>17.09.2025</td></tr>
-          <tr><th>İletişim</th><td>WhatsApp: 05057279143 • E-posta: <a href="mailto:takascemberi@gmail.com">takascemberi@gmail.com</a></td></tr>
-        </table>
+        <div class="table-wrap">
+          <table class="legal-table">
+            <tr><th>Marka / Site</th><td>Takas Çemberi — <a href="https://takascemberi.com/">takascemberi.com</a></td></tr>
+            <tr><th>İşletme Türü</th><td>Gerçek kişi işletmesi</td></tr>
+            <tr><th>Vergi Dairesi</th><td>Silivri Vergi Dairesi Müdürlüğü</td></tr>
+            <tr><th>Vergi Kimlik No (VKN)</th><td>9530226667</td></tr>
+            <tr><th>Faaliyet Kodu (NACE)</th><td>479114 — Radyo, TV, posta yoluyla veya internet üzerinden yapılan perakende ticaret</td></tr>
+            <tr><th>Vergi Türü</th><td>Yıllık Gelir Vergisi</td></tr>
+            <tr><th>İşe Başlama Tarihi</th><td>17.09.2025</td></tr>
+            <tr><th>İletişim</th><td>WhatsApp: 05057279143 • E-posta: <a href="mailto:takascemberi@gmail.com">takascemberi@gmail.com</a></td></tr>
+          </table>
+        </div>
 
         <h2 style="margin-top:14px">Yasal Metinler</h2>
         <p><a href="/legal/gizlilik.html">Gizlilik Sözleşmesi</a></p>
