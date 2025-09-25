@@ -10,7 +10,6 @@
 
   <style>
     :root{
-      /* Aydınlık tema */
       --bg:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
       --brandA:#6a5cff; --brandB:#00d4ff; --focus:#0ea5e9;
       --c1:#6d28d9; --c2:#2563eb; --c3:#0891b2; --c4:#db2777;
@@ -19,83 +18,92 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
+      margin:0; background:var(--bg); color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--ink);
+      overflow-x:hidden; /* taşmayı kesin kes kapat */
     }
+    img,svg{max-width:100%; height:auto; display:block}
 
-    /* Top bar */
+    /* Top bar (wrap destekli – taşma yok) */
     .topbar{
-      position:sticky;top:0;display:flex;align-items:center;gap:16px;height:64px;
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      min-height:64px;
       background:linear-gradient(90deg,var(--brandA),var(--brandB));
-      background-size:200% 200%;animation:barShift 8s ease-in-out infinite;
-      padding:0 16px;box-shadow:0 2px 14px rgba(10,20,60,.18);z-index:100;border-bottom:1px solid rgba(0,0,0,.06)
+      background-size:200% 200%; animation:barShift 8s ease-in-out infinite;
+      padding:8px 12px; box-shadow:0 2px 14px rgba(10,20,60,.18);
+      border-bottom:1px solid rgba(0,0,0,.06)
     }
     @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .brand img{height:52px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
-    .grow{flex:1}
-    .btn{border:0;border-radius:14px;padding:10px 16px;font-weight:700;cursor:pointer}
+    .brand img{height:clamp(40px,9vw,56px); filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+    .grow{flex:1 1 auto; min-width:20px}
+    .btn{border:0;border-radius:14px;padding:10px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
     .btn.primary{background:var(--btn);color:var(--btnInk)}
     .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28)}
     .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
+    @media (max-width:380px){
+      /* en dar ekranda butonlar küçülür, yine de taşmaz */
+      .btn{padding:8px 10px;font-size:13px}
+    }
 
     /* Hero */
-    .hero{max-width:1100px;margin:24px auto;padding:20px 16px}
+    .hero{max-width:1100px;margin:24px auto;padding:16px}
     .panel{
       background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));
-      background-size:800% 800%;animation:panelBG 16s ease infinite;
-      border-radius:20px;padding:28px;box-shadow:0 10px 40px rgba(5,10,30,.12);
-      color:#fff;text-align:center;border:1px solid #eef2ff
+      background-size:800% 800%; animation:panelBG 16s ease infinite;
+      border-radius:20px; padding:24px; box-shadow:0 10px 40px rgba(5,10,30,.12);
+      color:#fff; text-align:center; border:1px solid #eef2ff
     }
     @keyframes panelBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
     .hero-logo{
-      height:120px;width:auto;display:block;margin:0 auto 12px;
+      width:clamp(120px,28vw,220px); margin:0 auto 12px;
       filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))
     }
     .title{
-      font-size:56px;font-weight:900;margin:0 0 12px;
+      font-size:clamp(32px,6vw,56px); font-weight:900; margin:0 0 12px;
       text-shadow:0 1px 14px rgba(0,0,0,.25)
     }
-    @media (max-width:640px){ .title{font-size:40px} }
+    .subtitle{font-size:clamp(16px,3.2vw,20px); margin:0 0 6px; opacity:.98}
 
-    .subtitle{font-size:20px;margin:0 0 6px;opacity:.98}
     .slogan-panel{
-      margin:20px auto;max-width:900px;padding:30px;border-radius:20px;text-align:center;color:#0f172a;
-      background:#ffffff;border:1px solid var(--line);box-shadow:0 4px 30px rgba(0,0,0,.06)
+      margin:20px auto; max-width:900px; padding:20px;
+      border-radius:20px; text-align:center; color:#0f172a;
+      background:#ffffff; border:1px solid var(--line);
+      box-shadow:0 4px 30px rgba(0,0,0,.06)
     }
-    .slogan-rotator{font-size:22px;font-weight:800;min-height:30px;transition:opacity 0.35s ease}
+    .slogan-rotator{font-size:clamp(16px,3.5vw,22px); font-weight:800; min-height:2.2em; transition:opacity .35s ease}
 
     /* Kategoriler */
-    .cats{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px;color:var(--ink)}
+    .cats{background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:16px; color:var(--ink)}
     .cats h2{margin:0 0 12px}
-    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:12px}
+    .grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-top:12px}
     .card{
-      border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
-      color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1);
-      transition:transform .18s,border-color .2s;border:1px solid rgba(0,0,0,.06)
+      border-radius:18px; padding:16px; min-height:120px;
+      display:flex; flex-direction:column; gap:6px; align-items:center; justify-content:center;
+      color:#fff; animation:cardColors 20s infinite alternate ease-in-out; background:var(--c1);
+      transition:transform .18s,border-color .2s; border:1px solid rgba(0,0,0,.06)
     }
     .card:hover{transform:translateY(-6px)}
     @keyframes cardColors{
       0%{background:var(--c1)}25%{background:var(--c2)}50%{background:var(--c3)}75%{background:var(--c4)}100%{background:var(--c1)}
     }
-    .emoji{font-size:28px}
+    .emoji{font-size:26px}
 
-    .features{display:grid;gap:12px;margin-top:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-    .feature{padding:14px;border-radius:14px;color:#0f172a;text-align:center;background:#fff;border:1px solid var(--line)}
+    .features{display:grid; gap:12px; margin-top:16px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+    .feature{padding:12px; border-radius:14px; color:#0f172a; text-align:center; background:#fff; border:1px solid var(--line)}
 
-    /* Dialoglar */
+    /* Dialoglar (tam responsive) */
     dialog{border:0;border-radius:16px;padding:0;max-width:95vw;background:var(--paper);color:var(--ink);border:1px solid var(--line); z-index:200;}
     dialog::backdrop{background:rgba(0,0,0,.45)}
-    .modal{padding:18px}
+    .modal{padding:16px; width:min(560px,95vw); position:relative}
     .in{width:100%;padding:12px 44px 12px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px;font-size:16px;background:var(--paper2);color:var(--ink)}
     .in:focus{outline:2px solid var(--focus);border-color:transparent}
     .x{position:absolute;top:10px;right:12px;background:transparent;border:0;font-size:22px;cursor:pointer;color:#64748b}
     .field{position:relative}
     .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#64748b;cursor:pointer;font-size:13px}
-    .row{display:flex;gap:10px}
-    @media (max-width:640px){ .row{flex-direction:column} }
+    .row{display:flex;gap:10px; flex-wrap:wrap}
+    .row > *{flex:1 1 220px; min-width:0}
 
     .legal-ack{
       display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--line);
@@ -106,11 +114,14 @@
     .legal-ack a:hover{text-decoration:underline}
 
     /* Footer */
-    footer{border-top:1px solid var(--line);margin-top:30px}
-    .foot-wrap{max-width:1100px;margin:0 auto;padding:16px;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .foot-wrap img{height:28px}
-    .foot-links{display:flex;gap:12px;flex-wrap:wrap}
-    .foot-links a{color:var(--muted);text-decoration:none}
+    footer{border-top:1px solid var(--line); margin-top:30px}
+    .foot-wrap{
+      max-width:1100px; margin:0 auto; padding:12px 16px; color:var(--muted);
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap
+    }
+    .foot-logo{height:clamp(20px,4vw,28px)}
+    .foot-links{display:flex; gap:12px; flex-wrap:wrap}
+    .foot-links a{color:var(--muted); text-decoration:none}
     .foot-links a:hover{text-decoration:underline}
   </style>
 </head>
@@ -150,7 +161,7 @@
         <div class="card" role="listitem"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
       </div>
 
-      <div class="features" style="margin-top:18px">
+      <div class="features" style="margin-top:16px">
         <div class="feature">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
         <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
         <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
@@ -161,8 +172,8 @@
   <!-- Alt bilgi -->
   <footer>
     <div class="foot-wrap">
-      <img src="/assets/img/legallogo.png" alt="Takas Çemberi yasal logo">
-      <div class="foot-links" aria-label="Yasal bağlantılar">
+      <img class="foot-logo" src="/assets/img/legallogo.png" alt="Takas Çemberi yasal logo">
+      <nav class="foot-links" aria-label="Yasal bağlantılar">
         <a href="/legal/hakkimizda.html">Hakkımızda</a>
         <a href="/legal/gizlilik.html">Gizlilik</a>
         <a href="/legal/teslimat-iade.html">Teslimat &amp; İade</a>
@@ -170,7 +181,7 @@
         <a href="/legal/kullanim-sartlari.html">Kullanım Şartları</a>
         <a href="/legal/kvkk.html">KVKK</a>
         <a href="/legal/iletisim.html">İletişim &amp; Ticari</a>
-      </div>
+      </nav>
       <div class="grow"></div>
       <small>© 2025 Takas Çemberi • takascemberi.com</small>
     </div>
@@ -178,7 +189,7 @@
 
   <!-- MODALLAR: Giriş / Kayıt -->
   <dialog id="dlgLogin" aria-modal="true" role="dialog">
-    <form method="dialog" class="modal" style="min-width:min(520px,95vw);position:relative">
+    <form method="dialog" class="modal">
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
       <h3 style="margin:0 0 12px">Giriş Yap</h3>
 
@@ -204,7 +215,7 @@
   </dialog>
 
   <dialog id="dlgSignup" aria-modal="true" role="dialog">
-    <form method="dialog" class="modal" style="min-width:min(560px,95vw);position:relative">
+    <form method="dialog" class="modal">
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
       <h3 style="margin:0 0 12px">Kaydol</h3>
 
@@ -225,11 +236,11 @@
       </div>
       <input class="in" type="email" id="email" placeholder="E-posta" required />
       <div class="row">
-        <div class="field" style="flex:1">
+        <div class="field">
           <input class="in" type="password" id="pass1" placeholder="Şifre" required />
           <button type="button" class="toggle" data-target="pass1">Göster</button>
         </div>
-        <div class="field" style="flex:1">
+        <div class="field">
           <input class="in" type="password" id="pass2" placeholder="Şifre (tekrar)" required />
           <button type="button" class="toggle" data-target="pass2">Göster</button>
         </div>
