@@ -255,6 +255,7 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
     const logoutBtn = $("#btnLogout"); if(logoutBtn) logoutBtn.style.display = user ? "" : "none";
     if(verified && !onHome){ location.replace("/home.html"); }
   });
-</script>
+
+  <script type="module" src="/firebase-init.js"></script>
   </body>
 </html>
