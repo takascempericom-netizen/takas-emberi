@@ -18,7 +18,7 @@
     .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
     .side-head{padding:10px 12px;border-bottom:1px solid var(--brd);font-weight:700}
 
-    /* === Yeni: Araç çubuğu (seç/toplu sil) === */
+    /* Araç çubuğu (seç/toplu sil) */
     .side-tools{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--brd);background:rgba(255,255,255,.5)}
     .side-tools .grow{flex:1}
     .btn{border:1px solid var(--brd);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
@@ -46,12 +46,25 @@
     .panel-head .name{font-weight:700}
     .panel-head .name a{color:#0f172a;text-decoration:none}
     .panel-head .name a:hover{text-decoration:underline}
-    .msgs{padding:12px;display:flex;flex-direction:column;gap:8px;overflow:auto;background:#fff}
-    .msg{max-width:70%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc}
+
+    .msgs{padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto;background:#fff}
+
+    /* Mesaj satırı: avatar + baloncuk + isim/saat */
+    .msg-row{display:flex;align-items:flex-end;gap:8px}
+    .msg-row.me{flex-direction:row-reverse}
+    .msg-avatar{width:28px;height:28px;border-radius:999px;object-fit:cover;background:#f1f5f9;border:1px solid #e5e7eb}
+    .msg-wrap{max-width:72%;display:flex;flex-direction:column}
+    .msg-name{font-size:11px;color:#64748b;margin:0 4px 2px}
+    .msg-name .time{margin-left:6px;opacity:.7}
+
+    /* Baloncuk (eski .msg) */
+    .msg{max-width:100%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc;word-wrap:break-word;white-space:pre-wrap}
     .msg.me{margin-left:auto;background:#111827;color:#fff;border-color:#111827}
-    .msg .time{display:block;margin-top:4px;font-size:11px;opacity:.7}
+    .msg .time{display:none} /* artık isim satırında gösteriyoruz */
+
     .input{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-top:1px solid var(--brd);background:rgba(255,255,255,.6)}
     .input input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff}
+
     .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
     .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
     .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
@@ -70,7 +83,7 @@
       <aside class="card sidebar">
         <div class="side-head">Sohbetler</div>
 
-        <!-- Yeni: seçim araç çubuğu -->
+        <!-- seçim araç çubuğu -->
         <div class="side-tools">
           <label style="display:flex;align-items:center;gap:6px">
             <input type="checkbox" id="ckAll" class="ck"/> Tümünü Seç
@@ -125,7 +138,8 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, query, where, onSnapshot, orderBy,
-      doc, getDoc, setDoc, addDoc, serverTimestamp, deleteDoc   // <-- deleteDoc eklendi
+      doc, getDoc, setDoc, addDoc, serverTimestamp,
+      updateDoc, arrayUnion                           // <-- arşivleme için
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -150,7 +164,7 @@
     const peerEmail  = document.getElementById('peerEmail');
     const notifyEl   = document.getElementById('notifySound');
 
-    // Yeni: toplu seçim araçları
+    // toplu seçim araçları
     const ckAll      = document.getElementById('ckAll');
     const selCountEl = document.getElementById('selCount');
     const btnDelSel  = document.getElementById('btnDeleteSel');
@@ -231,9 +245,10 @@
     btnDelSel.addEventListener('click', async ()=>{
       const ids = selectedIds();
       if(ids.length===0) return;
-      if(!confirm(`${ids.length} sohbet silinsin mi? (Sadece sizin erişiminiz kalkar)`)) return;
+      if(!confirm(`${ids.length} sohbet arşivlensin mi? (Sadece sizde gizlenir)`)) return;
       for(const id of ids){
-        try{ await deleteDoc(doc(db,'chats',id)); }catch(e){ console.warn('Silinemedi:', id, e); }
+        try{ await updateDoc(doc(db,'chats',id), { hiddenFor: arrayUnion(me.uid) }); }
+        catch(e){ console.warn('Arşivlenemedi:', id, e); }
       }
     });
 
@@ -246,7 +261,10 @@
       unsubThreads=onSnapshot(qy, async (snap)=>{
         if(snap.empty){ elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>'; refreshSelectionUI(); return; }
 
-        const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
+        let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
+        // Gizlenenleri çıkar
+        rows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
+        // Tarihe göre sırala
         rows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
 
         elThreads.innerHTML='';
@@ -257,17 +275,17 @@
           const row=$el(`
             <div class="thread ${d.id===activeChatId?'active':''}" data-id="${d.id}" data-peer="${peerUid}">
               <input type="checkbox" class="ck thread-ck" data-id="${d.id}" title="Seç"/>
-              <img class="avatar" src="${info.photo||''}" alt="">
+              <img class="avatar" src="${info.photo||'/assets/img/seffaf.png'}" alt="">
               <div>
                 <div class="tname"><a href="${profUrl}" data-prof="${peerUid}">${info.name||'Kullanıcı'}</a></div>
                 <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
               </div>
               <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
-              <button class="delOne" data-id="${d.id}" title="Sohbeti sil">✕</button>
+              <button class="delOne" data-id="${d.id}" title="Sohbeti arşivle">✕</button>
             </div>
           `);
 
-          // Satıra tıklayınca sohbeti aç (profil linki/checkbox/sil’e tıklanırsa açma)
+          // Satır tıklanınca sohbeti aç (profil linki/checkbox/sil’e tıklanırsa açma)
           row.addEventListener('click',(e)=>{
             if (e.target.closest('a[data-prof]')) { e.stopPropagation(); return; }
             if (e.target.closest('input.thread-ck')) { e.stopPropagation(); return; }
@@ -278,10 +296,11 @@
           // Checkbox değişince sayaç güncelle
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
 
-          // Tekli sil
+          // Tekli arşiv
           row.querySelector('.delOne').addEventListener('click', async ()=>{
-            if(!confirm('Bu sohbet silinsin mi? (Sadece sizin erişiminiz kalkar)')) return;
-            try{ await deleteDoc(doc(db,'chats',d.id)); }catch(e){ alert('Silinemedi: ' + (e.code||e.message||'hata')); }
+            if(!confirm('Bu sohbet arşivlensin mi? (Sadece sizde gizlenir)')) return;
+            try{ await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) }); }
+            catch(e){ alert('Arşivlenemedi: ' + (e.code||e.message||'hata')); }
           });
 
           elThreads.appendChild(row);
@@ -289,37 +308,58 @@
         refreshSelectionUI();
 
         // İlk seçim
-        if(!activeChatId){
+        if(!activeChatId && rows.length){
           if(initialChatId){
             const ex=rows.find(x=>x.id===initialChatId);
             if(ex){ const peer=ex.participants.find(x=>x!==me.uid)||''; openChat(initialChatId,peer); }
             initialChatId='';
-          }else if(rows.length){
+          }else{
             const d0=rows[0]; const peer0=d0.participants.find(x=>x!==me.uid)||''; openChat(d0.id,peer0);
           }
         }
+        if(rows.length===0){ elMsgs.innerHTML='<div class="tmuted">Sohbet yok.</div>'; }
       });
     }
 
-    /* ==== Mesajlar ==== */
-    function watchMessages(chatId){
+    /* ==== Mesajlar (isim + avatar ile) ==== */
+    async function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
 
+      // Me & Peer bilgilerini önceden al
+      let meInfo = await getUserBrief(me.uid);
+      let peerInfo = null;
+      if(activePeerUid) peerInfo = await getUserBrief(activePeerUid);
+
       let firstLoad=true;
       const qy=query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
-      unsubMsgs=onSnapshot(qy,(snap)=>{
+      unsubMsgs=onSnapshot(qy, async (snap)=>{
         if(snap.empty){
           elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
           firstLoad=false;
           return;
         }
         elMsgs.innerHTML='';
-        snap.forEach(d=>{
-          const m=d.data()||{}; const mine=m.senderUid===me.uid;
-          const div=$el(`<div class="msg ${mine?'me':''}"><div class="text"></div><span class="time">${fmt(m.createdAt)}</span></div>`);
-          div.querySelector('.text').textContent=m.text||''; elMsgs.appendChild(div);
-        });
+
+        for (const d of snap.docs){
+          const m=d.data()||{};
+          const mine = m.senderUid===me.uid;
+          // Gönderen bilgisi (cache kullanıyor)
+          let info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
+
+          const row = $el(`
+            <div class="msg-row ${mine?'me':''}">
+              <img class="msg-avatar" src="${info.photo||'/assets/img/seffaf.png'}" alt="">
+              <div class="msg-wrap">
+                <div class="msg-name">${info.name||'Kullanıcı'} <span class="time">${fmt(m.createdAt)}</span></div>
+                <div class="msg ${mine?'me':''}"><div class="text"></div></div>
+              </div>
+            </div>
+          `);
+          row.querySelector('.text').textContent = m.text || '';
+          elMsgs.appendChild(row);
+        }
+
         elMsgs.scrollTop=elMsgs.scrollHeight;
 
         // Yeni gelen karşı mesaj için ses
@@ -377,28 +417,28 @@
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
 
     /* ==== Auth ==== */
-onAuthStateChanged(auth, async (user)=> {
-  if (!user) {
-    location.href="/auth.html?next=/messages.html";
-    return;
-  }
+    onAuthStateChanged(auth, async (user)=> {
+      if (!user) {
+        location.href="/auth.html?next=/messages.html";
+        return;
+      }
 
-  // Public profilini garantiye al (firebase-init.js içinde tanımlıysa)
-  try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
+      // Public profilini garantiye al (firebase-init.js içinde tanımlıysa)
+      try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
 
-  me = user;
-  tryUnlockAudio();
+      me = user;
+      tryUnlockAudio();
 
-  // ?peer= ile geldiyse DM oluştur/aç
-  if (peerParam) {
-    try {
-      const chatId = await ensureDmChat(me.uid, peerParam);
-      initialChatId = chatId;
-    } catch (e) { console.error('DM açılamadı', e); }
-  }
+      // ?peer= ile geldiyse DM oluştur/aç
+      if (peerParam) {
+        try {
+          const chatId = await ensureDmChat(me.uid, peerParam);
+          initialChatId = chatId;
+        } catch (e) { console.error('DM açılamadı', e); }
+      }
 
-  watchThreads();
-});
+      watchThreads();
+    });
 
     /* ==== Alt bar aktifliği ==== */
     const path=location.pathname;
