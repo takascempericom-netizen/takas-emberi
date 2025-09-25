@@ -8,7 +8,8 @@
   <meta name="color-scheme" content="light dark">
   <style>
     :root{
-      --bg:#0a0d17; --ink:#e8ecf8; --muted:#a3acc7; --line:#1f273d;
+      /* Arka planı beyaz yaptık, metinleri koyulaştırdık */
+      --bg:#ffffff; --ink:#0f172a; --muted:#475569; --line:#e5e7eb;
       --brandA:#6a5cff; --brandB:#00d4ff;
       --c1:#5b21b6; --c2:#1d4ed8; --c3:#0891b2; --c4:#be185d;
       --paper:#0f1422; --paper2:#0b0f1b; --btn:#111827; --btnInk:#fff; --focus:#38bdf8;
@@ -26,17 +27,27 @@
     .btn.primary{background:var(--btn);color:var(--btnInk)}
     .btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2)}
     .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
+
     .hero{max-width:1100px;margin:24px auto;padding:20px 16px}
-    .panel{background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:800% 800%;animation:panelBG 16s ease infinite;
-      border-radius:20px;padding:28px;box-shadow:0 10px 40px rgba(5,10,30,.45);color:#fff;text-align:center;border:1px solid #1a2444}
+    .panel{
+      background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:800% 800%;animation:panelBG 16s ease infinite;
+      border-radius:20px;padding:34px 28px;box-shadow:0 10px 40px rgba(5,10,30,.20);color:#fff;text-align:center;border:1px solid #1a2444
+    }
     @keyframes panelBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .title{font-size:46px;font-weight:900;margin:0 0 12px;text-shadow:0 1px 10px rgba(0,0,0,.35)}
-    .subtitle{font-size:20px;margin:0 0 20px;opacity:.95}
+
+    /* Logo + başlık */
+    .logo-big img{height:96px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.35));margin-bottom:8px}
+    .title{font-size:56px;font-weight:900;margin:0 0 10px;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+    @media (min-width:900px){ .title{font-size:64px} }
+
+    /* Döngüsel slogan paneli */
     .slogan-panel{margin:20px auto;max-width:900px;padding:30px;border-radius:20px;text-align:center;color:#fff;
       background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));
-      background-size:800% 800%;animation:sloganBG 20s ease infinite;border:1px solid #1a2444;box-shadow:0 10px 40px rgba(5,10,30,.45)}
+      background-size:800% 800%;animation:sloganBG 20s ease infinite;border:1px solid #1a2444;box-shadow:0 10px 40px rgba(5,10,30,.20)}
     @keyframes sloganBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .slogan-rotator{font-size:26px;font-weight:700;min-height:34px;transition:opacity 1.2s ease}
+
+    /* Kategori kartları (renk animasyonu kalsın) */
     .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:20px}
     .card{border-radius:18px;padding:18px;min-height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;
       color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1);transition:transform .18s,border-color .2s; border:1px solid #1a2444}
@@ -45,17 +56,21 @@
     .emoji{font-size:28px}
     .features{display:grid;gap:12px;margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
     .feature{padding:14px;border-radius:14px;color:#fff;text-align:center;animation:cardColors 20s infinite alternate ease-in-out; border:1px solid #1a2444}
-    dialog{border:0;border-radius:16px;padding:0;max-width:95vw;background:var(--paper);color:var(--ink);border:1px solid #1e2a4d; z-index:200;}
-dialog::backdrop{background:rgba(0,0,0,.45);}
+
+    /* Modallar */
+    dialog{border:0;border-radius:16px;padding:0;max-width:95vw;background:var(--paper);color:#e5ecff;border:1px solid #1e2a4d; z-index:200;}
+    dialog::backdrop{background:rgba(0,0,0,.45);}
     .modal{padding:18px}
-    .in{width:100%;padding:12px 44px 12px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px;font-size:16px;background:var(--paper2);color:var(--ink)}
+    .in{width:100%;padding:12px 44px 12px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px;font-size:16px;background:var(--paper2);color:#e5ecff}
     .in:focus{outline:2px solid var(--focus);border-color:transparent}
     .x{position:absolute;top:10px;right:12px;background:transparent;border:0;font-size:22px;cursor:pointer;color:#94a3b8}
     .row{display:flex;gap:10px}
-    @media (max-width:640px){ .row{flex-direction:column} .title{font-size:36px} .subtitle{font-size:18px} }
+    @media (max-width:640px){ .row{flex-direction:column} .slogan-rotator{font-size:22px} }
     .field{position:relative}
     .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#9fb2d7;cursor:pointer;font-size:14px}
     .toggle:hover{color:#d1e2ff}
+    .accept{display:flex;gap:10px;align-items:flex-start;background:#0b1226;border:1px solid #1f2b52;padding:10px;border-radius:12px;color:#c7d2fe;font-size:14px;margin-top:6px}
+    .accept a{color:#93c5fd;text-decoration:underline}
   </style>
 </head>
 <body>
@@ -68,15 +83,19 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
   </header>
 
   <main class="hero">
+    <!-- LOGO + BAŞLIK -->
     <section class="panel" aria-labelledby="welcome-title">
+      <div class="logo-big"><img src="assets/img/seffaf.png" alt="Takas Çemberi"></div>
       <h1 id="welcome-title" class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
-      <p class="subtitle">Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.</p>
+      <!-- Sabit alt yazı kaldırıldı, aşağıdaki slogan paneline taşındı -->
     </section>
 
+    <!-- DÖNGÜLÜ SLOGAN -->
     <section class="slogan-panel" aria-hidden="false">
       <div class="slogan-rotator" id="slogan" aria-live="polite"></div>
     </section>
 
+    <!-- KATEGORİLER -->
     <section class="panel" aria-labelledby="cats-title" style="margin-top:12px">
       <h2 id="cats-title" style="margin-bottom:12px">Kategoriler</h2>
       <div class="grid" role="list">
@@ -96,20 +115,6 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
         <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
       </div>
     </section>
-
-    <section class="panel" style="margin-top:20px">
-      <h2>KVKK</h2>
-      <p>Veri sorumlusu: Takas Çemberi A.Ş.<br/>Toplanan veriler: Ad, iletişim, işlem kayıtları.<br/>Amaç: Üyelik, güvenli takas, müşteri desteği.<br/>Haklarınız: Bilgi alma, düzeltme, silme, itiraz.</p>
-      <h3>Gizlilik</h3>
-      <p>Çerez kullanımı ve tercih yönetimi.<br/>Üçüncü taraflarla paylaşım ilkeleri.<br/>Veri saklama süreleri ve şifreleme.</p>
-      <h3>Güvenlik</h3>
-      <p>SSL/TLS ile şifreli bağlantı.<br/>2FA ve anormal aktivite izleme.<br/>İçerik moderasyonu ve raporlama.</p>
-      <h3>SSL Bilgisi</h3>
-      <p>Modern protokoller (TLS 1.3) desteği.<br/>Güncel sertifika ve HSTS uygulanması.<br/>Güvenli çerçeve ve CORS politikaları.</p>
-      <h3>Kullanım Şartları</h3>
-      <p>İlan kuralları ve yasaklı içerikler.<br/>Üyelik sorumlulukları ve fesih.<br/>Uyuşmazlık ve yetkili yargı mercii.</p>
-      <p style="margin-top:8px">© 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️</p>
-    </section>
   </main>
 
   <!-- MODALLAR: Giriş / Kayıt -->
@@ -118,8 +123,8 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
       <h3 style="margin:0 0 12px">Giriş Yap</h3>
       <button type="button" class="btn primary" id="btnGoogleLogin" style="width:100%;margin-bottom:10px">Google ile Giriş</button>
-      <div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="flex:1;height:1px;background:#233058"></span><small style="color:#8ea2c9">veya e‑posta ile</small><span style="flex:1;height:1px;background:#233058"></span></div>
-      <input class="in" type="email" id="loginEmail" placeholder="E‑posta" required />
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="flex:1;height:1px;background:#233058"></span><small style="color:#8ea2c9">veya e-posta ile</small><span style="flex:1;height:1px;background:#233058"></span></div>
+      <input class="in" type="email" id="loginEmail" placeholder="E-posta" required />
       <div class="field">
         <input class="in" type="password" id="loginPass" placeholder="Şifre" required />
         <button type="button" class="toggle" data-target="loginPass">Göster</button>
@@ -146,7 +151,7 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
         <input class="in" type="text" id="city" placeholder="Yaşadığı Şehir" required />
         <input class="in" type="text" id="username" placeholder="Kullanıcı Adı" required />
       </div>
-      <input class="in" type="email" id="email" placeholder="E‑posta" required />
+      <input class="in" type="email" id="email" placeholder="E-posta" required />
       <div class="row">
         <div class="field" style="flex:1">
           <input class="in" type="password" id="pass1" placeholder="Şifre" required />
@@ -157,6 +162,17 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
           <button type="button" class="toggle" data-target="pass2">Göster</button>
         </div>
       </div>
+
+      <!-- KVKK + Gizlilik onayı -->
+      <label class="accept">
+        <input type="checkbox" id="chkKvkk" required>
+        <span> <a href="/legal/kvkk.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>’ni okudum ve kabul ediyorum.</span>
+      </label>
+      <label class="accept">
+        <input type="checkbox" id="chkGiz" required>
+        <span> <a href="/legal/gizlilik.html" target="_blank" rel="noopener">Gizlilik Politikası</a>’nı okudum ve kabul ediyorum.</span>
+      </label>
+
       <button type="button" class="btn primary" id="btnEmailSignup" style="width:100%;margin-top:10px">Kaydol</button>
     </form>
   </dialog>
@@ -166,16 +182,17 @@ dialog::backdrop{background:rgba(0,0,0,.45);}
   import {
     getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence,
     signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
-    sendPasswordResetEmail, sendEmailVerification, signOut, onAuthStateChanged
+    sendPasswordResetEmail, sendEmailVerification, signOut, onAuthStateChanged,
+    createUserWithEmailAndPassword, updateProfile
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-authDomain: "auth.takascemberi.com",
-projectId: "ureten-eller-v2",
-storageBucket: "ureten-eller-v2.appspot.com",
-messagingSenderId: "621494781131",
-appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    authDomain: "auth.takascemberi.com",
+    projectId: "ureten-eller-v2",
+    storageBucket: "ureten-eller-v2.appspot.com",
+    messagingSenderId: "621494781131",
+    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
   };
 
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -206,13 +223,42 @@ appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     }
   });
 
-  // Google ile giriş/kayıt
-  const provider = new GoogleAuthProvider();
-  async function googleLogin(){ await signInWithPopup(auth, provider); location.href="/home.html"; }
-  $("#btnGoogleLogin")?.addEventListener("click", googleLogin);
-  $("#btnGoogleSignup")?.addEventListener("click", googleLogin);
+  /* ===== SLOGAN ROTASYONU (15 sn) ===== */
+  const sloganEl = $("#slogan");
+  const slogans = [
+    "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
+    "Dolabın dolmasın — eşyalar döngüde kalsın.",
+    "İhtiyacın olana, elindekilerle ulaş.",
+    "Mahallenden güvenli takas; cebinden para çıkmadan."
+  ];
+  let si = 0;
+  function showSlogan(i){
+    if(!sloganEl) return;
+    sloganEl.style.opacity = "0";
+    setTimeout(()=>{
+      sloganEl.textContent = slogans[i];
+      sloganEl.style.opacity = "1";
+    }, 400);
+  }
+  showSlogan(si);
+  setInterval(()=>{ si = (si+1) % slogans.length; showSlogan(si); }, 15000);
 
-  // E-posta ile giriş
+  /* ===== Google ile giriş/kayıt ===== */
+  const provider = new GoogleAuthProvider();
+  async function googleLogin(){
+    await signInWithPopup(auth, provider);
+    location.href="/home.html";
+  }
+  async function googleSignup(){
+    const ok = $("#chkKvkk")?.checked && $("#chkGiz")?.checked;
+    if(!ok){ alert("Devam etmek için KVKK ve Gizlilik onaylarını işaretleyin."); return; }
+    await signInWithPopup(auth, provider);
+    location.href="/home.html";
+  }
+  $("#btnGoogleLogin")?.addEventListener("click", googleLogin);
+  $("#btnGoogleSignup")?.addEventListener("click", googleSignup);
+
+  /* ===== E-posta ile giriş ===== */
   $("#btnEmailLogin")?.addEventListener("click", async ()=>{
     const email = $("#loginEmail")?.value?.trim() || "";
     const pass  = $("#loginPass")?.value || "";
@@ -227,7 +273,27 @@ appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     location.href="/home.html";
   });
 
-  // Şifremi unuttum
+  /* ===== E-posta ile kayıt ===== */
+  $("#btnEmailSignup")?.addEventListener("click", async ()=>{
+    const first = $("#firstName")?.value?.trim() || "";
+    const last  = $("#lastName")?.value?.trim() || "";
+    const email = $("#email")?.value?.trim() || "";
+    const pass1 = $("#pass1")?.value || "";
+    const pass2 = $("#pass2")?.value || "";
+    const ok = $("#chkKvkk")?.checked && $("#chkGiz")?.checked;
+
+    if(!first || !last || !email || !pass1 || !pass2){ alert("Lütfen tüm alanları doldurun."); return; }
+    if(pass1 !== pass2){ alert("Şifreler eşleşmiyor."); return; }
+    if(!ok){ alert("Kaydolmak için KVKK ve Gizlilik onaylarını işaretleyin."); return; }
+
+    const { user } = await createUserWithEmailAndPassword(auth, email, pass1);
+    try{ await updateProfile(user, { displayName: `${first} ${last}` }); }catch{}
+    try{ await sendEmailVerification(user); }catch{}
+    alert("Hesap oluşturuldu. E-postanı doğrulaman gerekiyor. Doğrulama maili gönderildi.");
+    try{ await signOut(auth); }catch{}
+  });
+
+  /* ===== Şifremi unuttum ===== */
   $("#btnForgot")?.addEventListener("click", async ()=>{
     let email = $("#loginEmail")?.value?.trim() || prompt("E-posta:") || "";
     if(!email) return;
@@ -235,20 +301,20 @@ appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
     alert("Sıfırlama e-postası gönderildi: "+email);
   });
 
-  // Doğrulama mailini tekrar gönder (oturum açıksa)
+  /* ===== Doğrulama mailini tekrar gönder (oturum açıksa) ===== */
   $("#btnResendVerify")?.addEventListener("click", async ()=>{
     const u = auth.currentUser;
     if(!u){ alert("Önce giriş yapmalısın."); return; }
     try{ await sendEmailVerification(u); alert("Doğrulama e-postası gönderildi."); }catch{ alert("Gönderilemedi."); }
   });
 
-  // Çıkış
+  /* ===== Çıkış ===== */
   $("#btnLogout")?.addEventListener("click", async ()=>{
     try{ await signOut(auth); }catch{}
     location.href="/";
   });
 
-  // Oturum durumu
+  /* ===== Oturum durumu ===== */
   onAuthStateChanged(auth, (user)=>{
     const verified = !!user && (user.emailVerified || (user?.providerData||[]).some(p=>p.providerId==="google.com"));
     const onHome = /\/home\.html$/.test(location.pathname);
