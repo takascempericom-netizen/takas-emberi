@@ -25,20 +25,22 @@
     }
     img,video{max-width:100%;height:auto;display:block}
 
-    /* Topbar */
+    /* Topbar (ARAMA KUTUSU YOK) */
     .topbar{
       position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;padding:0 12px 0 16px;
       background:linear-gradient(90deg,var(--brandA),var(--brandB));color:#fff;box-shadow:0 6px 24px rgba(16,24,40,.25)
     }
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;min-width:0}
     .brand img{height:44px}
+    .brand strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
     .grow{flex:1}
-    .btn{border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.18);color:#fff;border-radius:12px;padding:8px 14px;cursor:pointer}
+    .btn{
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(0,0,0,.18);
+      color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;white-space:nowrap
+    }
     .btn.primary{background:var(--btn);border-color:#000;color:var(--btnInk)}
-    .search-form{flex:1;max-width:460px;display:flex;gap:6px;min-width:0}
-    .search-input{flex:1;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;min-width:0}
-    .search-input::placeholder{color:rgba(255,255,255,.9)}
-    .search-btn{padding:9px 12px;border-radius:12px;border:1px solid #000;background:#111827;color:#fff}
+    .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
 
     /* Wrapper + panel */
     .wrap{max-width:1200px;margin:18px auto;padding:0 16px}
@@ -82,26 +84,23 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:#111827}
 
-    @media (max-width:480px){
-      .brand img{height:36px}
-      .search-form{max-width:260px}
+    /* Küçük ekran: üst bar taşma önlemleri */
+    @media (max-width:520px){
+      .brand strong{display:none}
+      .btn{padding:6px 10px;font-size:12px}
     }
   </style>
 </head>
 <body>
-  <!-- Top -->
+  <!-- Top (ARMA KUTUSU YOK) -->
   <header class="topbar">
     <a class="brand" href="index.html">
       <img src="assets/img/seffaf.png" alt="Takas Çemberi logo"/><strong>Takas Çemberi</strong>
     </a>
     <div class="grow"></div>
-    <form class="search-form" action="search.html" method="get" role="search" aria-label="Site içi arama">
-      <input class="search-input" type="search" name="q" placeholder="Ne arıyorsun?" aria-label="Arama"/>
-      <button class="search-btn" type="submit">Ara</button>
-    </form>
-    <button id="btnProfile" class="btn">Profil</button>
-    <button id="btnPostAd" class="btn primary">İlan Ver</button>
-    <button id="btnLogout" class="btn">Çıkış</button>
+    <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
+    <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
+    <button id="btnLogout" class="btn" aria-label="Çıkış">Çıkış</button>
   </header>
 
   <!-- Body -->
@@ -142,7 +141,7 @@
       Mesajlar
     </button>
     <button class="tab" onclick="location.href='notifications.html'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9H3c0-4 3-2 3-9"/><path d="M9 21h6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9"/><path d="M9 21h6"/></svg>
       Bildirimler
     </button>
   </nav>
@@ -159,6 +158,8 @@
     const params = new URLSearchParams(location.search);
     let qText = (params.get('q')||'').trim();
     let cat = (params.get('cat')||'').trim();
+
+    // TR normalizasyonu
     const normalize = s => String(s||'').toLocaleLowerCase('tr')
       .replaceAll('ç','c').replaceAll('ğ','g').replaceAll('ı','i')
       .replaceAll('ö','o').replaceAll('ş','s').replaceAll('ü','u');
@@ -223,9 +224,13 @@
         console.warn('Indexed sorgu başarısız, fallback’a geçiliyor:', err?.code || err);
       }
 
-      // === 2) Güvenli fallback: yalnız orderBy (indeks gerektirmez), tüm filtreler istemci tarafında
+      // === 2) Güvenli fallback: KURALA UYUMLU (isApproved şart), orderBy YOK
       try{
-        const fbRef = query(baseRef, orderBy('createdAt','desc'), limit(100));
+        const fbRef = query(
+          baseRef,
+          where('isApproved','==', true),
+          limit(100)
+        );
         const snap2 = await getDocs(fbRef);
         await renderFromSnap(snap2, /*clientFilter=*/true);
       }catch(err2){
@@ -246,7 +251,6 @@
 
         // İstemci filtreleri (fallback modunda)
         if (clientFilter){
-          if (v.isApproved !== true) return;
           if (cat && v.cat !== cat) return;
           if (nq){
             const hay = [v.title, v.desc, v.city, v.cond].map(x=>normalize(x)).join(' ');
@@ -254,7 +258,7 @@
           }
           rows.push({ id:d.id, createdAt, ...v });
         }else{
-          // Sunucu filtreli mod
+          // Sunucu filtreli mod (yalnız metin filtresi istemci)
           if (nq){
             const hay = [v.title, v.desc, v.city, v.cond].map(x=>normalize(x)).join(' ');
             if (!hay.includes(nq)) return;
@@ -263,7 +267,7 @@
         }
       });
 
-      // Ek güvenlik: istemci tarafında da tarihe göre sırala (fallback’te özellikle)
+      // İstemci sıralaması: en yeni üstte
       rows.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
 
       if (rows.length===0){ emptyEl.style.display='block'; return; }
@@ -307,12 +311,9 @@
       };
     }
 
+    // Giriş şart değil: approved ilanlar herkes görebilir
     onAuthStateChanged(auth, async (user)=>{
-      if (!user){
-        $('#results').innerHTML = '<div class="empty">İlanları görmek için giriş yapın</div>';
-        return;
-      }
-      try{ await user.getIdToken(true);}catch{}
+      if (user){ try{ await user.getIdToken(true);}catch{} }
       load();
     });
   </script>
