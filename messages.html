@@ -69,8 +69,11 @@
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
     @media (max-width:900px){
-      /* Alt bar yüksekliğine göre dinamik boşluk — masaüstünü bozmaz */
-      .msgs{ padding-bottom: calc(var(--footer-h, 88px) + 8px + env(safe-area-inset-bottom)); }
+      /* Alt bar yüksekliğine göre dinamik boşluklar — SAFE AREA TEKRAR EKLENMEZ */
+      .msgs,
+      .threads{
+        padding-bottom: calc(var(--footer-h, 88px) + 8px);
+      }
     }
   </style>
 </head>
@@ -133,7 +136,7 @@
     </div>
   </nav>
 
-  <!-- Firebase init (global watcher + ses) -->
+  <!-- Firebase init -->
   <script type="module" src="assets/js/firebase-init.js"></script>
 
   <!-- Sayfa scripti -->
@@ -524,7 +527,7 @@
         document.documentElement.style.setProperty('--footer-h', h + 'px');
       }
       setFooterH();
-      window.addEventListener('resize', setFooterH);
+      window.addEventListener('resize', setFooterH, {passive:true});
       setTimeout(setFooterH, 250);
     })();
   </script>
