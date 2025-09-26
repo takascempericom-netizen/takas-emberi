@@ -236,17 +236,8 @@
     }
     ckAll.addEventListener('change', ()=>{
       const all = !!ckAll.checked;
-      elThreads.querySelectorAll('input.ck.thread-ck').forEach(ck=>{ ck.checked = all; });
+      elThreads.querySelectorAll('input.thread-ck').forEach(ck=>{ ck.checked = all; });
       refreshSelectionUI();
-    });
-    btnDelSel.addEventListener('click', async ()=>{
-      const ids = selectedIds();
-      if(ids.length===0) return;
-      if(!confirm(`${ids.length} sohbet arşivlensin mi? (Sadece sizde gizlenir)`)) return;
-      for(const id of ids){
-        try{ await updateDoc(doc(db,'chats',id), { hiddenFor: arrayUnion(me.uid) }); }
-        catch(e){ console.warn('Arşivlenemedi:', id, e); }
-      }
     });
 
     /* ==== Sohbet listesi ==== */
@@ -262,17 +253,11 @@
           return;
         }
 
-        // Tüm DMer
+        // DM'ler
         let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
 
-        // 1) Normalde arşivlenenleri gizle
-        const visible = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
-        // 2) Ama aktif sohbet arşivli olsa bile MUTLAKA göster
-        const activeRow = rows.find(d=>d.id===activeChatId);
-        const renderRows = (visible.length ? visible : rows); // hepsi arşivliyse yine de göster
-        if (activeRow && !renderRows.some(x=>x.id===activeRow.id)) {
-          renderRows.unshift(activeRow);
-        }
+        // Sadece BENDE gizlenmemiş olanlar
+        const renderRows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
 
         // Tarihe göre sırala
         renderRows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
@@ -291,10 +276,11 @@
                 <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
               </div>
               <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
-              <button class="delOne" data-id="${d.id}" title="Sohbeti arşivle">✕</button>
+              <button class="delOne" data-id="${d.id}" title="Sohbeti sil (sadece sizde)">✕</button>
             </div>
           `);
 
+          // Satır tıklama
           row.addEventListener('click',(e)=>{
             if (e.target.closest('a[data-prof]')) { e.stopPropagation(); return; }
             if (e.target.closest('input.thread-ck')) { e.stopPropagation(); return; }
@@ -302,26 +288,45 @@
             openChat(d.id,peerUid);
           });
 
+          // Checkbox
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
+
+          // Tekli SİL (sadece bende gizle)
           row.querySelector('.delOne').addEventListener('click', async ()=>{
-            if(!confirm('Bu sohbet arşivlensin mi? (Sadece sizde gizlenir)')) return;
-            try{ await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) }); }
-            catch(e){ alert('Arşivlenemedi: ' + (e.code||e.message||'hata')); }
+            if(!confirm('Bu sohbet SİLİNSİN mi? (Sadece sizde görünmez)')) return;
+            try{
+              await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) });
+              // Aktif sohbetse paneli de kapat
+              if (activeChatId === d.id) {
+                activeChatId = '';
+                elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
+                peerName.textContent='Sohbet seç';
+                peerEmail.textContent='';
+                peerAvatar.removeAttribute('src');
+              }
+            }catch(e){
+              alert('Silinemedi: ' + (e.code||e.message||'hata'));
+            }
           });
 
           elThreads.appendChild(row);
         }
-        refreshSelectionUI();
 
-        // İlk açılışta hiçbir aktif seçili değilse, en üsttekini seç
-        if(!activeChatId && renderRows.length){
-          const d0=renderRows[0]; const peer0=(d0.participants||[]).find(x=>x!==me.uid)||'';
-          openChat(d0.id,peer0);
+        if (renderRows.length === 0){
+          elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
+          // aktif görünümü de sıfırla
+          activeChatId='';
+          elMsgs.innerHTML='<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
+          peerName.textContent='Sohbet seç';
+          peerEmail.textContent='';
+          peerAvatar.removeAttribute('src');
         }
+
+        refreshSelectionUI();
       });
     }
 
-    /* ==== Mesajlar ==== */
+    /* ==== Mesajlar (isim + avatar ile) ==== */
     async function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
@@ -454,6 +459,24 @@
     }
     btnSend.addEventListener('click',sendMessage);
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
+
+    /* ==== Toplu SİL (sadece bende gizle) ==== */
+    btnDelSel.addEventListener('click', async ()=>{
+      const ids = selectedIds();
+      if(ids.length===0) return;
+      if(!confirm(`${ids.length} sohbet SİLİNSİN mi? (Sadece sizde görünmez)`)) return;
+      for(const id of ids){
+        try{ await updateDoc(doc(db,'chats',id), { hiddenFor: arrayUnion(me.uid) }); }
+        catch(e){ console.warn('Silinemedi:', id, e); }
+        if (activeChatId === id) {
+          activeChatId = '';
+          elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
+          peerName.textContent='Sohbet seç';
+          peerEmail.textContent='';
+          peerAvatar.removeAttribute('src');
+        }
+      }
+    });
 
     /* ==== Auth ==== */
     onAuthStateChanged(auth, async (user)=> {
