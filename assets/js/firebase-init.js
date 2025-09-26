@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
   authDomain: "auth.takascemberi.com",
   projectId: "ureten-eller-v2",
-  storageBucket: "ureten-eller-v2.appspot.com", // DÜZELTİLDİ
+  storageBucket: "ureten-eller-v2.appspot.com",
   messagingSenderId: "621494781131",
   appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
 };
@@ -41,18 +41,7 @@ function requireAuth(opts = {}) {
   });
 }
 
-/* ===== Global Mesaj & Bildirim İzleyici =====
-   - Mesajlar rozeti: #msgBadge
-   - Bildirimler rozeti: #notifBadge
-   - Ses: #notifySoundGlobal (yoksa #notifySound) */
-function playPing(){
-  const tag = document.getElementById('notifySoundGlobal') || document.getElementById('notifySound');
-  if (tag) {
-    tag.play().catch(()=>{ /* autoplay engeli: sessiz geç, fallback'a düş */ fallbackBeep(); });
-  } else {
-    fallbackBeep();
-  }
-}
+/* ===== Ses & Rozet yardımcıları ===== */
 function fallbackBeep(duration=160, freq=880){
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -64,12 +53,21 @@ function fallbackBeep(duration=160, freq=880){
     setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.04); o.stop(); ac.close(); }, duration);
   }catch{}
 }
+
+function playPing(){
+  const tag = document.getElementById('notifySoundGlobal') || document.getElementById('notifySound');
+  if (tag) {
+    tag.play().catch(()=>{ fallbackBeep(); });
+  } else {
+    fallbackBeep();
+  }
+}
+
 function setBadge(el, n){
   if(!el) return;
   if(n > 0){ el.style.display = 'inline-grid'; el.textContent = String(n); }
   else     { el.style.display = 'none'; }
 }
-let _unsubChats = null, _unsubInbox = null;
 
 /* LocalStorage tabanlı “görüldü” yardımcıları */
 function getSeen(chatId){
@@ -78,6 +76,27 @@ function getSeen(chatId){
 function setSeen(chatId, ms){
   try{ localStorage.setItem(`seen_chat_${chatId}`, String(ms||Date.now())); }catch{}
 }
+
+/* Tüm sayfalarda notify.wav’ı garantiye al (fallback) */
+function ensureGlobalAudio(){
+  if (document.getElementById('notifySoundGlobal')) return;
+  const audio = document.createElement('audio');
+  audio.id = 'notifySoundGlobal';
+  audio.preload = 'auto';
+  audio.innerHTML = `
+    <source src="/assets/sounds/notify.wav" type="audio/wav">
+    <source src="/sounds/notify.wav" type="audio/wav">
+  `;
+  audio.style.display = 'none';
+  document.body.appendChild(audio);
+}
+document.addEventListener('DOMContentLoaded', ensureGlobalAudio, { once:true });
+
+/* ===== Global Mesaj & Bildirim İzleyici =====
+   - Mesajlar rozeti: #msgBadge
+   - Bildirimler rozeti: #notifBadge
+   - Ses: #notifySoundGlobal (yoksa #notifySound) */
+let _unsubChats = null, _unsubInbox = null;
 
 /* Dışarıdan çağır: window.__fb.startGlobalMessagingWatcher() */
 function startGlobalMessagingWatcher(){
@@ -149,6 +168,7 @@ async function upsertPublicProfile(user) {
 
     const displayName = user.displayName || user.providerData?.[0]?.displayName || '';
     const photoURL    = user.photoURL    || user.providerData?.[0]?.photoURL    || '';
+    no_implicit_any: true
     const email       = user.email       || user.providerData?.[0]?.email       || '';
     const providerId  = user.providerData?.[0]?.providerId || 'password';
 
@@ -192,7 +212,11 @@ async function upsertPublicProfile(user) {
 
 /* Global export — tek sefer, tekrar eden atamalar kaldırıldı */
 if (!window.__fb) window.__fb = {};
-Object.assign(window.__fb, { app, auth, db, requireAuth, startGlobalMessagingWatcher, upsertPublicProfile });
+Object.assign(window.__fb, {
+  app, auth, db,
+  requireAuth, startGlobalMessagingWatcher, upsertPublicProfile,
+  setSeen, getSeen
+});
 console.log("[fb] ready:", app?.options?.projectId);
 
 /* ESM uyumu */
