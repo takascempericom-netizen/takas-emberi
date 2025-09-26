@@ -43,20 +43,6 @@
     .btn.primary{background:var(--btn);border-color:#000;color:var(--btnInk)}
     .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
 
-    /* Arama kutusu (yeni) */
-    .search-form{flex:1;max-width:360px;display:flex;align-items:center;gap:6px}
-    .search-input{
-      flex:1; min-width:0;
-      padding:8px 12px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.5);
-      background:rgba(255,255,255,.15); color:#fff;
-    }
-    .search-input::placeholder{color:rgba(255,255,255,.85)}
-    .search-btn{
-      padding:8px 12px; border-radius:12px;
-      border:1px solid #000; background:#111827; color:#fff; cursor:pointer;
-    }
-
     /* Hero */
     .hero{max-width:1200px;margin:20px auto;padding:0 16px}
     .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 8px 28px rgba(170, 26, 80, .22)}
@@ -105,7 +91,7 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:#111827}
 
-    /* Destek butonu & popup (mevcut) */
+    /* === Support (compact & professional) === */
     .support-fab.compact{
       position:fixed; right:16px; bottom:calc(var(--bottomH) + 16px);
       width:48px; height:48px; border-radius:12px;
@@ -139,6 +125,9 @@
       border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.12); color:#fff;
       font-size:18px; line-height:1; cursor:pointer;
     }
+    .sup-close:focus{ outline:2px solid var(--focus); outline-offset:2px; }
+
+    /* Canlı destek: mesaj listesi + baloncuklar */
     .support-pop.pro .sup-body{
       padding:14px 10px; max-height:46vh; overflow:auto;
       display:flex; flex-direction:column; gap:8px;
@@ -163,55 +152,43 @@
       width:40px; height:40px; border-radius:10px; border:1px solid #111827; background:#111827; color:#fff; display:grid; place-items:center; cursor:pointer;
     }
 
-    /* küçük ekran uyumu */
+    /* Küçük ekran uyumu */
     @media (max-width:480px){
-      .support-fab.compact{ right:12px; }
-      .support-pop.pro{ right:12px; width:min(320px,94vw); }
-      .search-form{ max-width: 220px; }
       .brand strong{ display:none; }
       .brand img{ height:36px; }
       .topbar{ gap:8px; padding-right:8px; }
       .btn{ padding:6px 10px; font-size:12px; }
+      #btnSearch{ display:inline-block; }
+    }
+    @media (max-width:380px){
+      #btnSearch{ display:none; } /* çok küçük ekranda gizle */
     }
 
     /* === İLAN KARTLARI (Yeni İlanlar) === */
     .ads-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
     @media (min-width:900px){.ads-grid{grid-template-columns:repeat(4,1fr)}}
     .ad-card{
-      border:1px solid var(--line);
-      border-radius:16px;
-      overflow:hidden;
-      background:#fff; color:#111827; text-decoration:none;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
-      transition:transform .15s ease; cursor:pointer;
+      border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff; color:#111827;
+      text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.06); transition:transform .15s ease; cursor:pointer;
     }
     .ad-card:hover{transform:translateY(-2px)}
     .ad-media{position:relative;width:100%;background:#f1f5f9;border-bottom:1px solid var(--line)}
     .ad-media::before{content:"";display:block;padding-top:100%}
-    .ad-media img{
-      position:absolute; inset:0; width:100%; height:100%;
-      object-fit:cover; object-position:center; display:block; image-orientation:from-image;
-    }
+    .ad-media img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; display:block; image-orientation:from-image;}
     .ad-body{padding:10px}
     .ad-title{
       margin:0 0 4px; font-size:14px; font-weight:800; line-height:1.25; color:#0f172a;
-      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-      min-height: calc(1.25em * 2);
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height: calc(1.25em * 2);
     }
     .ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
     .ad-actions{display:flex;gap:8px;margin-top:8px}
-    .ad-actions button{
-      flex:1;padding:8px 10px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;
-      border-radius:10px;cursor:pointer
-    }
+    .ad-actions button{ flex:1;padding:8px 10px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;border-radius:10px;cursor:pointer }
     .ad-actions .btn-view{background:#111827;color:#fff;border-color:#000}
     .ad-actions .btn-offer{background:#fff}
 
     .badge{
-      position:absolute; top:-6px; right:-10px;
-      min-width:18px; height:18px; padding:0 6px;
-      border-radius:999px; background:#ef4444; color:#fff;
-      font-size:11px; display:none; place-items:center;
+      position:absolute; top:-6px; right:-10px; min-width:18px; height:18px; padding:0 6px;
+      border-radius:999px; background:#ef4444; color:#fff; font-size:11px; display:none; place-items:center;
     }
 
     html,body{overflow-x:hidden}
@@ -226,13 +203,7 @@
       <strong>Takas Çemberi</strong>
     </a>
     <div class="grow"></div>
-
-    <!-- ARA BUTONU YERİNE ARAMA FORMU -->
-    <form class="search-form" action="/search.html" method="get" role="search" aria-label="Site içi arama">
-      <input class="search-input" type="search" name="q" placeholder="Ne arıyorsun?" aria-label="Arama" inputmode="search" />
-      <button class="search-btn" type="submit">Ara</button>
-    </form>
-
+    <button id="btnSearch" class="btn" aria-label="Ara">Ara</button>
     <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
     <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
     <button id="btnLogout" class="btn" aria-label="Çıkış">Çıkış</button>
@@ -307,70 +278,31 @@
     </button>
   </nav>
 
-  /* Canlı destek: mesaj listesi + baloncuklar (sağ/sol & iki renk) */
-.support-pop.pro .sup-body{
-  padding:14px 10px;
-  max-height:46vh;
-  overflow:auto;
-  display:flex;               /* hizalama için flex sütun */
-  flex-direction:column;
-  gap:8px;
-}
+  <!-- Canlı Destek (compact, yukarı açılır) -->
+  <button class="support-fab compact" id="btnSupport" aria-label="Canlı Destek">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"></path>
+    </svg>
+  </button>
 
-.support-pop.pro .msg{
-  margin:0;
-  font-size:13px;
-  line-height:1.45;
-  color:#0f172a;
-  background:#eef2ff;         /* ADMİN (karşı taraf) için açık renk */
-  border:1px solid #e5e7eb;
-  padding:10px 12px;
-  border-radius:12px 12px 12px 4px;  /* sola kuyruk hissi */
-  max-width:80%;
-  align-self:flex-start;       /* sola yasla */
-  word-wrap:break-word;
-  white-space:pre-wrap;
-}
+  <div class="support-pop pro" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
+    <div class="sup-head">
+      <strong>Canlı Destek</strong>
+      <button id="supClose" class="sup-close" type="button" aria-label="Pencereyi kapat">×</button>
+    </div>
+    <div class="sup-body"></div>
+    <div class="sup-input">
+      <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" />
+      <button id="chatSend" class="sup-send" type="button" aria-label="Gönder">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7Z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
 
-.support-pop.pro .msg.me{
-  color:#ffffff;
-  background:#111827;          /* KULLANICI (ben) için koyu renk */
-  border-color:#111827;
-  border-radius:12px 12px 4px 12px;  /* sağa kuyruk hissi */
-  align-self:flex-end;         /* sağa yasla */
-}
-
-.support-pop.pro .sup-input{
-  display:flex; gap:8px; padding:10px 10px 12px 10px; background:#f8fafc; border-top:1px solid #e5e7eb;
-}
-.support-pop.pro .sup-in{
-  flex:1; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font:inherit;
-}
-.support-pop.pro .sup-send{
-  width:40px; height:40px; border-radius:10px; border:1px solid #111827; background:#111827; color:#fff; display:grid; place-items:center; cursor:pointer;
-}
-
-/* küçük ekran uyumu */
-@media (max-width:480px){
-  .support-fab.compact{ right:12px; }
-  .support-pop.pro{ right:12px; width:min(320px,94vw); }
-}
-
-    /* Legal footer */
-    .legal{background:var(--black);color:var(--black-ink);border-top:1px solid var(--black-line);margin-top:20px}
-    .legal .wrap{max-width:1200px;margin:0 auto;padding:18px 16px}
-    .accordion{border:1px solid var(--black-line);border-radius:12px;overflow:hidden}
-    .acc-item + .acc-item{border-top:1px solid var(--black-line)}
-    .acc-btn{width:100%;text-align:left;background:transparent;color:var(--black-ink);border:0;padding:14px 16px;cursor:pointer;font-weight:800}
-    .acc-panel{display:none;padding:0 16px 16px 16px;color:#cfd3e3}
-    .acc-item.open .acc-panel{display:block}
-
-    @media (min-width:720px){
-      .title{font-size:52px}
-      .subtitle{font-size:22px}
-    }
-
-    <!-- Yeni Hukuki Footer (link listesi) -->
+  <!-- Alt Siyah Hukuki Alan (link listesi) -->
   <footer class="legal">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center">
       <a href="/legal.html">legal</a>
@@ -382,9 +314,12 @@
       <a href="/mesafeli-satis-sozlesmesi.html">mesafeli-satis-sozlesmesi.html</a>
       <a href="/teslimat-iade.html">teslimat-iade.html</a>
     </div>
+    <div class="wrap" style="text-align:center;color:#a8acc4;margin-top:8px">
+      © 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️
+    </div>
   </footer>
 
-  <!-- Global bildirim sesi (her sayfada çalışır) -->
+  <!-- Global bildirim sesi -->
   <audio id="notifySoundGlobal" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
     <source src="/sounds/notify.wav" type="audio/wav">
@@ -392,7 +327,6 @@
 
   <!-- JS -->
   <script type="module" src="assets/js/firebase-init.js"></script>
-  <!-- Global watcher'ı başlat -->
   <script>
     window.__fb?.startGlobalMessagingWatcher?.();
   </script>
@@ -405,7 +339,7 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    /* ===== Audio güvenli oynatım (autoplay hatasını önler) ===== */
+    /* ===== Audio güvenli oynatım ===== */
     let audioReady = false;
     const enableAudio = ()=>{ audioReady = true; };
     ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev, enableAudio, {passive:true}));
@@ -468,7 +402,6 @@
         return;
       }
 
-      // Public profilini garantiye al
       try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
 
       await user.getIdToken(true);
@@ -548,10 +481,8 @@
       };
 
       try{
-        // 1) Teklifi kaydet ve referansı al
         const offerRef = await addDoc(collection(db,'listings', targetListingId, 'offers'), offer);
 
-        // 2) Karşı tarafın inbox’ına bildirim bırak
         const { collection: coll2, addDoc: add2, serverTimestamp: ts } =
           await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
@@ -578,7 +509,7 @@
       }
     }
 
-    /* ===== Bana gelen teklifleri dinle (ilk yüklemede ping atma) ===== */
+    /* ===== Bana gelen teklifleri dinle ===== */
     let _offerUnsubs = [];
     async function watchOffersForMe(uid){
       _offerUnsubs.forEach(u=>{ try{u()}catch{} });
@@ -595,13 +526,12 @@
         const unsub = onSnapshot(offRef, (snap)=>{
           const firstSeen = firstLoadMap.get(m.id) === true ? false : true;
           if(firstSeen){
-            firstLoadMap.set(m.id, true); // ilk açılışta ses/uyarı verme
+            firstLoadMap.set(m.id, true);
             return;
           }
           snap.docChanges().forEach(ch=>{
             const d = ch.doc.data();
             if(ch.type==='added' && d?.toUid === uid){
-              // Güvenli ses + kısa toast
               playSoundSafe();
               const note = document.createElement('div');
               note.style.cssText = "position:fixed;right:16px;bottom:90px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:1000";
@@ -617,7 +547,7 @@
 
     onAuthStateChanged(auth, (u)=>{ if(u) watchOffersForMe(u.uid); });
 
-    /* ===== Üst bar + Alt bar (TEK KERE) ===== */
+    /* ===== Üst bar + Alt bar ===== */
     const $ = (s,r=document)=>r.querySelector(s);
 
     $('#btnLogout')?.addEventListener('click', async ()=>{
@@ -626,7 +556,7 @@
     });
     $('#btnProfile')?.addEventListener('click', ()=>location.href="/profile/profile.html");
     $('#btnPostAd')?.addEventListener('click', ()=>location.href="/ilan/ilan-verme.html");
-    /* #btnSearch kaldırıldı — yerine form var, ekstra JS gerekmez */
+    $('#btnSearch')?.addEventListener('click', ()=>location.href="/search.html");
 
     const tabs=[$('#tabHome'),$('#tabMessages'),$('#tabNotifs')].filter(Boolean);
     tabs.forEach(t=>t.addEventListener('click',()=>{
@@ -638,15 +568,13 @@
     }));
   </script>
 
-  <!-- DUYURULAR (Broadcasts) — bunu </body>’den hemen önce ekliyoruz -->
+  <!-- DUYURULAR (Broadcasts) -->
   <script type="module">
     import { getFirestore, collection, query, orderBy, limit, onSnapshot }
       from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // window.__fb varsa onun db'sini kullan; yoksa fallback
     const db = (window.__fb && window.__fb.db) || getFirestore();
 
-    // Panel zaten varsa kullan; yoksa oluştur ve İlanlar panelinin üstüne koy
     let panel = document.getElementById("broadcastsPanel");
     if (!panel) {
       panel = document.createElement("section");
@@ -670,7 +598,6 @@
       "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
     }[m]));
 
-    // Son 5 bildiriyi canlı dinle (yenisi üstte)
     onSnapshot(
       query(collection(db, "broadcasts"), orderBy("createdAt", "desc"), limit(5)),
       snap => {
