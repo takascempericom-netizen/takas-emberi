@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mesajlar • Takas Çemberi</title>
   <style>
-    :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5)}
+    :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5);--footer-h:88px}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
       background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
     @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -62,14 +62,15 @@
     .input input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff}
     .input.hidden{display:none}
 
-    .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
+    .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30; padding-bottom: env(safe-area-inset-bottom)}
     .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
     .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
     .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
     @media (max-width:900px){
-      .msgs{ padding-bottom: 120px; } /* alt bar için boşluk — masaüstü bozulmaz */
+      /* Alt bar yüksekliğine göre dinamik boşluk — masaüstünü bozmaz */
+      .msgs{ padding-bottom: calc(var(--footer-h, 88px) + 8px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
@@ -514,6 +515,18 @@
     document.querySelectorAll('.fixedbar a').forEach(a=>{
       a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/messages') && a.id==='navMsgs'));
     });
+
+    /* ==== Mobilde alt bar yüksekliğini dinamik uygula ==== */
+    (function(){
+      const fb = document.querySelector('.fixedbar');
+      function setFooterH(){
+        const h = fb ? fb.offsetHeight : 88;
+        document.documentElement.style.setProperty('--footer-h', h + 'px');
+      }
+      setFooterH();
+      window.addEventListener('resize', setFooterH);
+      setTimeout(setFooterH, 250);
+    })();
   </script>
 </body>
 </html>
