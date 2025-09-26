@@ -142,7 +142,7 @@
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      getFirestore, collection, query, where, onSnapshot, orderBy,
+      collection, query, where, onSnapshot, orderBy,
       doc, getDoc, setDoc, addDoc, serverTimestamp,
       updateDoc, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -202,12 +202,13 @@
 
     /* ==== URL param ==== */
     const params=new URLSearchParams(location.search);
-    let initialChatId=params.get('chat')||params.get('chatId')||'';
-    const peerParam=params.get('peer')||'';
+    const paramChatId=(params.get('chat')||params.get('chatId')||'').trim();
+    const paramPeer  =(params.get('peer')||'').trim();
 
     /* ==== State ==== */
     let me=null, activeChatId='', activePeerUid='', unsubMsgs=null, unsubThreads=null;
 
+    /* ==== DM chat garantile ==== */
     async function ensureDmChat(myUid,peerUid){
       const pair=[myUid,peerUid].sort();
       const chatId=`dm_${pair[0]}_${pair[1]}`;
@@ -252,15 +253,13 @@
 
       const qy=query(collection(db,'chats'), where('participants','array-contains',me.uid));
       unsubThreads=onSnapshot(qy, async (snap)=>{
-        if(snap.empty){ elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>'; refreshSelectionUI(); return; }
-
+        // Filtrele/sırala
         let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
-        // Gizlenenleri çıkar
         rows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
-        // Tarihe göre sırala
         rows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
 
-        elThreads.innerHTML='';
+        elThreads.innerHTML = rows.length ? '' : '<div class="tmuted">Sohbet yok.</div>';
+
         for(const d of rows){
           const peerUid=(d.participants||[]).find(x=>x!==me.uid)||'';
           const info=peerUid?await getUserBrief(peerUid):{name:'—',email:'',photo:''};
@@ -286,7 +285,6 @@
           });
 
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
-
           row.querySelector('.delOne').addEventListener('click', async ()=>{
             if(!confirm('Bu sohbet arşivlensin mi? (Sadece sizde gizlenir)')) return;
             try{ await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) }); }
@@ -297,35 +295,29 @@
         }
         refreshSelectionUI();
 
-        // İlk seçim
-        if(!activeChatId && rows.length){
-          if(initialChatId){
-            const ex=rows.find(x=>x.id===initialChatId);
-            if(ex){ const peer=ex.participants.find(x=>x!==me.uid)||''; openChat(initialChatId,peer); }
-            initialChatId='';
-          }else{
-            const d0=rows[0]; const peer0=d0.participants.find(x=>x!==me.uid)||''; openChat(d0.id,peer0);
-          }
+        // Liste geldikten sonra, eğer parametreyle açtığımız sohbet listede yoksa bile sorun değil
+        // (openChatImmediate zaten paneli doldurdu). Listede varsa highlight güncellenir:
+        if(activeChatId){
+          document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===activeChatId));
         }
-        if(rows.length===0){ elMsgs.innerHTML='<div class="tmuted">Sohbet yok.</div>'; }
       });
     }
 
-    /* ==== Mesajlar (isim + avatar ile) ==== */
+    /* ==== Mesajlar ==== */
     async function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
 
-      // Me & Peer bilgilerini önceden al
       let meInfo = await getUserBrief(me.uid);
-      let peerInfo = null;
-      if(activePeerUid) peerInfo = await getUserBrief(activePeerUid);
+      let peerInfo = activePeerUid ? await getUserBrief(activePeerUid) : null;
 
       let firstLoad=true;
       const qy=query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
       unsubMsgs=onSnapshot(qy, async (snap)=>{
         if(snap.empty){
           elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
+          // Görüldü saatini yine güncelle (boşsa now)
+          try { setSeen && setSeen(chatId, Date.now()); } catch {}
           firstLoad=false;
           return;
         }
@@ -334,7 +326,7 @@
         for (const d of snap.docs){
           const m=d.data()||{};
           const mine = m.senderUid===me.uid;
-          let info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
+          const info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
 
           const row = $el(`
             <div class="msg-row ${mine?'me':''}">
@@ -376,7 +368,7 @@
       }
     }
 
-    /* ==== Sohbet aç ==== */
+    /* ==== Sohbet aç (peer başlığı/avatarlı) ==== */
     async function openChat(chatId,peerUid){
       activeChatId=chatId; activePeerUid=peerUid||'';
       document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===chatId));
@@ -392,10 +384,26 @@
       }
 
       watchMessages(chatId);
-      history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}`);
+      history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}${activePeerUid?`&peer=${encodeURIComponent(activePeerUid)}`:''}`);
 
       // Açıldığında “görüldü”
       try { setSeen && setSeen(chatId, Date.now()); } catch {}
+    }
+
+    /* ==== Sohbeti anında aç (listeyi beklemeden) ==== */
+    async function openChatImmediate(chatId, hintPeerUid){
+      // Eğer peer bilinmiyorsa chat doc’tan bul
+      let peer = hintPeerUid || '';
+      try{
+        if(!peer){
+          const cs = await getDoc(doc(db,'chats',chatId));
+          const cd = cs.exists() ? (cs.data()||{}) : null;
+          if (cd && Array.isArray(cd.participants)) {
+            peer = cd.participants.find(u=>u!==me.uid) || '';
+          }
+        }
+      }catch{}
+      await openChat(chatId, peer);
     }
 
     /* ==== Gönder ==== */
@@ -447,14 +455,19 @@
       me = user;
       tryUnlockAudio();
 
-      // ?peer= ile geldiyse DM oluştur/aç
-      if (peerParam) {
+      // 1) chatId paramı varsa: listeyi beklemeden anında aç
+      if (paramChatId) {
+        await openChatImmediate(paramChatId, paramPeer || '');
+      }
+      // 2) sadece peer paramı varsa: chat'i garantile → anında aç
+      else if (paramPeer) {
         try {
-          const chatId = await ensureDmChat(me.uid, peerParam);
-          initialChatId = chatId;
+          const cid = await ensureDmChat(me.uid, paramPeer);
+          await openChatImmediate(cid, paramPeer);
         } catch (e) { console.error('DM açılamadı', e); }
       }
 
+      // Listeyi izle (highlight ve yan panel için)
       watchThreads();
 
       // Global izleyici (rozet+ses)
