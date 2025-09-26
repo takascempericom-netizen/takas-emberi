@@ -92,27 +92,22 @@ function ensureGlobalAudio(){
 }
 document.addEventListener('DOMContentLoaded', ensureGlobalAudio, { once:true });
 
-/* ===== Global Mesaj & Bildirim İzleyici =====
-   - Mesajlar rozeti: #msgBadge
-   - Bildirimler rozeti: #notifBadge
-   - Ses: #notifySoundGlobal (yoksa #notifySound) */
+/* ===== Global Mesaj & Bildirim İzleyici ===== */
 let _unsubChats = null, _unsubInbox = null;
 
-/* Dışarıdan çağır: window.__fb.startGlobalMessagingWatcher() */
 function startGlobalMessagingWatcher(){
   onAuthStateChanged(auth, async (user)=>{
-    // eski listener'ları kapat
     try{ _unsubChats && _unsubChats(); }catch{} _unsubChats=null;
     try{ _unsubInbox && _unsubInbox(); }catch{} _unsubInbox=null;
 
-    const msgBadge  = document.getElementById('msgBadge');   // Mesajlar rozeti
-    const notifBadge= document.getElementById('notifBadge'); // Bildirimler rozeti
+    const msgBadge  = document.getElementById('msgBadge');
+    const notifBadge= document.getElementById('notifBadge');
     setBadge(msgBadge, 0);
     setBadge(notifBadge, 0);
 
     if(!user) return;
 
-    // === Mesajlar: katıldığım sohbetlerde karşıdan yeni mesaj var mı? ===
+    // Mesajlar
     const chatsQ = query(collection(db,'chats'), where('participants','array-contains', user.uid));
     let firstSnap = true;
     _unsubChats = onSnapshot(chatsQ, (snap)=>{
@@ -125,10 +120,8 @@ function startGlobalMessagingWatcher(){
         const lastSender = c.lastSenderUid || c.lastSender || '';
         const seen = getSeen(d.id);
 
-        // Rozet: bu sohbette “karşıdan” ve “görülmemiş” yeni mesaj varsa say
         if (lastAt && lastAt > seen && lastSender && lastSender !== user.uid) {
           count += 1;
-          // Ses: ilk snapshot’ta çalma; sonrakilerde sayfa mesajlar değilken veya sekme gizliyken çal
           if (!firstSnap && (location.pathname !== '/messages.html' || document.hidden)) {
             shouldPing = true;
           }
@@ -140,7 +133,7 @@ function startGlobalMessagingWatcher(){
       firstSnap = false;
     }, (e)=>console.warn("[global chats] err:", e));
 
-    // === Bildirimler: users/{uid}/inbox (read:false) ===
+    // Bildirimler
     const inboxQ = query(collection(db,'users', user.uid, 'inbox'), where('read','==', false));
     _unsubInbox = onSnapshot(inboxQ, (snap)=>{
       const n = snap.size || 0;
@@ -154,7 +147,7 @@ function startGlobalMessagingWatcher(){
   });
 }
 
-/* ---- Public profile upsert (Google/E-posta girişleri) ---- */
+/* ---- Public profile upsert ---- */
 function splitName(displayName) {
   if (!displayName || typeof displayName !== 'string') return { firstName: '', lastName: '' };
   const parts = displayName.trim().split(/\s+/);
@@ -165,13 +158,10 @@ function splitName(displayName) {
 async function upsertPublicProfile(user) {
   try {
     const _db = db || getFirestore();
-
     const displayName = user.displayName || user.providerData?.[0]?.displayName || '';
     const photoURL    = user.photoURL    || user.providerData?.[0]?.photoURL    || '';
-    no_implicit_any: true
     const email       = user.email       || user.providerData?.[0]?.email       || '';
     const providerId  = user.providerData?.[0]?.providerId || 'password';
-
     const { firstName, lastName } = splitName(displayName);
 
     await setDoc(
@@ -210,7 +200,7 @@ async function upsertPublicProfile(user) {
   }
 }
 
-/* Global export — tek sefer, tekrar eden atamalar kaldırıldı */
+/* Global export */
 if (!window.__fb) window.__fb = {};
 Object.assign(window.__fb, {
   app, auth, db,
@@ -221,3 +211,6 @@ console.log("[fb] ready:", app?.options?.projectId);
 
 /* ESM uyumu */
 export {};
+
+/* Otomatik global izleyici */
+try { window.__fb?.startGlobalMessagingWatcher?.(); } catch {}
