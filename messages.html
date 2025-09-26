@@ -57,10 +57,10 @@
     .msg-name{font-size:11px;color:#64748b;margin:0 4px 2px}
     .msg-name .time{margin-left:6px;opacity:.7}
 
-    /* Baloncuk (eski .msg) */
+    /* Baloncuk */
     .msg{max-width:100%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc;word-wrap:break-word;white-space:pre-wrap}
     .msg.me{margin-left:auto;background:#111827;color:#fff;border-color:#111827}
-    .msg .time{display:none} /* artık isim satırında gösteriyoruz */
+    .msg .time{display:none}
 
     .input{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-top:1px solid var(--brd);background:rgba(255,255,255,.6)}
     .input input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff}
@@ -114,7 +114,7 @@
     </section>
   </main>
 
-  <!-- Bildirim sesi -->
+  <!-- Bildirim sesi (sayfa içi de bulunsun; global fallback firebase-init ekler) -->
   <audio id="notifySound" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
     <source src="/sounds/notify.wav" type="audio/wav">
@@ -132,27 +132,20 @@
     </div>
   </nav>
 
+  <!-- Firebase init (ortak) -->
+  <script type="module" src="assets/js/firebase-init.js"></script>
+
+  <!-- Sayfa scripti -->
   <script type="module">
-    /* ==== Firebase ==== */
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Ortak fb objeleri
+    const { auth, db, startGlobalMessagingWatcher, setSeen } = window.__fb || {};
+
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, query, where, onSnapshot, orderBy,
       doc, getDoc, setDoc, addDoc, serverTimestamp,
-      updateDoc, arrayUnion                           // <-- arşivleme için
+      updateDoc, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "ureten-eller-v2.firebaseapp.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.firebasestorage.app",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
 
     /* ==== UI refs ==== */
     const elThreads  = document.getElementById('threads');
@@ -285,7 +278,6 @@
             </div>
           `);
 
-          // Satır tıklanınca sohbeti aç (profil linki/checkbox/sil’e tıklanırsa açma)
           row.addEventListener('click',(e)=>{
             if (e.target.closest('a[data-prof]')) { e.stopPropagation(); return; }
             if (e.target.closest('input.thread-ck')) { e.stopPropagation(); return; }
@@ -293,10 +285,8 @@
             openChat(d.id,peerUid);
           });
 
-          // Checkbox değişince sayaç güncelle
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
 
-          // Tekli arşiv
           row.querySelector('.delOne').addEventListener('click', async ()=>{
             if(!confirm('Bu sohbet arşivlensin mi? (Sadece sizde gizlenir)')) return;
             try{ await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) }); }
@@ -344,7 +334,6 @@
         for (const d of snap.docs){
           const m=d.data()||{};
           const mine = m.senderUid===me.uid;
-          // Gönderen bilgisi (cache kullanıyor)
           let info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
 
           const row = $el(`
@@ -368,6 +357,13 @@
           if(hasIncoming) playNotify();
         }
         firstLoad=false;
+
+        // Görüldü saatini yaz
+        try {
+          const last = snap.docs[snap.docs.length-1]?.data();
+          const lastAt = last?.createdAt?.toMillis?.() || Date.now();
+          setSeen && setSeen(chatId, lastAt);
+        } catch {}
       });
     }
 
@@ -397,6 +393,9 @@
 
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}`);
+
+      // Açıldığında “görüldü”
+      try { setSeen && setSeen(chatId, Date.now()); } catch {}
     }
 
     /* ==== Gönder ==== */
@@ -411,7 +410,26 @@
         lastMsg:text, lastMsgAt:serverTimestamp(), lastSenderUid: me.uid
       },{merge:true});
 
+      // Karşı tarafa inbox bildirimi
+      if (activePeerUid) {
+        try {
+          await addDoc(
+            collection(db,'users', activePeerUid, 'inbox'),
+            {
+              type: 'message',
+              title: 'Yeni mesaj',
+              body: text.slice(0,120),
+              fromUid: me.uid,
+              link: `/messages.html?chatId=${encodeURIComponent(activeChatId)}&peer=${encodeURIComponent(me.uid)}`,
+              createdAt: serverTimestamp(),
+              read: false
+            }
+          );
+        } catch(e){ console.warn('inbox yazılamadı:', e); }
+      }
+
       elInput.value='';
+      try { setSeen && setSeen(activeChatId, Date.now()); } catch {}
     }
     btnSend.addEventListener('click',sendMessage);
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
@@ -423,7 +441,7 @@
         return;
       }
 
-      // Public profilini garantiye al (firebase-init.js içinde tanımlıysa)
+      // Public profilini garantiye al
       try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
 
       me = user;
@@ -438,6 +456,9 @@
       }
 
       watchThreads();
+
+      // Global izleyici (rozet+ses)
+      try { startGlobalMessagingWatcher && startGlobalMessagingWatcher(); } catch {}
     });
 
     /* ==== Alt bar aktifliği ==== */
