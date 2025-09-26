@@ -5,17 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mesajlar • Takas Çemberi</title>
   <style>
-    :root{
-      --c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5);
-      /* Mobil overlay fix değişkenleri */
-      --fbh: 72px; /* fixedbar yaklaşık yüksekliği */
-      --kb: 0px;   /* sanal klavye yüksekliği (JS ile güncellenir) */
-    }
-    body{
-      margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
-      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;
-      animation:grad 18s ease infinite;min-height:100vh
-    }
+    :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
+      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
     @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .hdr{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-bottom:1px solid var(--brd)}
     .hdr .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -57,7 +49,7 @@
 
     .msgs{padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto;background:#fff}
 
-    /* Mesaj satırı: avatar + baloncuk + isim/saat */
+    /* Mesaj satırı */
     .msg-row{display:flex;align-items:flex-end;gap:8px}
     .msg-row.me{flex-direction:row-reverse}
     .msg-avatar{width:28px;height:28px;border-radius:999px;object-fit:cover;background:#f1f5f9;border:1px solid #e5e7eb}
@@ -65,7 +57,6 @@
     .msg-name{font-size:11px;color:#64748b;margin:0 4px 2px}
     .msg-name .time{margin-left:6px;opacity:.7}
 
-    /* Baloncuk */
     .msg{max-width:100%;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc;word-wrap:break-word;white-space:pre-wrap}
     .msg.me{margin-left:auto;background:#111827;color:#fff;border-color:#111827}
     .msg .time{display:none}
@@ -79,25 +70,10 @@
     .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
-    /* --- MOBİL OVERLAY FİX --- */
-    @media (max-width: 900px){
-      body{
-        min-height:100dvh;
-        padding-bottom:calc(var(--fbh) + env(safe-area-inset-bottom, 0px));
-      }
-      .wrap{
-        margin-bottom:calc(var(--fbh) + 16px);
-      }
-      .msgs{
-        /* input alanı + fixedbar + güvenli alan + klavye açılınca ek */
-        padding-bottom:calc(90px + var(--fbh) + env(safe-area-inset-bottom, 0px) + var(--kb));
-      }
-      .panel{
-        grid-template-rows:auto 1fr auto;
-        min-height:calc(100dvh - 120px);
-      }
+    /* Sadece mobilde ek boşluk (masaüstünü BOZMADAN) */
+    @media (max-width:900px){
+      .msgs{ padding-bottom: 120px; }
     }
-    .fixedbar{ padding-bottom: env(safe-area-inset-bottom, 0px); }
   </style>
 </head>
 <body>
@@ -142,7 +118,7 @@
     </section>
   </main>
 
-  <!-- Bildirim sesi (sayfa içi de bulunsun; global fallback firebase-init ekler) -->
+  <!-- Bildirim sesi -->
   <audio id="notifySound" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
     <source src="/sounds/notify.wav" type="audio/wav">
@@ -160,12 +136,11 @@
     </div>
   </nav>
 
-  <!-- Firebase init (ortak) -->
+  <!-- Ortak Firebase init -->
   <script type="module" src="assets/js/firebase-init.js"></script>
 
   <!-- Sayfa scripti -->
   <script type="module">
-    // Ortak fb objeleri
     const { auth, db, startGlobalMessagingWatcher, setSeen } = window.__fb || {};
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -281,14 +256,29 @@
 
       const qy=query(collection(db,'chats'), where('participants','array-contains',me.uid));
       unsubThreads=onSnapshot(qy, async (snap)=>{
-        // Filtrele/sırala
+        if(snap.empty){
+          elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
+          refreshSelectionUI();
+          return;
+        }
+
+        // Tüm DMer
         let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
-        rows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
-        rows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
 
-        elThreads.innerHTML = rows.length ? '' : '<div class="tmuted">Sohbet yok.</div>';
+        // 1) Normalde arşivlenenleri gizle
+        const visible = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
+        // 2) Ama aktif sohbet arşivli olsa bile MUTLAKA göster
+        const activeRow = rows.find(d=>d.id===activeChatId);
+        const renderRows = (visible.length ? visible : rows); // hepsi arşivliyse yine de göster
+        if (activeRow && !renderRows.some(x=>x.id===activeRow.id)) {
+          renderRows.unshift(activeRow);
+        }
 
-        for(const d of rows){
+        // Tarihe göre sırala
+        renderRows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
+
+        elThreads.innerHTML='';
+        for(const d of renderRows){
           const peerUid=(d.participants||[]).find(x=>x!==me.uid)||'';
           const info=peerUid?await getUserBrief(peerUid):{name:'—',email:'',photo:''};
           const profUrl=`/profile/profile.html?uid=${encodeURIComponent(peerUid)}`;
@@ -323,9 +313,10 @@
         }
         refreshSelectionUI();
 
-        // Liste geldikten sonra highlight güncelle
-        if(activeChatId){
-          document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===activeChatId));
+        // İlk açılışta hiçbir aktif seçili değilse, en üsttekini seç
+        if(!activeChatId && renderRows.length){
+          const d0=renderRows[0]; const peer0=(d0.participants||[]).find(x=>x!==me.uid)||'';
+          openChat(d0.id,peer0);
         }
       });
     }
@@ -367,17 +358,14 @@
           elMsgs.appendChild(row);
         }
 
-        // En alta kaydır
         try { elMsgs.scrollTop=elMsgs.scrollHeight; } catch {}
 
-        // Yeni gelen karşı mesaj için ses
         if(!firstLoad){
           const hasIncoming=snap.docChanges().some(ch=>ch.type==='added' && ch.doc.data()?.senderUid!==me.uid);
           if(hasIncoming) playNotify();
         }
         firstLoad=false;
 
-        // Görüldü saatini yaz
         try {
           const last = snap.docs[snap.docs.length-1]?.data();
           const lastAt = last?.createdAt?.toMillis?.() || Date.now();
@@ -443,7 +431,7 @@
         lastMsg:text, lastMsgAt:serverTimestamp(), lastSenderUid: me.uid
       },{merge:true});
 
-      // Karşı tarafa inbox bildirimi
+      // Karşı tarafa inbox bildirimi (rules izinli değilse sessiz geçer)
       if (activePeerUid) {
         try {
           await addDoc(
@@ -479,22 +467,17 @@
       me = user;
       tryUnlockAudio();
 
-      // 1) chatId paramı varsa: listeyi beklemeden anında aç
       if (paramChatId) {
         await openChatImmediate(paramChatId, paramPeer || '');
-      }
-      // 2) sadece peer paramı varsa: chat'i garantile → anında aç
-      else if (paramPeer) {
+      } else if (paramPeer) {
         try {
           const cid = await ensureDmChat(me.uid, paramPeer);
           await openChatImmediate(cid, paramPeer);
         } catch (e) { console.error('DM açılamadı', e); }
       }
 
-      // Listeyi izle
       watchThreads();
 
-      // Global izleyici (rozet+ses)
       try { startGlobalMessagingWatcher && startGlobalMessagingWatcher(); } catch {}
     });
 
@@ -503,34 +486,6 @@
     document.querySelectorAll('.fixedbar a').forEach(a=>{
       a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/messages') && a.id==='navMsgs'));
     });
-
-    /* ==== MOBİL: fixedbar & klavye davranışı düzeltmeleri ==== */
-
-    // 1) VisualViewport ile klavye açılınca alt boşluğu artır
-    (function attachViewportFix(){
-      const vv = window.visualViewport;
-      if(!vv) return;
-      const setKB = () => {
-        const kb = Math.max(0, (window.innerHeight - vv.height) || 0);
-        document.documentElement.style.setProperty('--kb', kb + 'px');
-        try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {}
-      };
-      vv.addEventListener('resize', setKB);
-      vv.addEventListener('scroll', setKB);
-      window.addEventListener('orientationchange', setKB);
-      setKB();
-    })();
-
-    // 2) Mesaj girişine odaklanınca en alta kay
-    (function attachInputFocusScroll(){
-      const toBottom = ()=>{ try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {} };
-      elInput.addEventListener('focus', ()=>{
-        setTimeout(toBottom, 120);
-        setTimeout(toBottom, 320);
-      });
-      // iOS’ta Enter sonrası tekrar en alta
-      elInput.addEventListener('blur', ()=>{ setTimeout(()=>{ try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {} }, 80); });
-    })();
   </script>
 </body>
 </html>
