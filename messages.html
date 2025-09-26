@@ -18,7 +18,6 @@
     .card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
     .side-head{padding:10px 12px;border-bottom:1px solid var(--brd);font-weight:700}
 
-    /* Araç çubuğu (seç/toplu sil) */
     .side-tools{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--brd);background:rgba(255,255,255,.5)}
     .side-tools .grow{flex:1}
     .btn{border:1px solid var(--brd);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
@@ -26,7 +25,6 @@
     .btn[disabled]{opacity:.5;cursor:not-allowed}
 
     .threads{display:flex;flex-direction:column;gap:6px;padding:10px;max-height:60vh;overflow:auto}
-    /* 5 kolon: checkbox | avatar | info | saat | sil */
     .thread{
       display:grid;grid-template-columns:24px 44px 1fr auto 30px;
       gap:8px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:8px;cursor:pointer
@@ -49,7 +47,6 @@
 
     .msgs{padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto;background:#fff}
 
-    /* Mesaj satırı */
     .msg-row{display:flex;align-items:flex-end;gap:8px}
     .msg-row.me{flex-direction:row-reverse}
     .msg-avatar{width:28px;height:28px;border-radius:999px;object-fit:cover;background:#f1f5f9;border:1px solid #e5e7eb}
@@ -63,6 +60,7 @@
 
     .input{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-top:1px solid var(--brd);background:rgba(255,255,255,.6)}
     .input input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff}
+    .input.hidden{display:none}
 
     .fixedbar{position:fixed;left:0;right:0;bottom:0;z-index:30}
     .fixedbar .in{max-width:1100px;margin:0 auto;padding:8px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -70,9 +68,8 @@
     .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
-    /* Sadece mobilde ek boşluk (masaüstünü BOZMADAN) */
     @media (max-width:900px){
-      .msgs{ padding-bottom: 120px; }
+      .msgs{ padding-bottom: 120px; } /* alt bar üstü boşluk */
     }
   </style>
 </head>
@@ -87,7 +84,6 @@
       <aside class="card sidebar">
         <div class="side-head">Sohbetler</div>
 
-        <!-- seçim araç çubuğu -->
         <div class="side-tools">
           <label style="display:flex;align-items:center;gap:6px">
             <input type="checkbox" id="ckAll" class="ck"/> Tümünü Seç
@@ -110,7 +106,7 @@
           </div>
         </div>
         <div id="msgs" class="msgs"><div class="tmuted">Sol taraftan bir sohbet seçin.</div></div>
-        <div class="input">
+        <div class="input hidden" id="inputBar">
           <input id="msgInput" placeholder="Mesaj yaz…" autocomplete="off" />
           <button id="btnSend" class="btn">Gönder</button>
         </div>
@@ -147,13 +143,14 @@
     import {
       collection, query, where, onSnapshot, orderBy,
       doc, getDoc, setDoc, addDoc, serverTimestamp,
-      updateDoc, arrayUnion
+      updateDoc, arrayUnion, arrayRemove
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     /* ==== UI refs ==== */
     const elThreads  = document.getElementById('threads');
     const elMsgs     = document.getElementById('msgs');
     const elInput    = document.getElementById('msgInput');
+    const inputBar   = document.getElementById('inputBar');
     const btnSend    = document.getElementById('btnSend');
     const peerAvatar = document.getElementById('peerAvatar');
     const peerName   = document.getElementById('peerName');
@@ -256,7 +253,7 @@
         // DM'ler
         let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
 
-        // Sadece BENDE gizlenmemiş olanlar
+        // YALNIZCA bende gizli olmayanlar
         const renderRows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
 
         // Tarihe göre sırala
@@ -291,19 +288,12 @@
           // Checkbox
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
 
-          // Tekli SİL (sadece bende gizle)
+          // Tekli SİL (yalnızca bende gizle)
           row.querySelector('.delOne').addEventListener('click', async ()=>{
             if(!confirm('Bu sohbet SİLİNSİN mi? (Sadece sizde görünmez)')) return;
             try{
               await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) });
-              // Aktif sohbetse paneli de kapat
-              if (activeChatId === d.id) {
-                activeChatId = '';
-                elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
-                peerName.textContent='Sohbet seç';
-                peerEmail.textContent='';
-                peerAvatar.removeAttribute('src');
-              }
+              if (activeChatId === d.id) resetPanel();
             }catch(e){
               alert('Silinemedi: ' + (e.code||e.message||'hata'));
             }
@@ -314,19 +304,23 @@
 
         if (renderRows.length === 0){
           elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
-          // aktif görünümü de sıfırla
-          activeChatId='';
-          elMsgs.innerHTML='<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
-          peerName.textContent='Sohbet seç';
-          peerEmail.textContent='';
-          peerAvatar.removeAttribute('src');
         }
 
         refreshSelectionUI();
       });
     }
 
-    /* ==== Mesajlar (isim + avatar ile) ==== */
+    function resetPanel(){
+      activeChatId='';
+      activePeerUid='';
+      elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
+      peerName.textContent='Sohbet seç';
+      peerEmail.textContent='';
+      peerAvatar.removeAttribute('src');
+      inputBar.classList.add('hidden'); // giriş alanını gizle
+    }
+
+    /* ==== Mesajlar ==== */
     async function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
       elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
@@ -350,7 +344,7 @@
           const mine = m.senderUid===me.uid;
           const info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
 
-          const row = $el(`
+        const row = $el(`
             <div class="msg-row ${mine?'me':''}">
               <img class="msg-avatar" src="${info.photo||'/assets/img/seffaf.png'}" alt="">
               <div class="msg-wrap">
@@ -403,28 +397,31 @@
         peerName.textContent='Sohbet'; peerEmail.textContent=''; peerAvatar.removeAttribute('src');
       }
 
+      inputBar.classList.remove('hidden'); // sohbet seçildi → giriş barını göster
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}${activePeerUid?`&peer=${encodeURIComponent(activePeerUid)}`:''}`);
 
       try { setSeen && setSeen(chatId, Date.now()); } catch {}
     }
 
-    /* ==== Sohbeti anında aç (listeyi beklemeden) ==== */
-    async function openChatImmediate(chatId, hintPeerUid){
+    /* ==== Parametre ile gelen sohbeti "gizliden çıkar" ve aç ==== */
+    async function openChatImmediateUnhide(chatId, hintPeerUid){
       let peer = hintPeerUid || '';
       try{
-        if(!peer){
-          const cs = await getDoc(doc(db,'chats',chatId));
-          const cd = cs.exists() ? (cs.data()||{}) : null;
-          if (cd && Array.isArray(cd.participants)) {
-            peer = cd.participants.find(u=>u!==me.uid) || '';
-          }
+        const cs = await getDoc(doc(db,'chats',chatId));
+        const cd = cs.exists() ? (cs.data()||{}) : null;
+        if (!peer && cd && Array.isArray(cd.participants)) {
+          peer = cd.participants.find(u=>u!==me.uid) || '';
+        }
+        // Eğer bu sohbet bende gizliyse listede görünmesi için gizliden çıkar
+        if ((cd?.hiddenFor||[]).includes(me.uid)) {
+          try { await updateDoc(doc(db,'chats',chatId), { hiddenFor: arrayRemove(me.uid) }); } catch {}
         }
       }catch{}
       await openChat(chatId, peer);
     }
 
-    /* ==== Gönder ==== */
+    /* ==== Mesaj Gönder ==== */
     async function sendMessage(){
       const text=(elInput.value||'').trim();
       if(!text||!activeChatId) return;
@@ -460,7 +457,7 @@
     btnSend.addEventListener('click',sendMessage);
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
 
-    /* ==== Toplu SİL (sadece bende gizle) ==== */
+    /* ==== Toplu SİL (yalnızca bende gizle) ==== */
     btnDelSel.addEventListener('click', async ()=>{
       const ids = selectedIds();
       if(ids.length===0) return;
@@ -468,13 +465,7 @@
       for(const id of ids){
         try{ await updateDoc(doc(db,'chats',id), { hiddenFor: arrayUnion(me.uid) }); }
         catch(e){ console.warn('Silinemedi:', id, e); }
-        if (activeChatId === id) {
-          activeChatId = '';
-          elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
-          peerName.textContent='Sohbet seç';
-          peerEmail.textContent='';
-          peerAvatar.removeAttribute('src');
-        }
+        if (activeChatId === id) resetPanel();
       }
     });
 
@@ -490,15 +481,17 @@
       me = user;
       tryUnlockAudio();
 
+      // Profilden/bildirimden gelindiyse önce DM’yi hazırla → gizliden çıkar → aç
       if (paramChatId) {
-        await openChatImmediate(paramChatId, paramPeer || '');
+        await openChatImmediateUnhide(paramChatId, paramPeer || '');
       } else if (paramPeer) {
         try {
           const cid = await ensureDmChat(me.uid, paramPeer);
-          await openChatImmediate(cid, paramPeer);
+          await openChatImmediateUnhide(cid, paramPeer);
         } catch (e) { console.error('DM açılamadı', e); }
       }
 
+      // Listeyi dinle (artık otomatik ilk sohbeti seçmiyoruz)
       watchThreads();
 
       try { startGlobalMessagingWatcher && startGlobalMessagingWatcher(); } catch {}
