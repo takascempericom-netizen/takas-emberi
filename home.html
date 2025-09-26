@@ -307,31 +307,70 @@
     </button>
   </nav>
 
-  <!-- Canlı Destek (compact, yukarı açılır) -->
-  <button class="support-fab compact" id="btnSupport" aria-label="Canlı Destek">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="9"></circle>
-      <path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"></path>
-    </svg>
-  </button>
+  /* Canlı destek: mesaj listesi + baloncuklar (sağ/sol & iki renk) */
+.support-pop.pro .sup-body{
+  padding:14px 10px;
+  max-height:46vh;
+  overflow:auto;
+  display:flex;               /* hizalama için flex sütun */
+  flex-direction:column;
+  gap:8px;
+}
 
-  <div class="support-pop pro" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
-    <div class="sup-head">
-      <strong>Canlı Destek</strong>
-      <button id="supClose" class="sup-close" type="button" aria-label="Pencereyi kapat">×</button>
-    </div>
-    <div class="sup-body"></div>
-    <div class="sup-input">
-      <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" />
-      <button id="chatSend" class="sup-send" type="button" aria-label="Gönder">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7Z"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
+.support-pop.pro .msg{
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+  color:#0f172a;
+  background:#eef2ff;         /* ADMİN (karşı taraf) için açık renk */
+  border:1px solid #e5e7eb;
+  padding:10px 12px;
+  border-radius:12px 12px 12px 4px;  /* sola kuyruk hissi */
+  max-width:80%;
+  align-self:flex-start;       /* sola yasla */
+  word-wrap:break-word;
+  white-space:pre-wrap;
+}
 
-  <!-- Yeni Hukuki Footer (link listesi) -->
+.support-pop.pro .msg.me{
+  color:#ffffff;
+  background:#111827;          /* KULLANICI (ben) için koyu renk */
+  border-color:#111827;
+  border-radius:12px 12px 4px 12px;  /* sağa kuyruk hissi */
+  align-self:flex-end;         /* sağa yasla */
+}
+
+.support-pop.pro .sup-input{
+  display:flex; gap:8px; padding:10px 10px 12px 10px; background:#f8fafc; border-top:1px solid #e5e7eb;
+}
+.support-pop.pro .sup-in{
+  flex:1; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; font:inherit;
+}
+.support-pop.pro .sup-send{
+  width:40px; height:40px; border-radius:10px; border:1px solid #111827; background:#111827; color:#fff; display:grid; place-items:center; cursor:pointer;
+}
+
+/* küçük ekran uyumu */
+@media (max-width:480px){
+  .support-fab.compact{ right:12px; }
+  .support-pop.pro{ right:12px; width:min(320px,94vw); }
+}
+
+    /* Legal footer */
+    .legal{background:var(--black);color:var(--black-ink);border-top:1px solid var(--black-line);margin-top:20px}
+    .legal .wrap{max-width:1200px;margin:0 auto;padding:18px 16px}
+    .accordion{border:1px solid var(--black-line);border-radius:12px;overflow:hidden}
+    .acc-item + .acc-item{border-top:1px solid var(--black-line)}
+    .acc-btn{width:100%;text-align:left;background:transparent;color:var(--black-ink);border:0;padding:14px 16px;cursor:pointer;font-weight:800}
+    .acc-panel{display:none;padding:0 16px 16px 16px;color:#cfd3e3}
+    .acc-item.open .acc-panel{display:block}
+
+    @media (min-width:720px){
+      .title{font-size:52px}
+      .subtitle{font-size:22px}
+    }
+
+    <!-- Yeni Hukuki Footer (link listesi) -->
   <footer class="legal">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center">
       <a href="/legal.html">legal</a>
