@@ -74,7 +74,11 @@ function getSeen(chatId){
   try{ return parseInt(localStorage.getItem(`seen_chat_${chatId}`)||'0',10); }catch{ return 0; }
 }
 function setSeen(chatId, ms){
-  try{ localStorage.setItem(`seen_chat_${chatId}`, String(ms||Date.now())); }catch{}
+  try{
+    localStorage.setItem(`seen_chat_${chatId}`, String(ms||Date.now()));
+    // Rozeti anında güncellemek için custom event yayınla (snapshot bekleme!)
+    window.dispatchEvent(new CustomEvent('tc_seen_updated', { detail: { chatId, ts: ms||Date.now() } }));
+  }catch{}
 }
 
 /* Tüm sayfalarda notify.wav’ı garantiye al (fallback) */
@@ -92,48 +96,79 @@ function ensureGlobalAudio(){
 }
 document.addEventListener('DOMContentLoaded', ensureGlobalAudio, { once:true });
 
-/* ===== Global Mesaj & Bildirim İzleyici ===== */
+/* ===== Global Mesaj & Bildirim İzleyici =====
+   - Mesajlar rozeti: #msgBadge
+   - Bildirimler rozeti: #notifBadge
+   - Ses: #notifySoundGlobal (yoksa #notifySound)
+   - 🔁 Rozetler, sadece snapshot’ta değil; fokus/visibility/storage/seen_updated olaylarında da yeniden hesaplanır. */
 let _unsubChats = null, _unsubInbox = null;
 
 function startGlobalMessagingWatcher(){
   onAuthStateChanged(auth, async (user)=>{
+    // eski listener'ları kapat
     try{ _unsubChats && _unsubChats(); }catch{} _unsubChats=null;
     try{ _unsubInbox && _unsubInbox(); }catch{} _unsubInbox=null;
 
-    const msgBadge  = document.getElementById('msgBadge');
-    const notifBadge= document.getElementById('notifBadge');
+    const msgBadge  = document.getElementById('msgBadge');   // Mesajlar rozeti
+    const notifBadge= document.getElementById('notifBadge'); // Bildirimler rozeti
     setBadge(msgBadge, 0);
     setBadge(notifBadge, 0);
 
     if(!user) return;
 
-    // Mesajlar
+    // === Mesajlar: katıldığım sohbetler ===
     const chatsQ = query(collection(db,'chats'), where('participants','array-contains', user.uid));
-    let firstSnap = true;
+
+    // Son snapshot verilerini tut → rozet hesaplamayı olaylarda da tetikle
+    let _lastChats = []; // { id, lastMsgAt, lastSenderUid }
+
+    function recomputeMsgBadge(){
+      try{
+        let count = 0;
+        for(const c of _lastChats){
+          const lastAt = c.lastMsgAt || 0;
+          const lastSender = c.lastSenderUid || '';
+          const seen = getSeen(c.id);
+          if (lastAt && lastAt > seen && lastSender && lastSender !== user.uid) {
+            count += 1;
+          }
+        }
+        setBadge(msgBadge, count);
+      }catch(e){/* yut */}
+    }
+
+    // Olaylarla da yeniden hesapla (snapshot gelmeden rozet sıfırlansın)
+    const _recompute = ()=>recomputeMsgBadge();
+    window.addEventListener('focus', _recompute);
+    document.addEventListener('visibilitychange', _recompute);
+    window.addEventListener('storage', (e)=>{ if(e.key && e.key.startsWith('seen_chat_')) _recompute(); });
+    window.addEventListener('tc_seen_updated', _recompute);
+
     _unsubChats = onSnapshot(chatsQ, (snap)=>{
-      let count = 0;
+      let firstSnap = _lastChats.length === 0;
       let shouldPing = false;
 
+      _lastChats = [];
       snap.forEach(d=>{
         const c = d.data()||{};
         const lastAt = c.lastMsgAt?.toMillis?.() || 0;
         const lastSender = c.lastSenderUid || c.lastSender || '';
-        const seen = getSeen(d.id);
+        _lastChats.push({ id: d.id, lastMsgAt: lastAt, lastSenderUid: lastSender });
 
+        const seen = getSeen(d.id);
         if (lastAt && lastAt > seen && lastSender && lastSender !== user.uid) {
-          count += 1;
+          // Ses: ilk snapshot’ta çalma; sonrakilerde sayfa mesajlar değilken veya sekme gizliyken çal
           if (!firstSnap && (location.pathname !== '/messages.html' || document.hidden)) {
             shouldPing = true;
           }
         }
       });
 
-      setBadge(msgBadge, count);
+      recomputeMsgBadge();
       if (shouldPing) playPing();
-      firstSnap = false;
     }, (e)=>console.warn("[global chats] err:", e));
 
-    // Bildirimler
+    // === Bildirimler: users/{uid}/inbox (read:false) ===
     const inboxQ = query(collection(db,'users', user.uid, 'inbox'), where('read','==', false));
     _unsubInbox = onSnapshot(inboxQ, (snap)=>{
       const n = snap.size || 0;
@@ -147,7 +182,7 @@ function startGlobalMessagingWatcher(){
   });
 }
 
-/* ---- Public profile upsert ---- */
+/* ---- Public profile upsert (Google/E-posta girişleri) ---- */
 function splitName(displayName) {
   if (!displayName || typeof displayName !== 'string') return { firstName: '', lastName: '' };
   const parts = displayName.trim().split(/\s+/);
@@ -158,10 +193,12 @@ function splitName(displayName) {
 async function upsertPublicProfile(user) {
   try {
     const _db = db || getFirestore();
+
     const displayName = user.displayName || user.providerData?.[0]?.displayName || '';
     const photoURL    = user.photoURL    || user.providerData?.[0]?.photoURL    || '';
     const email       = user.email       || user.providerData?.[0]?.email       || '';
     const providerId  = user.providerData?.[0]?.providerId || 'password';
+
     const { firstName, lastName } = splitName(displayName);
 
     await setDoc(
@@ -200,7 +237,7 @@ async function upsertPublicProfile(user) {
   }
 }
 
-/* Global export */
+/* Global export — tek sefer, tekrar eden atamalar kaldırıldı */
 if (!window.__fb) window.__fb = {};
 Object.assign(window.__fb, {
   app, auth, db,
@@ -211,6 +248,3 @@ console.log("[fb] ready:", app?.options?.projectId);
 
 /* ESM uyumu */
 export {};
-
-/* Otomatik global izleyici */
-try { window.__fb?.startGlobalMessagingWatcher?.(); } catch {}
