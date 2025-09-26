@@ -6,58 +6,80 @@
   <title>Takas Çemberi • Arama</title>
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="favicon.png" type="image/png" sizes="32x32"/>
+
   <style>
     :root{
-      --paper:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
+      --bg:#f7f7fb; --paper:#ffffff; --ink:#0f172a; --muted:#6b7280; --line:#e5e7eb;
       --brandA:#6a5cff; --brandB:#00d4ff; --focus:#0ea5e9; --btn:#111827; --btnInk:#fff;
+      --chip:#f3f4f6; --chipActive:#111827; --chipInk:#111827; --chipInkActive:#fff;
       --bottomH:64px;
     }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f9fafb;color:var(--ink);
-      padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px);}
-    a,button{font:inherit}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fefefe,#f6f7ff);color:var(--ink);padding-bottom:calc(var(--bottomH) + env(safe-area-inset-bottom,0px) + 12px);}
 
-    .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;
-      padding:0 12px 0 16px;background:linear-gradient(90deg,var(--brandA),var(--brandB));color:#fff;box-shadow:0 2px 12px rgba(10,20,60,.25)}
+    /* Topbar */
+    .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;height:64px;padding:0 12px 0 16px;
+      background:linear-gradient(90deg,var(--brandA),var(--brandB));color:#fff;box-shadow:0 6px 24px rgba(16,24,40,.25)}
     .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
     .brand img{height:44px}
     .grow{flex:1}
     .btn{border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.18);color:#fff;border-radius:12px;padding:8px 14px;cursor:pointer}
     .btn.primary{background:var(--btn);border-color:#000;color:var(--btnInk)}
-    .search-form{flex:1;max-width:420px;display:flex;gap:6px}
-    .search-input{flex:1;padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff}
+    .search-form{flex:1;max-width:460px;display:flex;gap:6px}
+    .search-input{flex:1;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff}
     .search-input::placeholder{color:rgba(255,255,255,.9)}
-    .search-btn{padding:8px 12px;border-radius:12px;border:1px solid #000;background:#111827;color:#fff}
+    .search-btn{padding:9px 12px;border-radius:12px;border:1px solid #000;background:#111827;color:#fff}
 
-    .wrap{max-width:1200px;margin:16px auto;padding:0 16px}
-    .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;padding:12px}
-    .chip{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}
-    .chip.active{background:#111827;color:#fff;border-color:#111827}
+    /* Wrapper + panel */
+    .wrap{max-width:1200px;margin:18px auto;padding:0 16px}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.08);overflow:hidden}
+    .panel-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .panel-title{margin:0;font-size:18px;font-weight:800}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px}
+    .chip{padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--chip);color:var(--chipInk);cursor:pointer}
+    .chip.active{background:var(--chipActive);color:var(--chipInkActive);border-color:#000}
 
-    .ads-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);padding:16px}
+    /* Grid */
+    .ads-grid{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);padding:16px}
     @media (min-width:900px){.ads-grid{grid-template-columns:repeat(4,1fr)}}
-    .ad-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;color:#111827;text-decoration:none;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);transition:transform .15s ease;cursor:pointer}
-    .ad-card:hover{transform:translateY(-2px)}
+    .ad-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;color:#111827;text-decoration:none;
+      box-shadow:0 10px 24px rgba(10,18,40,.06);transition:transform .15s ease;cursor:pointer}
+    .ad-card:hover{transform:translateY(-3px)}
     .ad-media{position:relative;width:100%;background:#f1f5f9;border-bottom:1px solid var(--line)}
     .ad-media::before{content:"";display:block;padding-top:100%}
     .ad-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .ad-body{padding:10px}
-    .ad-title{margin:0 0 4px;font-size:14px;font-weight:800;line-height:1.25;color:#0f172a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .ad-meta{display:flex;gap:6px;justify-content:space-between;color:var(--muted);font-size:12px}
-    .ad-actions{display:flex;gap:8px;margin-top:8px}
-    .ad-actions button{flex:1;padding:8px 10px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;border-radius:10px;cursor:pointer}
+    .ad-body{padding:12px}
+    .ad-title{margin:0 0 6px;font-size:15px;font-weight:900;line-height:1.25;color:#0f172a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+    .ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
+    .ad-actions{display:flex;gap:8px;margin-top:10px}
+    .ad-actions button{flex:1;padding:9px 10px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;border-radius:10px;cursor:pointer}
     .ad-actions .btn-view{background:#111827;color:#fff;border-color:#000}
-    .bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);z-index:40;height:var(--bottomH)}
+
+    /* Empty */
+    .empty{padding:24px;color:#64748b}
+
+    /* Bottom nav (iyileştirildi) */
+    .bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#ffffffd8;backdrop-filter:saturate(140%) blur(6px);
+      border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);z-index:40;height:var(--bottomH);box-shadow:0 -6px 24px rgba(0,0,0,.08)}
+    .tab{appearance:none;border:0;background:transparent;color:#6b7280;padding:8px 6px;display:flex;gap:6px;flex-direction:column;align-items:center;justify-content:center;font-size:12px}
+    .tab svg{width:22px;height:22px}
+    .tab.active{color:#111827}
+
+    @media (max-width:480px){
+      .brand img{height:36px}
+      .search-form{max-width:260px}
+    }
   </style>
 </head>
 <body>
+  <!-- Top -->
   <header class="topbar">
-    <a class="brand" href="index.html"><img src="assets/img/seffaf.png" alt="Takas Çemberi logo"/><strong>Takas Çemberi</strong></a>
+    <a class="brand" href="index.html">
+      <img src="assets/img/seffaf.png" alt="Takas Çemberi logo"/><strong>Takas Çemberi</strong>
+    </a>
     <div class="grow"></div>
-    <form class="search-form" action="search.html" method="get" role="search">
-      <input class="search-input" type="search" name="q" placeholder="Ne arıyorsun?" aria-label="Arama" />
+    <form class="search-form" action="search.html" method="get" role="search" aria-label="Site içi arama">
+      <input class="search-input" type="search" name="q" placeholder="Ne arıyorsun?" aria-label="Arama"/>
       <button class="search-btn" type="submit">Ara</button>
     </form>
     <button id="btnProfile" class="btn">Profil</button>
@@ -65,9 +87,15 @@
     <button id="btnLogout" class="btn">Çıkış</button>
   </header>
 
+  <!-- Body -->
   <main class="wrap">
     <section class="panel">
-      <div class="filters" id="filters">
+      <div class="panel-head">
+        <h1 class="panel-title" id="resultTitle">Sonuçlar</h1>
+        <div id="activeFilter" style="color:var(--muted);font-weight:600"></div>
+      </div>
+
+      <div class="filters" id="filters" aria-label="Kategoriler">
         <button class="chip" data-cat="">Tümü</button>
         <button class="chip" data-cat="ev-hobi">Ev & Hobi</button>
         <button class="chip" data-cat="tasinmaz">Taşınmaz</button>
@@ -78,74 +106,125 @@
         <button class="chip" data-cat="teknoloji">Teknoloji</button>
         <button class="chip" data-cat="mobilya">Mobilya</button>
       </div>
-      <div class="ads-grid" id="results"></div>
-      <div id="empty" style="display:none;padding:16px;color:#64748b">Sonuç bulunamadı.</div>
+
+      <div class="ads-grid" id="results" role="list"></div>
+      <div id="empty" class="empty" style="display:none">Sonuç bulunamadı.</div>
     </section>
   </main>
 
+  <!-- Bottom -->
   <nav class="bottom-nav" aria-label="Alt menü">
-    <button class="tab" onclick="location.href='index.html'">Ana Sayfa</button>
-    <button class="tab" onclick="location.href='messages.html'">Mesajlar</button>
-    <button class="tab" onclick="location.href='notifications.html'">Bildirimler</button>
+    <button class="tab active" onclick="location.href='index.html'" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9.5L12 3l9 6.5"/><path d="M5 10v10h5v-6h4v6h5V10"/>
+      </svg>
+      Ana Sayfa
+    </button>
+    <button class="tab" onclick="location.href='messages.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H7l-4 3 1.5-5.5A8.5 8.5 0 1 1 21 12z"/></svg>
+      Mesajlar
+    </button>
+    <button class="tab" onclick="location.href='notifications.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9H3c0-4 3-2 3-9"/><path d="M9 21h6"/></svg>
+      Bildirimler
+    </button>
   </nav>
 
+  <!-- Firebase -->
   <script type="module" src="assets/js/firebase-init.js"></script>
+
   <script type="module">
     const { auth, db } = window.__fb || {};
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // === helpers ===
     const $ = (s,r=document)=>r.querySelector(s);
     const params = new URLSearchParams(location.search);
     let qText = (params.get('q')||'').trim();
     let cat = (params.get('cat')||'').trim();
-    const normalize = s => s.toLocaleLowerCase('tr')
-      .replaceAll('ç','c').replaceAll('ğ','g').replaceAll('ı','i').replaceAll('ö','o').replaceAll('ş','s').replaceAll('ü','u');
+    const normalize = s => String(s||'').toLocaleLowerCase('tr')
+      .replaceAll('ç','c').replaceAll('ğ','g').replaceAll('ı','i')
+      .replaceAll('ö','o').replaceAll('ş','s').replaceAll('ü','u');
 
-    // UI filter chips
-    const chips = [...document.querySelectorAll('.chip')];
-    chips.forEach(ch=>{
+    // Başlık / aktif filter göstergesi
+    const catNames = {
+      "":"Tümü","ev-hobi":"Ev & Hobi","tasinmaz":"Taşınmaz","tasit":"Motorlu Taşıtlar",
+      "oyuncak":"Oyuncak","giyim":"Giyim","beyaz-esya":"Beyaz Eşya","teknoloji":"Teknoloji","mobilya":"Mobilya"
+    };
+    $('#resultTitle').textContent = 'Sonuçlar';
+    $('#activeFilter').textContent = (cat || qText)
+      ? [cat ? catNames[cat] || cat : null, qText ? `“${qText}”` : null].filter(Boolean).join(' • ')
+      : 'Filtre uygulanmadı';
+
+    // Chipler
+    [...document.querySelectorAll('.chip')].forEach(ch=>{
       if ((ch.dataset.cat||'') === cat) ch.classList.add('active');
       ch.addEventListener('click', ()=>{
         const url = new URL(location.href);
         if (ch.dataset.cat) url.searchParams.set('cat', ch.dataset.cat); else url.searchParams.delete('cat');
         history.replaceState(null,'',url.toString());
         cat = ch.dataset.cat||'';
+        $('#activeFilter').textContent = (cat || qText)
+          ? [cat ? catNames[cat] || cat : null, qText ? `“${qText}”` : null].filter(Boolean).join(' • ')
+          : 'Filtre uygulanmadı';
         load();
       });
     });
 
-    // topbar buttons
+    // Topbar butonları
     $('#btnLogout')?.addEventListener('click', async ()=>{ try{ await signOut(auth);}catch{} location.href="index.html"; });
     $('#btnProfile')?.addEventListener('click', ()=>location.href="profile/profile.html");
     $('#btnPostAd')?.addEventListener('click', ()=>location.href="ilan/ilan-verme.html");
 
-    // === query ===
     async function load(){
       const listEl = $('#results'); const emptyEl = $('#empty');
       listEl.innerHTML = ''; emptyEl.style.display='none';
 
-      // temel sorgu: isApproved true
-      let qRef = query(collection(db,'listings'), where('isApproved','==', true), orderBy('createdAt','desc'), limit(50));
-      // kategori varsa ek where
-      if (cat) {
-        qRef = query(collection(db,'listings'), where('isApproved','==', true), where('cat','==', cat), orderBy('createdAt','desc'), limit(50));
-      }
-      const snap = await getDocs(qRef);
+      const baseRef = collection(db,'listings');
 
+      // Önce: indeksli, ideal sorgu (kategori + isApproved + orderBy createdAt)
+      let qRef;
+      try{
+        if (cat){
+          qRef = query(baseRef, where('isApproved','==', true), where('cat','==', cat), orderBy('createdAt','desc'), limit(50));
+        }else{
+          qRef = query(baseRef, where('isApproved','==', true), orderBy('createdAt','desc'), limit(50));
+        }
+
+        const snap = await getDocs(qRef);
+        await renderFromSnap(snap);
+      }catch(err){
+        // Eğer kompozit indeks yoksa buraya düşer: failed-precondition
+        console.warn('Indexed sorgu başarısız, fallback’a geçiliyor:', err?.code || err);
+        // Fallback: sadece isApproved + orderBy ile çek; kategori + metin filtrelerini istemci tarafında uygula
+        try{
+          const fbRef = query(baseRef, where('isApproved','==', true), orderBy('createdAt','desc'), limit(50));
+          const snap2 = await getDocs(fbRef);
+          await renderFromSnap(snap2, /*clientFilter=*/true);
+        }catch(err2){
+          console.error('Fallback sorgu da başarısız:', err2);
+          listEl.innerHTML = `<div class="empty">Bir hata oluştu: ${(err2 && err2.message) || 'hata'}</div>`;
+        }
+      }
+    }
+
+    async function renderFromSnap(snap, clientFilter = false){
+      const listEl = $('#results'); const emptyEl = $('#empty');
       if (snap.empty){ emptyEl.style.display='block'; return; }
 
-      // metin filtresini istemci tarafında uygula (mevcut veriye uyum için)
       const nq = normalize(qText);
       const rows = [];
       snap.forEach(d=>{
-        const v = d.data()||{};
-        const title = v.title||'İlan';
-        const needle = [v.title, v.desc, v.city, v.cond].map(x=>normalize(String(x||''))).join(' ');
-        if (!nq || needle.includes(nq)){
-          rows.push({ id:d.id, ...v });
+        const v = d.data() || {};
+        // client-side filtre: indeks yoksa uygulanır
+        if (clientFilter){
+          if (cat && v.cat !== cat) return;
         }
+        if (nq){
+          const hay = [v.title, v.desc, v.city, v.cond].map(x=>normalize(x)).join(' ');
+          if (!hay.includes(nq)) return;
+        }
+        rows.push({ id:d.id, ...v });
       });
 
       if (rows.length===0){ emptyEl.style.display='block'; return; }
@@ -169,7 +248,6 @@
   </div>`);
       }
 
-      // kart tıklamaları
       listEl.addEventListener('click', (ev)=>{
         const btn = ev.target.closest('button');
         if (btn){
@@ -178,7 +256,6 @@
           if (btn.classList.contains('btn-offer')){
             const owner = btn.dataset.owner||'';
             if (!owner){ alert('İlan sahibi bilgisi eksik.'); return; }
-            // home’daki openOfferFlow yok; bu sayfada teklif akışını basitçe yönlendiriyoruz:
             location.href = `ilan/index.html?id=${encodeURIComponent(id)}#offer`;
             return;
           }
@@ -190,13 +267,12 @@
       });
     }
 
-    // auth sonra yükle
     onAuthStateChanged(auth, async (user)=>{
       if (!user){
-        $('#results').innerHTML = '<div style="grid-column:1/-1;color:#64748b;padding:16px">İlanları görmek için giriş yapın</div>';
+        $('#results').innerHTML = '<div class="empty">İlanları görmek için giriş yapın</div>';
         return;
       }
-      await user.getIdToken(true);
+      try{ await user.getIdToken(true);}catch{}
       load();
     });
   </script>
