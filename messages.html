@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mesajlar • Takas Çemberi</title>
   <style>
-    :root{--c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5)}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
-      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;animation:grad 18s ease infinite;min-height:100vh}
+    :root{
+      --c1:#7c3aed;--c2:#06b6d4;--c3:#10b981;--c4:#f59e0b;--fg:#0f172a;--glass:rgba(255,255,255,.78);--brd:rgba(255,255,255,.5);
+      /* Mobil overlay fix değişkenleri */
+      --fbh: 72px; /* fixedbar yaklaşık yüksekliği */
+      --kb: 0px;   /* sanal klavye yüksekliği (JS ile güncellenir) */
+    }
+    body{
+      margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--fg);
+      background:linear-gradient(120deg,var(--c1),var(--c2),var(--c3),var(--c4));background-size:300% 300%;
+      animation:grad 18s ease infinite;min-height:100vh
+    }
     @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .hdr{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border-bottom:1px solid var(--brd)}
     .hdr .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -70,6 +78,26 @@
     .fixedbar a{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:8px 6px;border-radius:14px;text-decoration:none;color:#111827;font-weight:600;border:1px solid var(--brd);background:var(--glass)}
     .fixedbar a.active{background:#111827;color:#fff;border-color:#111827}
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
+
+    /* --- MOBİL OVERLAY FİX --- */
+    @media (max-width: 900px){
+      body{
+        min-height:100dvh;
+        padding-bottom:calc(var(--fbh) + env(safe-area-inset-bottom, 0px));
+      }
+      .wrap{
+        margin-bottom:calc(var(--fbh) + 16px);
+      }
+      .msgs{
+        /* input alanı + fixedbar + güvenli alan + klavye açılınca ek */
+        padding-bottom:calc(90px + var(--fbh) + env(safe-area-inset-bottom, 0px) + var(--kb));
+      }
+      .panel{
+        grid-template-rows:auto 1fr auto;
+        min-height:calc(100dvh - 120px);
+      }
+    }
+    .fixedbar{ padding-bottom: env(safe-area-inset-bottom, 0px); }
   </style>
 </head>
 <body>
@@ -295,8 +323,7 @@
         }
         refreshSelectionUI();
 
-        // Liste geldikten sonra, eğer parametreyle açtığımız sohbet listede yoksa bile sorun değil
-        // (openChatImmediate zaten paneli doldurdu). Listede varsa highlight güncellenir:
+        // Liste geldikten sonra highlight güncelle
         if(activeChatId){
           document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===activeChatId));
         }
@@ -316,7 +343,6 @@
       unsubMsgs=onSnapshot(qy, async (snap)=>{
         if(snap.empty){
           elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
-          // Görüldü saatini yine güncelle (boşsa now)
           try { setSeen && setSeen(chatId, Date.now()); } catch {}
           firstLoad=false;
           return;
@@ -341,7 +367,8 @@
           elMsgs.appendChild(row);
         }
 
-        elMsgs.scrollTop=elMsgs.scrollHeight;
+        // En alta kaydır
+        try { elMsgs.scrollTop=elMsgs.scrollHeight; } catch {}
 
         // Yeni gelen karşı mesaj için ses
         if(!firstLoad){
@@ -368,7 +395,7 @@
       }
     }
 
-    /* ==== Sohbet aç (peer başlığı/avatarlı) ==== */
+    /* ==== Sohbet aç ==== */
     async function openChat(chatId,peerUid){
       activeChatId=chatId; activePeerUid=peerUid||'';
       document.querySelectorAll('.thread').forEach(t=>t.classList.toggle('active',t.dataset.id===chatId));
@@ -386,13 +413,11 @@
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}${activePeerUid?`&peer=${encodeURIComponent(activePeerUid)}`:''}`);
 
-      // Açıldığında “görüldü”
       try { setSeen && setSeen(chatId, Date.now()); } catch {}
     }
 
     /* ==== Sohbeti anında aç (listeyi beklemeden) ==== */
     async function openChatImmediate(chatId, hintPeerUid){
-      // Eğer peer bilinmiyorsa chat doc’tan bul
       let peer = hintPeerUid || '';
       try{
         if(!peer){
@@ -449,7 +474,6 @@
         return;
       }
 
-      // Public profilini garantiye al
       try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
 
       me = user;
@@ -467,7 +491,7 @@
         } catch (e) { console.error('DM açılamadı', e); }
       }
 
-      // Listeyi izle (highlight ve yan panel için)
+      // Listeyi izle
       watchThreads();
 
       // Global izleyici (rozet+ses)
@@ -479,6 +503,34 @@
     document.querySelectorAll('.fixedbar a').forEach(a=>{
       a.classList.toggle('active', a.getAttribute('href')===path || (path.startsWith('/messages') && a.id==='navMsgs'));
     });
+
+    /* ==== MOBİL: fixedbar & klavye davranışı düzeltmeleri ==== */
+
+    // 1) VisualViewport ile klavye açılınca alt boşluğu artır
+    (function attachViewportFix(){
+      const vv = window.visualViewport;
+      if(!vv) return;
+      const setKB = () => {
+        const kb = Math.max(0, (window.innerHeight - vv.height) || 0);
+        document.documentElement.style.setProperty('--kb', kb + 'px');
+        try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {}
+      };
+      vv.addEventListener('resize', setKB);
+      vv.addEventListener('scroll', setKB);
+      window.addEventListener('orientationchange', setKB);
+      setKB();
+    })();
+
+    // 2) Mesaj girişine odaklanınca en alta kay
+    (function attachInputFocusScroll(){
+      const toBottom = ()=>{ try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {} };
+      elInput.addEventListener('focus', ()=>{
+        setTimeout(toBottom, 120);
+        setTimeout(toBottom, 320);
+      });
+      // iOS’ta Enter sonrası tekrar en alta
+      elInput.addEventListener('blur', ()=>{ setTimeout(()=>{ try { elMsgs.scrollTop = elMsgs.scrollHeight; } catch {} }, 80); });
+    })();
   </script>
 </body>
 </html>
