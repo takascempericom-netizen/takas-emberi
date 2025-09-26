@@ -69,7 +69,7 @@
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
     @media (max-width:900px){
-      .msgs{ padding-bottom: 120px; } /* alt bar üstü boşluk */
+      .msgs{ padding-bottom: 120px; } /* alt bar için boşluk — masaüstü bozulmaz */
     }
   </style>
 </head>
@@ -114,7 +114,7 @@
     </section>
   </main>
 
-  <!-- Bildirim sesi -->
+  <!-- Ses -->
   <audio id="notifySound" preload="auto">
     <source src="/assets/sounds/notify.wav" type="audio/wav">
     <source src="/sounds/notify.wav" type="audio/wav">
@@ -132,7 +132,7 @@
     </div>
   </nav>
 
-  <!-- Ortak Firebase init -->
+  <!-- Firebase init (global watcher + ses) -->
   <script type="module" src="assets/js/firebase-init.js"></script>
 
   <!-- Sayfa scripti -->
@@ -141,9 +141,9 @@
 
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      collection, query, where, onSnapshot, orderBy,
-      doc, getDoc, setDoc, addDoc, serverTimestamp,
-      updateDoc, arrayUnion, arrayRemove
+      collection, query, where, onSnapshot, orderBy, limit,
+      doc, getDoc, getDocs, setDoc, addDoc, serverTimestamp,
+      updateDoc, deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     /* ==== UI refs ==== */
@@ -167,16 +167,15 @@
     const fmt = (ts)=>{ try{ const d=ts?.toDate?ts.toDate(): (ts instanceof Date? ts: new Date(ts)); if(isNaN(d)) return "—";
       return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return "—";} };
 
-    // Ses kilidi (autoplay)
+    // Ses kilidi
     let audioUnlocked=false;
     async function tryUnlockAudio(){
       if(audioUnlocked) return;
       try{ await notifyEl.play(); notifyEl.pause(); notifyEl.currentTime=0; audioUnlocked=true; }catch{}
     }
     ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,tryUnlockAudio,{passive:true}));
-    notifyEl.addEventListener('error',()=>console.warn('notify.wav bulunamadı (kaynak yollarını kontrol et).'));
 
-    // Küçük profil önbelleği
+    // Mini profil cache
     const userCache=new Map();
     async function getUserBrief(uid){
       if(userCache.has(uid)) return userCache.get(uid);
@@ -208,7 +207,6 @@
     /* ==== State ==== */
     let me=null, activeChatId='', activePeerUid='', unsubMsgs=null, unsubThreads=null;
 
-    /* ==== DM chat garantile ==== */
     async function ensureDmChat(myUid,peerUid){
       const pair=[myUid,peerUid].sort();
       const chatId=`dm_${pair[0]}_${pair[1]}`;
@@ -220,7 +218,7 @@
       return chatId;
     }
 
-    /* ==== Seçim durumu ==== */
+    /* ==== seçim ==== */
     function selectedIds(){
       return Array.from(elThreads.querySelectorAll('input.ck.thread-ck:checked')).map(x=>x.dataset.id);
     }
@@ -250,17 +248,11 @@
           return;
         }
 
-        // DM'ler
         let rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>(d.type||'dm')==='dm');
-
-        // YALNIZCA bende gizli olmayanlar
-        const renderRows = rows.filter(d => !((d.hiddenFor||[]).includes(me.uid)));
-
-        // Tarihe göre sırala
-        renderRows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
+        rows.sort((a,b)=> (b.lastMsgAt?.toMillis?.()||0)-(a.lastMsgAt?.toMillis?.()||0));
 
         elThreads.innerHTML='';
-        for(const d of renderRows){
+        for(const d of rows){
           const peerUid=(d.participants||[]).find(x=>x!==me.uid)||'';
           const info=peerUid?await getUserBrief(peerUid):{name:'—',email:'',photo:''};
           const profUrl=`/profile/profile.html?uid=${encodeURIComponent(peerUid)}`;
@@ -273,11 +265,10 @@
                 <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
               </div>
               <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
-              <button class="delOne" data-id="${d.id}" title="Sohbeti sil (sadece sizde)">✕</button>
+              <button class="delOne" data-id="${d.id}" title="Kalıcı sil">✕</button>
             </div>
           `);
 
-          // Satır tıklama
           row.addEventListener('click',(e)=>{
             if (e.target.closest('a[data-prof]')) { e.stopPropagation(); return; }
             if (e.target.closest('input.thread-ck')) { e.stopPropagation(); return; }
@@ -285,14 +276,13 @@
             openChat(d.id,peerUid);
           });
 
-          // Checkbox
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
 
-          // Tekli SİL (yalnızca bende gizle)
           row.querySelector('.delOne').addEventListener('click', async ()=>{
-            if(!confirm('Bu sohbet SİLİNSİN mi? (Sadece sizde görünmez)')) return;
+            if(!confirm('Bu sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.')) return;
+            if (activeChatId === d.id && unsubMsgs){ try{unsubMsgs();}catch{} unsubMsgs=null; }
             try{
-              await updateDoc(doc(db,'chats',d.id), { hiddenFor: arrayUnion(me.uid) });
+              await permanentlyDeleteChat(d.id);
               if (activeChatId === d.id) resetPanel();
             }catch(e){
               alert('Silinemedi: ' + (e.code||e.message||'hata'));
@@ -302,7 +292,7 @@
           elThreads.appendChild(row);
         }
 
-        if (renderRows.length === 0){
+        if (rows.length === 0){
           elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
         }
 
@@ -317,7 +307,25 @@
       peerName.textContent='Sohbet seç';
       peerEmail.textContent='';
       peerAvatar.removeAttribute('src');
-      inputBar.classList.add('hidden'); // giriş alanını gizle
+      inputBar.classList.add('hidden');
+    }
+
+    /* ==== Koleksiyon silme yardımcıları (kalıcı sil) ==== */
+    async function deleteCollectionByPages(colRef, pageSize=50){
+      for(;;){
+        const qy = query(colRef, orderBy('createdAt','asc'), limit(pageSize));
+        const snap = await getDocs(qy);
+        if (snap.empty) break;
+        await Promise.all(snap.docs.map(d=> deleteDoc(d.ref)));
+        if (snap.size < pageSize) break;
+      }
+    }
+    async function permanentlyDeleteChat(chatId){
+      // 1) Mesajları sil
+      const msgRef = collection(db,'chats',chatId,'messages');
+      await deleteCollectionByPages(msgRef, 100);
+      // 2) Sohbet dokümanını sil
+      await deleteDoc(doc(db,'chats',chatId));
     }
 
     /* ==== Mesajlar ==== */
@@ -344,7 +352,7 @@
           const mine = m.senderUid===me.uid;
           const info = mine ? meInfo : (peerInfo || await getUserBrief(m.senderUid));
 
-        const row = $el(`
+          const row = $el(`
             <div class="msg-row ${mine?'me':''}">
               <img class="msg-avatar" src="${info.photo||'/assets/img/seffaf.png'}" alt="">
               <div class="msg-wrap">
@@ -397,25 +405,22 @@
         peerName.textContent='Sohbet'; peerEmail.textContent=''; peerAvatar.removeAttribute('src');
       }
 
-      inputBar.classList.remove('hidden'); // sohbet seçildi → giriş barını göster
+      inputBar.classList.remove('hidden'); // sohbet seçildi → yazma barı görünür
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}${activePeerUid?`&peer=${encodeURIComponent(activePeerUid)}`:''}`);
 
       try { setSeen && setSeen(chatId, Date.now()); } catch {}
     }
 
-    /* ==== Parametre ile gelen sohbeti "gizliden çıkar" ve aç ==== */
-    async function openChatImmediateUnhide(chatId, hintPeerUid){
+    async function openChatImmediate(chatId, hintPeerUid){
       let peer = hintPeerUid || '';
       try{
-        const cs = await getDoc(doc(db,'chats',chatId));
-        const cd = cs.exists() ? (cs.data()||{}) : null;
-        if (!peer && cd && Array.isArray(cd.participants)) {
-          peer = cd.participants.find(u=>u!==me.uid) || '';
-        }
-        // Eğer bu sohbet bende gizliyse listede görünmesi için gizliden çıkar
-        if ((cd?.hiddenFor||[]).includes(me.uid)) {
-          try { await updateDoc(doc(db,'chats',chatId), { hiddenFor: arrayRemove(me.uid) }); } catch {}
+        if(!peer){
+          const cs = await getDoc(doc(db,'chats',chatId));
+          const cd = cs.exists() ? (cs.data()||{}) : null;
+          if (cd && Array.isArray(cd.participants)) {
+            peer = cd.participants.find(u=>u!==me.uid) || '';
+          }
         }
       }catch{}
       await openChat(chatId, peer);
@@ -433,7 +438,7 @@
         lastMsg:text, lastMsgAt:serverTimestamp(), lastSenderUid: me.uid
       },{merge:true});
 
-      // Karşı tarafa inbox bildirimi (rules izinli değilse sessiz geçer)
+      // Karşı tarafa inbox (rules izin vermeyebilir → sessiz)
       if (activePeerUid) {
         try {
           await addDoc(
@@ -448,7 +453,7 @@
               read: false
             }
           );
-        } catch(e){ console.warn('inbox yazılamadı:', e); }
+        } catch(e){ /* izin yoksa görmezden gel */ }
       }
 
       elInput.value='';
@@ -457,15 +462,18 @@
     btnSend.addEventListener('click',sendMessage);
     elInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }});
 
-    /* ==== Toplu SİL (yalnızca bende gizle) ==== */
+    /* ==== Toplu KALICI SİL ==== */
     btnDelSel.addEventListener('click', async ()=>{
       const ids = selectedIds();
       if(ids.length===0) return;
-      if(!confirm(`${ids.length} sohbet SİLİNSİN mi? (Sadece sizde görünmez)`)) return;
+      if(!confirm(`${ids.length} sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.`)) return;
+
+      // aktif sohbeti kapat
+      if (ids.includes(activeChatId) && unsubMsgs){ try{unsubMsgs();}catch{} unsubMsgs=null; resetPanel(); }
+
       for(const id of ids){
-        try{ await updateDoc(doc(db,'chats',id), { hiddenFor: arrayUnion(me.uid) }); }
+        try{ await permanentlyDeleteChat(id); }
         catch(e){ console.warn('Silinemedi:', id, e); }
-        if (activeChatId === id) resetPanel();
       }
     });
 
@@ -481,19 +489,23 @@
       me = user;
       tryUnlockAudio();
 
-      // Profilden/bildirimden gelindiyse önce DM’yi hazırla → gizliden çıkar → aç
+      // Profilden/bildirimden gelindiyse: sohbet varsa aç, yoksa oluşturup aç
       if (paramChatId) {
-        await openChatImmediateUnhide(paramChatId, paramPeer || '');
+        const cs = await getDoc(doc(db,'chats',paramChatId));
+        if (cs.exists()) {
+          await openChatImmediate(paramChatId, paramPeer || '');
+        } else if (paramPeer) {
+          const cid = await ensureDmChat(me.uid, paramPeer);
+          await openChatImmediate(cid, paramPeer);
+        }
       } else if (paramPeer) {
         try {
           const cid = await ensureDmChat(me.uid, paramPeer);
-          await openChatImmediateUnhide(cid, paramPeer);
+          await openChatImmediate(cid, paramPeer);
         } catch (e) { console.error('DM açılamadı', e); }
       }
 
-      // Listeyi dinle (artık otomatik ilk sohbeti seçmiyoruz)
       watchThreads();
-
       try { startGlobalMessagingWatcher && startGlobalMessagingWatcher(); } catch {}
     });
 
