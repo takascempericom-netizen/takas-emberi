@@ -631,5 +631,82 @@
       document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closePop(); });
     })();
   </script>
+  <script type="module">
+  const { auth, db } = window.__fb || {};
+  import {
+    doc, setDoc, addDoc, collection, serverTimestamp,
+    onSnapshot, orderBy, query, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const pop      = document.getElementById('supportPop');
+  const bodyEl   = pop?.querySelector('.sup-body');
+  const inputEl  = document.getElementById('chatInput');
+  const sendBtn  = document.getElementById('chatSend');
+
+  function append(text, me=false){
+    if(!bodyEl) return;
+    const p = document.createElement('p');
+    p.className = 'msg' + (me ? ' me' : '');
+    p.textContent = text;
+    bodyEl.appendChild(p);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  async function sendSupport(){
+    const txt = (inputEl?.value || '').trim();
+    if(!txt) return;
+    const user = auth?.currentUser;
+    if(!user){ location.href = "/auth.html?next=/"; return; }
+
+    // Önce UI'da göster
+    append(txt, true);
+    inputEl.value = '';
+
+    // Thread üst belgesi (liste/izinler için)
+    await setDoc(doc(db, 'supportThreads', user.uid), {
+      participants: [user.uid],
+      lastAt: serverTimestamp(),
+      lastMsg: txt,
+      lastSenderUid: user.uid
+    }, { merge: true });
+
+    // Mesajı alt koleksiyona yaz
+    await addDoc(collection(db, 'supportThreads', user.uid, 'messages'), {
+      senderUid: user.uid,
+      text: txt,
+      createdAt: serverTimestamp(),
+      page: location.pathname
+    });
+  }
+
+  // Gönder butonu + Enter
+  sendBtn?.addEventListener('click', sendSupport);
+  inputEl?.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendSupport();
+    }
+  });
+
+  // Admin yanıtlarını canlı göster (kullanıcı login ise)
+  onAuthStateChanged(auth, (u)=>{
+    if(!u || !bodyEl) return;
+    const q = query(
+      collection(db, 'supportThreads', u.uid, 'messages'),
+      orderBy('createdAt','asc'),
+      limit(200)
+    );
+    onSnapshot(q, (snap)=>{
+      bodyEl.innerHTML = '';
+      if(snap.empty){ append('Merhaba! Nasıl yardımcı olalım?'); return; }
+      snap.forEach(ms=>{
+        const m = ms.data() || {};
+        append(m.text || '', m.senderUid === u.uid);
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
