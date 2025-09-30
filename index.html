@@ -1,4 +1,3 @@
-<!-- /index.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -20,11 +19,11 @@
     body{
       margin:0; background:var(--bg); color:var(--ink);
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      overflow-x:hidden; /* taşmayı kesin kes kapat */
+      overflow-x:hidden;
     }
     img,svg{max-width:100%; height:auto; display:block}
 
-    /* Top bar (wrap destekli – taşma yok) */
+    /* Top bar */
     .topbar{
       position:sticky; top:0; z-index:100;
       display:flex; align-items:center; gap:12px; flex-wrap:wrap;
@@ -35,66 +34,50 @@
       border-bottom:1px solid rgba(0,0,0,.06)
     }
     @keyframes barShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
     .brand img{height:clamp(40px,9vw,56px); filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
     .grow{flex:1 1 auto; min-width:20px}
     .btn{border:0;border-radius:14px;padding:10px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
     .btn.primary{background:var(--btn);color:var(--btnInk)}
     .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28)}
+    .btn.light{background:#fff; color:#111827; border:1px solid #e5e7eb}
     .btn:focus{outline:2px solid var(--focus);outline-offset:2px}
-    @media (max-width:380px){
-      /* en dar ekranda butonlar küçülür, yine de taşmaz */
-      .btn{padding:8px 10px;font-size:13px}
-    }
+    @media (max-width:380px){ .btn{padding:8px 10px;font-size:13px} }
 
     /* Hero */
     .hero{max-width:1100px;margin:24px auto;padding:16px}
-    .panel{
-      background:linear-gradient(270deg,var(--c1),var(--c2),var(--c3),var(--c4));
-      background-size:800% 800%; animation:panelBG 16s ease infinite;
-      border-radius:20px; padding:24px; box-shadow:0 10px 40px rgba(5,10,30,.12);
-      color:#fff; text-align:center; border:1px solid #eef2ff
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 10px 40px rgba(5,10,30,.12)}
+    .hero-panel{
+      display:grid;place-items:center;text-align:center;padding:32px 24px;
+      background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3),var(--c4));
+      background-size:800% 800%;animation:panelBG 16s ease infinite;border-color:transparent;color:#fff
     }
     @keyframes panelBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-
-    .hero-logo{
-      width:clamp(120px,28vw,220px); margin:0 auto 12px;
-      filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))
-    }
-    .title{
-      font-size:clamp(32px,6vw,56px); font-weight:900; margin:0 0 12px;
-      text-shadow:0 1px 14px rgba(0,0,0,.25)
-    }
+    .hero-logo{width:clamp(120px,28vw,220px); margin:0 auto 12px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+    .title{font-size:clamp(32px,6vw,56px); font-weight:900; margin:0 0 12px; text-shadow:0 1px 14px rgba(0,0,0,.25)}
     .subtitle{font-size:clamp(16px,3.2vw,20px); margin:0 0 6px; opacity:.98}
+    .cta-wrap{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;color:#111827;border:1px solid #e5e7eb;font-weight:800}
 
-    .slogan-panel{
-      margin:20px auto; max-width:900px; padding:20px;
-      border-radius:20px; text-align:center; color:#0f172a;
-      background:#ffffff; border:1px solid var(--line);
-      box-shadow:0 4px 30px rgba(0,0,0,.06)
-    }
+    /* Slogan panel */
+    .slogan-panel{margin:20px auto; max-width:900px; padding:20px; border-radius:20px; text-align:center; color:#0f172a; background:#ffffff; border:1px solid var(--line); box-shadow:0 4px 30px rgba(0,0,0,.06)}
     .slogan-rotator{font-size:clamp(16px,3.5vw,22px); font-weight:800; min-height:2.2em; transition:opacity .35s ease}
 
-    /* Kategoriler */
-    .cats{background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:16px; color:var(--ink)}
-    .cats h2{margin:0 0 12px}
-    .grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-top:12px}
-    .card{
-      border-radius:18px; padding:16px; min-height:120px;
-      display:flex; flex-direction:column; gap:6px; align-items:center; justify-content:center;
-      color:#fff; animation:cardColors 20s infinite alternate ease-in-out; background:var(--c1);
-      transition:transform .18s,border-color .2s; border:1px solid rgba(0,0,0,.06)
-    }
-    .card:hover{transform:translateY(-6px)}
-    @keyframes cardColors{
-      0%{background:var(--c1)}25%{background:var(--c2)}50%{background:var(--c3)}75%{background:var(--c4)}100%{background:var(--c1)}
-    }
-    .emoji{font-size:26px}
+    /* İlan grid */
+    .ads-wrap{max-width:1100px;margin:12px auto;padding:0 16px}
+    .ads-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    @media (min-width:900px){.ads-grid{grid-template-columns:repeat(4,1fr)}}
+    .ad-card{border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff; color:#111827; text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.06); transition:transform .15s ease; cursor:pointer}
+    .ad-card:hover{transform:translateY(-2px)}
+    .ad-media{position:relative;width:100%;background:#f1f5f9;border-bottom:1px solid var(--line)}
+    .ad-media::before{content:"";display:block;padding-top:100%}
+    .ad-media img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; display:block; image-orientation:from-image}
+    .ad-body{padding:10px}
+    .ad-title{margin:0 0 4px; font-size:14px; font-weight:800; line-height:1.25; color:#0f172a; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height: calc(1.25em * 2)}
+    .ad-meta{display:flex;gap:6px;justify-content:space-between;color:#64748b;font-size:12px}
 
-    .features{display:grid; gap:12px; margin-top:16px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
-    .feature{padding:12px; border-radius:14px; color:#0f172a; text-align:center; background:#fff; border:1px solid var(--line)}
-
-    /* Dialoglar (tam responsive) */
-    dialog{border:0;border-radius:16px;padding:0;max-width:95vw;background:var(--paper);color:var(--ink);border:1px solid var(--line); z-index:200;}
+    /* Dialoglar */
+    dialog{border:0;border-radius:16px;padding:0;max-width:95vw;background:var(--paper);color:var(--ink);border:1px solid var(--line); z-index:200}
     dialog::backdrop{background:rgba(0,0,0,.45)}
     .modal{padding:16px; width:min(560px,95vw); position:relative}
     .in{width:100%;padding:12px 44px 12px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px;font-size:16px;background:var(--paper2);color:var(--ink)}
@@ -104,25 +87,26 @@
     .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#64748b;cursor:pointer;font-size:13px}
     .row{display:flex;gap:10px; flex-wrap:wrap}
     .row > *{flex:1 1 220px; min-width:0}
-
-    .legal-ack{
-      display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--line);
-      padding:10px;border-radius:12px;margin-top:6px
-    }
+    .legal-ack{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--line); padding:10px;border-radius:12px;margin-top:6px}
     .legal-ack label{line-height:1.4}
     .legal-ack a{color:#2563eb;text-decoration:none}
     .legal-ack a:hover{text-decoration:underline}
 
     /* Footer */
     footer{border-top:1px solid var(--line); margin-top:30px}
-    .foot-wrap{
-      max-width:1100px; margin:0 auto; padding:12px 16px; color:var(--muted);
-      display:flex; gap:12px; align-items:center; flex-wrap:wrap
-    }
+    .foot-wrap{max-width:1100px; margin:0 auto; padding:12px 16px; color:var(--muted); display:flex; gap:12px; align-items:center; flex-wrap:wrap}
     .foot-logo{height:clamp(20px,4vw,28px)}
     .foot-links{display:flex; gap:12px; flex-wrap:wrap}
     .foot-links a{color:var(--muted); text-decoration:none}
     .foot-links a:hover{text-decoration:underline}
+      /* Kategori grid & kartları */
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:12px}
+    .card{border-radius:18px;padding:16px;min-height:120px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:#fff;animation:cardColors 20s infinite alternate ease-in-out;background:var(--c1);transition:transform .18s,border-color .2s;border:1px solid rgba(0,0,0,.06)}
+    .card:hover{transform:translateY(-6px)}
+    @keyframes cardColors{0%{background:var(--c1)}25%{background:var(--c2)}50%{background:var(--c3)}75%{background:var(--c4)}100%{background:var(--c1)}}
+    .emoji{font-size:26px}
+    .features{display:grid;gap:12px;margin-top:16px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+    .feature{padding:12px;border-radius:14px;color:#0f172a;text-align:center;background:#fff;border:1px solid var(--line)}
   </style>
 </head>
 
@@ -133,23 +117,38 @@
     <div class="grow"></div>
     <button class="btn ghost" id="btnLoginOpen">Giriş Yap</button>
     <button class="btn primary" id="btnSignupOpen">Kaydol</button>
-    <button class="btn ghost" id="btnLogout" style="display:none">Çıkış</button>
   </header>
 
   <!-- İçerik -->
   <main class="hero">
-    <section class="panel" aria-labelledby="welcome-title">
+    <section class="panel hero-panel" aria-labelledby="welcome-title">
       <img class="hero-logo" src="/assets/img/seffaf.png" alt="Takas Çemberi logo">
       <h1 id="welcome-title" class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
       <p class="subtitle">Toplulukla takas et, eşyana yeni bir hayat ver.</p>
+      <div class="cta-wrap">
+        <button class="btn light" id="btnBrowse">İlanlara Göz At</button>
+        <button class="btn primary" id="btnPrimaryPost">Hemen Ücretsiz İlan Ver</button>
+      </div>
+      <div style="margin-top:10px"><span class="badge">🎁 İlk ilan ücretsiz, sonrası ücretli</span></div>
     </section>
 
     <section class="slogan-panel" aria-hidden="false">
       <div class="slogan-rotator" id="slogan" aria-live="polite"></div>
     </section>
+  </main>
+  <!-- İLANLAR (MISAFIR GORUNUM) -->
+  <section class="ads-wrap" aria-labelledby="ads-title">
+    <div class="panel" style="padding:16px">
+      <h2 id="ads-title" style="margin:0 0 12px">Yeni İlanlar</h2>
+      <div class="ads-grid" id="adsGrid" role="list"></div>
+      <div id="adsHint" style="margin-top:10px;color:#64748b;font-size:13px">İlan kartına tıkladığınızda kayıt penceresi açılır.</div>
+    </div>
+  </section>
 
-    <section class="cats" aria-labelledby="cats-title" style="margin-top:12px">
-      <h2 id="cats-title" style="margin-bottom:12px">Kategoriler</h2>
+  <!-- KATEGORİLER + ÖZELLİKLER (misafir görünümde de kalsın) -->
+  <section class="ads-wrap" aria-labelledby="cats-title">
+    <div class="panel" style="padding:16px">
+      <h2 id="cats-title" style="margin:0 0 12px">Kategoriler</h2>
       <div class="grid" role="list">
         <div class="card" role="listitem"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
         <div class="card" role="listitem"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
@@ -166,21 +165,21 @@
         <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
         <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
   <!-- Alt bilgi -->
   <footer>
     <div class="foot-wrap">
       <img class="foot-logo" src="/assets/img/legallogo.png" alt="Takas Çemberi yasal logo">
       <nav class="foot-links" aria-label="Yasal bağlantılar">
-        <a href="/legal/hakkimizda.html">Hakkımızda</a>
-        <a href="/legal/gizlilik.html">Gizlilik</a>
-        <a href="/legal/teslimat-iade.html">Teslimat &amp; İade</a>
-        <a href="/legal/mesafeli-satis-sozlesmesi.html">Mesafeli Satış</a>
-        <a href="/legal/kullanim-sartlari.html">Kullanım Şartları</a>
-        <a href="/legal/kvkk.html">KVKK</a>
-        <a href="/legal/iletisim.html">İletişim &amp; Ticari</a>
+        <a href="/legal/hakkimizda.html" target="_blank">Hakkımızda</a>
+        <a href="/legal/gizlilik.html" target="_blank">Gizlilik</a>
+        <a href="/legal/teslimat-iade.html" target="_blank">Teslimat &amp; İade</a>
+        <a href="/legal/mesafeli-satis-sozlesmesi.html" target="_blank">Mesafeli Satış</a>
+        <a href="/legal/kullanim-sartlari.html" target="_blank">Kullanım Şartları</a>
+        <a href="/legal/kvkk.html" target="_blank">KVKK</a>
+        <a href="/legal/iletisim.html" target="_blank">İletişim &amp; Ticari</a>
       </nav>
       <div class="grow"></div>
       <small>© 2025 Takas Çemberi • takascemberi.com</small>
@@ -246,7 +245,6 @@
         </div>
       </div>
 
-      <!-- KVKK & Gizlilik onay kutuları -->
       <div class="legal-ack">
         <input id="ackKvkk" type="checkbox" style="margin-top:3px">
         <label for="ackKvkk">
@@ -264,33 +262,14 @@
     </form>
   </dialog>
 
+  <!-- Firebase init (global __fb) -->
+  <script type="module" src="/assets/js/firebase-init.js"></script>
+
+  <!-- Sayfa mantığı -->
   <script type="module">
-    import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence,
-      signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
-      createUserWithEmailAndPassword, updateProfile,
-      sendPasswordResetEmail, sendEmailVerification, signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    /* ===== Firebase ===== */
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-      authDomain: "auth.takascemberi.com",
-      projectId: "ureten-eller-v2",
-      storageBucket: "ureten-eller-v2.appspot.com",
-      messagingSenderId: "621494781131",
-      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    try { await setPersistence(auth, indexedDBLocalPersistence); }
-    catch { await setPersistence(auth, browserLocalPersistence); }
-
     const $ = (sel, root=document) => root.querySelector(sel);
 
-    /* ===== Slogan rotator (15 sn) ===== */
+    /* Slogan rotator */
     const slogans = [
       "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
       "İhtiyacın olmayan başkasının hazinesi olabilir.",
@@ -300,87 +279,59 @@
     ];
     const sEl = $("#slogan");
     let sIdx = 0;
-    function setSlogan(i){
-      if(!sEl) return;
-      sEl.style.opacity = 0;
-      setTimeout(()=>{ sEl.textContent = slogans[i % slogans.length]; sEl.style.opacity = 1; }, 250);
-    }
-    setSlogan(sIdx++);
-    setInterval(()=>setSlogan(sIdx++), 15000);
+    function setSlogan(i){ if(!sEl) return; sEl.style.opacity=0; setTimeout(()=>{ sEl.textContent = slogans[i % slogans.length]; sEl.style.opacity=1; }, 250); }
+    setSlogan(sIdx++); setInterval(()=>setSlogan(sIdx++), 15000);
 
-    /* ===== Dialog açma ===== */
-    const openDlg = (sel) => {
-      const d = $(sel);
-      if (!d) return;
-      if (typeof d.showModal === "function") d.showModal();
-      else d.setAttribute("open", "");
-    };
+    /* Dialog helpers */
+    function openDlg(id){ const d=$(id); if(!d) return; if (typeof d.showModal==="function") d.showModal(); else d.setAttribute("open",""); }
     $("#btnLoginOpen")?.addEventListener("click", ()=>openDlg("#dlgLogin"));
     $("#btnSignupOpen")?.addEventListener("click", ()=>openDlg("#dlgSignup"));
 
-    /* ===== Şifre göster/gizle ===== */
-    addEventListener("click",(e)=>{
-      const t=e.target;
-      if(t?.classList?.contains("toggle")){
-        const id=t.getAttribute("data-target");
-        const inp=$("#"+id);
-        if(inp) inp.type = (inp.type==="password"?"text":"password");
-      }
-    });
+    /* CTA davranışları */
+    $("#btnPrimaryPost")?.addEventListener("click", ()=> openDlg("#dlgSignup"));
+    $("#btnBrowse")?.addEventListener("click", ()=> document.getElementById("adsGrid")?.scrollIntoView({behavior:"smooth"}));
 
-    /* ===== KVKK & Gizlilik onay kontrolü ===== */
-    const ackKvkk = $("#ackKvkk");
-    const ackPrivacy = $("#ackPrivacy");
-    const btnEmailSignup = $("#btnEmailSignup");
-    function refreshSignupEnabled(){
-      if (!btnEmailSignup) return;
-      const ok = !!(ackKvkk?.checked && ackPrivacy?.checked);
-      btnEmailSignup.disabled = !ok;
-    }
-    ackKvkk?.addEventListener("change", refreshSignupEnabled);
-    ackPrivacy?.addEventListener("change", refreshSignupEnabled);
-    refreshSignupEnabled();
+    /* Şifre göster/gizle */
+    addEventListener("click",(e)=>{ const t=e.target; if(t?.classList?.contains("toggle")){ const id=t.getAttribute("data-target"); const inp=$("#"+id); if(inp) inp.type = (inp.type==="password"?"text":"password"); }});
 
-    /* ===== Google ile giriş/kayıt ===== */
+    /* KVKK & Gizlilik */
+    const ackKvkk = $("#ackKvkk"); const ackPrivacy = $("#ackPrivacy"); const btnEmailSignup = $("#btnEmailSignup");
+    function refreshSignupEnabled(){ if(!btnEmailSignup) return; const ok = !!(ackKvkk?.checked && ackPrivacy?.checked); btnEmailSignup.disabled = !ok; }
+    ackKvkk?.addEventListener("change", refreshSignupEnabled); ackPrivacy?.addEventListener("change", refreshSignupEnabled); refreshSignupEnabled();
+
+    /* getNext: login sonra nereye? default: /home.html */
+    function getNext(){ try{ const url=new URL(location.href); const n=url.searchParams.get("next"); if(n && /^\/[\S]*$/.test(n)) return n; }catch{} return "/home.html"; }
+
+    /* Firebase (global) */
+    const fb = window.__fb || {}; const auth = fb.auth; const db = fb.db;
+
+    /* Google ile giriş/kayıt */
+    import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
     const provider = new GoogleAuthProvider();
-    async function googleLogin(){ await signInWithPopup(auth, provider); location.href="/home.html"; }
+    async function googleLogin(){ await signInWithPopup(auth, provider); location.href=getNext(); }
     $("#btnGoogleLogin")?.addEventListener("click", googleLogin);
     $("#btnGoogleSignup")?.addEventListener("click", googleLogin);
 
-    /* ===== E-posta ile giriş ===== */
+    /* E-posta ile giriş */
     $("#btnEmailLogin")?.addEventListener("click", async ()=>{
       const email = $("#loginEmail")?.value?.trim() || "";
       const pass  = $("#loginPass")?.value || "";
       if(!email || !pass) return;
       const { user } = await signInWithEmailAndPassword(auth, email, pass);
-      if(!user.emailVerified){
-        try{ await sendEmailVerification(user); }catch{}
-        alert("E-postanı doğrulaman gerekiyor. Doğrulama linkini gönderdik. Gelen kutunu/SPAM’ı kontrol et.");
-        try{ await signOut(auth); }catch{}
-        return;
-      }
-      location.href="/home.html";
+      if(!user.emailVerified){ try{ await sendEmailVerification(user); }catch{} alert("E-postanı doğrulaman gerekiyor. Doğrulama linki gönderdik. Spam klasörünü de kontrol et."); return; }
+      location.href = getNext();
     });
 
-    /* ===== Şifremi unuttum ===== */
-    $("#btnForgot")?.addEventListener("click", async ()=>{
-      let email = $("#loginEmail")?.value?.trim() || prompt("E-posta:") || "";
-      if(!email) return;
-      await sendPasswordResetEmail(auth, email);
-      alert("Sıfırlama e-postası gönderildi: "+email);
-    });
+    /* Şifremi unuttum */
+    $("#btnForgot")?.addEventListener("click", async ()=>{ let email = $("#loginEmail")?.value?.trim() || prompt("E-posta:") || ""; if(!email) return; await sendPasswordResetEmail(auth, email); alert("Sıfırlama e-postası gönderildi: "+email); });
 
-    /* ===== Doğrulama mailini tekrar gönder ===== */
-    $("#btnResendVerify")?.addEventListener("click", async ()=>{
-      const u = auth.currentUser;
-      if(!u){ alert("Önce giriş yapmalısın."); return; }
-      try{ await sendEmailVerification(u); alert("Doğrulama e-postası gönderildi."); }catch{ alert("Gönderilemedi."); }
-    });
+    /* Doğrulama mailini tekrar gönder */
+    $("#btnResendVerify")?.addEventListener("click", async ()=>{ const u = auth.currentUser; if(!u){ alert("Önce giriş yapmalısın."); return; } try{ await sendEmailVerification(u); alert("Doğrulama e-postası gönderildi."); }catch{ alert("Gönderilemedi."); } });
 
-    /* ===== E-posta ile kayıt ===== */
-    btnEmailSignup?.addEventListener("click", async ()=>{
+    /* E-posta ile kayıt */
+    $("#btnEmailSignup")?.addEventListener("click", async ()=>{
       if(btnEmailSignup.disabled) { alert("KVKK ve Gizlilik onaylarını kabul etmelisin."); return; }
-
       const firstName = $("#firstName")?.value?.trim() || "";
       const lastName  = $("#lastName")?.value?.trim() || "";
       const city      = $("#city")?.value?.trim() || "";
@@ -388,35 +339,69 @@
       const email     = $("#email")?.value?.trim() || "";
       const p1        = $("#pass1")?.value || "";
       const p2        = $("#pass2")?.value || "";
-
-      if(!firstName || !lastName || !city || !username || !email || !p1 || !p2){
-        alert("Lütfen tüm alanları doldurun."); return;
-      }
+      if(!firstName || !lastName || !city || !username || !email || !p1 || !p2){ alert("Lütfen tüm alanları doldurun."); return; }
       if(p1 !== p2){ alert("Şifreler eşleşmiyor."); return; }
       if(p1.length < 6){ alert("Şifre en az 6 karakter olmalı."); return; }
-
       const { user } = await createUserWithEmailAndPassword(auth, email, p1);
+      try{ await updateProfile(user, { displayName: `${firstName} ${lastName}` }); await sendEmailVerification(user); await window.__fb?.upsertPublicProfile?.(user); alert("Kayıt oluşturuldu. Doğrulama e-postasını kontrol edin."); }catch(e){ console.warn(e); }
+    });
+
+    /* Oturum durumu: girişli kullanıcıyı /home.html veya next'e at */
+    onAuthStateChanged(auth, (user)=>{ if(user && (user.emailVerified || (user?.providerData||[]).some(p=>p.providerId==="google.com"))){ location.replace(getNext()); }});
+
+    /* İlanları yükle (misafir görünümü, sadece approved) */
+    import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const adsGrid = document.getElementById("adsGrid");
+
+    function cardHtml({id,title,city,cond,cover}){
+      const safeTitle = (title||"İlan");
+      const safeCity  = (city||"");
+      const safeCond  = (cond||"");
+      const img = cover || "/assets/img/seffaf.png";
+      return `
+      <div class="ad-card" data-id="${id}">
+        <div class="ad-media"><img src="${img}" alt="${safeTitle}" loading="lazy" decoding="async"></div>
+        <div class="ad-body">
+          <h3 class="ad-title">${safeTitle}</h3>
+          <div class="ad-meta"><span>${safeCity}</span><span>${safeCond}</span></div>
+        </div>
+      </div>`;
+    }
+
+    async function loadGuestAds(){
+      if(!adsGrid) return;
       try{
-        await updateProfile(user, { displayName: `${firstName} ${lastName}` });
-        await sendEmailVerification(user);
-        alert("Kayıt oluşturuldu. Doğrulama e-postasını kontrol edin.");
-        await signOut(auth);
-      }catch(e){
-        console.warn(e);
-      }
-    });
+        adsGrid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">İlanlar yükleniyor…</div>';
 
-    /* ===== Çıkış ===== */
-    $("#btnLogout")?.addEventListener("click", async ()=>{
-      try{ await signOut(auth); }catch{}
-      location.href="/";
-    });
+        // Önce isApproved==true
+        const q1 = query(collection(db, 'listings'), where('isApproved','==', true), limit(20));
+        const s1 = await getDocs(q1);
 
-    /* ===== Oturum durumu ===== */
-    onAuthStateChanged(auth, (user)=>{
-      const verified = !!user && (user.emailVerified || (user?.providerData||[]).some(p=>p.providerId==="google.com"));
-      const logoutBtn = $("#btnLogout"); if(logoutBtn) logoutBtn.style.display = user ? "" : "none";
-      if(verified){ location.replace("/home.html"); }
+        const items = [];
+        const seen = new Set();
+        s1.forEach(d=>{ const v=d.data()||{}; items.push({id:d.id, title:v.title, city:v.city, cond:v.cond, cover:(v.photos&&v.photos[0])||''}); seen.add(d.id) });
+
+        // Eğer sonuç azsa status=='approved' olanlardan da çek (bazı doklarda alan farklı olabilir)
+        if(items.length < 20){
+          try{
+            const q2 = query(collection(db,'listings'), where('status','==','approved'), limit(20 - items.length));
+            const s2 = await getDocs(q2);
+            s2.forEach(d=>{ if(seen.has(d.id)) return; const v=d.data()||{}; items.push({id:d.id, title:v.title, city:v.city, cond:v.cond, cover:(v.photos&&v.photos[0])||''}); });
+          }catch{ /* some projects may not index 'status' yet */ }
+        }
+
+        if(items.length===0){ adsGrid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz yayınlanmış ilan yok.</div>'; return; }
+        adsGrid.innerHTML = items.map(cardHtml).join('');
+      }catch(err){ console.error('İlan yükleme hatası:', err); adsGrid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi.</div>`; }
+    }
+    await loadGuestAds();
+
+    // Kart tıklandığında → login/signup aç
+    adsGrid?.addEventListener('click', (ev)=>{
+      const card = ev.target.closest('.ad-card');
+      if(!card) return;
+      openDlg('#dlgSignup');
     });
   </script>
 </body>
