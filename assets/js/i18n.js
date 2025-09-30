@@ -1,8 +1,8 @@
 /**
- * Çok hafif i18n:
- * - setLang('tr'|'en'|'ar') → lang ve dir ayarlanır, localStorage'a yazılır
- * - apply() → data-i18n, data-i18n-placeholder, data-i18n-aria-label çevirilerini uygular
- * - init() → sayfa açılışında lokal dili yükler + dropdown (#langSelect) ile senkron
+ * Çok hafif i18n
+ * - setLang('tr'|'en'|'ar') → lang/dir ayarlar, localStorage'a yazar
+ * - apply() → data-i18n / -placeholder / -aria-label uygular
+ * - init() → sayfa açılışında çalışır, #langSelect ile senkron
  */
 
 const DICT = {
@@ -12,7 +12,6 @@ const DICT = {
     "brand.sub": "Toplulukla takas et, eşyana yeni bir hayat ver.",
     "cta.browse": "İlanlara Göz At",
     "cta.post": "Ücretsiz İlan Ver",
-    "badge.free": "🎁 İlk ilan ücretsiz, sonrası ücretli",
 
     // Sections
     "sec.newlistings": "Yeni İlanlar",
@@ -62,6 +61,11 @@ const DICT = {
     "dlg.kvkk": "KVKK Aydınlatma Metni",
     "dlg.privacy": "Gizlilik Politikası",
 
+    // UI küçük metinler
+    "ui.show": "Göster",
+    "ui.hide": "Gizle",
+    "ack.tail": "’ni okudum ve kabul ediyorum.",
+
     // Slogans
     "_slogans": [
       "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
@@ -80,7 +84,6 @@ const DICT = {
     "brand.sub": "Trade with the community and give your items a new life.",
     "cta.browse": "Browse Listings",
     "cta.post": "Post for Free",
-    "badge.free": "🎁 First listing free, others paid",
 
     "sec.newlistings": "New Listings",
     "sec.categories": "Categories",
@@ -126,6 +129,10 @@ const DICT = {
     "dlg.kvkk": "KVKK Notice",
     "dlg.privacy": "Privacy Policy",
 
+    "ui.show": "Show",
+    "ui.hide": "Hide",
+    "ack.tail": " — I have read and accept.",
+
     "_slogans": [
       "Trade fairly, reduce waste, win together.",
       "What you don’t need may be someone’s treasure.",
@@ -142,7 +149,6 @@ const DICT = {
     "brand.sub": "بادِل مع المجتمع وأعطِ أغراضك حياةً جديدة.",
     "cta.browse": "تصفح الإعلانات",
     "cta.post": "أضف إعلانًا مجانًا",
-    "badge.free": "🎁 الإعلان الأول مجانًا، وما بعده مدفوع",
 
     "sec.newlistings": "إعلانات جديدة",
     "sec.categories": "الفئات",
@@ -188,6 +194,10 @@ const DICT = {
     "dlg.kvkk": "إشعار KVKK",
     "dlg.privacy": "سياسة الخصوصية",
 
+    "ui.show": "إظهار",
+    "ui.hide": "إخفاء",
+    "ack.tail": " — لقد قرأتُ وأوافق.",
+
     "_slogans": [
       "بادِل بعدل، وقلّل النفايات، واربحوا معًا.",
       "ما لا تحتاجه قد يكون كنزًا لغيرك.",
@@ -216,23 +226,24 @@ function t(key, lang) {
 
 function apply(root = document) {
   const lang = getLang();
-  // textContent / innerHTML
+
   root.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     const html = t(key, lang);
     if (/<br\/?>/i.test(html)) el.innerHTML = html;
     else el.textContent = html;
   });
-  // placeholder
+
   root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.getAttribute("data-i18n-placeholder");
     el.setAttribute("placeholder", t(key, lang));
   });
-  // aria-label
+
   root.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
     const key = el.getAttribute("data-i18n-aria-label");
     el.setAttribute("aria-label", t(key, lang));
   });
+
   // slogan listesi
   const sEl = root.querySelector("#slogan");
   if (sEl && Array.isArray(DICT[lang]?._slogans)) {
@@ -251,7 +262,6 @@ function setLang(lang) {
   try { localStorage.setItem("tc_lang", L); } catch {}
   setAttrsForLang(L);
   apply();
-  // dropdown senkron
   const sel = document.getElementById("langSelect");
   if (sel) sel.value = L;
 }
@@ -260,17 +270,17 @@ function init() {
   const lang = getLang();
   setAttrsForLang(lang);
   apply();
-  // dropdown wire
+
   const sel = document.getElementById("langSelect");
   if (sel) {
     sel.value = lang;
     sel.addEventListener("change", e => setLang(e.target.value));
   }
-  // sekmeler arası senkron
+
   window.addEventListener("storage", (e)=>{
     if (e.key === "tc_lang") setLang(getLang());
   });
-  // dışarı aç
+
   if (!window.__i18n) window.__i18n = {};
   Object.assign(window.__i18n, { setLang, getLang, apply, t });
 }
