@@ -1,5 +1,3 @@
-<!-- /assets/js/i18n.js -->
-<script type="module">
 /**
  * Çok hafif i18n:
  * - setLang('tr'|'en'|'ar') → lang ve dir ayarlanır, localStorage'a yazılır
@@ -64,7 +62,7 @@ const DICT = {
     "dlg.kvkk": "KVKK Aydınlatma Metni",
     "dlg.privacy": "Gizlilik Politikası",
 
-    // Slogans (dönen metinler)
+    // Slogans
     "_slogans": [
       "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
       "İhtiyacın olmayan başkasının hazinesi olabilir.",
@@ -218,11 +216,10 @@ function t(key, lang) {
 
 function apply(root = document) {
   const lang = getLang();
-  // textContent
+  // textContent / innerHTML
   root.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     const html = t(key, lang);
-    // bazıları <br/> içeriyor → innerHTML kullan
     if (/<br\/?>/i.test(html)) el.innerHTML = html;
     else el.textContent = html;
   });
@@ -236,7 +233,7 @@ function apply(root = document) {
     const key = el.getAttribute("data-i18n-aria-label");
     el.setAttribute("aria-label", t(key, lang));
   });
-  // slogan döndürücü varsa güncelle
+  // slogan listesi
   const sEl = root.querySelector("#slogan");
   if (sEl && Array.isArray(DICT[lang]?._slogans)) {
     sEl.dataset.slogans = JSON.stringify(DICT[lang]._slogans);
@@ -269,7 +266,7 @@ function init() {
     sel.value = lang;
     sel.addEventListener("change", e => setLang(e.target.value));
   }
-  // refr. sayfalar arası senkron (başka sekmede dil değişirse)
+  // sekmeler arası senkron
   window.addEventListener("storage", (e)=>{
     if (e.key === "tc_lang") setLang(getLang());
   });
@@ -280,4 +277,3 @@ function init() {
 
 init();
 export {};
-</script>
