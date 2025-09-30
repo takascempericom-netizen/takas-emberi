@@ -403,6 +403,18 @@
       if(!card) return;
       openDlg('#dlgSignup');
     });
-  </script>
+    </script>
+  
+  <script>
+  // "Ücretsiz İlan Ver" → daima kayıt diyaloğunu aç (bağımsız, hata toleranslı)
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('#btnPrimaryPost');
+    if (!btn) return;
+    const d = document.getElementById('dlgSignup');
+    if (d?.showModal) d.showModal(); else d?.setAttribute('open','');
+    e.preventDefault();
+  });
+</script>
+
 </body>
 </html>
