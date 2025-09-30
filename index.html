@@ -115,21 +115,29 @@
   <header class="topbar">
     <a class="brand" href="/"><img src="/assets/img/seffaf.png" alt="Takas Çemberi"/></a>
     <div class="grow"></div>
-    <button class="btn ghost" id="btnLoginOpen">Giriş Yap</button>
-    <button class="btn primary" id="btnSignupOpen">Kaydol</button>
+
+    <!-- Dil seçimi (i18n) -->
+    <select id="langSelect" style="border-radius:8px;padding:6px;font-weight:600">
+      <option value="tr">TR</option>
+      <option value="en">EN</option>
+      <option value="ar">AR</option>
+    </select>
+
+    <button class="btn ghost" id="btnLoginOpen" data-i18n="dlg.login.title">Giriş Yap</button>
+    <button class="btn primary" id="btnSignupOpen" data-i18n="dlg.signup.title">Kaydol</button>
   </header>
 
   <!-- İçerik -->
   <main class="hero">
     <section class="panel hero-panel" aria-labelledby="welcome-title">
       <img class="hero-logo" src="/assets/img/seffaf.png" alt="Takas Çemberi logo">
-      <h1 id="welcome-title" class="title">Takas Çemberi’ne Hoş Geldiniz</h1>
-      <p class="subtitle">Toplulukla takas et, eşyana yeni bir hayat ver.</p>
+      <h1 id="welcome-title" class="title" data-i18n="brand.slogan">Takas Çemberi’ne Hoş Geldiniz</h1>
+      <p class="subtitle" data-i18n="brand.sub">Toplulukla takas et, eşyana yeni bir hayat ver.</p>
       <div class="cta-wrap">
-        <button class="btn light" id="btnBrowse">İlanlara Göz At</button>
-        <button class="btn primary" id="btnPrimaryPost">Hemen Ücretsiz İlan Ver</button>
+        <button class="btn light" id="btnBrowse" data-i18n="cta.browse">İlanlara Göz At</button>
+        <button class="btn primary" id="btnPrimaryPost" data-i18n="cta.post">Hemen Ücretsiz İlan Ver</button>
       </div>
-      <div style="margin-top:10px"><span class="badge">🎁 İlk ilan ücretsiz, sonrası ücretli</span></div>
+      <div style="margin-top:10px"><span class="badge" data-i18n="badge.free">🎁 İlk ilan ücretsiz, sonrası ücretli</span></div>
     </section>
 
     <section class="slogan-panel" aria-hidden="false">
@@ -139,31 +147,31 @@
   <!-- İLANLAR (MISAFIR GORUNUM) -->
   <section class="ads-wrap" aria-labelledby="ads-title">
     <div class="panel" style="padding:16px">
-      <h2 id="ads-title" style="margin:0 0 12px">Yeni İlanlar</h2>
+      <h2 id="ads-title" style="margin:0 0 12px" data-i18n="sec.newlistings">Yeni İlanlar</h2>
       <div class="ads-grid" id="adsGrid" role="list"></div>
-      <div id="adsHint" style="margin-top:10px;color:#64748b;font-size:13px">İlan kartına tıkladığınızda kayıt penceresi açılır.</div>
+      <div id="adsHint" style="margin-top:10px;color:#64748b;font-size:13px" data-i18n="hint.listings.click">İlan kartına tıkladığınızda kayıt penceresi açılır.</div>
     </div>
   </section>
 
   <!-- KATEGORİLER + ÖZELLİKLER (misafir görünümde de kalsın) -->
   <section class="ads-wrap" aria-labelledby="cats-title">
     <div class="panel" style="padding:16px">
-      <h2 id="cats-title" style="margin:0 0 12px">Kategoriler</h2>
+      <h2 id="cats-title" style="margin:0 0 12px" data-i18n="sec.categories">Kategoriler</h2>
       <div class="grid" role="list">
-        <div class="card" role="listitem"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></div>
-        <div class="card" role="listitem"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></div>
-        <div class="card" role="listitem"><div class="emoji">🚗</div><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet, yedek parça</p></div>
-        <div class="card" role="listitem"><div class="emoji">🧸</div><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></div>
-        <div class="card" role="listitem"><div class="emoji">👗</div><h3>Giyim</h3><p>Kadın, erkek, çocuk</p></div>
-        <div class="card" role="listitem"><div class="emoji">⚡</div><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak</p></div>
-        <div class="card" role="listitem"><div class="emoji">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></div>
-        <div class="card" role="listitem"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></div>
+        <div class="card" role="listitem"><div class="emoji">🏠</div><h3 data-i18n="cat.home">Ev & Hobi</h3><p data-i18n="cat.home.desc">Ev eşyaları, hobi ürünleri</p></div>
+        <div class="card" role="listitem"><div class="emoji">🏡</div><h3 data-i18n="cat.real">Taşınmaz</h3><p data-i18n="cat.real.desc">Ev, arsa, tarla</p></div>
+        <div class="card" role="listitem"><div class="emoji">🚗</div><h3 data-i18n="cat.auto">Motorlu Taşıtlar</h3><p data-i18n="cat.auto.desc">Araba, motosiklet, yedek parça</p></div>
+        <div class="card" role="listitem"><div class="emoji">🧸</div><h3 data-i18n="cat.toy">Oyuncak</h3><p data-i18n="cat.toy.desc">Her yaşa uygun oyuncaklar</p></div>
+        <div class="card" role="listitem"><div class="emoji">👗</div><h3 data-i18n="cat.fashion">Giyim</h3><p data-i18n="cat.fashion.desc">Kadın, erkek, çocuk</p></div>
+        <div class="card" role="listitem"><div class="emoji">⚡</div><h3 data-i18n="cat.appliance">Beyaz Eşya</h3><p data-i18n="cat.appliance.desc">Ev aletleri, mutfak</p></div>
+        <div class="card" role="listitem"><div class="emoji">💻</div><h3 data-i18n="cat.tech">Teknoloji</h3><p data-i18n="cat.tech.desc">Bilgisayar, telefon</p></div>
+        <div class="card" role="listitem"><div class="emoji">🛋️</div><h3 data-i18n="cat.furniture">Mobilya</h3><p data-i18n="cat.furniture.desc">Koltuk, masa, dolap</p></div>
       </div>
 
       <div class="features" style="margin-top:16px">
-        <div class="feature">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
-        <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
-        <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
+        <div class="feature" data-i18n="feat.safe">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
+        <div class="feature" data-i18n="feat.easy">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
+        <div class="feature" data-i18n="feat.support">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
       </div>
     </div>
   </section>
@@ -190,25 +198,25 @@
   <dialog id="dlgLogin" aria-modal="true" role="dialog">
     <form method="dialog" class="modal">
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
-      <h3 style="margin:0 0 12px">Giriş Yap</h3>
+      <h3 style="margin:0 0 12px" data-i18n="dlg.login.title">Giriş Yap</h3>
 
-      <button type="button" class="btn primary" id="btnGoogleLogin" style="width:100%;margin-bottom:10px">Google ile Giriş</button>
+      <button type="button" class="btn primary" id="btnGoogleLogin" style="width:100%;margin-bottom:10px" data-i18n="dlg.google.login">Google ile Giriş</button>
       <div style="display:flex;align-items:center;gap:10px;margin:8px 0">
         <span style="flex:1;height:1px;background:#e5e7eb"></span>
-        <small style="color:#64748b">veya e-posta ile</small>
+        <small style="color:#64748b" data-i18n="dlg.or.email">veya e-posta ile</small>
         <span style="flex:1;height:1px;background:#e5e7eb"></span>
       </div>
 
-      <input class="in" type="email" id="loginEmail" placeholder="E-posta" required />
+      <input class="in" type="email" id="loginEmail" placeholder="E-posta" required data-i18n-placeholder="dlg.email"/>
       <div class="field">
-        <input class="in" type="password" id="loginPass" placeholder="Şifre" required />
+        <input class="in" type="password" id="loginPass" placeholder="Şifre" required data-i18n-placeholder="dlg.password"/>
         <button type="button" class="toggle" data-target="loginPass">Göster</button>
       </div>
-      <button type="button" class="btn primary" id="btnEmailLogin" style="width:100%;margin-top:8px">Giriş Yap</button>
+      <button type="button" class="btn primary" id="btnEmailLogin" style="width:100%;margin-top:8px" data-i18n="dlg.login.btn">Giriş Yap</button>
 
       <div style="text-align:center;margin-top:8px">
-        <button type="button" id="btnForgot" style="background:none;border:0;color:#2563eb;font-weight:700;cursor:pointer">Şifremi Unuttum</button>
-        <button type="button" id="btnResendVerify" style="background:none;border:0;color:#059669;font-weight:700;cursor:pointer">Doğrulama Mailini Tekrar Gönder</button>
+        <button type="button" id="btnForgot" style="background:none;border:0;color:#2563eb;font-weight:700;cursor:pointer" data-i18n="dlg.forgot">Şifremi Unuttum</button>
+        <button type="button" id="btnResendVerify" style="background:none;border:0;color:#059669;font-weight:700;cursor:pointer" data-i18n="dlg.resend">Doğrulama Mailini Tekrar Gönder</button>
       </div>
     </form>
   </dialog>
@@ -216,31 +224,31 @@
   <dialog id="dlgSignup" aria-modal="true" role="dialog">
     <form method="dialog" class="modal">
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
-      <h3 style="margin:0 0 12px">Kaydol</h3>
+      <h3 style="margin:0 0 12px" data-i18n="dlg.signup.title">Kaydol</h3>
 
-      <button type="button" class="btn primary" id="btnGoogleSignup" style="width:100%;margin-bottom:10px">Google ile Devam Et</button>
+      <button type="button" class="btn primary" id="btnGoogleSignup" style="width:100%;margin-bottom:10px" data-i18n="dlg.google.signup">Google ile Devam Et</button>
       <div style="display:flex;align-items:center;gap:10px;margin:8px 0">
         <span style="flex:1;height:1px;background:#e5e7eb"></span>
-        <small style="color:#64748b">veya formu doldur</small>
+        <small style="color:#64748b" data-i18n="dlg.or.form">veya formu doldur</small>
         <span style="flex:1;height:1px;background:#e5e7eb"></span>
       </div>
 
       <div class="row">
-        <input class="in" type="text" id="firstName" placeholder="İsim" required />
-        <input class="in" type="text" id="lastName" placeholder="Soyisim" required />
+        <input class="in" type="text" id="firstName" placeholder="İsim" required data-i18n-placeholder="dlg.name"/>
+        <input class="in" type="text" id="lastName" placeholder="Soyisim" required data-i18n-placeholder="dlg.surname"/>
       </div>
       <div class="row">
-        <input class="in" type="text" id="city" placeholder="Yaşadığı Şehir" required />
-        <input class="in" type="text" id="username" placeholder="Kullanıcı Adı" required />
+        <input class="in" type="text" id="city" placeholder="Yaşadığı Şehir" required data-i18n-placeholder="dlg.city"/>
+        <input class="in" type="text" id="username" placeholder="Kullanıcı Adı" required data-i18n-placeholder="dlg.username"/>
       </div>
-      <input class="in" type="email" id="email" placeholder="E-posta" required />
+      <input class="in" type="email" id="email" placeholder="E-posta" required data-i18n-placeholder="dlg.email"/>
       <div class="row">
         <div class="field">
-          <input class="in" type="password" id="pass1" placeholder="Şifre" required />
+          <input class="in" type="password" id="pass1" placeholder="Şifre" required data-i18n-placeholder="dlg.password"/>
           <button type="button" class="toggle" data-target="pass1">Göster</button>
         </div>
         <div class="field">
-          <input class="in" type="password" id="pass2" placeholder="Şifre (tekrar)" required />
+          <input class="in" type="password" id="pass2" placeholder="Şifre (tekrar)" required data-i18n-placeholder="dlg.password2"/>
           <button type="button" class="toggle" data-target="pass2">Göster</button>
         </div>
       </div>
@@ -248,38 +256,48 @@
       <div class="legal-ack">
         <input id="ackKvkk" type="checkbox" style="margin-top:3px">
         <label for="ackKvkk">
-          <a href="/legal/kvkk.html" target="_blank" rel="noopener">KVKK Aydınlatma Metni</a>’ni okudum ve kabul ediyorum.
+          <a href="/legal/kvkk.html" target="_blank" rel="noopener" data-i18n="dlg.kvkk">KVKK Aydınlatma Metni</a>’ni okudum ve kabul ediyorum.
         </label>
       </div>
       <div class="legal-ack">
         <input id="ackPrivacy" type="checkbox" style="margin-top:3px">
         <label for="ackPrivacy">
-          <a href="/legal/gizlilik.html" target="_blank" rel="noopener">Gizlilik Politikası</a>’nı okudum ve kabul ediyorum.
+          <a href="/legal/gizlilik.html" target="_blank" rel="noopener" data-i18n="dlg.privacy">Gizlilik Politikası</a>’nı okudum ve kabul ediyorum.
         </label>
       </div>
 
-      <button type="button" class="btn primary" id="btnEmailSignup" style="width:100%;margin-top:10px" disabled>Kaydol</button>
+      <button type="button" class="btn primary" id="btnEmailSignup" style="width:100%;margin-top:10px" disabled data-i18n="dlg.signup.btn">Kaydol</button>
     </form>
   </dialog>
 
   <!-- Firebase init (global __fb) -->
   <script type="module" src="/assets/js/firebase-init.js"></script>
+  <!-- i18n -->
+  <script type="module" src="/assets/js/i18n.js"></script>
 
   <!-- Sayfa mantığı -->
   <script type="module">
     const $ = (sel, root=document) => root.querySelector(sel);
 
-    /* Slogan rotator */
-    const slogans = [
-      "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
-      "İhtiyacın olmayan başkasının hazinesi olabilir.",
-      "Bütçe dostu takasla yeni başlangıçlar yap.",
-      "Topluluk gücüyle sürdürülebilir alışveriş.",
-      "Az tüket, çok paylaş: Takas Çemberi’ndesin."
-    ];
+    /* Slogan rotator — i18n’den beslen (yoksa TR fallback) */
     const sEl = $("#slogan");
+    let slogans = [];
+    try { slogans = JSON.parse(sEl?.dataset?.slogans || "[]"); } catch {}
+    if (!Array.isArray(slogans) || slogans.length === 0) {
+      slogans = [
+        "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
+        "İhtiyacın olmayan başkasının hazinesi olabilir.",
+        "Bütçe dostu takasla yeni başlangıçlar yap.",
+        "Topluluk gücüyle sürdürülebilir alışveriş.",
+        "Az tüket, çok paylaş: Takas Çemberi’ndesin."
+      ];
+    }
     let sIdx = 0;
-    function setSlogan(i){ if(!sEl) return; sEl.style.opacity=0; setTimeout(()=>{ sEl.textContent = slogans[i % slogans.length]; sEl.style.opacity=1; }, 250); }
+    function setSlogan(i){
+      if(!sEl) return;
+      sEl.style.opacity = 0;
+      setTimeout(()=>{ sEl.textContent = slogans[i % slogans.length]; sEl.style.opacity = 1; }, 250);
+    }
     setSlogan(sIdx++); setInterval(()=>setSlogan(sIdx++), 15000);
 
     /* Dialog helpers */
@@ -350,7 +368,7 @@
     onAuthStateChanged(auth, (user)=>{ if(user && (user.emailVerified || (user?.providerData||[]).some(p=>p.providerId==="google.com"))){ location.replace(getNext()); }});
 
     /* İlanları yükle (misafir görünümü, sadece approved) */
-    import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const adsGrid = document.getElementById("adsGrid");
 
@@ -382,13 +400,13 @@
         const seen = new Set();
         s1.forEach(d=>{ const v=d.data()||{}; items.push({id:d.id, title:v.title, city:v.city, cond:v.cond, cover:(v.photos&&v.photos[0])||''}); seen.add(d.id) });
 
-        // Eğer sonuç azsa status=='approved' olanlardan da çek (bazı doklarda alan farklı olabilir)
+        // Eğer sonuç azsa status=='approved' olanlardan da çek
         if(items.length < 20){
           try{
             const q2 = query(collection(db,'listings'), where('status','==','approved'), limit(20 - items.length));
             const s2 = await getDocs(q2);
             s2.forEach(d=>{ if(seen.has(d.id)) return; const v=d.data()||{}; items.push({id:d.id, title:v.title, city:v.city, cond:v.cond, cover:(v.photos&&v.photos[0])||''}); });
-          }catch{ /* some projects may not index 'status' yet */ }
+          }catch{}
         }
 
         if(items.length===0){ adsGrid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz yayınlanmış ilan yok.</div>'; return; }
@@ -403,7 +421,7 @@
       if(!card) return;
       openDlg('#dlgSignup');
     });
-    </script>
+  </script>
   
   <script>
   // "Ücretsiz İlan Ver" → daima kayıt diyaloğunu aç (bağımsız, hata toleranslı)
@@ -414,7 +432,7 @@
     if (d?.showModal) d.showModal(); else d?.setAttribute('open','');
     e.preventDefault();
   });
-</script>
+  </script>
 
 </body>
 </html>
