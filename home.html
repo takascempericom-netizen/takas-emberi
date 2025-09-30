@@ -202,6 +202,11 @@
       <strong>Takas Çemberi</strong>
     </a>
     <div class="grow"></div>
+    <select id="langSelect" style="border-radius:8px;padding:6px;font-weight:600">
+  <option value="tr">TR</option>
+  <option value="en">EN</option>
+  <option value="ar">AR</option>
+</select>
     <button id="btnSearch" class="btn" aria-label="Ara">Ara</button>
     <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
     <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
@@ -706,7 +711,8 @@
     });
   });
 </script>
-
+<script type="module" src="/assets/js/firebase-init.js"></script>
+  <script type="module" src="/assets/js/i18n.js"></script>
 </body>
 </html>
 
