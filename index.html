@@ -57,7 +57,6 @@
     .title{font-size:clamp(32px,6vw,56px); font-weight:900; margin:0 0 12px; text-shadow:0 1px 14px rgba(0,0,0,.25)}
     .subtitle{font-size:clamp(16px,3.2vw,20px); margin:0 0 6px; opacity:.98}
     .cta-wrap{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;color:#111827;border:1px solid #e5e7eb;font-weight:800}
 
     /* Slogan panel */
     .slogan-panel{margin:20px auto; max-width:900px; padding:20px; border-radius:20px; text-align:center; color:#0f172a; background:#ffffff; border:1px solid var(--line); box-shadow:0 4px 30px rgba(0,0,0,.06)}
@@ -94,10 +93,10 @@
 
     /* Footer */
     footer{border-top:1px solid var(--line); margin-top:30px}
-    .foot-wrap{max-width:1100px; margin:0 auto; padding:12px 16px; color:var(--muted); display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .foot-wrap{max-width:1100px; margin:0 auto; padding:12px 16px; color:#64748b; display:flex; gap:12px; align-items:center; flex-wrap:wrap}
     .foot-logo{height:clamp(20px,4vw,28px)}
     .foot-links{display:flex; gap:12px; flex-wrap:wrap}
-    .foot-links a{color:var(--muted); text-decoration:none}
+    .foot-links a{color:#64748b; text-decoration:none}
     .foot-links a:hover{text-decoration:underline}
       /* Kategori grid & kartları */
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:12px}
@@ -137,13 +136,13 @@
         <button class="btn light" id="btnBrowse" data-i18n="cta.browse">İlanlara Göz At</button>
         <button class="btn primary" id="btnPrimaryPost" data-i18n="cta.post">Hemen Ücretsiz İlan Ver</button>
       </div>
-      <div style="margin-top:10px"><span class="badge" data-i18n="badge.free">🎁 İlk ilan ücretsiz, sonrası ücretli</span></div>
     </section>
 
     <section class="slogan-panel" aria-hidden="false">
       <div class="slogan-rotator" id="slogan" aria-live="polite"></div>
     </section>
   </main>
+
   <!-- İLANLAR (MISAFIR GORUNUM) -->
   <section class="ads-wrap" aria-labelledby="ads-title">
     <div class="panel" style="padding:16px">
@@ -153,7 +152,7 @@
     </div>
   </section>
 
-  <!-- KATEGORİLER + ÖZELLİKLER (misafir görünümde de kalsın) -->
+  <!-- KATEGORİLER + ÖZELLİKLER -->
   <section class="ads-wrap" aria-labelledby="cats-title">
     <div class="panel" style="padding:16px">
       <h2 id="cats-title" style="margin:0 0 12px" data-i18n="sec.categories">Kategoriler</h2>
@@ -194,7 +193,7 @@
     </div>
   </footer>
 
-  <!-- MODALLAR: Giriş / Kayıt -->
+  <!-- MODALLAR -->
   <dialog id="dlgLogin" aria-modal="true" role="dialog">
     <form method="dialog" class="modal">
       <button class="x" value="close" aria-label="Kapat" onclick="this.closest('dialog').close()">✕</button>
@@ -270,7 +269,7 @@
     </form>
   </dialog>
 
-  <!-- Firebase init (global __fb) -->
+  <!-- Firebase init -->
   <script type="module" src="/assets/js/firebase-init.js"></script>
   <!-- i18n -->
   <script type="module" src="/assets/js/i18n.js"></script>
@@ -419,12 +418,13 @@
     adsGrid?.addEventListener('click', (ev)=>{
       const card = ev.target.closest('.ad-card');
       if(!card) return;
-      openDlg('#dlgSignup');
+      const d = document.getElementById('dlgSignup');
+      if (d?.showModal) d.showModal(); else d?.setAttribute('open','');
     });
   </script>
-  
+
   <script>
-  // "Ücretsiz İlan Ver" → daima kayıt diyaloğunu aç (bağımsız, hata toleranslı)
+  // "Ücretsiz İlan Ver" → daima kayıt diyaloğunu aç
   document.addEventListener('click', function (e) {
     const btn = e.target.closest('#btnPrimaryPost');
     if (!btn) return;
@@ -433,6 +433,5 @@
     e.preventDefault();
   });
   </script>
-
 </body>
 </html>
