@@ -202,76 +202,79 @@
       <strong>Takas Çemberi</strong>
     </a>
     <div class="grow"></div>
-    <select id="langSelect" style="border-radius:8px;padding:6px;font-weight:600">
-  <option value="tr">TR</option>
-  <option value="en">EN</option>
-  <option value="ar">AR</option>
-</select>
-    <button id="btnSearch" class="btn" aria-label="Ara">Ara</button>
-    <button id="btnProfile" class="btn" aria-label="Profil">Profil</button>
-    <button id="btnPostAd" class="btn primary" aria-label="İlan Ver">İlan Ver</button>
-    <button id="btnLogout" class="btn" aria-label="Çıkış">Çıkış</button>
+
+    <!-- DİL SEÇİCİ (ekleme) -->
+    <select id="langSelect" style="border-radius:8px;padding:6px;font-weight:600" aria-label="Language">
+      <option value="tr">TR</option>
+      <option value="en">EN</option>
+      <option value="ar">AR</option>
+    </select>
+
+    <button id="btnSearch" class="btn" data-i18n-aria-label="cta.browse">Ara</button>
+    <button id="btnProfile" class="btn" data-i18n-aria-label="nav.profile">Profil</button>
+    <button id="btnPostAd" class="btn primary" data-i18n-aria-label="cta.post">İlan Ver</button>
+    <button id="btnLogout" class="btn" data-i18n-aria-label="nav.logout">Çıkış</button>
   </header>
 
   <!-- İçerik -->
   <main class="hero">
     <section class="panel hero-panel" aria-labelledby="welcome">
-      <h1 id="welcome" class="title gx">Takas Çemberi’ne Hoş Geldiniz</h1>
-      <p class="subtitle gx-sub">Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.</p>
+      <h1 id="welcome" class="title gx" data-i18n="brand.slogan">Takas Çemberi’ne Hoş Geldiniz</h1>
+      <p class="subtitle gx-sub" data-i18n="brand.sub">Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.</p>
     </section>
 
-    <section class="slogan" aria-live="polite">Doğaya • Bütçene • Dost</section>
+    <section class="slogan" aria-live="polite" data-i18n="slogan.inline">Doğaya • Bütçene • Dost</section>
   </main>
 
   <!-- İLANLAR -->
   <section class="panel" id="ads" aria-labelledby="ads-title" style="margin:12px auto;max-width:1200px;padding:16px">
-    <h2 id="ads-title" style="margin:0 0 12px">Yeni İlanlar</h2>
+    <h2 id="ads-title" style="margin:0 0 12px" data-i18n="sec.newlistings">Yeni İlanlar</h2>
     <div class="ads-grid" id="adsGrid" role="list"></div>
   </section>
 
   <!-- Kategoriler + Özellikler -->
   <section class="panel" aria-labelledby="cats-title" style="margin:12px auto;max-width:1200px;padding:24px 16px">
-    <h2 id="cats-title" style="margin-bottom:12px;text-align:center">Kategoriler</h2>
+    <h2 id="cats-title" style="margin-bottom:12px;text-align:center" data-i18n="sec.categories">Kategoriler</h2>
     <div class="grid" role="list">
-      <a class="card" role="listitem" href="/search.html?cat=ev-hobi"><div class="emoji">🏠</div><h3>Ev & Hobi</h3><p>Ev eşyaları, hobi ürünleri</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=tasinmaz"><div class="emoji">🏡</div><h3>Taşınmaz</h3><p>Ev, arsa, tarla</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=tasit"><div class="emoji">🚗</div><h3>Motorlu Taşıtlar</h3><p>Araba, motosiklet, yedek parça</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=oyuncak"><div class="emoji">🧸</div><h3>Oyuncak</h3><p>Her yaşa uygun oyuncaklar</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=giyim"><div class="emoji">👗</div><h3>Giyim</h3><p>Kadın, erkek, çocuk</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=beyaz-esya"><div class="emoji">⚡</div><h3>Beyaz Eşya</h3><p>Ev aletleri, mutfak</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=teknoloji"><div class="emoji">💻</div><h3>Teknoloji</h3><p>Bilgisayar, telefon</p></a>
-      <a class="card" role="listitem" href="/search.html?cat=mobilya"><div class="emoji">🛋️</div><h3>Mobilya</h3><p>Koltuk, masa, dolap</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=ev-hobi"><div class="emoji">🏠</div><h3 data-i18n="cat.home">Ev & Hobi</h3><p data-i18n="cat.home.desc">Ev eşyaları, hobi ürünleri</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=tasinmaz"><div class="emoji">🏡</div><h3 data-i18n="cat.real">Taşınmaz</h3><p data-i18n="cat.real.desc">Ev, arsa, tarla</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=tasit"><div class="emoji">🚗</div><h3 data-i18n="cat.auto">Motorlu Taşıtlar</h3><p data-i18n="cat.auto.desc">Araba, motosiklet, yedek parça</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=oyuncak"><div class="emoji">🧸</div><h3 data-i18n="cat.toy">Oyuncak</h3><p data-i18n="cat.toy.desc">Her yaşa uygun oyuncaklar</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=giyim"><div class="emoji">👗</div><h3 data-i18n="cat.fashion">Giyim</h3><p data-i18n="cat.fashion.desc">Kadın, erkek, çocuk</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=beyaz-esya"><div class="emoji">⚡</div><h3 data-i18n="cat.appliance">Beyaz Eşya</h3><p data-i18n="cat.appliance.desc">Ev aletleri, mutfak</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=teknoloji"><div class="emoji">💻</div><h3 data-i18n="cat.tech">Teknoloji</h3><p data-i18n="cat.tech.desc">Bilgisayar, telefon</p></a>
+      <a class="card" role="listitem" href="/search.html?cat=mobilya"><div class="emoji">🛋️</div><h3 data-i18n="cat.furniture">Mobilya</h3><p data-i18n="cat.furniture.desc">Koltuk, masa, dolap</p></a>
     </div>
 
     <div class="features" style="margin-top:18px">
-      <div class="feature">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
-      <div class="feature">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
-      <div class="feature">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
+      <div class="feature" data-i18n="feat.safe">✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.</div>
+      <div class="feature" data-i18n="feat.easy">📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.</div>
+      <div class="feature" data-i18n="feat.support">💬 Canlı Destek<br/>7/24 destek ekibi seninle.</div>
     </div>
   </section>
 
   <!-- Alt Bar -->
   <nav class="bottom-nav" aria-label="Alt menü">
-    <button class="tab active" id="tabHome" aria-current="page" aria-label="Ana Sayfa">
+    <button class="tab active" id="tabHome" aria-current="page" data-i18n-aria-label="nav.home" aria-label="Ana Sayfa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9.5L12 3l9 6.5"/><path d="M5 10v10h5v-6h4v6h5V10"/>
       </svg>
-      <span style="font-size:12px">Ana Sayfa</span>
+      <span style="font-size:12px" data-i18n="nav.home.txt">Ana Sayfa</span>
     </button>
-    <button class="tab" id="tabMessages" aria-label="Mesajlar">
+    <button class="tab" id="tabMessages" data-i18n-aria-label="nav.messages" aria-label="Mesajlar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H7l-4 3 1.5-5.5A8.5 8.5 0 1 1 21 12z"/>
       </svg>
-      <span style="font-size:12px; position:relative">
+      <span style="font-size:12px; position:relative" data-i18n="nav.messages.txt">
         Mesajlar
         <b id="msgBadge" class="badge" aria-live="polite">0</b>
       </span>
     </button>
-    <button class="tab" id="tabNotifs" aria-label="Bildirimler">
+    <button class="tab" id="tabNotifs" data-i18n-aria-label="nav.notifications" aria-label="Bildirimler">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M6 8a6 6 0 1 1 12 0c0 7 3 5 3 9H3c0-4 3-2 3-9"/><path d="M9 21h6"/>
       </svg>
-      <span style="font-size:12px; position:relative">
+      <span style="font-size:12px; position:relative" data-i18n="nav.notifications.txt">
         Bildirimler
         <b id="notifBadge" class="badge" aria-live="polite">0</b>
       </span>
@@ -279,7 +282,7 @@
   </nav>
 
   <!-- Canlı Destek (compact, yukarı açılır) -->
-  <button class="support-fab compact" id="btnSupport" aria-label="Canlı Destek">
+  <button class="support-fab compact" id="btnSupport" aria-label="Canlı Destek" data-i18n-aria-label="support.open">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="9"></circle>
       <path d="M8 13a3 3 0 0 0 3 3h1l4 3-.5-3.5"></path>
@@ -288,13 +291,13 @@
 
   <div class="support-pop pro" id="supportPop" role="dialog" aria-modal="true" aria-live="polite" aria-label="Canlı Destek">
     <div class="sup-head">
-      <strong>Canlı Destek</strong>
-      <button id="supClose" class="sup-close" type="button" aria-label="Pencereyi kapat">×</button>
+      <strong data-i18n="support.title">Canlı Destek</strong>
+      <button id="supClose" class="sup-close" type="button" aria-label="Pencereyi kapat" data-i18n-aria-label="support.close">×</button>
     </div>
     <div class="sup-body"></div>
     <div class="sup-input">
-      <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" />
-      <button id="chatSend" class="sup-send" type="button" aria-label="Gönder">
+      <input id="chatInput" class="sup-in" placeholder="Mesajınızı yazın…" data-i18n-placeholder="support.placeholder" />
+      <button id="chatSend" class="sup-send" type="button" aria-label="Gönder" data-i18n-aria-label="support.send">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7Z"></path>
         </svg>
@@ -305,16 +308,16 @@
   <!-- Alt Siyah Hukuki Alan -->
   <footer class="legal">
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center">
-    <a href="/legal/hakkimizda.html">Hakkımızda</a>
-    <a href="/legal/iletisim.html">İletişim</a>
-    <a href="/legal/gizlilik.html">Gizlilik</a>
-    <a href="/legal/kullanim-sartlari.html">Kullanım Şartları</a>
-    <a href="/legal/kvkk.html">KVKK Aydınlatma</a>
-    <a href="/legal/mesafeli-satis-sozlesmesi.html">Mesafeli Satış Sözleşmesi</a>
-    <a href="/legal/teslimat-iade.html">Teslimat & İade</a>
+    <a href="/legal/hakkimizda.html" data-i18n="legal.about">Hakkımızda</a>
+    <a href="/legal/iletisim.html" data-i18n="legal.contact">İletişim</a>
+    <a href="/legal/gizlilik.html" data-i18n="legal.privacy">Gizlilik</a>
+    <a href="/legal/kullanim-sartlari.html" data-i18n="legal.tos">Kullanım Şartları</a>
+    <a href="/legal/kvkk.html" data-i18n="legal.kvkk">KVKK Aydınlatma</a>
+    <a href="/legal/mesafeli-satis-sozlesmesi.html" data-i18n="legal.distance">Mesafeli Satış Sözleşmesi</a>
+    <a href="/legal/teslimat-iade.html" data-i18n="legal.shipping">Teslimat & İade</a>
   </div>
   <div class="wrap" style="text-align:center;color:#a8acc4;margin-top:8px">
-    © 2025 Takas Çemberi — milli sermayeyi koru, atığı azalt ♻️
+    © 2025 Takas Çemberi — <span data-i18n="footer.slogan">milli sermayeyi koru, atığı azalt</span> ♻️
   </div>
 </footer>
 
@@ -359,7 +362,7 @@
         const snap = await getDocs(q);
 
         if(snap.empty){
-          grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">Henüz ilan yok</div>';
+          grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b" data-i18n="ads.none">Henüz ilan yok</div>';
           return;
         }
 
@@ -380,8 +383,8 @@
       <h3 class="ad-title">${title}</h3>
       <div class="ad-meta"><span>${city}</span><span>${cond}</span></div>
       <div class="ad-actions">
-        <button type="button" class="btn-view"  data-id="${doc.id}">İncele</button>
-        <button type="button" class="btn-offer" data-id="${doc.id}" data-owner="${d.ownerId || d.uid || ''}">Teklif ver</button>
+        <button type="button" class="btn-view"  data-id="${doc.id}" data-i18n="ads.view">İncele</button>
+        <button type="button" class="btn-offer" data-id="${doc.id}" data-owner="${d.ownerId || d.uid || ''}" data-i18n="ads.offer">Teklif ver</button>
       </div>
     </div>
   </div>`;
@@ -389,7 +392,7 @@
 
       } catch(err){
         console.error("İlan yükleme hatası:", err);
-        grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444">İlanlar yüklenemedi: ${err.code||"hata"}</div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;color:#ef4444" data-i18n="ads.error">İlanlar yüklenemedi</div>`;
       }
     }
     window.loadAds = loadAds;
@@ -397,7 +400,7 @@
     onAuthStateChanged(auth, async (user) => {
       const grid = document.getElementById("adsGrid");
       if (!user) {
-        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b">İlanları görmek için giriş yapın</div>';
+        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;color:#64748b" data-i18n="ads.login">İlanları görmek için giriş yapın</div>';
         return;
       }
       try { await window.__fb?.upsertPublicProfile?.(user); } catch {}
@@ -557,7 +560,7 @@
     tabs.forEach(t=>t.addEventListener('click',()=>{
       tabs.forEach(x=>x.classList.remove('active'));
       t.classList.add('active');
-      if(t.id==='tabHome') location.href="/";
+      if(t.id==='tabHome') location.href="/home.html";
       if(t.id==='tabMessages') location.href="/messages.html";
       if(t.id==='tabNotifs') location.href="/notifications.html";
     }));
@@ -577,7 +580,7 @@
       panel.id = "broadcastsPanel";
       panel.style.cssText = "margin:12px auto;max-width:1200px;padding:16px;display:none";
       panel.innerHTML = `
-        <h2 style="margin:0 0 12px">Duyurular</h2>
+        <h2 style="margin:0 0 12px" data-i18n="sec.announcements">Duyurular</h2>
         <div id="bcList" style="display:grid;gap:8px"></div>
       `;
       const adsPanel = document.getElementById("ads");
@@ -608,7 +611,7 @@
             <div style="font-weight:700">${esc(v.title || "Duyuru")}</div>
             <div style="white-space:pre-wrap;margin-top:4px">${esc(v.body || "")}</div>
             <div style="color:#64748b;font-size:12px;margin-top:6px">
-              Gönderici: ${esc(v.sender || "admin")} • ${esc(when)}
+              <span data-i18n="ann.from">Gönderici</span>: ${esc(v.sender || "admin")} • ${esc(when)}
             </div>
           `;
           listEl.appendChild(item);
@@ -711,8 +714,8 @@
     });
   });
 </script>
-<script type="module" src="/assets/js/firebase-init.js"></script>
+
+  <!-- i18n (EKLENDİ) -->
   <script type="module" src="/assets/js/i18n.js"></script>
 </body>
 </html>
-
