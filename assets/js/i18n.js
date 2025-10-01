@@ -6,14 +6,33 @@
  */
 
 const DICT = {
+  /* =========================
+     TÜRKÇE
+  ==========================*/
   tr: {
-    // Topbar & CTA
+    // Marka & CTA
     "brand.slogan": "Takas Çemberi’ne Hoş Geldiniz",
     "brand.sub": "Toplulukla takas et, eşyana yeni bir hayat ver.",
     "cta.browse": "İlanlara Göz At",
     "cta.post": "Ücretsiz İlan Ver",
 
-    // Nav (üst/alt bar)
+    // Genel butonlar
+    "btn.save": "Kaydet",
+    "btn.cancel": "İptal",
+    "btn.delete": "Sil",
+    "btn.edit": "Düzenle",
+    "btn.update": "Güncelle",
+    "btn.close": "Kapat",
+    "btn.ok": "Tamam",
+    "btn.yes": "Evet",
+    "btn.no": "Hayır",
+    "btn.back": "Geri",
+    "btn.next": "İleri",
+    "btn.prev": "Önceki",
+    "btn.send": "Gönder",
+    "btn.apply": "Uygula",
+
+    // Navigasyon (üst/alt bar)
     "nav.home": "Ana Sayfa",
     "nav.home.txt": "Ana Sayfa",
     "nav.messages": "Mesajlar",
@@ -23,20 +42,20 @@ const DICT = {
     "nav.profile": "Profil",
     "nav.logout": "Çıkış",
 
-    // Support (canlı destek)
+    // Destek
     "support.open": "Canlı Destek",
     "support.title": "Canlı Destek",
     "support.close": "Pencereyi kapat",
     "support.placeholder": "Mesajınızı yazın…",
     "support.send": "Gönder",
 
-    // Sections
+    // Bölümler
     "sec.newlistings": "Yeni İlanlar",
     "sec.categories": "Kategoriler",
     "sec.announcements": "Duyurular",
     "ann.from": "Gönderici",
 
-    // Footer / legal
+    // Footer / Hukuki
     "legal.about": "Hakkımızda",
     "legal.contact": "İletişim",
     "legal.privacy": "Gizlilik",
@@ -47,7 +66,54 @@ const DICT = {
     "footer.slogan": "milli sermayeyi koru, atığı azalt",
     "slogan.inline": "Doğaya • Bütçene • Dost",
 
-    // Categories
+    // Bildirimler sayfası
+    "page.notifs.title": "Bildirimler",
+    "notifs.markall": "Tümünü okundu işaretle",
+    "notifs.empty": "Bildirim yok.",
+    "notifs.loading": "Yükleniyor…",
+    "notifs.read": "Okundu",
+    "notifs.goto": "Git",
+    "notifs.profile": "Profil",
+    "notifs.chat": "Mesaj yaz",
+    "notifs.delete": "Sil",
+    "notifs.delete.confirm": "Bu bildirimi silmek istiyor musun?",
+    "notifs.default": "Bildirim",
+
+    // Mesajlar sayfası (genel)
+    "page.messages.title": "Mesajlar",
+    "messages.start": "Sohbet seçin veya yeni mesaj başlatın.",
+    "messages.to": "Alıcı",
+    "messages.type": "Mesaj yazın…",
+    "messages.send": "Gönder",
+    "messages.loading": "Mesajlar yükleniyor…",
+    "messages.empty": "Henüz mesaj yok.",
+    "messages.error": "Mesaj gönderilemedi.",
+    "messages.new": "Yeni Mesaj",
+
+    // Arama sayfası
+    "page.search.title": "Arama",
+    "search.placeholder": "Ürün, kategori veya şehir ara…",
+    "search.filters": "Filtreler",
+    "search.category": "Kategori",
+    "search.city": "Şehir",
+    "search.minPrice": "En az",
+    "search.maxPrice": "En çok",
+    "search.sort": "Sırala",
+    "search.results.none": "Sonuç bulunamadı.",
+    "search.apply": "Uygula",
+
+    // Profil sayfası
+    "page.profile.title": "Profil",
+    "profile.edit": "Profili Düzenle",
+    "profile.save": "Kaydet",
+    "profile.username": "Kullanıcı Adı",
+    "profile.name": "İsim",
+    "profile.surname": "Soyisim",
+    "profile.city": "Şehir",
+    "profile.bio": "Hakkında",
+    "profile.contact": "İletişim",
+
+    // Kategoriler
     "cat.home": "Ev & Hobi",
     "cat.home.desc": "Ev eşyaları, hobi ürünleri",
     "cat.real": "Taşınmaz",
@@ -65,12 +131,12 @@ const DICT = {
     "cat.furniture": "Mobilya",
     "cat.furniture.desc": "Koltuk, masa, dolap",
 
-    // Features
+    // Özellikler
     "feat.safe": "✅ Güvenli Takas<br/>SSL ve KVKK güvencesiyle güvenli işlemler.",
     "feat.easy": "📱 Kolay Kullanım<br/>Mobil uyumlu arayüz ile her yerde ilan ver.",
     "feat.support":"💬 Canlı Destek<br/>7/24 destek ekibi seninle.",
 
-    // Dialogs
+    // Diyaloglar / Auth
     "dlg.login.title": "Giriş Yap",
     "dlg.signup.title": "Kaydol",
     "dlg.login.btn": "Giriş Yap",
@@ -91,19 +157,19 @@ const DICT = {
     "dlg.kvkk": "KVKK Aydınlatma Metni",
     "dlg.privacy": "Gizlilik Politikası",
 
-    // UI küçük metinler
+    // UI ufak metinler
     "ui.show": "Göster",
     "ui.hide": "Gizle",
     "ack.tail": "’ni okudum ve kabul ediyorum.",
 
-    // İlan/ads
+    // İlanlar / Ads
     "ads.none": "Henüz ilan yok",
     "ads.view": "İncele",
     "ads.offer": "Teklif ver",
     "ads.error": "İlanlar yüklenemedi",
     "ads.login": "İlanları görmek için giriş yapın",
 
-    // Slogans
+    // Slogan listesi (rotasyon için data-slogans)
     "_slogans": [
       "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
       "İhtiyacın olmayan başkasının hazinesi olabilir.",
@@ -112,15 +178,33 @@ const DICT = {
       "Az tüket, çok paylaş: Takas Çemberi’ndesin."
     ],
 
-    // System / misc
+    // Çeşitli
     "hint.listings.click": "İlan kartına tıkladığınızda kayıt penceresi açılır."
   },
 
+  /* =========================
+     ENGLISH
+  ==========================*/
   en: {
     "brand.slogan": "Welcome to Takas Çemberi",
     "brand.sub": "Trade with the community and give your items a new life.",
     "cta.browse": "Browse Listings",
     "cta.post": "Post for Free",
+
+    "btn.save": "Save",
+    "btn.cancel": "Cancel",
+    "btn.delete": "Delete",
+    "btn.edit": "Edit",
+    "btn.update": "Update",
+    "btn.close": "Close",
+    "btn.ok": "OK",
+    "btn.yes": "Yes",
+    "btn.no": "No",
+    "btn.back": "Back",
+    "btn.next": "Next",
+    "btn.prev": "Previous",
+    "btn.send": "Send",
+    "btn.apply": "Apply",
 
     "nav.home": "Home",
     "nav.home.txt": "Home",
@@ -151,6 +235,49 @@ const DICT = {
     "legal.shipping": "Shipping & Returns",
     "footer.slogan": "protect national capital, reduce waste",
     "slogan.inline": "Nature • Budget • Friendly",
+
+    "page.notifs.title": "Notifications",
+    "notifs.markall": "Mark all as read",
+    "notifs.empty": "No notifications.",
+    "notifs.loading": "Loading…",
+    "notifs.read": "Read",
+    "notifs.goto": "Go",
+    "notifs.profile": "Profile",
+    "notifs.chat": "Write message",
+    "notifs.delete": "Delete",
+    "notifs.delete.confirm": "Do you want to delete this notification?",
+    "notifs.default": "Notification",
+
+    "page.messages.title": "Messages",
+    "messages.start": "Pick a chat or start a new message.",
+    "messages.to": "Recipient",
+    "messages.type": "Type your message…",
+    "messages.send": "Send",
+    "messages.loading": "Loading messages…",
+    "messages.empty": "No messages yet.",
+    "messages.error": "Failed to send message.",
+    "messages.new": "New Message",
+
+    "page.search.title": "Search",
+    "search.placeholder": "Search item, category or city…",
+    "search.filters": "Filters",
+    "search.category": "Category",
+    "search.city": "City",
+    "search.minPrice": "Min",
+    "search.maxPrice": "Max",
+    "search.sort": "Sort",
+    "search.results.none": "No results found.",
+    "search.apply": "Apply",
+
+    "page.profile.title": "Profile",
+    "profile.edit": "Edit Profile",
+    "profile.save": "Save",
+    "profile.username": "Username",
+    "profile.name": "First Name",
+    "profile.surname": "Last Name",
+    "profile.city": "City",
+    "profile.bio": "About",
+    "profile.contact": "Contact",
 
     "cat.home": "Home & Hobby",
     "cat.home.desc": "Home goods, hobby items",
@@ -214,11 +341,29 @@ const DICT = {
     "hint.listings.click": "Click a card to open the sign-up dialog."
   },
 
+  /* =========================
+     ARABIC
+  ==========================*/
   ar: {
     "brand.slogan": "مرحبًا بكم في حلقة المقايضة",
     "brand.sub": "بادِل مع المجتمع وأعطِ أغراضك حياةً جديدة.",
     "cta.browse": "تصفح الإعلانات",
     "cta.post": "أضف إعلانًا مجانًا",
+
+    "btn.save": "حفظ",
+    "btn.cancel": "إلغاء",
+    "btn.delete": "حذف",
+    "btn.edit": "تعديل",
+    "btn.update": "تحديث",
+    "btn.close": "إغلاق",
+    "btn.ok": "تم",
+    "btn.yes": "نعم",
+    "btn.no": "لا",
+    "btn.back": "رجوع",
+    "btn.next": "التالي",
+    "btn.prev": "السابق",
+    "btn.send": "إرسال",
+    "btn.apply": "تطبيق",
 
     "nav.home": "الصفحة الرئيسية",
     "nav.home.txt": "الصفحة الرئيسية",
@@ -249,6 +394,49 @@ const DICT = {
     "legal.shipping": "الشحن والإرجاع",
     "footer.slogan": "احمِ رأس المال الوطني وقلّل الهدر",
     "slogan.inline": "صديق للطبيعة • للميزانية",
+
+    "page.notifs.title": "الإشعارات",
+    "notifs.markall": "وَسْم الكل كمقروء",
+    "notifs.empty": "لا توجد إشعارات.",
+    "notifs.loading": "جارٍ التحميل…",
+    "notifs.read": "مقروء",
+    "notifs.goto": "اذهب",
+    "notifs.profile": "الملف",
+    "notifs.chat": "اكتب رسالة",
+    "notifs.delete": "حذف",
+    "notifs.delete.confirm": "هل تريد حذف هذا الإشعار؟",
+    "notifs.default": "إشعار",
+
+    "page.messages.title": "الرسائل",
+    "messages.start": "اختر محادثة أو ابدأ رسالة جديدة.",
+    "messages.to": "المستلم",
+    "messages.type": "اكتب رسالتك…",
+    "messages.send": "إرسال",
+    "messages.loading": "جارٍ تحميل الرسائل…",
+    "messages.empty": "لا توجد رسائل بعد.",
+    "messages.error": "تعذّر إرسال الرسالة.",
+    "messages.new": "رسالة جديدة",
+
+    "page.search.title": "بحث",
+    "search.placeholder": "ابحث عن غرض أو فئة أو مدينة…",
+    "search.filters": "المرشحات",
+    "search.category": "الفئة",
+    "search.city": "المدينة",
+    "search.minPrice": "الأدنى",
+    "search.maxPrice": "الأعلى",
+    "search.sort": "الترتيب",
+    "search.results.none": "لا توجد نتائج.",
+    "search.apply": "تطبيق",
+
+    "page.profile.title": "الملف الشخصي",
+    "profile.edit": "تعديل الملف",
+    "profile.save": "حفظ",
+    "profile.username": "اسم المستخدم",
+    "profile.name": "الاسم",
+    "profile.surname": "الكنية",
+    "profile.city": "المدينة",
+    "profile.bio": "نبذة",
+    "profile.contact": "تواصل",
 
     "cat.home": "المنزل والهوايات",
     "cat.home.desc": "أغراض المنزل والهوايات",
@@ -313,8 +501,10 @@ const DICT = {
   }
 };
 
+/* RTL dilleri */
 const RTL = new Set(["ar"]);
 
+/* html[lang] + dir ayarla */
 function setAttrsForLang(lang) {
   const html = document.documentElement;
   html.lang = lang;
@@ -322,11 +512,13 @@ function setAttrsForLang(lang) {
   document.body?.classList.toggle("rtl", RTL.has(lang));
 }
 
+/* key → metin */
 function t(key, lang) {
   const L = DICT[lang] || DICT.tr;
   return L[key] ?? DICT.tr[key] ?? key;
 }
 
+/* DOM’a uygula */
 function apply(root = document) {
   const lang = getLang();
 
@@ -347,19 +539,21 @@ function apply(root = document) {
     el.setAttribute("aria-label", t(key, lang));
   });
 
-  // slogan listesi
+  // slogan listesi (opsiyonel rotasyon için)
   const sEl = root.querySelector("#slogan");
   if (sEl && Array.isArray(DICT[lang]?._slogans)) {
     sEl.dataset.slogans = JSON.stringify(DICT[lang]._slogans);
   }
 }
 
+/* depodan oku */
 function getLang() {
   try {
     return localStorage.getItem("tc_lang") || "tr";
   } catch { return "tr"; }
 }
 
+/* dile geç */
 function setLang(lang) {
   const L = ["tr","en","ar"].includes(lang) ? lang : "tr";
   try { localStorage.setItem("tc_lang", L); } catch {}
@@ -369,6 +563,7 @@ function setLang(lang) {
   if (sel) sel.value = L;
 }
 
+/* init */
 function init() {
   const lang = getLang();
   setAttrsForLang(lang);
@@ -380,6 +575,7 @@ function init() {
     sel.addEventListener("change", e => setLang(e.target.value));
   }
 
+  // Sekmeler arası senkron
   window.addEventListener("storage", (e)=>{
     if (e.key === "tc_lang") setLang(getLang());
   });
