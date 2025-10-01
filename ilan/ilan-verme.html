@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>İlan Ver • Takas Çemberi</title>
+  <title data-i18n="post.page.title">İlan Ver • Takas Çemberi</title>
   <link rel="icon" href="/favicon.png">
   <style>
     :root{
@@ -32,8 +32,6 @@
       100%{background-position:0% 50%}
     }
 
-    /* Çerçevede dönen koyu renkler kaldırıldı */
-
     label{font-weight:600;display:block;margin-top:12px;margin-bottom:6px}
     input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;color:var(--ink)}
     input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);border-color:transparent}
@@ -55,24 +53,27 @@
 <body>
   <main class="container">
     <form id="listingForm" class="panel">
-      <button class="closeX" type="button" onclick="window.location.href='/'">✕</button>
-      <h1>İlan Ver</h1>
-      <label for="title">İlan Başlığı</label>
-      <input id="title" required>
+      <button class="closeX" type="button" onclick="window.location.href='/'" aria-label="Kapat" data-i18n-aria-label="ui.close">✕</button>
 
-      <label for="desc">Açıklama</label>
-      <textarea id="desc" rows="4" required></textarea>
+      <h1 data-i18n="post.form.title">İlan Ver</h1>
 
-      <label for="photos">Fotoğraflar</label>
-      <input id="photos" type="file" multiple accept="image/*">
+      <label for="title" data-i18n="post.title">İlan Başlığı</label>
+      <input id="title" required data-i18n-placeholder="post.title.ph" placeholder="İlan Başlığı">
+
+      <label for="desc" data-i18n="post.desc">Açıklama</label>
+      <textarea id="desc" rows="4" required data-i18n-placeholder="post.desc.ph" placeholder="Ürünün durumunu, takas isteğini yazın"></textarea>
+
+      <label for="photos" data-i18n="post.photos">Fotoğraflar</label>
+      <input id="photos" type="file" multiple accept="image/*" aria-label="Fotoğraflar" data-i18n-aria-label="post.photos">
       <div id="preview" class="preview"></div>
-      <p class="note">En fazla 5 fotoğraf yükleyebilirsiniz.</p>
+      <p class="note" data-i18n="post.max5">En fazla 5 fotoğraf yükleyebilirsiniz.</p>
 
       <div class="row">
         <div class="col">
-          <label for="city">Şehir</label>
-          <select id="city" required>
-            <option value="">Seçiniz</option>
+          <label for="city" data-i18n="post.city">Şehir</label>
+          <select id="city" required aria-label="Şehir" data-i18n-aria-label="post.city">
+            <option value="" data-i18n="ui.select">Seçiniz</option>
+            <!-- Şehir isimleri özel isim olduğu için çeviri yapılmaz -->
             <option>Adana</option><option>Adıyaman</option><option>Afyonkarahisar</option><option>Ağrı</option><option>Amasya</option>
             <option>Ankara</option><option>Antalya</option><option>Artvin</option><option>Aydın</option><option>Balıkesir</option>
             <option>Bilecik</option><option>Bingöl</option><option>Bitlis</option><option>Bolu</option><option>Burdur</option>
@@ -91,23 +92,23 @@
           </select>
         </div>
         <div class="col">
-          <label for="district">İlçe</label>
-          <input id="district" required>
+          <label for="district" data-i18n="post.district">İlçe</label>
+          <input id="district" required data-i18n-placeholder="post.district.ph" placeholder="İlçe">
         </div>
       </div>
 
       <div class="row-inline">
         <div>
-          <label for="cat">Kategori</label>
-          <select id="cat" required>
-            <option value="">Seçiniz</option>
-            <option value="tasit">Motorlu Taşıtlar</option>
-            <option value="tasinmaz">Taşınmaz</option>
-            <option value="oyuncak">Oyuncak</option>
-            <option value="giyim">Giyim</option>
-            <option value="beyaz">Beyaz Eşya</option>
-            <option value="teknoloji">Teknoloji</option>
-            <option value="mobilya">Mobilya</option>
+          <label for="cat" data-i18n="post.category">Kategori</label>
+          <select id="cat" required aria-label="Kategori" data-i18n-aria-label="post.category">
+            <option value="" data-i18n="ui.select">Seçiniz</option>
+            <option value="tasit" data-i18n="cat.auto">Motorlu Taşıtlar</option>
+            <option value="tasinmaz" data-i18n="cat.real">Taşınmaz</option>
+            <option value="oyuncak" data-i18n="cat.toy">Oyuncak</option>
+            <option value="giyim" data-i18n="cat.fashion">Giyim</option>
+            <option value="beyaz" data-i18n="cat.appliance">Beyaz Eşya</option>
+            <option value="teknoloji" data-i18n="cat.tech">Teknoloji</option>
+            <option value="mobilya" data-i18n="cat.furniture">Mobilya</option>
           </select>
         </div>
         <div id="subcatWrap"></div>
@@ -115,17 +116,17 @@
 
       <div id="subcatFields"></div>
 
-      <label for="cond">Durum</label>
-      <select id="cond" required>
-        <option value="">Seçiniz</option>
-        <option>Parçaniyetine</option>
-        <option>Kötü</option>
-        <option>Orta</option>
-        <option>İyi</option>
-        <option>Sıfır</option>
+      <label for="cond" data-i18n="post.condition">Durum</label>
+      <select id="cond" required aria-label="Durum" data-i18n-aria-label="post.condition">
+        <option value="" data-i18n="ui.select">Seçiniz</option>
+        <option data-i18n="cond.parts">Parçaniyetine</option>
+        <option data-i18n="cond.bad">Kötü</option>
+        <option data-i18n="cond.ok">Orta</option>
+        <option data-i18n="cond.good">İyi</option>
+        <option data-i18n="cond.new">Sıfır</option>
       </select>
 
-      <button class="btn primary" type="submit">İlanı Gönder</button>
+      <button class="btn primary" type="submit" data-i18n="post.submit">İlanı Gönder</button>
     </form>
   </main>
 
@@ -133,14 +134,14 @@
   const photos = document.getElementById('photos');
   const preview = document.getElementById('preview');
 
-  // Foto önizleme (max 5 önerisi metinde; kullanıcı 5'ten fazla eklerse yine gösterir, istersen kısıt koyabiliriz)
+  // Foto önizleme
   photos.addEventListener('change', ()=>{
     preview.innerHTML='';
     [...photos.files].forEach((file,i)=>{
       const url = URL.createObjectURL(file);
       const box = document.createElement('div');
       box.className='imgBox';
-      box.innerHTML = `<img src="${url}"><button type="button">✕</button>`;
+      box.innerHTML = `<img src="${url}"><button type="button" aria-label="Kaldır">✕</button>`;
       box.querySelector('button').onclick=()=>{
         const dt=new DataTransfer();
         [...photos.files].forEach((f,idx)=>{if(idx!==i) dt.items.add(f)});
@@ -155,162 +156,166 @@
   const catSel = document.getElementById('cat');
   const subcatDiv = document.getElementById('subcatFields');
 
+  const i18n = (window.__i18n && window.__i18n.t) ? window.__i18n.t : (k)=>k;
+  const getLang = (window.__i18n && window.__i18n.getLang) ? window.__i18n.getLang : ()=>'tr';
+
   catSel.addEventListener('change', ()=>{
     subcatDiv.innerHTML = '';
+    const lang = getLang();
 
     // === Motorlu Taşıtlar
     if(catSel.value==='tasit'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Araba</option>
-          <option>Motosiklet</option>
-          <option>Yedek Parça</option>
+        <label data-i18n="post.subcat">Alt Kategori</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="auto.car">${i18n('auto.car',lang) || 'Araba'}</option>
+          <option data-i18n="auto.moto">${i18n('auto.moto',lang) || 'Motosiklet'}</option>
+          <option data-i18n="auto.parts">${i18n('auto.parts',lang) || 'Yedek Parça'}</option>
         </select>
 
-        <label>Kilometre</label>
-        <input inputmode="numeric" pattern="\\d*">
+        <label data-i18n="auto.km">${i18n('auto.km',lang) || 'Kilometre'}</label>
+        <input inputmode="numeric" pattern="\\d*" data-i18n-placeholder="auto.km.ph" placeholder="${i18n('auto.km.ph',lang) || ''}">
 
-        <label>Yıl</label>
-        <input type="number" min="1950" max="2100" step="1">
+        <label data-i18n="auto.year">${i18n('auto.year',lang) || 'Yıl'}</label>
+        <input type="number" min="1950" max="2100" step="1" data-i18n-placeholder="auto.year.ph" placeholder="${i18n('auto.year.ph',lang) || ''}">
 
-        <label>Marka</label>
-        <input>
+        <label data-i18n="auto.brand">${i18n('auto.brand',lang) || 'Marka'}</label>
+        <input data-i18n-placeholder="auto.brand.ph" placeholder="${i18n('auto.brand.ph',lang) || ''}">
 
-        <label>Model</label>
-        <input>
+        <label data-i18n="auto.model">${i18n('auto.model',lang) || 'Model'}</label>
+        <input data-i18n-placeholder="auto.model.ph" placeholder="${i18n('auto.model.ph',lang) || ''}">
       `;
     }
 
     // === Taşınmaz
     if(catSel.value==='tasinmaz'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Konut</option>
-          <option>Arsa</option>
-          <option>Tarla</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="real.house">${i18n('real.house',lang) || 'Konut'}</option>
+          <option data-i18n="real.land">${i18n('real.land',lang) || 'Arsa'}</option>
+          <option data-i18n="real.field">${i18n('real.field',lang) || 'Tarla'}</option>
         </select>
 
-        <label>Metrekare</label>
-        <input type="number" min="1" step="1">
+        <label data-i18n="real.size">${i18n('real.size',lang) || 'Metrekare'}</label>
+        <input type="number" min="1" step="1" data-i18n-placeholder="real.size.ph" placeholder="${i18n('real.size.ph',lang) || ''}">
 
-        <label>Oda Sayısı</label>
-        <input placeholder="3+1 gibi">
+        <label data-i18n="real.rooms">${i18n('real.rooms',lang) || 'Oda Sayısı'}</label>
+        <input data-i18n-placeholder="real.rooms.ph" placeholder="${i18n('real.rooms.ph',lang) || '3+1 gibi'}">
 
-        <label>Kat</label>
-        <input>
+        <label data-i18n="real.floor">${i18n('real.floor',lang) || 'Kat'}</label>
+        <input data-i18n-placeholder="real.floor.ph" placeholder="${i18n('real.floor.ph',lang) || ''}">
 
-        <label>İmar Durumu</label>
-        <input>
+        <label data-i18n="real.zoning">${i18n('real.zoning',lang) || 'İmar Durumu'}</label>
+        <input data-i18n-placeholder="real.zoning.ph" placeholder="${i18n('real.zoning.ph',lang) || ''}">
       `;
     }
 
     // === Beyaz Eşya
     if(catSel.value==='beyaz'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Buzdolabı</option>
-          <option>Çamaşır Makinesi</option>
-          <option>Bulaşık Makinesi</option>
-          <option>Küçük Ev Aletleri</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="appl.fridge">${i18n('appl.fridge',lang) || 'Buzdolabı'}</option>
+          <option data-i18n="appl.wm">${i18n('appl.wm',lang) || 'Çamaşır Makinesi'}</option>
+          <option data-i18n="appl.dm">${i18n('appl.dm',lang) || 'Bulaşık Makinesi'}</option>
+          <option data-i18n="appl.sda">${i18n('appl.sda',lang) || 'Küçük Ev Aletleri'}</option>
         </select>
 
-        <label>Marka</label>
-        <input>
+        <label data-i18n="appl.brand">${i18n('appl.brand',lang) || 'Marka'}</label>
+        <input data-i18n-placeholder="appl.brand.ph" placeholder="${i18n('appl.brand.ph',lang) || ''}">
 
-        <label>Model</label>
-        <input>
+        <label data-i18n="appl.model">${i18n('appl.model',lang) || 'Model'}</label>
+        <input data-i18n-placeholder="appl.model.ph" placeholder="${i18n('appl.model.ph',lang) || ''}">
 
-        <label>Enerji Sınıfı</label>
-        <input placeholder="A++ gibi">
+        <label data-i18n="appl.energy">${i18n('appl.energy',lang) || 'Enerji Sınıfı'}</label>
+        <input data-i18n-placeholder="appl.energy.ph" placeholder="${i18n('appl.energy.ph',lang) || 'A++ gibi'}">
       `;
     }
 
     // === Giyim
     if(catSel.value==='giyim'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Kadın</option>
-          <option>Erkek</option>
-          <option>Çocuk</option>
-          <option>Aksesuar</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="fashion.women">${i18n('fashion.women',lang) || 'Kadın'}</option>
+          <option data-i18n="fashion.men">${i18n('fashion.men',lang) || 'Erkek'}</option>
+          <option data-i18n="fashion.kids">${i18n('fashion.kids',lang) || 'Çocuk'}</option>
+          <option data-i18n="fashion.acc">${i18n('fashion.acc',lang) || 'Aksesuar'}</option>
         </select>
 
-        <label>Beden</label>
-        <input placeholder="S / M / L / 36 / 38 ...">
+        <label data-i18n="fashion.size">${i18n('fashion.size',lang) || 'Beden'}</label>
+        <input data-i18n-placeholder="fashion.size.ph" placeholder="${i18n('fashion.size.ph',lang) || 'S / M / L / 36 / 38 ...'}">
 
-        <label>Renk</label>
-        <input>
+        <label data-i18n="fashion.color">${i18n('fashion.color',lang) || 'Renk'}</label>
+        <input data-i18n-placeholder="fashion.color.ph" placeholder="${i18n('fashion.color.ph',lang) || ''}">
 
-        <label>Marka</label>
-        <input>
+        <label data-i18n="fashion.brand">${i18n('fashion.brand',lang) || 'Marka'}</label>
+        <input data-i18n-placeholder="fashion.brand.ph" placeholder="${i18n('fashion.brand.ph',lang) || ''}">
       `;
     }
 
     // === Teknoloji
     if(catSel.value==='teknoloji'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Bilgisayar</option>
-          <option>Telefon</option>
-          <option>Tablet</option>
-          <option>Aksesuar</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="tech.pc">${i18n('tech.pc',lang) || 'Bilgisayar'}</option>
+          <option data-i18n="tech.phone">${i18n('tech.phone',lang) || 'Telefon'}</option>
+          <option data-i18n="tech.tablet">${i18n('tech.tablet',lang) || 'Tablet'}</option>
+          <option data-i18n="tech.acc">${i18n('tech.acc',lang) || 'Aksesuar'}</option>
         </select>
 
-        <label>Marka</label>
-        <input>
+        <label data-i18n="tech.brand">${i18n('tech.brand',lang) || 'Marka'}</label>
+        <input data-i18n-placeholder="tech.brand.ph" placeholder="${i18n('tech.brand.ph',lang) || ''}">
 
-        <label>Model</label>
-        <input>
+        <label data-i18n="tech.model">${i18n('tech.model',lang) || 'Model'}</label>
+        <input data-i18n-placeholder="tech.model.ph" placeholder="${i18n('tech.model.ph',lang) || ''}">
 
-        <label>Depolama</label>
-        <input placeholder="128 GB, 512 GB...">
+        <label data-i18n="tech.storage">${i18n('tech.storage',lang) || 'Depolama'}</label>
+        <input data-i18n-placeholder="tech.storage.ph" placeholder="${i18n('tech.storage.ph',lang) || '128 GB, 512 GB...'}">
       `;
     }
 
-    // === Mobilya (istersen kalsın)
+    // === Mobilya
     if(catSel.value==='mobilya'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Koltuk</option>
-          <option>Masa</option>
-          <option>Dolap</option>
-          <option>Yatak</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="furn.sofa">${i18n('furn.sofa',lang) || 'Koltuk'}</option>
+          <option data-i18n="furn.table">${i18n('furn.table',lang) || 'Masa'}</option>
+          <option data-i18n="furn.wardrobe">${i18n('furn.wardrobe',lang) || 'Dolap'}</option>
+          <option data-i18n="furn.bed">${i18n('furn.bed',lang) || 'Yatak'}</option>
         </select>
 
-        <label>Malzeme</label>
-        <input placeholder="Ahşap, MDF, Metal...">
+        <label data-i18n="furn.material">${i18n('furn.material',lang) || 'Malzeme'}</label>
+        <input data-i18n-placeholder="furn.material.ph" placeholder="${i18n('furn.material.ph',lang) || 'Ahşap, MDF, Metal...'}">
 
-        <label>Ölçüler</label>
-        <input placeholder="En x Boy x Yükseklik">
+        <label data-i18n="furn.size">${i18n('furn.size',lang) || 'Ölçüler'}</label>
+        <input data-i18n-placeholder="furn.size.ph" placeholder="${i18n('furn.size.ph',lang) || 'En x Boy x Yükseklik'}">
       `;
     }
 
-    // === Oyuncak (istersen kalsın)
+    // === Oyuncak
     if(catSel.value==='oyuncak'){
       subcatDiv.innerHTML = `
-        <label>Alt Kategori</label>
-        <select required>
-          <option value="">Seçiniz</option>
-          <option>Eğitici</option>
-          <option>Figür</option>
-          <option>Araba</option>
-          <option>Oyun Seti</option>
+        <label data-i18n="post.subcat">${i18n('post.subcat',lang) || 'Alt Kategori'}</label>
+        <select required aria-label="${i18n('post.subcat',lang)}">
+          <option value="" data-i18n="ui.select">${i18n('ui.select',lang)}</option>
+          <option data-i18n="toy.edu">${i18n('toy.edu',lang) || 'Eğitici'}</option>
+          <option data-i18n="toy.figure">${i18n('toy.figure',lang) || 'Figür'}</option>
+          <option data-i18n="toy.car">${i18n('toy.car',lang) || 'Araba'}</option>
+          <option data-i18n="toy.set">${i18n('toy.set',lang) || 'Oyun Seti'}</option>
         </select>
 
-        <label>Yaş Aralığı</label>
-        <input placeholder="3-6 yaş gibi">
+        <label data-i18n="toy.age">${i18n('toy.age',lang) || 'Yaş Aralığı'}</label>
+        <input data-i18n-placeholder="toy.age.ph" placeholder="${i18n('toy.age.ph',lang) || '3-6 yaş gibi'}">
       `;
     }
   });
@@ -321,13 +326,18 @@
     e.preventDefault();
     const text = (document.getElementById('title').value+" "+document.getElementById('desc').value).toLowerCase();
     if(banned.some(w=>text.includes(w))){
-      alert("Toplum kurallarına aykırı kelime tespit edildi. Lütfen düzeltin.");
+      alert((window.__i18n?.t?.('post.badwords')||'Toplum kurallarına aykırı kelime tespit edildi. Lütfen düzeltin.'));
       return;
     }
-    alert('İlan kurallar gereği admin onayına gönderildi.');
-    // Burada submit akışını Firestore’a bağlayacağız: ilan kaydı + durum: pending (istersen ekleyelim)
+    alert((window.__i18n?.t?.('post.sent')||'İlan kurallar gereği admin onayına gönderildi.'));
+    // Firestore akışını burada bağlayabilirsiniz.
   });
 </script>
+
+  <!-- Sayfanın davranış JS’i (mevcut) -->
   <script type="module" src="ilanver.js"></script>
+
+  <!-- i18n (kalıcı dil için) -->
+  <script type="module" src="/assets/js/i18n.js"></script>
 </body>
 </html>
