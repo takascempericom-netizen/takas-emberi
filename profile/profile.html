@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profil • Takas Çemberi</title>
+  <title data-i18n="nav.profile">Profil • Takas Çemberi</title>
   <style>
   :root{
     --c1:#7c3aed; --c2:#06b6d4; --c3:#10b981; --c4:#f59e0b;
@@ -97,14 +97,14 @@
   <!-- ÜST BAR (TEK ADET) -->
   <header class="hdr">
     <div class="in">
-      <h1 class="ttl">Profil</h1>
+      <h1 class="ttl" data-i18n="nav.profile">Profil</h1>
       <div class="row">
-        <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ Yeni İlan</a>
+        <a class="btn" id="btnNew" href="/ilan/ilan-verme.html">+ <span data-i18n="cta.post">Ücretsiz İlan Ver</span></a>
         <!-- Başkasının profiline bakarken görünecek -->
-        <button class="btn" id="btnDM" style="display:none">Mesaj yaz</button>
-        <button class="btn" id="btnReport" style="display:none">Şikayet et</button>
+        <button class="btn" id="btnDM">Mesaj yaz</button>
+        <button class="btn" id="btnReport">Şikayet et</button>
         <!-- Çıkış -->
-        <button class="btn danger" id="btnLogout">Çıkış</button>
+        <button class="btn danger" id="btnLogout" data-i18n="nav.logout">Çıkış</button>
       </div>
     </div>
   </header>
@@ -122,14 +122,14 @@
           <div class="rating-num" id="ratingNum">0.0 / 5 (0 oy)</div>
         </div>
         <div class="right">
-          <label>Ad</label>
-          <input id="firstName" placeholder="Ad" disabled>
-          <label>Soyad</label>
-          <input id="lastName" placeholder="Soyad" disabled>
-          <label>E-posta</label>
-          <input id="email" placeholder="eposta@example.com" disabled>
-          <label>Şehir</label>
-          <input id="city" placeholder="Şehir" disabled>
+          <label data-i18n="dlg.name">İsim</label>
+          <input id="firstName" data-i18n-placeholder="dlg.name" placeholder="İsim" disabled>
+          <label data-i18n="dlg.surname">Soyisim</label>
+          <input id="lastName" data-i18n-placeholder="dlg.surname" placeholder="Soyisim" disabled>
+          <label data-i18n="dlg.email">E-posta</label>
+          <input id="email" data-i18n-placeholder="dlg.email" placeholder="E-posta" disabled>
+          <label data-i18n="dlg.city">Yaşadığı Şehir</label>
+          <input id="city" data-i18n-placeholder="dlg.city" placeholder="Yaşadığı Şehir" disabled>
 
           <!-- Şifre alanları (KENDİ profilinde gösterilecek) -->
           <div id="passwordBox" style="grid-column:1 / -1; display:none">
@@ -140,12 +140,12 @@
               </div>
               <div></div>
               <div>
-                <label>Yeni Şifre</label>
-                <input id="newPassword" type="password" placeholder="Yeni şifre" autocomplete="new-password">
+                <label data-i18n="dlg.password">Şifre</label>
+                <input id="newPassword" type="password" data-i18n-placeholder="dlg.password" placeholder="Şifre" autocomplete="new-password">
               </div>
               <div>
-                <label>Yeni Şifre (Tekrar)</label>
-                <input id="newPassword2" type="password" placeholder="Yeni şifre (tekrar)" autocomplete="new-password">
+                <label data-i18n="dlg.password2">Şifre (tekrar)</label>
+                <input id="newPassword2" type="password" data-i18n-placeholder="dlg.password2" placeholder="Şifre (tekrar)" autocomplete="new-password">
               </div>
             </div>
             <div class="row end" style="margin-top:10px">
@@ -181,9 +181,9 @@
         <img id="mPhoto" alt="ilan">
         <div class="f">
           <div id="mDetails" class="muted" style="font-size:13px;color:#475569;line-height:1.5"></div>
-          <label>Başlık</label>
+          <label data-i18n="ads.view">İncele</label>
           <input id="mInputTitle">
-          <label>Açıklama</label>
+          <label data-i18n="dlg.or.form">veya formu doldur</label>
           <textarea id="mInputDesc"></textarea>
           <div class="muted" id="mMeta"></div>
         </div>
@@ -198,10 +198,10 @@
   <!-- ALT SABİT BAR -->
   <nav class="fixedbar">
     <div class="in">
-      <a href="/" class="active" id="navHome">🏠<span>Ana Sayfa</span></a>
-      <a href="/messages.html" id="navMsgs">💬<span>Mesajlar</span></a>
-      <a href="/notifications.html" id="navNotifs">🔔<span>Bildirimler</span></a>
-      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+      <a href="/" class="active" id="navHome">🏠<span data-i18n="nav.home.txt">Ana Sayfa</span></a>
+      <a href="/messages.html" id="navMsgs">💬<span data-i18n="nav.messages.txt">Mesajlar</span></a>
+      <a href="/notifications.html" id="navNotifs">🔔<span data-i18n="nav.notifications.txt">Bildirimler</span></a>
+      <a href="/profile/profile.html" id="navProfile">👤<span data-i18n="nav.profile">Profil</span></a>
     </div>
   </nav>
 
@@ -251,5 +251,7 @@
 
   <!-- İş mantığı (Firebase & render): profile.js bu HTML ile uyumlu -->
   <script type="module" src="./profile.js"></script>
+  <!-- i18n (tüm sayfalarda ortak) -->
+  <script type="module" src="/assets/js/i18n.js"></script>
 </body>
 </html>
