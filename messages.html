@@ -69,7 +69,6 @@
     .fixedbar:before{content:"";position:absolute;inset:-20px 0 -20px 0;z-index:-1;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c4));filter:blur(30px);opacity:.6}
 
     @media (max-width:900px){
-      /* Alt bar yüksekliğine göre dinamik boşluklar — SAFE AREA TEKRAR EKLENMEZ */
       .msgs,
       .threads{
         padding-bottom: calc(var(--footer-h, 88px) + 8px);
@@ -79,25 +78,25 @@
 </head>
 <body>
   <header class="hdr">
-    <div class="in"><h1 class="ttl">Mesajlar</h1></div>
+    <div class="in"><h1 class="ttl" data-i18n="page.messages.title"></h1></div>
   </header>
 
   <main class="wrap">
     <section class="chat">
       <!-- SOL: Sohbet listesi -->
       <aside class="card sidebar">
-        <div class="side-head">Sohbetler</div>
+        <div class="side-head" data-i18n="messages.sidebar.title"></div>
 
         <div class="side-tools">
           <label style="display:flex;align-items:center;gap:6px">
-            <input type="checkbox" id="ckAll" class="ck"/> Tümünü Seç
+            <input type="checkbox" id="ckAll" class="ck"/> <span data-i18n="messages.selectall"></span>
           </label>
           <div class="grow"></div>
-          <span id="selCount" class="tmuted">0 seçili</span>
-          <button id="btnDeleteSel" class="btn danger" disabled>Seçilenleri Sil</button>
+          <span id="selCount" class="tmuted">0</span>
+          <button id="btnDeleteSel" class="btn danger" disabled data-i18n="messages.bulk.delete"></button>
         </div>
 
-        <div id="threads" class="threads"><div class="tmuted">Yükleniyor…</div></div>
+        <div id="threads" class="threads"><div class="tmuted" data-i18n="messages.loading"></div></div>
       </aside>
 
       <!-- SAĞ: Panel -->
@@ -105,14 +104,14 @@
         <div class="panel-head">
           <img id="peerAvatar" alt="">
           <div>
-            <div class="name" id="peerName">Sohbet seç</div>
+            <div class="name" id="peerName" data-i18n="messages.pick"></div>
             <div class="tmuted" id="peerEmail"></div>
           </div>
         </div>
-        <div id="msgs" class="msgs"><div class="tmuted">Sol taraftan bir sohbet seçin.</div></div>
+        <div id="msgs" class="msgs"><div class="tmuted" data-i18n="messages.pick.left"></div></div>
         <div class="input hidden" id="inputBar">
-          <input id="msgInput" placeholder="Mesaj yaz…" autocomplete="off" />
-          <button id="btnSend" class="btn">Gönder</button>
+          <input id="msgInput" data-i18n-placeholder="messages.type" placeholder="Mesaj yaz…" autocomplete="off" />
+          <button id="btnSend" class="btn" data-i18n="messages.send"></button>
         </div>
       </section>
     </section>
@@ -129,10 +128,10 @@
   <!-- Alt bar -->
   <nav class="fixedbar">
     <div class="in">
-      <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
-      <a href="/messages.html" class="active" id="navMsgs">💬<span>Mesajlar</span></a>
-      <a href="/notifications.html" id="navNotifs">🔔<span>Bildirimler</span></a>
-      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+      <a href="/" id="navHome">🏠<span data-i18n="nav.home.txt"></span></a>
+      <a href="/messages.html" class="active" id="navMsgs">💬<span data-i18n="nav.messages.txt"></span></a>
+      <a href="/notifications.html" id="navNotifs">🔔<span data-i18n="nav.notifications.txt"></span></a>
+      <a href="/profile/profile.html" id="navProfile">👤<span data-i18n="nav.profile"></span></a>
     </div>
   </nav>
 
@@ -170,6 +169,13 @@
     const $el = (html)=>{ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; };
     const fmt = (ts)=>{ try{ const d=ts?.toDate?ts.toDate(): (ts instanceof Date? ts: new Date(ts)); if(isNaN(d)) return "—";
       return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return "—";} };
+
+    // Basit çok dilli "N seçili" formatlayıcı (i18n.js'i bozmadan)
+    function selectedLabel(n){
+      const lang = window.__i18n?.getLang?.() || document.documentElement.lang || 'tr';
+      const suffix = lang==='en' ? 'selected' : (lang==='ar' ? 'محدد' : 'seçili');
+      return `${n} ${suffix}`;
+    }
 
     // Ses kilidi
     let audioUnlocked=false;
@@ -229,7 +235,7 @@
     function refreshSelectionUI(){
       const allCks = elThreads.querySelectorAll('input.ck.thread-ck');
       const sel    = selectedIds();
-      selCountEl.textContent = `${sel.length} seçili`;
+      selCountEl.textContent = selectedLabel(sel.length);
       btnDelSel.disabled = sel.length === 0;
       ckAll.checked = sel.length > 0 && sel.length === allCks.length;
     }
@@ -242,12 +248,14 @@
     /* ==== Sohbet listesi ==== */
     function watchThreads(){
       if(unsubThreads) unsubThreads();
-      elThreads.innerHTML='<div class="tmuted">Yükleniyor…</div>';
+      elThreads.innerHTML='<div class="tmuted" data-i18n="messages.loading"></div>';
+      window.__i18n?.apply?.(elThreads);
 
       const qy=query(collection(db,'chats'), where('participants','array-contains',me.uid));
       unsubThreads=onSnapshot(qy, async (snap)=>{
         if(snap.empty){
-          elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
+          elThreads.innerHTML='<div class="tmuted" data-i18n="messages.empty.threads"></div>';
+          window.__i18n?.apply?.(elThreads);
           refreshSelectionUI();
           return;
         }
@@ -262,14 +270,14 @@
           const profUrl=`/profile/profile.html?uid=${encodeURIComponent(peerUid)}`;
           const row=$el(`
             <div class="thread ${d.id===activeChatId?'active':''}" data-id="${d.id}" data-peer="${peerUid}">
-              <input type="checkbox" class="ck thread-ck" data-id="${d.id}" title="Seç"/>
+              <input type="checkbox" class="ck thread-ck" data-id="${d.id}" title="" data-i18n-aria-label="messages.select.one"/>
               <img class="avatar" src="${info.photo||'/assets/img/seffaf.png'}" alt="">
               <div>
                 <div class="tname"><a href="${profUrl}" data-prof="${peerUid}">${info.name||'Kullanıcı'}</a></div>
                 <div class="tmuted">${(d.lastMsg||'').slice(0,50)}</div>
               </div>
               <div class="tmuted">${d.lastMsgAt?new Date(d.lastMsgAt.toMillis()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):''}</div>
-              <button class="delOne" data-id="${d.id}" title="Kalıcı sil">✕</button>
+              <button class="delOne" data-id="${d.id}" title="" data-i18n-aria-label="messages.delete.permanent">✕</button>
             </div>
           `);
 
@@ -283,7 +291,7 @@
           row.querySelector('input.thread-ck').addEventListener('change', refreshSelectionUI);
 
           row.querySelector('.delOne').addEventListener('click', async ()=>{
-            if(!confirm('Bu sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.')) return;
+            if(!confirm(window.__i18n?.t?.('messages.delete.confirm') || 'Bu sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.')) return;
             if (activeChatId === d.id && unsubMsgs){ try{unsubMsgs();}catch{} unsubMsgs=null; }
             try{
               await permanentlyDeleteChat(d.id);
@@ -297,9 +305,11 @@
         }
 
         if (rows.length === 0){
-          elThreads.innerHTML='<div class="tmuted">Sohbet yok.</div>';
+          elThreads.innerHTML='<div class="tmuted" data-i18n="messages.empty.threads"></div>';
         }
 
+        // Dinamik eklenenlere çeviri uygula
+        window.__i18n?.apply?.(elThreads);
         refreshSelectionUI();
       });
     }
@@ -307,11 +317,13 @@
     function resetPanel(){
       activeChatId='';
       activePeerUid='';
-      elMsgs.innerHTML = '<div class="tmuted">Sol taraftan bir sohbet seçin.</div>';
-      peerName.textContent='Sohbet seç';
+      elMsgs.innerHTML = '<div class="tmuted" data-i18n="messages.pick.left"></div>';
+      window.__i18n?.apply?.(elMsgs);
+      peerName.setAttribute('data-i18n','messages.pick'); peerName.textContent='';
       peerEmail.textContent='';
       peerAvatar.removeAttribute('src');
       inputBar.classList.add('hidden');
+      window.__i18n?.apply?.(document);
     }
 
     /* ==== Koleksiyon silme yardımcıları (kalıcı sil) ==== */
@@ -325,17 +337,16 @@
       }
     }
     async function permanentlyDeleteChat(chatId){
-      // 1) Mesajları sil
       const msgRef = collection(db,'chats',chatId,'messages');
       await deleteCollectionByPages(msgRef, 100);
-      // 2) Sohbet dokümanını sil
       await deleteDoc(doc(db,'chats',chatId));
     }
 
     /* ==== Mesajlar ==== */
     async function watchMessages(chatId){
       if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
-      elMsgs.innerHTML='<div class="tmuted">Yükleniyor…</div>';
+      elMsgs.innerHTML='<div class="tmuted" data-i18n="messages.loading"></div>';
+      window.__i18n?.apply?.(elMsgs);
 
       let meInfo = await getUserBrief(me.uid);
       let peerInfo = activePeerUid ? await getUserBrief(activePeerUid) : null;
@@ -344,7 +355,8 @@
       const qy=query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
       unsubMsgs=onSnapshot(qy, async (snap)=>{
         if(snap.empty){
-          elMsgs.innerHTML='<div class="tmuted">Henüz mesaj yok. İlk mesajı sen gönder.</div>';
+          elMsgs.innerHTML='<div class="tmuted" data-i18n="messages.empty"></div>';
+          window.__i18n?.apply?.(elMsgs);
           try { setSeen && setSeen(chatId, Date.now()); } catch {}
           firstLoad=false;
           return;
@@ -402,14 +414,17 @@
       if(activePeerUid){
         const info=await getUserBrief(activePeerUid);
         const profUrl=`/profile/profile.html?uid=${encodeURIComponent(activePeerUid)}`;
-        peerName.innerHTML=`<a href="${profUrl}" id="peerNameLink">${info.name||'Sohbet'}</a>`;
+        peerName.innerHTML=`<a href="${profUrl}" id="peerNameLink">${info.name||(window.__i18n?.t?.('messages.chat')||'Sohbet')}</a>`;
         peerEmail.textContent=info.email||'';
         if(info.photo) peerAvatar.src=info.photo; else peerAvatar.removeAttribute('src');
       }else{
-        peerName.textContent='Sohbet'; peerEmail.textContent=''; peerAvatar.removeAttribute('src');
+        peerName.setAttribute('data-i18n','messages.chat'); peerName.textContent='';
+        peerEmail.textContent=''; peerAvatar.removeAttribute('src');
       }
 
-      inputBar.classList.remove('hidden'); // sohbet seçildi → yazma barı görünür
+      inputBar.classList.remove('hidden');
+      window.__i18n?.apply?.(document);
+
       watchMessages(chatId);
       history.replaceState(null,'',`/messages.html?chatId=${encodeURIComponent(chatId)}${activePeerUid?`&peer=${encodeURIComponent(activePeerUid)}`:''}`);
 
@@ -449,7 +464,7 @@
             collection(db,'users', activePeerUid, 'inbox'),
             {
               type: 'message',
-              title: 'Yeni mesaj',
+              title: window.__i18n?.t?.('messages.new') || 'Yeni mesaj',
               body: text.slice(0,120),
               fromUid: me.uid,
               link: `/messages.html?chatId=${encodeURIComponent(activeChatId)}&peer=${encodeURIComponent(me.uid)}`,
@@ -470,9 +485,9 @@
     btnDelSel.addEventListener('click', async ()=>{
       const ids = selectedIds();
       if(ids.length===0) return;
-      if(!confirm(`${ids.length} sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.`)) return;
+      const ask = window.__i18n?.t?.('messages.delete.confirm') || 'Bu sohbet KALICI olarak silinsin mi?\nTüm mesajlar geri alınamaz şekilde silinir.';
+      if(!confirm(ask)) return;
 
-      // aktif sohbeti kapat
       if (ids.includes(activeChatId) && unsubMsgs){ try{unsubMsgs();}catch{} unsubMsgs=null; resetPanel(); }
 
       for(const id of ids){
@@ -493,7 +508,6 @@
       me = user;
       tryUnlockAudio();
 
-      // Profilden/bildirimden gelindiyse: sohbet varsa aç, yoksa oluşturup aç
       if (paramChatId) {
         const cs = await getDoc(doc(db,'chats',paramChatId));
         if (cs.exists()) {
@@ -511,6 +525,11 @@
 
       watchThreads();
       try { startGlobalMessagingWatcher && startGlobalMessagingWatcher(); } catch {}
+
+      // Sayfa yüklenince statik alanlara çeviriyi uygula
+      window.__i18n?.apply?.(document);
+      // Sel count ilk yazımı
+      selCountEl.textContent = selectedLabel(0);
     });
 
     /* ==== Alt bar aktifliği ==== */
