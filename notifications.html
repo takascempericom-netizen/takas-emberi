@@ -50,35 +50,35 @@
 <body>
   <header class="hdr">
     <div class="in">
-      <h1 class="ttl">Bildirimler</h1>
+      <h1 class="ttl" data-i18n="page.notifs.title"></h1>
       <div class="row">
-        <button class="btn sm" id="btnMarkAll">Tümünü okundu işaretle</button>
+        <button class="btn sm" id="btnMarkAll" data-i18n="notifs.markall"></button>
       </div>
     </div>
   </header>
 
   <main class="wrap">
     <section class="card">
-      <div id="status" class="empty">Yükleniyor…</div>
+      <div id="status" class="empty" data-i18n="notifs.loading"></div>
       <div id="list" class="list" style="display:none"></div>
     </section>
   </main>
 
   <nav class="fixedbar">
     <div class="in">
-      <a href="/" id="navHome">🏠<span>Ana Sayfa</span></a>
+      <a href="/" id="navHome">🏠<span data-i18n="nav.home.txt"></span></a>
 
       <a href="/messages.html" id="navMsgs">
-        💬<span>Mesajlar</span>
+        💬<span data-i18n="nav.messages.txt"></span>
         <b id="msgBadge" class="badge" aria-live="polite">0</b>
       </a>
 
       <a href="/notifications.html" class="active" id="navNotifs">
-        🔔<span>Bildirimler</span>
+        🔔<span data-i18n="nav.notifications.txt"></span>
         <b id="notifBadge" class="badge" aria-live="polite">0</b>
       </a>
 
-      <a href="/profile/profile.html" id="navProfile">👤<span>Profil</span></a>
+      <a href="/profile/profile.html" id="navProfile">👤<span data-i18n="nav.profile"></span></a>
     </div>
   </nav>
 
@@ -151,7 +151,12 @@
     const known = new Set();
 
     onAuthStateChanged(auth, async (user)=>{
-      if(!user){ elStatus.textContent="Lütfen giriş yapın."; elList.style.display="none"; return; }
+      if(!user){
+        // Giriş yoksa durum yazısını göster (isteğe göre ayrı key ekleyebilirsin)
+        elStatus.style.display="block";
+        elList.style.display="none";
+        return;
+      }
 
       const inboxRef = collection(db, "users", user.uid, "inbox");
       const qInbox   = query(inboxRef, orderBy("createdAt","desc"));
@@ -160,7 +165,9 @@
         if(snap.empty){
           elList.style.display="none";
           elStatus.style.display="block";
-          elStatus.textContent="Bildirim yok.";
+          // "Bildirim yok." -> i18n
+          elStatus.setAttribute("data-i18n","notifs.empty");
+          window.__i18n?.apply(elStatus.parentNode);
           firstLoad = false;
           return;
         }
@@ -181,15 +188,15 @@
               <div class="muted">${fmt(data.createdAt)}</div>
             </div>
             <div class="actions">
-              ${data.read ? "" : `<button class="btn sm" data-act="read">Okundu</button>`}
-              ${data.link ? `<a class="btn sm" href="${data.link}">Git</a>` : ""}
+              ${data.read ? "" : `<button class="btn sm" data-i18n="notifs.read" data-act="read"></button>`}
+              ${data.link ? `<a class="btn sm" data-i18n="notifs.goto" href="${data.link}"></a>` : ""}
 
               ${data.fromUid && data.fromUid !== user.uid
-                ? `<a class="btn sm" href="/profile/profile.html?uid=${encodeURIComponent(data.fromUid)}">Profil</a>
-                   <button class="btn sm" data-act="chat" data-peer="${data.fromUid}">Mesaj yaz</button>`
+                ? `<a class="btn sm" data-i18n="notifs.profile" href="/profile/profile.html?uid=${encodeURIComponent(data.fromUid)}"></a>
+                   <button class="btn sm" data-i18n="notifs.chat" data-act="chat" data-peer="${data.fromUid}"></button>`
                 : ""}
 
-              <button class="btn sm danger" data-act="del">Sil</button>
+              <button class="btn sm danger" data-i18n="notifs.delete" data-act="del"></button>
             </div>
           `;
 
@@ -210,7 +217,7 @@
               return;
             }
             if (delBtn) {
-              if (!confirm("Bu bildirimi silmek istiyor musun?")) return;
+              if (!confirm(window.__i18n?.t?.("notifs.delete.confirm") || "Bu bildirimi silmek istiyor musun?")) return;
               await deleteDoc(doc(db,"users",user.uid,"inbox",d.id));
               div.remove();
               return;
@@ -218,16 +225,26 @@
           });
 
           elList.appendChild(div);
-
-          // Yeni düşen ve okunmamışsa ses (ilk yüklemede çalma)
-          if(!firstLoad && !data.read && !known.has(d.id)){
-            playDing();
-          }
-          known.add(d.id);
         });
 
         elStatus.style.display="none";
         elList.style.display="grid";
+
+        // Dinamik eklenen buton/label'ları çevir
+        window.__i18n?.apply(elList);
+
+        // Yeni düşen ve okunmamışsa ses (ilk yüklemede çalma)
+        snap.docChanges().forEach(ch=>{
+          if(ch.type==='added'){
+            const id = ch.doc.id;
+            const data = ch.doc.data()||{};
+            if(!firstLoad && !data.read && !known.has(id)){
+              (async ()=>{ try{ ding.currentTime = 0; await ding.play(); }catch{ beep(); } })();
+            }
+            known.add(id);
+          }
+        });
+
         firstLoad = false;
       });
 
@@ -262,6 +279,8 @@
       }
     }
   </script>
+
+  <!-- i18n (sayfanın EN ALTINDA) -->
   <script type="module" src="/assets/js/i18n.js"></script>
 </body>
 </html>
