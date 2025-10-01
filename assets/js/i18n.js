@@ -13,9 +13,39 @@ const DICT = {
     "cta.browse": "İlanlara Göz At",
     "cta.post": "Ücretsiz İlan Ver",
 
+    // Nav (üst/alt bar)
+    "nav.home": "Ana Sayfa",
+    "nav.home.txt": "Ana Sayfa",
+    "nav.messages": "Mesajlar",
+    "nav.messages.txt": "Mesajlar",
+    "nav.notifications": "Bildirimler",
+    "nav.notifications.txt": "Bildirimler",
+    "nav.profile": "Profil",
+    "nav.logout": "Çıkış",
+
+    // Support (canlı destek)
+    "support.open": "Canlı Destek",
+    "support.title": "Canlı Destek",
+    "support.close": "Pencereyi kapat",
+    "support.placeholder": "Mesajınızı yazın…",
+    "support.send": "Gönder",
+
     // Sections
     "sec.newlistings": "Yeni İlanlar",
     "sec.categories": "Kategoriler",
+    "sec.announcements": "Duyurular",
+    "ann.from": "Gönderici",
+
+    // Footer / legal
+    "legal.about": "Hakkımızda",
+    "legal.contact": "İletişim",
+    "legal.privacy": "Gizlilik",
+    "legal.tos": "Kullanım Şartları",
+    "legal.kvkk": "KVKK Aydınlatma",
+    "legal.distance": "Mesafeli Satış Sözleşmesi",
+    "legal.shipping": "Teslimat & İade",
+    "footer.slogan": "milli sermayeyi koru, atığı azalt",
+    "slogan.inline": "Doğaya • Bütçene • Dost",
 
     // Categories
     "cat.home": "Ev & Hobi",
@@ -66,6 +96,13 @@ const DICT = {
     "ui.hide": "Gizle",
     "ack.tail": "’ni okudum ve kabul ediyorum.",
 
+    // İlan/ads
+    "ads.none": "Henüz ilan yok",
+    "ads.view": "İncele",
+    "ads.offer": "Teklif ver",
+    "ads.error": "İlanlar yüklenemedi",
+    "ads.login": "İlanları görmek için giriş yapın",
+
     // Slogans
     "_slogans": [
       "Evinizdeki eşyaları değerinde takas edin, atığı azaltın, birlikte kazanın.",
@@ -85,8 +122,35 @@ const DICT = {
     "cta.browse": "Browse Listings",
     "cta.post": "Post for Free",
 
+    "nav.home": "Home",
+    "nav.home.txt": "Home",
+    "nav.messages": "Messages",
+    "nav.messages.txt": "Messages",
+    "nav.notifications": "Notifications",
+    "nav.notifications.txt": "Notifications",
+    "nav.profile": "Profile",
+    "nav.logout": "Log Out",
+
+    "support.open": "Live Support",
+    "support.title": "Live Support",
+    "support.close": "Close window",
+    "support.placeholder": "Type your message…",
+    "support.send": "Send",
+
     "sec.newlistings": "New Listings",
     "sec.categories": "Categories",
+    "sec.announcements": "Announcements",
+    "ann.from": "Sender",
+
+    "legal.about": "About",
+    "legal.contact": "Contact",
+    "legal.privacy": "Privacy",
+    "legal.tos": "Terms of Use",
+    "legal.kvkk": "KVKK Notice",
+    "legal.distance": "Distance Sales Agreement",
+    "legal.shipping": "Shipping & Returns",
+    "footer.slogan": "protect national capital, reduce waste",
+    "slogan.inline": "Nature • Budget • Friendly",
 
     "cat.home": "Home & Hobby",
     "cat.home.desc": "Home goods, hobby items",
@@ -133,6 +197,12 @@ const DICT = {
     "ui.hide": "Hide",
     "ack.tail": " — I have read and accept.",
 
+    "ads.none": "No listings yet",
+    "ads.view": "View",
+    "ads.offer": "Make an offer",
+    "ads.error": "Failed to load listings",
+    "ads.login": "Log in to see listings",
+
     "_slogans": [
       "Trade fairly, reduce waste, win together.",
       "What you don’t need may be someone’s treasure.",
@@ -150,8 +220,35 @@ const DICT = {
     "cta.browse": "تصفح الإعلانات",
     "cta.post": "أضف إعلانًا مجانًا",
 
+    "nav.home": "الصفحة الرئيسية",
+    "nav.home.txt": "الصفحة الرئيسية",
+    "nav.messages": "الرسائل",
+    "nav.messages.txt": "الرسائل",
+    "nav.notifications": "الإشعارات",
+    "nav.notifications.txt": "الإشعارات",
+    "nav.profile": "الملف الشخصي",
+    "nav.logout": "تسجيل الخروج",
+
+    "support.open": "الدعم المباشر",
+    "support.title": "الدعم المباشر",
+    "support.close": "إغلاق النافذة",
+    "support.placeholder": "اكتب رسالتك…",
+    "support.send": "إرسال",
+
     "sec.newlistings": "إعلانات جديدة",
     "sec.categories": "الفئات",
+    "sec.announcements": "الإعلانات",
+    "ann.from": "المرسل",
+
+    "legal.about": "من نحن",
+    "legal.contact": "اتصال",
+    "legal.privacy": "الخصوصية",
+    "legal.tos": "شروط الاستخدام",
+    "legal.kvkk": "إشعار KVKK",
+    "legal.distance": "اتفاقية البيع عن بُعد",
+    "legal.shipping": "الشحن والإرجاع",
+    "footer.slogan": "احمِ رأس المال الوطني وقلّل الهدر",
+    "slogan.inline": "صديق للطبيعة • للميزانية",
 
     "cat.home": "المنزل والهوايات",
     "cat.home.desc": "أغراض المنزل والهوايات",
@@ -197,6 +294,12 @@ const DICT = {
     "ui.show": "إظهار",
     "ui.hide": "إخفاء",
     "ack.tail": " — لقد قرأتُ وأوافق.",
+
+    "ads.none": "لا توجد إعلانات بعد",
+    "ads.view": "عرض",
+    "ads.offer": "قدّم عرضًا",
+    "ads.error": "فشل تحميل الإعلانات",
+    "ads.login": "سجّل الدخول لرؤية الإعلانات",
 
     "_slogans": [
       "بادِل بعدل، وقلّل النفايات، واربحوا معًا.",
