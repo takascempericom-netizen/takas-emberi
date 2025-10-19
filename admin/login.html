@@ -1,4 +1,4 @@
-<!-- /admin/login.html (GÜNCEL & DÜZELTİLMİŞ) -->
+<!-- /admin/login.html (GÜNCEL – Şifre Sıfırlama Eklenmiş) -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -18,6 +18,7 @@
     .btn{padding:10px 14px;border-radius:12px;border:1px solid #111827;background:#111827;color:#fff;cursor:pointer}
     .btn[disabled]{opacity:.7;cursor:wait}
     .msg{margin-top:10px;font-size:13px;color:#b91c1c;display:none}
+    .ok{margin-top:10px;font-size:13px;color:#166534;display:none}
     .small{font-size:12px;color:var(--muted);margin-top:6px}
   </style>
 </head>
@@ -35,116 +36,146 @@
           <input id="pass" type="password" required autocomplete="current-password" />
         </div>
         <button id="btn" class="btn" type="submit">Giriş</button>
+
+        <button id="forgot" class="btn" type="button" style="background:#fff;color:#111827;border-color:#d1d5db">Şifremi unuttum</button>
+
         <div id="err" class="msg" role="alert"></div>
+        <div id="ok" class="ok" role="status"></div>
+
         <div class="small">Yalnızca <strong>admin/moderator/support</strong> yetkisine sahip hesaplar giriş yapabilir.</div>
       </form>
     </section>
   </main>
-     
-<script type="module">
-  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ——— Firebase init ———
-  const firebaseConfig = {
-    apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
-    authDomain: "ureten-eller-v2.firebaseapp.com",
-    projectId: "ureten-eller-v2",
-    storageBucket: "ureten-eller-v2.firebasestorage.app",
-    messagingSenderId: "621494781131",
-    appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
-  };
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ——— UI refs ———
-  const frm = document.getElementById('frm');
-  const btn = document.getElementById('btn');
-  const elE = document.getElementById('email');
-  const elP = document.getElementById('pass');
-  const err = document.getElementById('err');
+    // Firebase init
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUNSYxoWNUsK0C-C04qTUm6KM5756fvg",
+      authDomain: "ureten-eller-v2.firebaseapp.com",
+      projectId: "ureten-eller-v2",
+      storageBucket: "ureten-eller-v2.firebasestorage.app",
+      messagingSenderId: "621494781131",
+      appId: "1:621494781131:web:13cc3b061a5e94b7cf874e"
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-  function setBusy(b){
-    btn.disabled = b;
-    btn.textContent = b ? "Giriş yapılıyor…" : "Giriş";
-  }
-  function showError(msg){
-    err.textContent = msg;
-    err.style.display = 'block';
-  }
-  function clearError(){
-    err.textContent = "";
-    err.style.display = 'none';
-  }
+    // UI refs
+    const frm = document.getElementById('frm');
+    const btn = document.getElementById('btn');
+    const elE = document.getElementById('email');
+    const elP = document.getElementById('pass');
+    const err = document.getElementById('err');
+    const ok  = document.getElementById('ok');
+    const forgot = document.getElementById('forgot');
 
-  async function isAdminLike(user){
-    const idt = await user.getIdTokenResult(true);
-    const fromClaim =
-      idt.claims?.admin === true ||
-      ["admin","moderator","support"].includes(idt.claims?.role);
-
-    if (fromClaim) return true;
-
-    try{
-      const s = await getDoc(doc(db,"users",user.uid));
-      if (s.exists()){
-        const role = (s.data()?.role || "").toString().toLowerCase();
-        if (["admin","moderator","support"].includes(role)) return true;
-      }
-    }catch(e){
-      console.warn("users/{uid} okunamadı:", e);
+    function setBusy(b){
+      btn.disabled = b;
+      btn.textContent = b ? "Giriş yapılıyor…" : "Giriş";
     }
-    return false;
-  }
+    function showError(msg){
+      err.textContent = msg;
+      err.style.display = 'block';
+    }
+    function clearError(){
+      err.textContent = "";
+      err.style.display = 'none';
+    }
+    function showInfo(msg){
+      ok.textContent = msg;
+      ok.style.display = 'block';
+    }
+    function clearInfo(){
+      ok.textContent = "";
+      ok.style.display = 'none';
+    }
 
-  let redirecting = false;
+    async function isAdminLike(user){
+      const idt = await user.getIdTokenResult(true);
+      const fromClaim =
+        idt.claims?.admin === true ||
+        ["admin","moderator","support"].includes(idt.claims?.role);
 
-  // ——— Girişliyse kontrol et; admin ise yönlendir, değilse oturumu kapatma ———
-  onAuthStateChanged(auth, async (u)=>{
-    if (!u || redirecting) return;
-    try{
+      if (fromClaim) return true;
+
+      try{
+        const s = await getDoc(doc(db,"users",user.uid));
+        if (s.exists()){
+          const role = (s.data()?.role || "").toString().toLowerCase();
+          if (["admin","moderator","support"].includes(role)) return true;
+        }
+      }catch(e){
+        console.warn("users/{uid} okunamadı:", e);
+      }
+      return false;
+    }
+
+    let redirecting = false;
+
+    onAuthStateChanged(auth, async (u)=>{
+      if (!u || redirecting) return;
+      try{
+        setBusy(true);
+        if (await isAdminLike(u)) {
+          redirecting = true;
+          location.replace("/admin/index.html");
+        } else {
+          showError("Bu hesapta admin/moderator/support yetkisi yok.");
+        }
+      }catch(e){
+        console.error("onAuthStateChanged hata:", e);
+        showError("Beklenmeyen hata. Lütfen tekrar deneyin.");
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    frm.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      clearError(); clearInfo();
       setBusy(true);
-      if (await isAdminLike(u)) {
-        redirecting = true;
-        location.replace("/admin/index.html");
-      } else {
-        // Döngüyü engellemek için signOut yapmıyoruz
-        showError("Bu hesapta admin/moderator/support yetkisi yok.");
+      try{
+        const { user } = await signInWithEmailAndPassword(auth, elE.value.trim(), elP.value);
+        if (await isAdminLike(user)) {
+          redirecting = true;
+          location.replace("/admin/index.html");
+        } else {
+          showError("Bu hesapta admin/moderator/support yetkisi yok.");
+        }
+      }catch(e){
+        console.error("Giriş hatası:", e);
+        showError(e?.code || e?.message || "Giriş başarısız.");
+      }finally{
+        setBusy(false);
       }
-    }catch(e){
-      console.error("onAuthStateChanged hata:", e);
-      showError("Beklenmeyen hata. Lütfen tekrar deneyin.");
-    }finally{
-      setBusy(false);
-    }
-  });
+    });
 
-  // ——— Form submit ———
-  frm.addEventListener('submit', async (ev)=>{
-    ev.preventDefault();
-    clearError();
-    setBusy(true);
-    try{
-      const { user } = await signInWithEmailAndPassword(auth, elE.value.trim(), elP.value);
-      if (await isAdminLike(user)) {
-        redirecting = true;
-        location.replace("/admin/index.html");
-      } else {
-        showError("Bu hesapta admin/moderator/support yetkisi yok.");
+    forgot.addEventListener('click', async ()=>{
+      clearError(); clearInfo();
+      const email = elE.value.trim();
+      if(!email){
+        showError("Şifre sıfırlama için e-posta girin.");
+        elE.focus();
+        return;
       }
-    }catch(e){
-      console.error("Giriş hatası:", e);
-      showError(e?.code || e?.message || "Giriş başarısız.");
-    }finally{
-      setBusy(false);
-    }
-  });
+      try{
+        forgot.disabled = true; forgot.textContent = "Gönderiliyor…";
+        await sendPasswordResetEmail(auth, email);
+        showInfo("Sıfırlama e-postası gönderildi. Gelen kutusu ve spam klasörünü kontrol edin.");
+      }catch(e){
+        console.error("Reset hata:", e);
+        showError(e?.code || e?.message || "E-posta gönderilemedi.");
+      }finally{
+        forgot.disabled = false; forgot.textContent = "Şifremi unuttum";
+      }
+    });
 
-  // Emniyet: UI kilitlenmesin
-  setTimeout(()=>{ if(btn.disabled) setBusy(false); }, 15000);
-</script>
- 
+    setTimeout(()=>{ if(btn.disabled) setBusy(false); }, 15000);
+  </script>
 </body>
 </html>
