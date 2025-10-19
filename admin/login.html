@@ -1,4 +1,4 @@
-<!-- /admin/login.html (GÜNCEL – Şifre Sıfırlama Eklenmiş) -->
+<!-- /admin/login.html (GÜNCEL – Şifre Sıfırlama + Teşhis için window.__fb) -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -35,8 +35,8 @@
           <label for="pass">Şifre</label>
           <input id="pass" type="password" required autocomplete="current-password" />
         </div>
-        <button id="btn" class="btn" type="submit">Giriş</button>
 
+        <button id="btn" class="btn" type="submit">Giriş</button>
         <button id="forgot" class="btn" type="button" style="background:#fff;color:#111827;border-color:#d1d5db">Şifremi unuttum</button>
 
         <div id="err" class="msg" role="alert"></div>
@@ -64,6 +64,9 @@
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
+
+    // Konsoldan teşhis için:
+    window.__fb = { app, auth, db }; // <-- İSTEDİĞİN SATIR
 
     // UI refs
     const frm = document.getElementById('frm');
@@ -95,19 +98,23 @@
       ok.style.display = 'none';
     }
 
+    // Rol kontrolü (claims + Firestore)
     async function isAdminLike(user){
       const idt = await user.getIdTokenResult(true);
       const fromClaim =
         idt.claims?.admin === true ||
-        ["admin","moderator","support"].includes(idt.claims?.role);
-
+        ["admin","moderator","support"].includes(String(idt.claims?.role||"").toLowerCase());
       if (fromClaim) return true;
 
       try{
-        const s = await getDoc(doc(db,"users",user.uid));
+        const s = await getDoc(doc(db,"users", user.uid));
         if (s.exists()){
-          const role = (s.data()?.role || "").toString().toLowerCase();
-          if (["admin","moderator","support"].includes(role)) return true;
+          const d = s.data() || {};
+          const role = String(d.role || "").toLowerCase();
+          const isAdminDoc = d.isAdmin === true || String(d.isAdmin).toLowerCase() === "true";
+          if (isAdminDoc || ["admin","moderator","support"].includes(role)) return true;
+        } else {
+          console.warn("users/{uid} yok:", user.uid);
         }
       }catch(e){
         console.warn("users/{uid} okunamadı:", e);
@@ -141,6 +148,9 @@
       setBusy(true);
       try{
         const { user } = await signInWithEmailAndPassword(auth, elE.value.trim(), elP.value);
+        // Custom claim varsa tazelensin
+        await user.getIdToken(true);
+
         if (await isAdminLike(user)) {
           redirecting = true;
           location.replace("/admin/index.html");
